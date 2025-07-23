@@ -14,7 +14,222 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      articles: {
+        Row: {
+          abstract: string
+          authors: Json
+          conflicts_of_interest: string | null
+          corresponding_author_email: string
+          created_at: string | null
+          doi: string | null
+          funding_info: string | null
+          id: string
+          issue: number | null
+          keywords: string[] | null
+          manuscript_file_url: string | null
+          page_end: number | null
+          page_start: number | null
+          publication_date: string | null
+          status: string | null
+          subject_area: string | null
+          submission_date: string | null
+          title: string
+          updated_at: string | null
+          volume: number | null
+        }
+        Insert: {
+          abstract: string
+          authors: Json
+          conflicts_of_interest?: string | null
+          corresponding_author_email: string
+          created_at?: string | null
+          doi?: string | null
+          funding_info?: string | null
+          id?: string
+          issue?: number | null
+          keywords?: string[] | null
+          manuscript_file_url?: string | null
+          page_end?: number | null
+          page_start?: number | null
+          publication_date?: string | null
+          status?: string | null
+          subject_area?: string | null
+          submission_date?: string | null
+          title: string
+          updated_at?: string | null
+          volume?: number | null
+        }
+        Update: {
+          abstract?: string
+          authors?: Json
+          conflicts_of_interest?: string | null
+          corresponding_author_email?: string
+          created_at?: string | null
+          doi?: string | null
+          funding_info?: string | null
+          id?: string
+          issue?: number | null
+          keywords?: string[] | null
+          manuscript_file_url?: string | null
+          page_end?: number | null
+          page_start?: number | null
+          publication_date?: string | null
+          status?: string | null
+          subject_area?: string | null
+          submission_date?: string | null
+          title?: string
+          updated_at?: string | null
+          volume?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          affiliation: string | null
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_editor: boolean | null
+          is_reviewer: boolean | null
+          orcid_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          affiliation?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          is_editor?: boolean | null
+          is_reviewer?: boolean | null
+          orcid_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          affiliation?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_editor?: boolean | null
+          is_reviewer?: boolean | null
+          orcid_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comments_to_author: string | null
+          comments_to_editor: string | null
+          created_at: string | null
+          id: string
+          recommendation: string | null
+          review_file_url: string | null
+          reviewer_id: string | null
+          submission_id: string | null
+          submitted_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          comments_to_author?: string | null
+          comments_to_editor?: string | null
+          created_at?: string | null
+          id?: string
+          recommendation?: string | null
+          review_file_url?: string | null
+          reviewer_id?: string | null
+          submission_id?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          comments_to_author?: string | null
+          comments_to_editor?: string | null
+          created_at?: string | null
+          id?: string
+          recommendation?: string | null
+          review_file_url?: string | null
+          reviewer_id?: string | null
+          submission_id?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          article_id: string | null
+          cover_letter: string | null
+          editor_notes: string | null
+          id: string
+          reviewer_suggestions: string | null
+          status: string | null
+          submission_type: string | null
+          submitted_at: string | null
+          submitter_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          cover_letter?: string | null
+          editor_notes?: string | null
+          id?: string
+          reviewer_suggestions?: string | null
+          status?: string | null
+          submission_type?: string | null
+          submitted_at?: string | null
+          submitter_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          cover_letter?: string | null
+          editor_notes?: string | null
+          id?: string
+          reviewer_suggestions?: string | null
+          status?: string | null
+          submission_type?: string | null
+          submitted_at?: string | null
+          submitter_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_submitter_id_fkey"
+            columns: ["submitter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
