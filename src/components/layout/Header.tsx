@@ -75,6 +75,14 @@ export const Header = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   Dashboard
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/editorial')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Editorial
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/reviewer-dashboard')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Reviewer
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="h-4 w-4 mr-2" />
                   Edit Profile
