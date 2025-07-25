@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User, LogOut, FileText } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { BookOpen, User, LogOut, FileText, Settings } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,7 +64,9 @@ export const Header = () => {
           {loading ? (
             <div className="h-10 w-20 bg-muted animate-pulse rounded" />
           ) : user ? (
-            <DropdownMenu>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <User className="h-4 w-4 mr-2" />
@@ -83,6 +86,10 @@ export const Header = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   Reviewer
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/publication')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Publication
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="h-4 w-4 mr-2" />
                   Edit Profile
@@ -93,6 +100,7 @@ export const Header = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           ) : (
             <div className="space-x-2">
               <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>

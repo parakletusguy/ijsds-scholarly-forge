@@ -83,6 +83,80 @@ export type Database = {
         }
         Relationships: []
       }
+      file_versions: {
+        Row: {
+          article_id: string
+          created_at: string
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          uploaded_by: string
+          version_number: number
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          file_name: string
+          file_type: string
+          file_url: string
+          id?: string
+          uploaded_by: string
+          version_number?: number
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          uploaded_by?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_versions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           affiliation: string | null

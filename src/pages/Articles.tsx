@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Calendar, User, FileText } from 'lucide-react';
+import { AdvancedSearch, SearchFilters } from '@/components/search/AdvancedSearch';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { Calendar, User, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,12 +20,14 @@ interface Article {
   status: string;
   volume: number | null;
   issue: number | null;
+  subject_area: string | null;
 }
 
 export const Articles = () => {
   const [articles, setArticles] = useState<Article[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +43,9 @@ export const Articles = () => {
         .order('publication_date', { ascending: false });
 
       if (error) throw error;
-      setArticles(data || []);
+      const articlesData = data || [];
+      setArticles(articlesData);
+      setFilteredArticles(articlesData);
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {
@@ -47,13 +53,60 @@ export const Articles = () => {
     }
   };
 
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.abstract.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (article.keywords && Array.isArray(article.keywords) && article.keywords.some(keyword => 
-      keyword.toLowerCase().includes(searchTerm.toLowerCase())
-    ))
-  );
+  const handleSearch = async (filters: SearchFilters) => {
+    setSearching(true);
+    try {
+      let query = supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published');
+
+      // Apply filters
+      if (filters.query) {
+        query = query.or(`title.ilike.%${filters.query}%,abstract.ilike.%${filters.query}%`);
+      }
+
+      if (filters.subjectArea) {
+        query = query.eq('subject_area', filters.subjectArea);
+      }
+
+      if (filters.status && filters.status !== 'published') {
+        query = query.eq('status', filters.status);
+      }
+
+      if (filters.dateFrom) {
+        query = query.gte('publication_date', filters.dateFrom);
+      }
+
+      if (filters.dateTo) {
+        query = query.lte('publication_date', filters.dateTo);
+      }
+
+      const { data, error } = await query.order('publication_date', { ascending: false });
+
+      if (error) throw error;
+
+      let results = data || [];
+
+      // Filter by author if specified (client-side filtering for JSON field)
+      if (filters.author) {
+        results = results.filter(article => {
+          if (Array.isArray(article.authors)) {
+            return article.authors.some((author: any) => 
+              author.name?.toLowerCase().includes(filters.author.toLowerCase())
+            );
+          }
+          return false;
+        });
+      }
+
+      setFilteredArticles(results);
+    } catch (error) {
+      console.error('Error searching articles:', error);
+    } finally {
+      setSearching(false);
+    }
+  };
 
   const formatAuthors = (authors: any) => {
     if (!authors || !Array.isArray(authors) || authors.length === 0) return 'Unknown Author';
@@ -64,122 +117,135 @@ export const Articles = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <div className="h-8 bg-muted animate-pulse rounded" />
-          <div className="h-12 bg-muted animate-pulse rounded" />
-          {[1, 2, 3].map(i => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="h-6 bg-muted animate-pulse rounded" />
-                <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Published Articles</h1>
-          <p className="text-muted-foreground">
-            Browse our collection of peer-reviewed articles in social and development sciences
-          </p>
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search articles by title, abstract, or keywords..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {filteredArticles.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground">
-                {articles.length === 0 
-                  ? "No articles have been published yet." 
-                  : "Try adjusting your search terms."
-                }
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 container mx-auto px-4 py-8">
           <div className="space-y-6">
-            {filteredArticles.map((article) => (
-              <Card key={article.id} className="hover:shadow-md transition-shadow">
+            <div className="h-8 bg-muted animate-pulse rounded" />
+            <div className="h-12 bg-muted animate-pulse rounded" />
+            {[1, 2, 3].map(i => (
+              <Card key={i}>
                 <CardHeader>
-                  <CardTitle className="text-xl leading-tight">
-                    {article.title}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      {formatAuthors(article.authors)}
-                    </div>
-                    {article.publication_date && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(article.publication_date).toLocaleDateString()}
-                      </div>
-                    )}
-                    {article.volume && article.issue && (
-                      <span>Vol. {article.volume}, Issue {article.issue}</span>
-                    )}
-                  </CardDescription>
+                  <div className="h-6 bg-muted animate-pulse rounded" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                    {article.abstract}
-                  </p>
-                  
-                  {article.keywords && Array.isArray(article.keywords) && article.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {article.keywords.map((keyword, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {keyword}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {article.doi && (
-                        <span>DOI: {article.doi}</span>
-                      )}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate(`/article/${article.id}`)}
-                    >
-                      Read Article
-                    </Button>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted animate-pulse rounded" />
+                    <div className="h-4 bg-muted animate-pulse rounded" />
+                    <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        )}
+        </div>
+        <Footer />
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Published Articles</h1>
+            <p className="text-muted-foreground">
+              Browse our collection of peer-reviewed articles in social and development sciences
+            </p>
+          </div>
+
+          <AdvancedSearch onSearch={handleSearch} loading={searching} />
+
+          {filteredArticles.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No articles found</h3>
+                <p className="text-muted-foreground">
+                  {searching ? 'Searching...' : articles.length === 0 
+                    ? "No articles have been published yet." 
+                    : "No articles found matching your criteria."
+                  }
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {filteredArticles.map((article) => (
+                <Card key={article.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="text-xl leading-tight">
+                      {article.title}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        {formatAuthors(article.authors)}
+                      </div>
+                      {article.publication_date && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(article.publication_date).toLocaleDateString()}
+                        </div>
+                      )}
+                      {article.volume && article.issue && (
+                        <span>Vol. {article.volume}, Issue {article.issue}</span>
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                      {article.abstract}
+                    </p>
+                    
+                    <div className="flex items-center gap-2 mb-4">
+                      {article.subject_area && (
+                        <Badge variant="outline">
+                          {article.subject_area}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {article.keywords && Array.isArray(article.keywords) && article.keywords.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {article.keywords.slice(0, 5).map((keyword, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {keyword}
+                          </Badge>
+                        ))}
+                        {article.keywords.length > 5 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{article.keywords.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        {article.doi && (
+                          <span>DOI: {article.doi}</span>
+                        )}
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/article/${article.id}`)}
+                      >
+                        Read Article
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 };

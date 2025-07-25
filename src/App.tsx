@@ -13,6 +13,8 @@ import { Editorial } from "./pages/Editorial";
 import { ReviewAssignment } from "./pages/ReviewAssignment";
 import { ReviewerDashboard } from "./pages/ReviewerDashboard";
 import { ReviewForm } from "./pages/ReviewForm";
+import { Publication } from "./pages/Publication";
+import { Profile } from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/review-assignment/:submissionId" element={<ReviewAssignment />} />
             <Route path="/reviewer-dashboard" element={<ReviewerDashboard />} />
             <Route path="/review/:reviewId" element={<ReviewForm />} />
+            <Route path="/publication" element={<Publication />} />
+            <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
