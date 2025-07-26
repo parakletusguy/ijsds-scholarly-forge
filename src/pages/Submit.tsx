@@ -252,14 +252,14 @@ export const Submit = () => {
           <Card>
             <CardHeader>
               <CardTitle>Manuscript File</CardTitle>
-              <CardDescription>Upload your manuscript file (PDF, DOC, or DOCX)</CardDescription>
+              <CardDescription>Upload your manuscript file (DOC or DOCX only)</CardDescription>
             </CardHeader>
             <CardContent>
               <FileUpload
                 bucketName="journal-website-db1"
                 folder="manuscripts"
                 onFileUploaded={(url) => setManuscriptFileUrl(url)}
-                acceptedTypes=".pdf,.doc,.docx"
+                acceptedTypes=".doc,.docx"
                 maxSizeMB={10}
               />
               {manuscriptFileUrl && (
