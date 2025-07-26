@@ -29,6 +29,19 @@ export const signIn = async (email: string, password: string) => {
   return { data, error };
 };
 
+export const signInWithOrcid = async () => {
+  const redirectUrl = `${window.location.origin}/`;
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'orcid' as any,
+    options: {
+      redirectTo: redirectUrl,
+    },
+  });
+
+  return { data, error };
+};
+
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   return { error };
