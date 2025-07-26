@@ -10,6 +10,7 @@ import { X, Plus, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { FileUpload } from '@/components/file-management/FileUpload';
 
 interface Author {
   name: string;
@@ -34,6 +35,7 @@ export const Submit = () => {
   const [fundingInfo, setFundingInfo] = useState('');
   const [conflictsOfInterest, setConflictsOfInterest] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
+  const [manuscriptFileUrl, setManuscriptFileUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   const addKeyword = () => {
@@ -76,6 +78,15 @@ export const Submit = () => {
       return;
     }
 
+    if (!manuscriptFileUrl) {
+      toast({
+        title: 'Manuscript file required',
+        description: 'Please upload your manuscript file before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -91,6 +102,7 @@ export const Submit = () => {
           subject_area: subjectArea,
           funding_info: fundingInfo,
           conflicts_of_interest: conflictsOfInterest,
+          manuscript_file_url: manuscriptFileUrl,
           status: 'draft'
         })
         .select()
@@ -233,6 +245,30 @@ export const Submit = () => {
                   placeholder="e.g., Development Economics, Social Policy, etc."
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Manuscript Upload */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Manuscript File</CardTitle>
+              <CardDescription>Upload your manuscript file (PDF, DOC, or DOCX)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FileUpload
+                bucketName="journal-website-db1"
+                folder="manuscripts"
+                onFileUploaded={(url) => setManuscriptFileUrl(url)}
+                acceptedTypes=".pdf,.doc,.docx"
+                maxSizeMB={10}
+              />
+              {manuscriptFileUrl && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-700">
+                    ✓ Manuscript file uploaded successfully
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
