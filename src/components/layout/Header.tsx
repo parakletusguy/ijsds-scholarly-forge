@@ -39,7 +39,7 @@ export const Header = () => {
           <BookOpen className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-2xl font-bold text-foreground">IJSDS</h1>
-            <p className="text-sm text-muted-foreground">International Journal of Social and Development Sciences</p>
+            <p className="text-sm text-muted-foreground">International Journal for Social Work and Development Studies</p>
           </div>
         </div>
 
