@@ -15,6 +15,7 @@ import { ReviewerDashboard } from "./pages/ReviewerDashboard";
 import { ReviewForm } from "./pages/ReviewForm";
 import { Publication } from "./pages/Publication";
 import { Profile } from "./pages/Profile";
+import { About } from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/review/:reviewId" element={<ReviewForm />} />
             <Route path="/publication" element={<Publication />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/about" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

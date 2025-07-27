@@ -60,16 +60,15 @@ export const Home = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <BookOpen className="h-16 w-16 text-primary mr-4" />
-            <div className="text-left">
-              <h1 className="text-5xl font-bold text-foreground mb-2">IJSDS</h1>
-              <p className="text-xl text-muted-foreground">International Journal for Social Work and Development Studies</p>
-            </div>
+          <div className="text-left">
+            <h1 className="text-5xl font-bold text-foreground mb-2">IJSDS</h1>
+            <p className="text-xl text-muted-foreground">International Journal On Social Work and Development Studies</p>
           </div>
-          
-          <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
-            A premier peer-reviewed academic journal dedicated to advancing knowledge in social sciences 
-            and development studies through rigorous research and scholarly excellence.
-          </p>
+        </div>
+        
+        <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
+          "Empowering Communities through Research and Practice" - A peer-reviewed journal dedicated to advancing knowledge and practice in social work and development studies.
+        </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={() => navigate('/articles')}>
@@ -96,7 +95,7 @@ export const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Rigorous double-blind peer review process by leading experts in social and development sciences
+                  Rigorous peer review process by leading experts in social work and development studies
                 </p>
               </CardContent>
             </Card>
@@ -108,7 +107,7 @@ export const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Indexed in major academic databases with worldwide visibility and open access options
+                  Global platform for researchers, practitioners, and policymakers to share insights and research findings
                 </p>
               </CardContent>
             </Card>
@@ -120,7 +119,7 @@ export const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  High-impact research that advances understanding in social development and policy
+                  Evidence-based research that informs policy and practice in social work and development studies
                 </p>
               </CardContent>
             </Card>
@@ -207,7 +206,7 @@ export const Home = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Share Your Research?</h2>
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-            Join our community of researchers and contribute to the advancement of social and development sciences.
+            Join our community of researchers, practitioners, and policymakers to contribute to social work and development studies.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" onClick={() => navigate(user ? '/submit' : '/auth')}>
