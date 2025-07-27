@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus, Upload } from 'lucide-react';
+import { X, Plus, Upload, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -37,6 +37,87 @@ export const Submit = () => {
   const [coverLetter, setCoverLetter] = useState('');
   const [manuscriptFileUrl, setManuscriptFileUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [draftId, setDraftId] = useState<string | null>(null);
+
+  // Load saved draft on mount
+  useEffect(() => {
+    if (user) {
+      loadDraft();
+    }
+  }, [user]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (user && (title || abstract || keywords.length > 0)) {
+      const timeoutId = setTimeout(() => {
+        saveDraft();
+      }, 2000); // Auto-save after 2 seconds of inactivity
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [title, abstract, keywords, authors, correspondingAuthorEmail, subjectArea, fundingInfo, conflictsOfInterest, coverLetter, manuscriptFileUrl, user]);
+
+  const loadDraft = async () => {
+    try {
+      const savedData = localStorage.getItem(`article_draft_${user?.id}`);
+      if (savedData) {
+        const draft = JSON.parse(savedData);
+        setTitle(draft.title || '');
+        setAbstract(draft.abstract || '');
+        setKeywords(draft.keywords || []);
+        setAuthors(draft.authors || [{ name: '', email: user?.email || '', affiliation: '', orcid: '' }]);
+        setCorrespondingAuthorEmail(draft.correspondingAuthorEmail || user?.email || '');
+        setSubjectArea(draft.subjectArea || '');
+        setFundingInfo(draft.fundingInfo || '');
+        setConflictsOfInterest(draft.conflictsOfInterest || '');
+        setCoverLetter(draft.coverLetter || '');
+        setManuscriptFileUrl(draft.manuscriptFileUrl || '');
+        setDraftId(draft.draftId || null);
+        setLastSaved(new Date(draft.lastSaved));
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error);
+    }
+  };
+
+  const saveDraft = async () => {
+    if (!user || autoSaving) return;
+    
+    setAutoSaving(true);
+    try {
+      const draftData = {
+        title,
+        abstract,
+        keywords,
+        authors,
+        correspondingAuthorEmail,
+        subjectArea,
+        fundingInfo,
+        conflictsOfInterest,
+        coverLetter,
+        manuscriptFileUrl,
+        draftId,
+        lastSaved: new Date().toISOString(),
+        userId: user.id
+      };
+
+      // Save to localStorage first (immediate backup)
+      localStorage.setItem(`article_draft_${user.id}`, JSON.stringify(draftData));
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Error saving draft:', error);
+    } finally {
+      setAutoSaving(false);
+    }
+  };
+
+  const clearDraft = () => {
+    localStorage.removeItem(`article_draft_${user?.id}`);
+    setDraftId(null);
+    setLastSaved(null);
+  };
 
   const addKeyword = () => {
     if (keywordInput.trim() && !keywords.includes(keywordInput.trim())) {
@@ -78,6 +159,25 @@ export const Submit = () => {
       return;
     }
 
+    // Validate required fields
+    if (!title.trim()) {
+      toast({
+        title: 'Title required',
+        description: 'Please enter a title for your article.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!abstract.trim()) {
+      toast({
+        title: 'Abstract required',
+        description: 'Please enter an abstract for your article.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!manuscriptFileUrl) {
       toast({
         title: 'Manuscript file required',
@@ -87,15 +187,27 @@ export const Submit = () => {
       return;
     }
 
+    if (authors.some(author => !author.name.trim() || !author.email.trim())) {
+      toast({
+        title: 'Author information incomplete',
+        description: 'Please ensure all authors have names and email addresses.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Save a final backup before submission
+      await saveDraft();
+
       // Create article
       const { data: articleData, error: articleError } = await supabase
         .from('articles')
         .insert({
-          title,
-          abstract,
+          title: title.trim(),
+          abstract: abstract.trim(),
           keywords,
           authors: authors as any,
           corresponding_author_email: correspondingAuthorEmail,
@@ -130,6 +242,9 @@ export const Submit = () => {
 
       if (updateError) throw updateError;
 
+      // Clear the draft after successful submission
+      clearDraft();
+
       toast({
         title: 'Article submitted successfully',
         description: 'Your article has been submitted for review. You will receive updates via email.',
@@ -138,11 +253,17 @@ export const Submit = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Error submitting article:', error);
+      
+      // Provide more specific error information
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       toast({
-        title: 'Error',
-        description: 'Failed to submit article. Please try again.',
+        title: 'Submission failed',
+        description: `Failed to submit article: ${errorMessage}. Your work has been saved automatically.`,
         variant: 'destructive',
       });
+
+      // Don't navigate away on error - keep the form data
     } finally {
       setLoading(false);
     }
@@ -170,10 +291,29 @@ export const Submit = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Submit Article</h1>
-          <p className="text-muted-foreground">
-            Submit your research article for peer review and publication in IJSDS
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Submit Article</h1>
+              <p className="text-muted-foreground">
+                Submit your research article for peer review and publication in IJSDS
+              </p>
+            </div>
+            
+            {/* Auto-save status indicator */}
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              {autoSaving ? (
+                <>
+                  <Save className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : lastSaved ? (
+                <>
+                  <Save className="h-4 w-4 text-green-600" />
+                  <span>Last saved: {lastSaved.toLocaleTimeString()}</span>
+                </>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
