@@ -208,12 +208,9 @@ export const Home = () => {
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
             Join our community of researchers, practitioners, and policymakers to contribute to social work and development studies.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button size="lg" variant="secondary" onClick={() => navigate(user ? '/submit' : '/auth')}>
               {user ? 'Submit Your Article' : 'Get Started'}
-            </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-              Learn More
             </Button>
           </div>
         </div>
