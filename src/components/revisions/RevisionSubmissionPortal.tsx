@@ -61,7 +61,7 @@ export const RevisionSubmissionPortal = () => {
     }
   };
 
-  const handleFileUploaded = async (fileUrl: string, fileName: string, fileSize: number) => {
+  const handleFileUploaded = async (fileUrl: string, fileName: string) => {
     try {
       // Create new file version
       await supabase
@@ -71,7 +71,6 @@ export const RevisionSubmissionPortal = () => {
           file_url: fileUrl,
           file_name: fileName,
           file_type: fileName.split('.').pop() || 'unknown',
-          file_size: fileSize,
           uploaded_by: user?.id,
           version_number: await getNextVersionNumber(),
           file_description: 'Revision submission'
@@ -215,7 +214,7 @@ export const RevisionSubmissionPortal = () => {
             bucketName="journal-website-db1"
             folder={`submissions/${submissionId}/revisions`}
             onFileUploaded={handleFileUploaded}
-            acceptedTypes={['.pdf', '.doc', '.docx']}
+            acceptedTypes=".pdf,.doc,.docx"
             maxSizeMB={50}
           />
         </CardContent>
