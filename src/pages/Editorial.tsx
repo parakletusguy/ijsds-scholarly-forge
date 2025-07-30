@@ -12,6 +12,9 @@ import { FileText, Users, Clock, CheckCircle2 } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
 import { ApproveSubmissionDialog } from '@/components/editor/ApproveSubmissionDialog';
+import { ReviewerInvitationDialog } from '@/components/editor/ReviewerInvitationDialog';
+import { DeskRejectDialog } from '@/components/editor/DeskRejectDialog';
+import { RevisionRequestDialog } from '@/components/editor/RevisionRequestDialog';
 import { useNavigate } from 'react-router-dom';
 
 interface Submission {
@@ -138,6 +141,8 @@ export const Editorial = () => {
       case 'under_review': return 'bg-yellow-100 text-yellow-800';
       case 'accepted': return 'bg-green-100 text-green-800';
       case 'rejected': return 'bg-red-100 text-red-800';
+      case 'desk_rejected': return 'bg-red-100 text-red-800';
+      case 'revision_requested': return 'bg-orange-100 text-orange-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -148,6 +153,8 @@ export const Editorial = () => {
       case 'under_review': return <Clock className="h-4 w-4" />;
       case 'accepted': return <CheckCircle2 className="h-4 w-4" />;
       case 'rejected': return <CheckCircle2 className="h-4 w-4" />;
+      case 'desk_rejected': return <CheckCircle2 className="h-4 w-4" />;
+      case 'revision_requested': return <FileText className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
   };
@@ -166,7 +173,8 @@ export const Editorial = () => {
 
   const pendingSubmissions = submissions.filter(s => s.status === 'submitted');
   const underReviewSubmissions = submissions.filter(s => s.status === 'under_review');
-  const completedSubmissions = submissions.filter(s => ['accepted', 'rejected'].includes(s.status));
+  const revisionSubmissions = submissions.filter(s => s.status === 'revision_requested');
+  const completedSubmissions = submissions.filter(s => ['accepted', 'rejected', 'desk_rejected'].includes(s.status));
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -223,6 +231,7 @@ export const Editorial = () => {
           <TabsList>
             <TabsTrigger value="pending">Pending ({pendingSubmissions.length})</TabsTrigger>
             <TabsTrigger value="review">Under Review ({underReviewSubmissions.length})</TabsTrigger>
+            <TabsTrigger value="revision">Revisions ({revisionSubmissions.length})</TabsTrigger>
             <TabsTrigger value="completed">Completed ({completedSubmissions.length})</TabsTrigger>
           </TabsList>
 
@@ -242,12 +251,10 @@ export const Editorial = () => {
                           Submitted by {submission.profiles.full_name} • {new Date(submission.submitted_at).toLocaleDateString()}
                         </CardDescription>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(submission.status)}>
-                          {getStatusIcon(submission.status)}
-                          <span className="ml-1">{submission.status.replace('_', ' ')}</span>
-                        </Badge>
-                      </div>
+                      <Badge className={getStatusColor(submission.status)}>
+                        {getStatusIcon(submission.status)}
+                        <span className="ml-1">{submission.status.replace('_', ' ')}</span>
+                      </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -265,15 +272,16 @@ export const Editorial = () => {
                       >
                         Start Review
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => navigate(`/review-assignment/${submission.id}`)}
-                      >
-                        Assign Reviewers
-                      </Button>
-                      <RejectSubmissionDialog 
+                      <ReviewerInvitationDialog
                         submissionId={submission.id}
+                        submissionTitle={submission.articles.title}
+                        onInvite={fetchSubmissions}
+                      />
+                      <DeskRejectDialog
+                        submissionId={submission.id}
+                        submissionTitle={submission.articles.title}
+                        authorEmail={submission.articles.corresponding_author_email}
+                        authorName={submission.profiles.full_name}
                         onReject={fetchSubmissions}
                       />
                     </div>
@@ -316,6 +324,13 @@ export const Editorial = () => {
                         submissionId={submission.id}
                         onApprove={fetchSubmissions}
                       />
+                      <RevisionRequestDialog
+                        submissionId={submission.id}
+                        submissionTitle={submission.articles.title}
+                        authorEmail={submission.articles.corresponding_author_email}
+                        authorName={submission.profiles.full_name}
+                        onRequest={fetchSubmissions}
+                      />
                       <RejectSubmissionDialog 
                         submissionId={submission.id}
                         onReject={fetchSubmissions}
@@ -326,6 +341,42 @@ export const Editorial = () => {
                         onClick={() => navigate(`/submission/${submission.id}/reviews`)}
                       >
                         View Reviews
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="revision" className="space-y-4">
+            {revisionSubmissions.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No submissions awaiting revision</div>
+            ) : (
+              revisionSubmissions.map((submission) => (
+                <Card key={submission.id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-xl">{submission.articles.title}</CardTitle>
+                        <CardDescription>
+                          Submitted by {submission.profiles.full_name} • Revision requested
+                        </CardDescription>
+                      </div>
+                      <Badge className={getStatusColor(submission.status)}>
+                        {getStatusIcon(submission.status)}
+                        <span className="ml-1">{submission.status.replace('_', ' ')}</span>
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigate(`/submission/${submission.id}/revision`)}
+                      >
+                        View Revision Details
                       </Button>
                     </div>
                   </CardContent>
@@ -350,7 +401,7 @@ export const Editorial = () => {
                       </div>
                       <Badge className={getStatusColor(submission.status)}>
                         {getStatusIcon(submission.status)}
-                        <span className="ml-1">{submission.status}</span>
+                        <span className="ml-1">{submission.status.replace('_', ' ')}</span>
                       </Badge>
                     </div>
                   </CardHeader>
