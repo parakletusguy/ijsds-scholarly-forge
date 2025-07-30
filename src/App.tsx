@@ -20,6 +20,8 @@ import { Profile } from "./pages/Profile";
 import { About } from "./pages/About";
 import Copyright from "./pages/Copyright";
 import EditorialBoard from "./pages/EditorialBoard";
+import { SubmissionGuidelines } from "./pages/SubmissionGuidelines";
+import { PeerReview } from "./pages/PeerReview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +50,8 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/copyright" element={<Copyright />} />
             <Route path="/editorial-board" element={<EditorialBoard />} />
+            <Route path="/submission-guidelines" element={<SubmissionGuidelines />} />
+            <Route path="/peer-review" element={<PeerReview />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
