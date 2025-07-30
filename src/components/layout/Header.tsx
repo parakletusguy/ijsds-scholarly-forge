@@ -94,6 +94,10 @@ export const Header = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   Production
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/external-integrations')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  External Integrations
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/analytics')}>
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analytics

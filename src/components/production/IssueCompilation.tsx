@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { BookOpen, Save, FileText, Calendar, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, Save, FileText, Calendar, Plus, Trash2, ExternalLink } from 'lucide-react';
 
 interface Article {
   id: string;
@@ -379,6 +379,14 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
             <Button variant="outline" disabled={loading}>
               <FileText className="h-4 w-4 mr-2" />
               Export Metadata
+            </Button>
+            <Button 
+              variant="outline" 
+              disabled={loading}
+              onClick={() => window.open('/external-integrations', '_blank')}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Submit to DOAJ/AJOL
             </Button>
           </div>
         </CardContent>
