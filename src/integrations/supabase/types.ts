@@ -83,6 +83,76 @@ export type Database = {
         }
         Relationships: []
       }
+      discussion_messages: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          thread_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          thread_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          thread_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "discussion_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussion_threads: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          submission_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          submission_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          submission_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_threads_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       editorial_decisions: {
         Row: {
           created_at: string
@@ -156,30 +226,42 @@ export type Database = {
         Row: {
           article_id: string
           created_at: string
+          file_description: string | null
           file_name: string
+          file_size: number | null
           file_type: string
           file_url: string
           id: string
+          is_archived: boolean | null
+          is_supplementary: boolean | null
           uploaded_by: string
           version_number: number
         }
         Insert: {
           article_id: string
           created_at?: string
+          file_description?: string | null
           file_name: string
+          file_size?: number | null
           file_type: string
           file_url: string
           id?: string
+          is_archived?: boolean | null
+          is_supplementary?: boolean | null
           uploaded_by: string
           version_number?: number
         }
         Update: {
           article_id?: string
           created_at?: string
+          file_description?: string | null
           file_name?: string
+          file_size?: number | null
           file_type?: string
           file_url?: string
           id?: string
+          is_archived?: boolean | null
+          is_supplementary?: boolean | null
           uploaded_by?: string
           version_number?: number
         }
@@ -189,6 +271,50 @@ export type Database = {
             columns: ["article_id"]
             isOneToOne: false
             referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          recipient_id: string
+          sender_id: string
+          subject: string
+          submission_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          recipient_id: string
+          sender_id: string
+          subject: string
+          submission_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+          subject?: string
+          submission_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
         ]
