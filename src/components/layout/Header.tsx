@@ -90,6 +90,10 @@ export const Header = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   Publication
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/production')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Production
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/analytics')}>
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analytics
