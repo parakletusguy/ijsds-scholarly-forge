@@ -23,15 +23,18 @@ interface AdvancedSearchProps {
 }
 
 const SUBJECT_AREAS = [
-  'Computer Science',
-  'Biology',
-  'Physics',
-  'Chemistry',
-  'Mathematics',
-  'Medicine',
-  'Engineering',
-  'Psychology',
-  'Economics',
+  'Social Work Practice',
+  'Community Development',
+  'Social Policy',
+  'Human Services',
+  'Child Welfare',
+  'Mental Health',
+  'Gerontology',
+  'Disability Studies',
+  'International Development',
+  'Social Justice',
+  'Family Studies',
+  'Healthcare Social Work',
 ];
 
 const STATUS_OPTIONS = [
