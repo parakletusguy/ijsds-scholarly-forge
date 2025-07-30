@@ -14,6 +14,7 @@ import { ReviewAssignment } from "./pages/ReviewAssignment";
 import { ReviewerDashboard } from "./pages/ReviewerDashboard";
 import { ReviewForm } from "./pages/ReviewForm";
 import { Publication } from "./pages/Publication";
+import { Analytics } from "./pages/Analytics";
 import { Profile } from "./pages/Profile";
 import { About } from "./pages/About";
 import NotFound from "./pages/NotFound";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/reviewer-dashboard" element={<ReviewerDashboard />} />
             <Route path="/review/:reviewId" element={<ReviewForm />} />
             <Route path="/publication" element={<Publication />} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/about" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
