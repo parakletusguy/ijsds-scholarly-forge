@@ -18,6 +18,8 @@ import { Production } from "./pages/Production";
 import { Analytics } from "./pages/Analytics";
 import { Profile } from "./pages/Profile";
 import { About } from "./pages/About";
+import Copyright from "./pages/Copyright";
+import EditorialBoard from "./pages/EditorialBoard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,8 @@ const App = () => (
           <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/about" element={<About />} />
+            <Route path="/copyright" element={<Copyright />} />
+            <Route path="/editorial-board" element={<EditorialBoard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
