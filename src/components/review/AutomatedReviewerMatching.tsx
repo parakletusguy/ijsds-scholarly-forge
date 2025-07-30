@@ -162,8 +162,8 @@ export const AutomatedReviewerMatching = ({
           reviewer_affiliation: reviewer.affiliation,
           reviewer_bio: reviewer.bio,
           match_score: normalizedScore,
-          match_reasons,
-          expertise_areas,
+          match_reasons: matchReasons,
+          expertise_areas: expertiseAreas,
           review_history: reviewHistory,
         });
       }
