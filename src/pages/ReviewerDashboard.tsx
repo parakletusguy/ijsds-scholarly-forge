@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { FileText, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { PaperDownload } from '@/components/papers/PaperDownload';
 import { useNavigate } from 'react-router-dom';
 
 interface Review {
@@ -26,6 +27,7 @@ interface Review {
       abstract: string;
       subject_area: string;
       corresponding_author_email: string;
+      manuscript_file_url: string;
     };
   };
 }
@@ -86,7 +88,8 @@ export const ReviewerDashboard = () => {
               title,
               abstract,
               subject_area,
-              corresponding_author_email
+              corresponding_author_email,
+              manuscript_file_url
             )
           )
         `)
@@ -220,7 +223,11 @@ export const ReviewerDashboard = () => {
                       <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                         {review.submissions.articles.abstract}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
+                        <PaperDownload 
+                          manuscriptFileUrl={review.submissions.articles.manuscript_file_url}
+                          title={review.submissions.articles.title}
+                        />
                         <Button 
                           onClick={() => navigate(`/review/${review.id}`)}
                         >

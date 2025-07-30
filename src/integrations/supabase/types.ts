@@ -196,6 +196,33 @@ export type Database = {
         }
         Relationships: []
       }
+      rejection_messages: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          submission_id: string
+          suggested_corrections: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          message: string
+          submission_id: string
+          suggested_corrections?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          submission_id?: string
+          suggested_corrections?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comments_to_author: string | null
@@ -252,6 +279,9 @@ export type Database = {
       }
       submissions: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_by_editor: boolean | null
           article_id: string | null
           cover_letter: string | null
           editor_notes: string | null
@@ -264,6 +294,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_editor?: boolean | null
           article_id?: string | null
           cover_letter?: string | null
           editor_notes?: string | null
@@ -276,6 +309,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_editor?: boolean | null
           article_id?: string | null
           cover_letter?: string | null
           editor_notes?: string | null

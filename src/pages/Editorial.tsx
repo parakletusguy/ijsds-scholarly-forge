@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { FileText, Users, Clock, CheckCircle2 } from 'lucide-react';
+import { PaperDownload } from '@/components/papers/PaperDownload';
+import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
+import { ApproveSubmissionDialog } from '@/components/editor/ApproveSubmissionDialog';
 import { useNavigate } from 'react-router-dom';
 
 interface Submission {
@@ -23,6 +26,7 @@ interface Submission {
     abstract: string;
     corresponding_author_email: string;
     authors: any;
+    manuscript_file_url: string;
   };
   profiles: {
     full_name: string;
@@ -81,7 +85,8 @@ export const Editorial = () => {
             title,
             abstract,
             corresponding_author_email,
-            authors
+            authors,
+            manuscript_file_url
           ),
           profiles (
             full_name,
@@ -249,7 +254,11 @@ export const Editorial = () => {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                       {submission.articles.abstract}
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <PaperDownload 
+                        manuscriptFileUrl={submission.articles.manuscript_file_url}
+                        title={submission.articles.title}
+                      />
                       <Button 
                         size="sm" 
                         onClick={() => updateSubmissionStatus(submission.id, 'under_review')}
@@ -263,13 +272,10 @@ export const Editorial = () => {
                       >
                         Assign Reviewers
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={() => updateSubmissionStatus(submission.id, 'rejected')}
-                      >
-                        Reject
-                      </Button>
+                      <RejectSubmissionDialog 
+                        submissionId={submission.id}
+                        onReject={fetchSubmissions}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -298,20 +304,22 @@ export const Editorial = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm"
-                        onClick={() => updateSubmissionStatus(submission.id, 'accepted')}
-                      >
-                        Accept
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={() => updateSubmissionStatus(submission.id, 'rejected')}
-                      >
-                        Reject
-                      </Button>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {submission.articles.abstract}
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      <PaperDownload 
+                        manuscriptFileUrl={submission.articles.manuscript_file_url}
+                        title={submission.articles.title}
+                      />
+                      <ApproveSubmissionDialog 
+                        submissionId={submission.id}
+                        onApprove={fetchSubmissions}
+                      />
+                      <RejectSubmissionDialog 
+                        submissionId={submission.id}
+                        onReject={fetchSubmissions}
+                      />
                       <Button 
                         size="sm" 
                         variant="outline"
