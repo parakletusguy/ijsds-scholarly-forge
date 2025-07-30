@@ -391,27 +391,33 @@ export const Analytics = () => {
               <CardDescription>Breakdown of editorial decisions by type</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={analytics.editorialPerformance.decisionsByType}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ type, count }) => `${type}: ${count}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="count"
-                    >
-                      {analytics.editorialPerformance.decisionsByType.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              <ChartContainer
+                config={{
+                  count: {
+                    label: "Count",
+                    color: "hsl(var(--chart-1))",
+                  },
+                }}
+                className="h-[300px]"
+              >
+                <PieChart>
+                  <Pie
+                    data={analytics.editorialPerformance.decisionsByType}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ type, count }) => `${type}: ${count}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="count"
+                  >
+                    {analytics.editorialPerformance.decisionsByType.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </TabsContent>
@@ -511,22 +517,28 @@ export const Analytics = () => {
               <CardDescription>Acceptance rates over the last 12 months</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={analytics.acceptanceRates.monthlyTrend}>
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="rate" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2}
-                      name="Acceptance Rate (%)"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <ChartContainer
+                config={{
+                  rate: {
+                    label: "Acceptance Rate (%)",
+                    color: "hsl(var(--chart-1))",
+                  },
+                }}
+                className="h-[300px]"
+              >
+                <LineChart data={analytics.acceptanceRates.monthlyTrend}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="rate" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2}
+                    name="Acceptance Rate (%)"
+                  />
+                </LineChart>
+              </ChartContainer>
             </CardContent>
           </Card>
 
@@ -536,17 +548,27 @@ export const Analytics = () => {
               <CardDescription>Accepted vs rejected submissions by month</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.acceptanceRates.monthlyTrend}>
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="accepted" fill="hsl(var(--primary))" name="Accepted" />
-                    <Bar dataKey="rejected" fill="hsl(var(--secondary))" name="Rejected" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <ChartContainer
+                config={{
+                  accepted: {
+                    label: "Accepted",
+                    color: "hsl(var(--chart-1))",
+                  },
+                  rejected: {
+                    label: "Rejected",
+                    color: "hsl(var(--chart-2))",
+                  },
+                }}
+                className="h-[300px]"
+              >
+                <BarChart data={analytics.acceptanceRates.monthlyTrend}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="accepted" fill="hsl(var(--primary))" name="Accepted" />
+                  <Bar dataKey="rejected" fill="hsl(var(--secondary))" name="Rejected" />
+                </BarChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </TabsContent>
@@ -582,16 +604,22 @@ export const Analytics = () => {
               <CardDescription>Articles published over the last 12 months</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.publicationStats.publicationTrend}>
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="published" fill="hsl(var(--primary))" name="Published Articles" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <ChartContainer
+                config={{
+                  published: {
+                    label: "Published Articles",
+                    color: "hsl(var(--chart-1))",
+                  },
+                }}
+                className="h-[300px]"
+              >
+                <BarChart data={analytics.publicationStats.publicationTrend}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="published" fill="hsl(var(--primary))" name="Published Articles" />
+                </BarChart>
+              </ChartContainer>
             </CardContent>
           </Card>
 
