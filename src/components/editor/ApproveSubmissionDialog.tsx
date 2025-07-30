@@ -34,10 +34,39 @@ export const ApproveSubmissionDialog = ({ submissionId, onApprove, disabled }: A
 
       if (error) throw error;
 
-      toast({
-        title: 'Submission Approved',
-        description: 'The submission has been approved for publication.',
-      });
+      // Generate Zenodo DOI automatically
+      try {
+        const { data: doiResult, error: doiError } = await supabase.functions.invoke('generate-zenodo-doi', {
+          body: { submissionId }
+        });
+
+        if (doiError) {
+          console.error('DOI generation error:', doiError);
+          toast({
+            title: 'Submission Approved',
+            description: 'Submission approved but DOI generation failed. Please generate manually.',
+            variant: 'default',
+          });
+        } else if (doiResult?.success) {
+          toast({
+            title: 'Submission Approved',
+            description: `Submission approved and DOI generated: ${doiResult.doi}`,
+          });
+        } else {
+          toast({
+            title: 'Submission Approved',
+            description: 'Submission approved but DOI generation failed. Please generate manually.',
+            variant: 'default',
+          });
+        }
+      } catch (doiError) {
+        console.error('Error generating DOI:', doiError);
+        toast({
+          title: 'Submission Approved',
+          description: 'Submission approved but DOI generation failed. Please generate manually.',
+          variant: 'default',
+        });
+      }
 
       setOpen(false);
       onApprove();
