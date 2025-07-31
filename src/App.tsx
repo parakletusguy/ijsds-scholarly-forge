@@ -23,6 +23,7 @@ import EditorialBoard from "./pages/EditorialBoard";
 import { SubmissionGuidelines } from "./pages/SubmissionGuidelines";
 import { PeerReview } from "./pages/PeerReview";
 import { ExternalIntegrations } from "./pages/ExternalIntegrations";
+import { DataManagement } from "./pages/DataManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
