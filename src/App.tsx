@@ -53,7 +53,8 @@ const App = () => (
             <Route path="/editorial-board" element={<EditorialBoard />} />
             <Route path="/submission-guidelines" element={<SubmissionGuidelines />} />
             <Route path="/peer-review" element={<PeerReview />} />
-            <Route path="/external-integrations" element={<ExternalIntegrations />} />
+          <Route path="/external-integrations" element={<ExternalIntegrations />} />
+          <Route path="/data-management" element={<DataManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
