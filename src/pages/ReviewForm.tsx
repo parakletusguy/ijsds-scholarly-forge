@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ArrowLeft, FileText, Save } from 'lucide-react';
 
 interface Review {
@@ -163,7 +164,7 @@ export const ReviewForm = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse">Loading...</div>
+          <LoadingSpinner size="lg" text="Loading review details..." />
         </main>
         <Footer />
       </div>

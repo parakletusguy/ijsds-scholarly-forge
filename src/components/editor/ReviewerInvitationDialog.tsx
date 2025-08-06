@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, AlertCircle } from 'lucide-react';
 import { sendEmailNotification, generateReviewInvitationEmail } from '@/lib/emailService';
+import { ReviewStatusIndicator } from '@/components/review/ReviewStatusIndicator';
 
 interface ReviewerInvitationDialogProps {
   submissionId: string;
@@ -31,6 +32,7 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
   const [deadlineDate, setDeadlineDate] = useState('');
   const [customMessage, setCustomMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingReviewers, setLoadingReviewers] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -43,6 +45,7 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
   }, [open]);
 
   const fetchReviewers = async () => {
+    setLoadingReviewers(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -58,6 +61,8 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
         description: 'Failed to fetch reviewers list.',
         variant: 'destructive',
       });
+    } finally {
+      setLoadingReviewers(false);
     }
   };
 
@@ -145,18 +150,33 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="reviewer">Select Reviewer</Label>
-            <Select value={selectedReviewerId} onValueChange={setSelectedReviewerId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a reviewer..." />
-              </SelectTrigger>
-              <SelectContent>
-                {reviewers.map((reviewer) => (
-                  <SelectItem key={reviewer.id} value={reviewer.id}>
-                    {reviewer.full_name} - {reviewer.affiliation}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {loadingReviewers ? (
+              <div className="flex items-center justify-center p-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span className="ml-2 text-sm text-muted-foreground">Loading reviewers...</span>
+              </div>
+            ) : reviewers.length === 0 ? (
+              <div className="flex items-center gap-2 p-4 border border-orange-200 bg-orange-50 rounded-lg">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <span className="text-sm text-orange-800">No reviewers available. Please add reviewers to the system first.</span>
+              </div>
+            ) : (
+              <Select value={selectedReviewerId} onValueChange={setSelectedReviewerId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a reviewer..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {reviewers.map((reviewer) => (
+                    <SelectItem key={reviewer.id} value={reviewer.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{reviewer.full_name}</span>
+                        <span className="text-xs text-muted-foreground">{reviewer.affiliation}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-2">
