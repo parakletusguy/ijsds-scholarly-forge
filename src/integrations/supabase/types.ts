@@ -83,34 +83,185 @@ export type Database = {
         }
         Relationships: []
       }
+      discussion_messages: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          thread_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          thread_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          thread_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "discussion_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussion_threads: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          submission_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          submission_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          submission_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_threads_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      editorial_decisions: {
+        Row: {
+          created_at: string
+          decision_rationale: string | null
+          decision_type: string
+          editor_id: string
+          id: string
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decision_rationale?: string | null
+          decision_type: string
+          editor_id: string
+          id?: string
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decision_rationale?: string | null
+          decision_type?: string
+          editor_id?: string
+          id?: string
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_notifications: {
+        Row: {
+          body: string
+          id: string
+          notification_type: string
+          recipient_email: string
+          recipient_id: string | null
+          related_review_id: string | null
+          related_submission_id: string | null
+          sent_at: string
+          status: string | null
+          subject: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          notification_type: string
+          recipient_email: string
+          recipient_id?: string | null
+          related_review_id?: string | null
+          related_submission_id?: string | null
+          sent_at?: string
+          status?: string | null
+          subject: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          notification_type?: string
+          recipient_email?: string
+          recipient_id?: string | null
+          related_review_id?: string | null
+          related_submission_id?: string | null
+          sent_at?: string
+          status?: string | null
+          subject?: string
+        }
+        Relationships: []
+      }
       file_versions: {
         Row: {
           article_id: string
           created_at: string
+          file_description: string | null
           file_name: string
+          file_size: number | null
           file_type: string
           file_url: string
           id: string
+          is_archived: boolean | null
+          is_supplementary: boolean | null
           uploaded_by: string
           version_number: number
         }
         Insert: {
           article_id: string
           created_at?: string
+          file_description?: string | null
           file_name: string
+          file_size?: number | null
           file_type: string
           file_url: string
           id?: string
+          is_archived?: boolean | null
+          is_supplementary?: boolean | null
           uploaded_by: string
           version_number?: number
         }
         Update: {
           article_id?: string
           created_at?: string
+          file_description?: string | null
           file_name?: string
+          file_size?: number | null
           file_type?: string
           file_url?: string
           id?: string
+          is_archived?: boolean | null
+          is_supplementary?: boolean | null
           uploaded_by?: string
           version_number?: number
         }
@@ -120,6 +271,50 @@ export type Database = {
             columns: ["article_id"]
             isOneToOne: false
             referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          recipient_id: string
+          sender_id: string
+          subject: string
+          submission_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          recipient_id: string
+          sender_id: string
+          subject: string
+          submission_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+          subject?: string
+          submission_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -162,7 +357,9 @@ export type Database = {
           affiliation: string | null
           bio: string | null
           created_at: string | null
+          deadline_reminder_days: number | null
           email: string | null
+          email_notifications_enabled: boolean | null
           full_name: string | null
           id: string
           is_editor: boolean | null
@@ -174,7 +371,9 @@ export type Database = {
           affiliation?: string | null
           bio?: string | null
           created_at?: string | null
+          deadline_reminder_days?: number | null
           email?: string | null
+          email_notifications_enabled?: boolean | null
           full_name?: string | null
           id: string
           is_editor?: boolean | null
@@ -186,7 +385,9 @@ export type Database = {
           affiliation?: string | null
           bio?: string | null
           created_at?: string | null
+          deadline_reminder_days?: number | null
           email?: string | null
+          email_notifications_enabled?: boolean | null
           full_name?: string | null
           id?: string
           is_editor?: boolean | null
@@ -196,14 +397,48 @@ export type Database = {
         }
         Relationships: []
       }
+      rejection_messages: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          submission_id: string
+          suggested_corrections: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          message: string
+          submission_id: string
+          suggested_corrections?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          submission_id?: string
+          suggested_corrections?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comments_to_author: string | null
           comments_to_editor: string | null
+          conflict_of_interest_declared: boolean | null
+          conflict_of_interest_details: string | null
           created_at: string | null
+          deadline_date: string | null
           id: string
+          invitation_accepted_at: string | null
+          invitation_sent_at: string | null
+          invitation_status: string | null
           recommendation: string | null
           review_file_url: string | null
+          review_round: number | null
           reviewer_id: string | null
           submission_id: string | null
           submitted_at: string | null
@@ -212,10 +447,17 @@ export type Database = {
         Insert: {
           comments_to_author?: string | null
           comments_to_editor?: string | null
+          conflict_of_interest_declared?: boolean | null
+          conflict_of_interest_details?: string | null
           created_at?: string | null
+          deadline_date?: string | null
           id?: string
+          invitation_accepted_at?: string | null
+          invitation_sent_at?: string | null
+          invitation_status?: string | null
           recommendation?: string | null
           review_file_url?: string | null
+          review_round?: number | null
           reviewer_id?: string | null
           submission_id?: string | null
           submitted_at?: string | null
@@ -224,10 +466,17 @@ export type Database = {
         Update: {
           comments_to_author?: string | null
           comments_to_editor?: string | null
+          conflict_of_interest_declared?: boolean | null
+          conflict_of_interest_details?: string | null
           created_at?: string | null
+          deadline_date?: string | null
           id?: string
+          invitation_accepted_at?: string | null
+          invitation_sent_at?: string | null
+          invitation_status?: string | null
           recommendation?: string | null
           review_file_url?: string | null
+          review_round?: number | null
           reviewer_id?: string | null
           submission_id?: string | null
           submitted_at?: string | null
@@ -250,8 +499,44 @@ export type Database = {
           },
         ]
       }
+      revision_requests: {
+        Row: {
+          created_at: string
+          deadline_date: string | null
+          id: string
+          request_details: string
+          requested_by: string
+          revision_type: string
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deadline_date?: string | null
+          id?: string
+          request_details: string
+          requested_by: string
+          revision_type: string
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deadline_date?: string | null
+          id?: string
+          request_details?: string
+          requested_by?: string
+          revision_type?: string
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_by_editor: boolean | null
           article_id: string | null
           cover_letter: string | null
           editor_notes: string | null
@@ -264,6 +549,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_editor?: boolean | null
           article_id?: string | null
           cover_letter?: string | null
           editor_notes?: string | null
@@ -276,6 +564,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_by_editor?: boolean | null
           article_id?: string | null
           cover_letter?: string | null
           editor_notes?: string | null

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Plus, Calendar, User } from 'lucide-react';
+import { RejectionMessages } from '@/components/messages/RejectionMessages';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -211,6 +212,12 @@ export const Dashboard = () => {
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                     {submission.articles.abstract}
                   </p>
+                  
+                  {submission.status === 'rejected' && (
+                    <div className="mb-4">
+                      <RejectionMessages submissionId={submission.id} />
+                    </div>
+                  )}
                   
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">

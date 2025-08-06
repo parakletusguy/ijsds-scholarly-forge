@@ -20,7 +20,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="/submission-guidelines" className="hover:text-foreground transition-colors">Submission Guidelines</a></li>
               <li><a href="/peer-review" className="hover:text-foreground transition-colors">Peer Review Process</a></li>
-              <li><a href="/copyright" className="hover:text-foreground transition-colors">Copyright Policy</a></li>
+              <li><a href="/copyright" className="hover:text-foreground transition-colors">Copyright Notice</a></li>
             </ul>
           </div>
 
@@ -38,7 +38,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>Email: editor@ijsds.org</li>
               <li>Phone: +1 (555) 123-4567</li>
-              <li>ISSN: 2309-1045</li>
+              <li>ISSN: 3027-3075</li>
             </ul>
           </div>
         </div>

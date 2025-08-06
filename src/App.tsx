@@ -14,8 +14,16 @@ import { ReviewAssignment } from "./pages/ReviewAssignment";
 import { ReviewerDashboard } from "./pages/ReviewerDashboard";
 import { ReviewForm } from "./pages/ReviewForm";
 import { Publication } from "./pages/Publication";
+import { Production } from "./pages/Production";
+import { Analytics } from "./pages/Analytics";
 import { Profile } from "./pages/Profile";
 import { About } from "./pages/About";
+import Copyright from "./pages/Copyright";
+import EditorialBoard from "./pages/EditorialBoard";
+import { SubmissionGuidelines } from "./pages/SubmissionGuidelines";
+import { PeerReview } from "./pages/PeerReview";
+import { ExternalIntegrations } from "./pages/ExternalIntegrations";
+import { DataManagement } from "./pages/DataManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,9 +45,17 @@ const App = () => (
             <Route path="/review-assignment/:submissionId" element={<ReviewAssignment />} />
             <Route path="/reviewer-dashboard" element={<ReviewerDashboard />} />
             <Route path="/review/:reviewId" element={<ReviewForm />} />
-            <Route path="/publication" element={<Publication />} />
+          <Route path="/publication" element={<Publication />} />
+          <Route path="/production" element={<Production />} />
+          <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/about" element={<About />} />
+            <Route path="/copyright" element={<Copyright />} />
+            <Route path="/editorial-board" element={<EditorialBoard />} />
+            <Route path="/submission-guidelines" element={<SubmissionGuidelines />} />
+            <Route path="/peer-review" element={<PeerReview />} />
+          <Route path="/external-integrations" element={<ExternalIntegrations />} />
+          <Route path="/data-management" element={<DataManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { BookOpen, User, LogOut, FileText, Settings } from 'lucide-react';
+import { BookOpen, User, LogOut, FileText, Settings, BarChart3, Database } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,6 +89,22 @@ export const Header = () => {
                 <DropdownMenuItem onClick={() => navigate('/publication')}>
                   <FileText className="h-4 w-4 mr-2" />
                   Publication
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/production')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Production
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/external-integrations')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  External Integrations
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/data-management')}>
+                  <Database className="h-4 w-4 mr-2" />
+                  Data Management
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/analytics')}>
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Analytics
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="h-4 w-4 mr-2" />

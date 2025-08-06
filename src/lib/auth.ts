@@ -7,7 +7,7 @@ export interface AuthState {
   loading: boolean;
 }
 
-export const signUp = async (email: string, password: string, fullName: string) => {
+export const signUp = async (email: string, password: string, fullName: string, roles: { is_editor?: boolean; is_reviewer?: boolean } = {}) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -15,6 +15,8 @@ export const signUp = async (email: string, password: string, fullName: string) 
       emailRedirectTo: `${window.location.origin}/`,
       data: {
         full_name: fullName,
+        is_editor: roles.is_editor || false,
+        is_reviewer: roles.is_reviewer || false,
       }
     }
   });
