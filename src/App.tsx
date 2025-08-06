@@ -26,6 +26,7 @@ import { PeerReview } from "./pages/PeerReview";
 import { ExternalIntegrations } from "./pages/ExternalIntegrations";
 import { DataManagement } from "./pages/DataManagement";
 import { SubmissionDetail } from "./pages/SubmissionDetail";
+import { Reports } from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/submission-guidelines" element={<SubmissionGuidelines />} />
               <Route path="/peer-review" element={<PeerReview />} />
               <Route path="/external-integrations" element={<ExternalIntegrations />} />
+              <Route path="/reports" element={<Reports />} />
               <Route path="/submission/:submissionId/details" element={<SubmissionDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

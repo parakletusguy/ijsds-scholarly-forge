@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { HelpSystem } from '@/components/help/HelpSystem';
 import { BookOpen, User, LogOut, FileText, Settings, BarChart3, Database } from 'lucide-react';
 import {
   DropdownMenu,
@@ -61,6 +62,7 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-2">
+          <HelpSystem />
           {loading ? (
             <div className="h-10 w-20 bg-muted animate-pulse rounded" />
           ) : user ? (

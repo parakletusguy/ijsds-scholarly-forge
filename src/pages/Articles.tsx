@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AdvancedSearch, SearchFilters } from '@/components/search/AdvancedSearch';
+import { EnhancedSearch, SearchFilters } from '@/components/search/EnhancedSearch';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Calendar, User, FileText } from 'lucide-react';
@@ -66,12 +66,12 @@ export const Articles = () => {
         query = query.or(`title.ilike.%${filters.query}%,abstract.ilike.%${filters.query}%`);
       }
 
-      if (filters.subjectArea) {
-        query = query.eq('subject_area', filters.subjectArea);
+      if (filters.subjectArea && filters.subjectArea.length > 0) {
+        query = query.in('subject_area', filters.subjectArea);
       }
 
-      if (filters.status && filters.status !== 'published') {
-        query = query.eq('status', filters.status);
+      if (filters.status && filters.status.length > 0 && !filters.status.includes('published')) {
+        query = query.in('status', filters.status);
       }
 
       if (filters.dateFrom) {
@@ -157,7 +157,12 @@ export const Articles = () => {
             </p>
           </div>
 
-          <AdvancedSearch onSearch={handleSearch} loading={searching} />
+          <EnhancedSearch 
+            onSearch={(filters, sort, fuzzy) => handleSearch(filters)} 
+            results={filteredArticles as any[]}
+            loading={searching}
+            totalResults={filteredArticles.length}
+          />
 
           {filteredArticles.length === 0 ? (
             <Card>
