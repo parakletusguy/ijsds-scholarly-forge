@@ -50,7 +50,8 @@ const App = () => (
               <Route path="/review/:reviewId" element={<ReviewForm />} />
               <Route path="/publication" element={<Publication />} />
               <Route path="/production" element={<Production />} />
-              <Route path="/analytics" element={<Analytics />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/data-management" element={<DataManagement />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/about" element={<About />} />
               <Route path="/copyright" element={<Copyright />} />
@@ -58,7 +59,6 @@ const App = () => (
               <Route path="/submission-guidelines" element={<SubmissionGuidelines />} />
               <Route path="/peer-review" element={<PeerReview />} />
               <Route path="/external-integrations" element={<ExternalIntegrations />} />
-              <Route path="/data-management" element={<DataManagement />} />
               <Route path="/submission/:submissionId/details" element={<SubmissionDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

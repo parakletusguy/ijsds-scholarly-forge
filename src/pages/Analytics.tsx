@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Calendar, Clock, FileText, Users, TrendingUp, Award } from 'lucide-react';
+import { PerformanceDashboard } from '@/components/analytics/PerformanceDashboard';
 
 interface AnalyticsData {
   editorialPerformance: {
@@ -340,11 +341,12 @@ export const Analytics = () => {
       </div>
 
       <Tabs defaultValue="editorial" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="editorial">Editorial Performance</TabsTrigger>
           <TabsTrigger value="reviews">Review Metrics</TabsTrigger>
           <TabsTrigger value="acceptance">Acceptance Rates</TabsTrigger>
           <TabsTrigger value="publication">Publication Stats</TabsTrigger>
+          <TabsTrigger value="dashboard">Performance Dashboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="editorial" className="space-y-6">
@@ -646,6 +648,10 @@ export const Analytics = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="dashboard">
+          <PerformanceDashboard />
         </TabsContent>
       </Tabs>
     </div>

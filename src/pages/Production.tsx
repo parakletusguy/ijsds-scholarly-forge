@@ -13,6 +13,7 @@ import { TypesettingIntegration } from '@/components/production/TypesettingInteg
 import { PDFGeneration } from '@/components/production/PDFGeneration';
 import { IssueCompilation } from '@/components/production/IssueCompilation';
 import { FileText, Edit3, Eye, Layout, Download, BookOpen } from 'lucide-react';
+import { AutomatedReviewerMatchingInterface } from '@/components/workflow/AutomatedReviewerMatchingInterface';
 
 interface Article {
   id: string;
@@ -163,7 +164,7 @@ export const Production = () => {
           <div className="lg:col-span-2">
             {selectedArticle ? (
               <Tabs defaultValue="copyediting" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="copyediting" className="flex items-center gap-2">
                     <Edit3 className="h-4 w-4" />
                     Copyedit
@@ -183,6 +184,10 @@ export const Production = () => {
                   <TabsTrigger value="issues" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Issues
+                  </TabsTrigger>
+                  <TabsTrigger value="workflow" className="flex items-center gap-2">
+                    <Layout className="h-4 w-4" />
+                    Workflow
                   </TabsTrigger>
                 </TabsList>
 
@@ -218,6 +223,17 @@ export const Production = () => {
                   <IssueCompilation 
                     article={selectedArticle} 
                     onUpdate={fetchProductionArticles}
+                  />
+                </TabsContent>
+
+                <TabsContent value="workflow">
+                  <AutomatedReviewerMatchingInterface 
+                    articleData={{
+                      title: selectedArticle.title,
+                      abstract: selectedArticle.abstract,
+                      keywords: [],
+                      subject_area: ''
+                    }}
                   />
                 </TabsContent>
               </Tabs>
