@@ -33,7 +33,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="border-b border-border bg-background">
+    <header className="border-b border-border bg-background md:p-2">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
           <BookOpen className="h-8 w-8 text-primary" />
@@ -102,8 +102,8 @@ export const Header = () => {
             </DropdownMenu>
             </div>
           ) : (
-            <div className="space-x-2">
-              <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
+            <div className="sm:space-x-2 my-3 sm:my-0">
+              <Button variant="outline" className='my-2 sm:my-0' size="sm" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
               <Button size="sm" onClick={() => navigate('/auth?mode=signup')}>
