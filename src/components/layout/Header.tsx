@@ -33,7 +33,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="border-b border-border bg-background md:p-2">
+    <header className="border-b border-border bg-background md:p-2 md:py-0">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
           <BookOpen className="h-8 w-8 text-primary" />

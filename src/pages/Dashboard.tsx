@@ -7,6 +7,8 @@ import { FileText, Plus, Calendar, User } from 'lucide-react';
 import { RejectionMessages } from '@/components/messages/RejectionMessages';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 interface Submission {
   id: string;
@@ -95,6 +97,7 @@ export const Dashboard = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
+        
         <div className="space-y-6">
           <div className="h-8 bg-muted animate-pulse rounded" />
           <div className="h-32 bg-muted animate-pulse rounded" />
@@ -119,7 +122,8 @@ export const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
+      <Header/>
+      <div className="space-y-6  mt-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -237,6 +241,7 @@ export const Dashboard = () => {
           )}
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };
