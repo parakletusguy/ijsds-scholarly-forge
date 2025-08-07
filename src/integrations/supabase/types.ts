@@ -633,6 +633,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_review_quality_score: {
+        Args: { _review_id: string }
+        Returns: number
+      }
+      find_potential_reviewers: {
+        Args: {
+          _submission_id: string
+          _subject_area: string
+          _keywords: string[]
+          _limit?: number
+        }
+        Returns: {
+          reviewer_id: string
+          match_score: number
+          profile_data: Json
+        }[]
+      }
+      get_editorial_analytics: {
+        Args: { _start_date?: string; _end_date?: string }
+        Returns: Json
+      }
       validate_status_transition: {
         Args: { old_status: string; new_status: string; user_role: string }
         Returns: boolean
