@@ -72,12 +72,6 @@ verify_jwt = false
 [functions.oai-pmh-endpoint]
 verify_jwt = false
 
-[functions.realtime-notifications]
-verify_jwt = false
-
-[functions.system-backup]
-verify_jwt = false
-
 [edge_runtime]
 enabled = true
 port = 54330
