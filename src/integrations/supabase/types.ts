@@ -595,12 +595,48 @@ export type Database = {
           },
         ]
       }
+      workflow_audit_log: {
+        Row: {
+          change_reason: string | null
+          changed_by: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_status: string
+          old_status: string | null
+          submission_id: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status: string
+          old_status?: string | null
+          submission_id: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string
+          old_status?: string | null
+          submission_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_status_transition: {
+        Args: { old_status: string; new_status: string; user_role: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
