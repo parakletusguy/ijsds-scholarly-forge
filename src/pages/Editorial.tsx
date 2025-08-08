@@ -15,6 +15,7 @@ import { ApproveSubmissionDialog } from '@/components/editor/ApproveSubmissionDi
 import { ReviewerInvitationDialog } from '@/components/editor/ReviewerInvitationDialog';
 import { DeskRejectDialog } from '@/components/editor/DeskRejectDialog';
 import { RevisionRequestDialog } from '@/components/editor/RevisionRequestDialog';
+import { SystemVerification } from '@/components/testing/SystemVerification';
 import { useNavigate } from 'react-router-dom';
 
 interface Submission {
@@ -225,6 +226,11 @@ export const Editorial = () => {
               <div className="text-2xl font-bold">{completedSubmissions.length}</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* System Health Check - shown to editors */}
+        <div className="mb-8">
+          <SystemVerification />
         </div>
 
         <Tabs defaultValue="pending" className="space-y-6">
