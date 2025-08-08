@@ -595,12 +595,69 @@ export type Database = {
           },
         ]
       }
+      workflow_audit_log: {
+        Row: {
+          change_reason: string | null
+          changed_by: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_status: string
+          old_status: string | null
+          submission_id: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status: string
+          old_status?: string | null
+          submission_id: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string
+          old_status?: string | null
+          submission_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_review_quality_score: {
+        Args: { _review_id: string }
+        Returns: number
+      }
+      find_potential_reviewers: {
+        Args: {
+          _submission_id: string
+          _subject_area: string
+          _keywords: string[]
+          _limit?: number
+        }
+        Returns: {
+          reviewer_id: string
+          match_score: number
+          profile_data: Json
+        }[]
+      }
+      get_editorial_analytics: {
+        Args: { _start_date?: string; _end_date?: string }
+        Returns: Json
+      }
+      validate_status_transition: {
+        Args: { old_status: string; new_status: string; user_role: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
