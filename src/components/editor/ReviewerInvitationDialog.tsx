@@ -94,21 +94,23 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
 
       if (reviewError) throw reviewError;
 
+      //activate back after fixing brevo issues
+      
       // Send email invitation
-      const emailContent = generateReviewInvitationEmail(
-        selectedReviewer.full_name,
-        submissionTitle,
-        new Date(deadlineDate).toLocaleDateString()
-      );
+      // const emailContent = generateReviewInvitationEmail(
+      //   selectedReviewer.full_name,
+      //   submissionTitle,
+      //   new Date(deadlineDate).toLocaleDateString()
+      // );
 
-      await sendEmailNotification({
-        to: selectedReviewer.email,
-        subject: `Review Invitation: ${submissionTitle}`,
-        htmlContent: emailContent,
-        type: 'review_invitation',
-        userId: selectedReviewerId,
-        submissionId: submissionId,
-      });
+      // await sendEmailNotification({
+      //   to: selectedReviewer.email,
+      //   subject: `Review Invitation: ${submissionTitle}`,
+      //   htmlContent: emailContent,
+      //   type: 'review_invitation',
+      //   userId: selectedReviewerId,
+      //   submissionId: submissionId,
+      // });
 
       toast({
         title: 'Invitation Sent',
