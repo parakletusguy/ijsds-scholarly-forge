@@ -241,10 +241,10 @@ export const Publication = () => {
                           onChange={(e) => setPublicationData(prev => ({ ...prev, doi: e.target.value }))}
                           placeholder="10.1234/journal.2024.123456"
                         />
-                        <Button variant="outline" onClick={generateDOI}>
+                        {/* <Button variant="outline" onClick={generateDOI}>
                           <Globe className="h-4 w-4 mr-2" />
                           Generate
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
 
