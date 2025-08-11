@@ -36,14 +36,20 @@ export const FileUpload = ({
       }
 
       // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = folder ? `${folder}/${fileName}` : fileName;
+      // const fileExt = file.name.split('.').pop();
+      const fileExt = file.name
+      // const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      // const filePath = folder ? `${folder}/${fileName}` : fileName;
+      const filePath = fileExt
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .upload(filePath, file);
+        .upload(filePath, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type // ✅ preserves correct MIME type
+  });
 
       if (error) throw error;
 
