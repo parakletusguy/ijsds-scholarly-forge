@@ -251,6 +251,19 @@ export const Profile = () => {
                 </div>
               </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                <CardTitle>Role</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <p className='text-sm'>
+                  {
+                    formData.isEditor?"Editor":
+                    formData.isReviewer?"Reviewer":"Author"
+                  }
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Roles */}
             {/* <Card>
