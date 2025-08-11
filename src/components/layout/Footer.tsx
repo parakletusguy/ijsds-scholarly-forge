@@ -44,7 +44,7 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 International Journal for Social Work and Development Studies. All rights reserved.</p>
+          <p>&copy; 2025 International Journal for Social Work and Development Studies. All rights reserved.</p>
         </div>
       </div>
     </footer>
