@@ -10,7 +10,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const brevoApiKey = Deno.env.get('BREVO_API_KEY')!;
+const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -26,25 +26,24 @@ interface EmailRequest {
   reviewId?: string;
 }
 
-const sendBrevoEmail = async (emailData: EmailRequest) => {
-  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+const sendResendEmail = async (emailData: EmailRequest) => {
+  const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'Accept': 'application/json',
+      'Authorization': `Bearer ${resendApiKey}`,
       'Content-Type': 'application/json',
-      'api-key': brevoApiKey,
     },
     body: JSON.stringify({
-      sender: { name: 'IJSDS', email: 'editor.ijsds@gmail.com' },
-      to: [{ email: emailData.to }],
+      from: 'IJSDS <editor.ijsds@gmail.com>', // Must be a verified sender in Resend
+      to: [emailData.to],
       subject: emailData.subject,
-      htmlContent: emailData.htmlContent,
+      html: emailData.htmlContent,
     }),
   });
 
-  if (!response.ok) {
+    if (!response.ok) {
     const error = await response.text();
-    console.error('Brevo API error:', error);
+    console.error('Resend API error:', error);
     throw new Error(`Failed to send email: ${error}`);
   }
 
@@ -77,7 +76,7 @@ serve(async (req) => {
     const emailData: EmailRequest = await req.json();
     console.log('Sending email notification:', emailData);
 
-    const result = await sendBrevoEmail(emailData);
+    const result = await sendResendEmail(emailData);
     await logEmailNotification(emailData);
 
     console.log('Email sent successfully:', result);

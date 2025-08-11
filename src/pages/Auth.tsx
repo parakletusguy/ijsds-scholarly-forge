@@ -83,7 +83,13 @@ export const Auth = () => {
   const handleOrcidLogin = async () => {
     setLoading(true);
     try {
-      const { error } = await signInWithOrcid();
+      // const { error } = await signInWithOrcid();
+      const client_id = "APP-GKE87FTH6QV1ZK9D"
+      const redirect = encodeURIComponent("https://ijsdsbackend.onrender.com/auth/orcid")
+      window.location.href = `https://orcid.org/oauth/authorize?client_id=${client_id}&response_type=code&scope=/authenticate&redirect_uri=${redirect}`
+    
+      
+    } catch (error) {
       if (error) {
         toast({
           title: 'Error',
@@ -91,7 +97,6 @@ export const Auth = () => {
           variant: 'destructive',
         });
       }
-    } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to sign in with ORCID',

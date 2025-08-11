@@ -230,7 +230,7 @@ export const Dashboard = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => navigate(`/submission/${submission.id}`)}
+                      onClick={() => navigate(`/submission/${submission.id}/details`)}
                     >
                       View Details
                     </Button>
