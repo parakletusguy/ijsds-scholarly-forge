@@ -8,6 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Calendar, User, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { PaperDownload } from '@/components/papers/PaperDownload';
 
 interface Article {
   id: string;
@@ -21,6 +22,7 @@ interface Article {
   volume: number | null;
   issue: number | null;
   subject_area: string | null;
+  manuscript_file_url: string | null
 }
 
 export const Articles = () => {
@@ -235,13 +237,17 @@ export const Articles = () => {
                           <span>DOI: {article.doi}</span>
                         )}
                       </div>
-                      <Button 
+                      {/* <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => navigate(`/article/${article.id}`)}
                       >
                         Read Article
-                      </Button>
+                      </Button> */}
+                        <PaperDownload 
+                                manuscriptFileUrl={article.manuscript_file_url}
+                              title={article.title}
+                              />
                     </div>
                   </CardContent>
                 </Card>
