@@ -253,7 +253,7 @@ export const Profile = () => {
             </Card>
 
             {/* Roles */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Journal Roles</CardTitle>
               </CardHeader>
@@ -286,7 +286,7 @@ export const Profile = () => {
                   />
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Save Button */}
             <Button 
