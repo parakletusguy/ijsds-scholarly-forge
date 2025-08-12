@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { HelpSystem } from '@/components/help/HelpSystem';
 import { BookOpen, User, LogOut, FileText, Settings, BarChart3, Database } from 'lucide-react';
-import icon from "../../../public/favicon.ico"
+import icon from "../../../public/WhatsApp_Image_2025-08-12_at_1.50.31_PM-removebg-preview.png"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +39,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
           {/* <BookOpen className="h-8 w-8 text-primary" /> */}
-          <img src={icon} alt="ijsds_icon" /> 
+          <img src={icon} alt="ijsds_icon" className='w-[50px] md:w-[100px]'/> 
           <div>
             <h1 className="text-2xl font-bold text-foreground">IJSDS</h1>
             <p className="text-sm text-muted-foreground">International Journal for Social Work and Development Studies</p>
@@ -64,10 +64,14 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-2">
-          <HelpSystem />
+            <div className='hidden md:block'>
+              <HelpSystem />
+            </div>
           {loading ? (
             <div className="h-10 w-20 bg-muted animate-pulse rounded" />
           ) : user ? (
+            <div className='flex flex-col items-center justify-center space-y-2'>
+              <HelpSystem />
             <div className="flex items-center gap-2">
               <NotificationBell />
               <DropdownMenu>
@@ -121,8 +125,12 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             </div>
+            </div>
           ) : (
             <div className="sm:space-x-2 my-3 sm:my-0">
+              <div className='md:hidden'>
+                <HelpSystem />
+              </div>
               <Button variant="outline" className='my-2 sm:my-0' size="sm" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
