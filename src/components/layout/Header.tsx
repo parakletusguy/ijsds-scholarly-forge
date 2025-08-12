@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { HelpSystem } from '@/components/help/HelpSystem';
 import { BookOpen, User, LogOut, FileText, Settings, BarChart3, Database } from 'lucide-react';
+import icon from "../../../public/favicon.ico"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +38,8 @@ export const Header = () => {
     <header className="border-b border-border bg-background md:p-2 md:py-0">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-          <BookOpen className="h-8 w-8 text-primary" />
+          {/* <BookOpen className="h-8 w-8 text-primary" /> */}
+          <img src={icon} alt="ijsds_icon" /> 
           <div>
             <h1 className="text-2xl font-bold text-foreground">IJSDS</h1>
             <p className="text-sm text-muted-foreground">International Journal for Social Work and Development Studies</p>
