@@ -71,7 +71,9 @@ export const Header = () => {
             <div className="h-10 w-20 bg-muted animate-pulse rounded" />
           ) : user ? (
             <div className='flex flex-col items-center justify-center space-y-2'>
-              <HelpSystem />
+              <div className='md:hidden'>
+                <HelpSystem />
+              </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
               <DropdownMenu>
