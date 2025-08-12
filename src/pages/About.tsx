@@ -6,9 +6,10 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-const navigate = useNavigate()
+
 
 export const About = () => {
+  const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-background">
       <Header/>

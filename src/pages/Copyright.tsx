@@ -4,8 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
-const navigate = useNavigate()
+
 const Copyright = () => {
+  const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
