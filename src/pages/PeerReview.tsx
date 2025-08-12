@@ -3,9 +3,12 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Users, Clock, CheckCircle, XCircle, RotateCcw } from "lucide-react";
+import { Eye, Users, Clock, CheckCircle, XCircle, RotateCcw, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export const PeerReview = () => {
+  const navigate  = useNavigate()
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -18,6 +21,14 @@ export const PeerReview = () => {
               Our rigorous double-blind peer review ensures the highest quality publications
             </p>
           </div>
+          <Button 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                      className="mb-4"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </Button>
 
           <div className="grid gap-6">
             <Card>

@@ -7,10 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DataExport } from '@/components/reporting/DataExport';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Database, Shield, FileText, Activity } from 'lucide-react';
+import { Database, Shield, FileText, Activity, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const DataManagement = () => {
   const { user } = useAuth();
+  const navigate = useNavigate()
 
   const systemStats = {
     totalSubmissions: 245,
@@ -26,6 +28,14 @@ export const DataManagement = () => {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
+             <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <h1 className="text-3xl font-bold mb-2">Data Management</h1>
           <p className="text-muted-foreground">
             Export data, generate reports, and monitor system health

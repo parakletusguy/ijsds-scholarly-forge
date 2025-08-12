@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus, Upload, Save } from 'lucide-react';
+import { X, Plus, Upload, Save, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -298,6 +298,14 @@ export const Submit = () => {
                 Submit your research article for peer review and publication in IJSDS
               </p>
             </div>
+            <Button 
+                        variant="outline" 
+                        onClick={() => navigate(-1)}
+                        className="mb-4"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back
+                      </Button>
             
             {/* Auto-save status indicator */}
             <div className="text-sm text-muted-foreground flex items-center gap-2">

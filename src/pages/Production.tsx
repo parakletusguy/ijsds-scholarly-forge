@@ -12,8 +12,10 @@ import { ProofreadingSystem } from '@/components/production/ProofreadingSystem';
 import { TypesettingIntegration } from '@/components/production/TypesettingIntegration';
 import { PDFGeneration } from '@/components/production/PDFGeneration';
 import { IssueCompilation } from '@/components/production/IssueCompilation';
-import { FileText, Edit3, Eye, Layout, Download, BookOpen } from 'lucide-react';
+import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft } from 'lucide-react';
 import { AutomatedReviewerMatchingInterface } from '@/components/workflow/AutomatedReviewerMatchingInterface';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface Article {
   id: string;
@@ -88,6 +90,8 @@ export const Production = () => {
     return 'Unknown Author';
   };
 
+  const navigate = useNavigate()
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -112,6 +116,14 @@ export const Production = () => {
             Manage copyediting, proofreading, typesetting, and final production of accepted articles
           </p>
         </div>
+        <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Articles List */}

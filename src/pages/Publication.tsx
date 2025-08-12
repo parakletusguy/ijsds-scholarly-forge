@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Calendar, FileText, Globe, Save } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Globe, Save } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 interface Article {
   id: string;
@@ -46,6 +47,7 @@ export const Publication = () => {
     pageEnd: '',
     publicationDate: '',
   });
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchAcceptedArticles();
@@ -165,6 +167,15 @@ export const Publication = () => {
             Manage the final publication of accepted articles
           </p>
         </div>
+
+    <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Articles List */}
