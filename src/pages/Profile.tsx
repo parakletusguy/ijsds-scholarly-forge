@@ -10,7 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { User, Mail, Building, Link, Save } from 'lucide-react';
+import { User, Mail, Building, Link, Save, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -29,6 +30,7 @@ export const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -161,6 +163,14 @@ export const Profile = () => {
               Manage your personal information and academic profile
             </p>
           </div>
+          <Button 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                      className="mb-4"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </Button>
 
           <div className="space-y-6">
             {/* Personal Information */}

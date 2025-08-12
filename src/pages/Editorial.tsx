@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Users, Clock, CheckCircle2 } from 'lucide-react';
+import { FileText, Users, Clock, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
 import { ApproveSubmissionDialog } from '@/components/editor/ApproveSubmissionDialog';
@@ -181,6 +181,14 @@ export const Editorial = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
+           <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Editorial Dashboard</h1>
           <p className="text-muted-foreground">Manage journal submissions and reviews</p>

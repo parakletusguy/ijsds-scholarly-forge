@@ -1,8 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Target, Eye, Users, TrendingUp, Globe, Award, Network } from 'lucide-react';
+import { BookOpen, Target, Eye, Users, TrendingUp, Globe, Award, Network, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
+const navigate = useNavigate()
 
 export const About = () => {
   return (
@@ -18,6 +22,14 @@ export const About = () => {
               <p className="text-xl text-muted-foreground">International Journal On Social Work and Development Studies</p>
             </div>
           </div>
+             <Button 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                      className="mb-4"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </Button>
           
           <div className="max-w-4xl mx-auto">
             <p className="text-lg text-muted-foreground mb-6">

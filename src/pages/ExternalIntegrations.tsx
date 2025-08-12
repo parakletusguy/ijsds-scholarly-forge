@@ -23,8 +23,10 @@ import {
   Download,
   Monitor,
   AlertTriangle,
-  Info
+  Info,
+  ArrowLeft
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface IntegrationStatus {
   doaj: {
@@ -65,6 +67,7 @@ export const ExternalIntegrations = () => {
   });
 
   const [submissionHistory, setSubmissionHistory] = useState([]);
+  const navigate = useNavigate()
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -178,6 +181,14 @@ export const ExternalIntegrations = () => {
             Manage integrations with DOAJ, AJOL, and other journal directories
           </p>
         </div>
+        <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>

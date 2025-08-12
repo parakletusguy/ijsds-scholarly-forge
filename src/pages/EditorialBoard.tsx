@@ -1,5 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+
 
 const EditorialBoard = () => {
   const boardMembers = [
@@ -14,6 +18,7 @@ const EditorialBoard = () => {
     { name: "Professor Uranta Daniel", role: "Editorial Board Member" },
     { name: "Professor T. Adolphus", role: "Editorial Board Member" },
   ];
+  const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-background">
@@ -27,6 +32,14 @@ const EditorialBoard = () => {
             International Journal of Social Work and Development Studies
           </p>
         </div>
+        <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
       </section>
 
       {/* Editorial Board Content */}

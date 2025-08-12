@@ -1,5 +1,10 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
+
+const navigate = useNavigate()
 const Copyright = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -13,6 +18,14 @@ const Copyright = () => {
             International Journal of Social Work and Development Studies
           </p>
         </div>
+           <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
       </section>
 
       {/* Copyright Notice Content */}

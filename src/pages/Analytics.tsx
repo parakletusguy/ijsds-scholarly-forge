@@ -6,8 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Calendar, Clock, FileText, Users, TrendingUp, Award } from 'lucide-react';
+import { Calendar, Clock, FileText, Users, TrendingUp, Award, ArrowLeft } from 'lucide-react';
 import { PerformanceDashboard } from '@/components/analytics/PerformanceDashboard';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface AnalyticsData {
   editorialPerformance: {
@@ -42,6 +44,7 @@ export const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isEditor, setIsEditor] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!user) return;
@@ -335,6 +338,14 @@ export const Analytics = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+         <Button 
+                  variant="outline" 
+                  onClick={() => navigate(-1)}
+                  className="mb-4"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Analytics & Reports</h1>
         <p className="text-muted-foreground">Comprehensive insights into journal performance and editorial metrics</p>

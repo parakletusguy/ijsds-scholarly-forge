@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileText, Clock, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { useNavigate } from 'react-router-dom';
 
@@ -147,6 +147,14 @@ export const ReviewerDashboard = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">Reviewer Dashboard</h1>
           <p className="text-muted-foreground">Manage your assigned reviews</p>
         </div>
+        <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { EnhancedSearch, SearchFilters } from '@/components/search/EnhancedSearch';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Calendar, User, FileText } from 'lucide-react';
+import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PaperDownload } from '@/components/papers/PaperDownload';
@@ -122,6 +122,14 @@ export const Articles = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <div className="flex-1 container mx-auto px-4 py-8">
+             <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <div className="space-y-6">
             <div className="h-8 bg-muted animate-pulse rounded" />
             <div className="h-12 bg-muted animate-pulse rounded" />
