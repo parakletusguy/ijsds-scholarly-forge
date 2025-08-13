@@ -34,7 +34,7 @@ const sendResendEmail = async (emailData: EmailRequest) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'IJSDS <editor.ijsds@gmail.com>', // Must be a verified sender in Resend
+      from: 'IJSDS <editor@ijsds.org>', // Must be a verified sender in Resend
       to: [emailData.to],
       subject: emailData.subject,
       html: emailData.htmlContent,
