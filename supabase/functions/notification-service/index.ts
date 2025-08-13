@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const brevoApiKey = Deno.env.get('BREVO_API_KEY')!;
+const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -92,8 +92,8 @@ const emailTemplates = {
 };
 
 const sendEmailNotification = async (userEmail: string, template: string, data: Record<string, any>) => {
-  if (!brevoApiKey) {
-    console.log('Brevo API key not configured, skipping email');
+  if (!resendApiKey) {
+    console.log('Resend API key not configured, skipping email');
     return;
   }
 
@@ -113,27 +113,24 @@ const sendEmailNotification = async (userEmail: string, template: string, data: 
       htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), String(value));
     });
 
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const response = await fetch('https://api.resend.com/v3/smtp/emails', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'api-key': brevoApiKey,
+        'api-key': resendApiKey,
       },
       body: JSON.stringify({
-        sender: { 
-          name: 'International Journal of Social Work and Development Studies', 
-          email: 'noreply@ijsds.com' 
-        },
-        to: [{ email: userEmail }],
-        subject,
-        htmlContent,
+    from: 'International Journal of Social Work and Development Studies <noreply@ijsds.org>',
+    to: [userEmail],
+    subject,
+    html: htmlContent,
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Brevo API error:', error);
+      console.error('Resend API error:', error);
       throw new Error(`Failed to send email: ${error}`);
     }
 
