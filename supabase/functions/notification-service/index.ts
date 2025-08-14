@@ -18,25 +18,204 @@ interface NotificationRequest {
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   emailNotification?: boolean;
-  emailTemplate?: 'submission_received' | 'review_assigned' | 'decision_made' | 'article_published';
+  emailTemplate?: 'user_welcome' | 'author_welcome' | 'submission_received' | 'fee_information' | 'review_assigned' | 'decision_made' | 'article_published';
   emailData?: Record<string, any>;
 }
 
 const emailTemplates = {
+  user_welcome: {
+    subject: 'Welcome to International Journal of Social Work and Development Studies',
+    content: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Welcome to IJSDS</h1>
+          <p style="color: #e2e8f0; margin: 10px 0 0 0; font-size: 16px;">International Journal of Social Work and Development Studies</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 24px;">Dear {{authorName}},</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+            Welcome to the International Journal of Social Work and Development Studies publishing platform! We're excited to have you join our community of researchers, scholars, and practitioners.
+          </p>
+          <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0;">
+            <h3 style="color: #1e293b; margin: 0 0 15px 0; font-size: 18px;">What's Next?</h3>
+            <ul style="color: #475569; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Complete your profile to enhance your academic presence</li>
+              <li style="margin-bottom: 8px;">Review our submission guidelines and editorial policies</li>
+              <li style="margin-bottom: 8px;">Explore our published articles and current calls for papers</li>
+              <li>Consider joining our reviewer community</li>
+            </ul>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{platformUrl}}/profile" style="background-color: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Complete Your Profile</a>
+          </div>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0;">
+            If you have any questions, please don't hesitate to contact our editorial team. We look forward to your contributions to social work research and development studies.
+          </p>
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Best regards,<br>
+              <strong>Editorial Team</strong><br>
+              International Journal of Social Work and Development Studies
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+  author_welcome: {
+    subject: 'Welcome to IJSDS - Author Onboarding',
+    content: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Author Welcome Guide</h1>
+          <p style="color: #a7f3d0; margin: 10px 0 0 0; font-size: 16px;">Your journey to publication starts here</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 24px;">Dear {{authorName}},</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+            Thank you for choosing IJSDS for your research publication. As a first-time author with us, we've prepared this guide to ensure a smooth submission process.
+          </p>
+          <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 18px;">📋 Submission Checklist</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Manuscript follows our formatting guidelines</li>
+              <li style="margin-bottom: 8px;">Abstract is between 150-250 words</li>
+              <li style="margin-bottom: 8px;">Keywords are relevant and specific (3-5 recommended)</li>
+              <li style="margin-bottom: 8px;">References follow APA 7th edition style</li>
+              <li>All co-authors have approved the submission</li>
+            </ul>
+          </div>
+          <div style="background-color: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #92400e; margin: 0 0 15px 0; font-size: 18px;">⏱️ Review Timeline</h3>
+            <p style="color: #374151; margin: 0; line-height: 1.6;">
+              <strong>Initial Review:</strong> 2-3 weeks<br>
+              <strong>Peer Review:</strong> 4-6 weeks<br>
+              <strong>Final Decision:</strong> 6-8 weeks total
+            </p>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{platformUrl}}/submission-guidelines" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block; margin-right: 15px;">View Guidelines</a>
+            <a href="{{platformUrl}}/submit" style="background-color: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Start Submission</a>
+          </div>
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Best regards,<br>
+              <strong>Editorial Team</strong><br>
+              International Journal of Social Work and Development Studies
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  },
   submission_received: {
     subject: 'Submission Received - {{title}}',
     content: `
-      <h2>Submission Received Successfully</h2>
-      <p>Dear {{authorName}},</p>
-      <p>Thank you for submitting your manuscript titled "<strong>{{title}}</strong>" to the International Journal of Social Work and Development Studies.</p>
-      <p><strong>Submission Details:</strong></p>
-      <ul>
-        <li>Submission ID: {{submissionId}}</li>
-        <li>Title: {{title}}</li>
-        <li>Submitted on: {{submissionDate}}</li>
-      </ul>
-      <p>Your manuscript will undergo an initial editorial review to ensure it meets our journal's scope and quality standards. You will be notified of our decision within 2-3 weeks.</p>
-      <p>Best regards,<br>Editorial Team<br>International Journal of Social Work and Development Studies</p>
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Submission Received</h1>
+          <p style="color: #ddd6fe; margin: 10px 0 0 0; font-size: 16px;">Your manuscript is now under initial review</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 24px;">Dear {{authorName}},</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+            Thank you for submitting your manuscript to the International Journal of Social Work and Development Studies. We have successfully received your submission and it has been assigned for initial editorial review.
+          </p>
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #1e293b; margin: 0 0 15px 0; font-size: 18px;">📄 Submission Details</h3>
+            <table style="width: 100%; color: #374151;">
+              <tr><td style="padding: 8px 0; font-weight: 500;">Submission ID:</td><td style="padding: 8px 0;">{{submissionId}}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: 500;">Title:</td><td style="padding: 8px 0;">{{title}}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: 500;">Submitted:</td><td style="padding: 8px 0;">{{submissionDate}}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: 500;">Status:</td><td style="padding: 8px 0;"><span style="background-color: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Under Initial Review</span></td></tr>
+            </table>
+          </div>
+          <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #0c4a6e; margin: 0 0 15px 0; font-size: 18px;">🔄 What Happens Next?</h3>
+            <ol style="color: #374151; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Initial editorial review (2-3 weeks)</li>
+              <li style="margin-bottom: 8px;">Peer review assignment (if approved)</li>
+              <li style="margin-bottom: 8px;">Review completion and editor decision</li>
+              <li>Notification of decision with reviewer feedback</li>
+            </ol>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{platformUrl}}/dashboard" style="background-color: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Track Your Submission</a>
+          </div>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0;">
+            You can track the progress of your submission through your author dashboard. We will notify you at each stage of the review process.
+          </p>
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Best regards,<br>
+              <strong>Editorial Team</strong><br>
+              International Journal of Social Work and Development Studies
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+  fee_information: {
+    subject: 'Publication Fees Information - {{title}}',
+    content: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Publication Fees</h1>
+          <p style="color: #fecaca; margin: 10px 0 0 0; font-size: 16px;">Transparent pricing for quality publishing</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 24px;">Dear {{authorName}},</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+            Your manuscript "<strong>{{title}}</strong>" has successfully passed our initial editorial review. We are pleased to move forward with the peer review process.
+          </p>
+          <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #991b1b; margin: 0 0 20px 0; font-size: 18px;">💳 Publication Fee Structure</h3>
+            <div style="background-color: white; border-radius: 6px; padding: 20px;">
+              <table style="width: 100%; color: #374151;">
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 12px 0; font-weight: 500;">Vetting Fee (Initial Review)</td>
+                  <td style="padding: 12px 0; text-align: right; font-weight: 600;">₦5,000</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; font-weight: 500;">Processing Fee (Upon Acceptance)</td>
+                  <td style="padding: 12px 0; text-align: right; font-weight: 600;">₦20,000</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 18px;">✅ What's Included</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Professional peer review process</li>
+              <li style="margin-bottom: 8px;">Editorial oversight and quality assurance</li>
+              <li style="margin-bottom: 8px;">Professional copyediting and proofreading</li>
+              <li style="margin-bottom: 8px;">DOI assignment and online publication</li>
+              <li style="margin-bottom: 8px;">Inclusion in academic databases</li>
+              <li>Open access publication with global reach</li>
+            </ul>
+          </div>
+          <div style="background-color: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #92400e; margin: 0 0 15px 0; font-size: 18px;">📋 Payment Information</h3>
+            <p style="color: #374151; margin: 0 0 15px 0; line-height: 1.6;">
+              The vetting fee is required to proceed with peer review. Payment instructions will be provided separately through your author dashboard.
+            </p>
+            <p style="color: #374151; margin: 0; line-height: 1.6;">
+              <strong>Note:</strong> The processing fee is only required upon acceptance for publication.
+            </p>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{platformUrl}}/dashboard" style="background-color: #dc2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Payment Details</a>
+          </div>
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Best regards,<br>
+              <strong>Editorial Team</strong><br>
+              International Journal of Social Work and Development Studies
+            </p>
+          </div>
+        </div>
+      </div>
     `,
   },
   review_assigned: {

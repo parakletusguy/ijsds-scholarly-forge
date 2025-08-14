@@ -29,6 +29,97 @@ export const sendEmailNotification = async (data: EmailNotificationData) => {
   }
 };
 
+// Welcome email for new users
+export const sendWelcomeEmail = async (userId: string, authorName: string, email: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Welcome to IJSDS',
+        message: 'Welcome to the International Journal of Social Work and Development Studies platform!',
+        type: 'info',
+        emailNotification: true,
+        emailTemplate: 'user_welcome',
+        emailData: {
+          authorName,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) {
+      console.error('Error sending welcome email:', error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+    throw error;
+  }
+};
+
+// Author-specific welcome email
+export const sendAuthorWelcomeEmail = async (userId: string, authorName: string, email: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Welcome to IJSDS - Author Guide',
+        message: 'Your complete guide to publishing with IJSDS',
+        type: 'info',
+        emailNotification: true,
+        emailTemplate: 'author_welcome',
+        emailData: {
+          authorName,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) {
+      console.error('Error sending author welcome email:', error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send author welcome email:', error);
+    throw error;
+  }
+};
+
+// Fee information email
+export const sendFeeInformationEmail = async (userId: string, authorName: string, title: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Publication Fees Information',
+        message: 'Information about publication fees for your submission',
+        type: 'info',
+        emailNotification: true,
+        emailTemplate: 'fee_information',
+        emailData: {
+          authorName,
+          title,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) {
+      console.error('Error sending fee information email:', error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send fee information email:', error);
+    throw error;
+  }
+};
+
 export const generateReviewInvitationEmail = (reviewerName: string, submissionTitle: string, deadline: string) => {
   return `
     <html>
