@@ -23,14 +23,14 @@ export const About = () => {
               <p className="text-xl text-muted-foreground">International Journal On Social Work and Development Studies</p>
             </div>
           </div>
-             <Button 
+             {/* <Button 
                       variant="outline" 
                       onClick={() => navigate(-1)}
                       className="mb-4"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
                       Back
-                    </Button>
+                    </Button> */}
           
           <div className="max-w-4xl mx-auto">
             <p className="text-lg text-muted-foreground mb-6">
