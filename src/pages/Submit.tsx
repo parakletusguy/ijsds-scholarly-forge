@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { FileUpload } from '@/components/file-management/FileUpload';
+import {PayDialog} from '@/components/submission/paystackDialogBox';
 
 interface Author {
   name: string;
@@ -40,6 +41,9 @@ export const Submit = () => {
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
+  const [open,setopen] = useState(false)
+  const [vet,setvet] = useState(false)
+
 
   // Load saved draft on mount
   useEffect(() => {
@@ -215,12 +219,18 @@ export const Submit = () => {
           funding_info: fundingInfo,
           conflicts_of_interest: conflictsOfInterest,
           manuscript_file_url: manuscriptFileUrl,
-          status: 'draft'
+          status: 'draft',
+          vetting_fee:vet
         })
         .select()
         .single();
 
       if (articleError) throw articleError;
+
+      // if(!vet){
+      //   setopen(true)
+      //   throw 'vetting fee not paid yet'
+      // }
 
       // Create submission
       const { error: submissionError } = await supabase
@@ -229,7 +239,8 @@ export const Submit = () => {
           article_id: articleData.id,
           submitter_id: user.id,
           cover_letter: coverLetter,
-          status: 'submitted'
+          status: 'submitted',
+          vetting_fee:vet
         });
 
       if (submissionError) throw submissionError;
@@ -268,6 +279,54 @@ export const Submit = () => {
       setLoading(false);
     }
   };
+
+  const onSuccess = async (pReponse) => {
+    try {
+      console.log(pReponse.reference)
+      const transactionReference = pReponse.reference
+      const confirm = await fetch("http://localhost:4500/api/verify-payment",{
+        method:"POST",
+        headers:{ 'Content-Type':'application/json'},
+        body:JSON.stringify({reference:transactionReference,amount:500000})
+      }) 
+      const {success,message,data} = await confirm.json()
+      console.log({success,message,data})
+      if(!success) throw "server error"
+      if(!data.status) throw "payment not verified"
+      if(data.amount != 500000) throw 'amount not equal'
+
+      setvet(true)
+
+      toast({
+          title:'payment successful',
+          description:`your payment has been successfully verified, kindly proceed to submit your article`
+        })
+    } catch (error) {
+      if(error){
+        console.log(error)
+
+        toast({
+          title:'payment failed',
+          description:`payment failed due to ${error}, please contact support or try again later`,
+          variant:'destructive'
+        })
+      }
+    }
+  }
+
+   const userData = {
+    email:correspondingAuthorEmail,
+    amount:500000,
+    metadata:{
+      name:name
+    },
+    onSuccess: (response) => onSuccess(response),
+    onClose:() => {    toast({
+        title: 'payment cancelled',
+        description: `you cancelled payment for the vet fee`,
+        variant: 'destructive',
+      });}
+  }
 
   if (!user) {
     return (
@@ -550,6 +609,7 @@ export const Submit = () => {
             <Button type="submit" disabled={loading}>
               {loading ? 'Submitting...' : 'Submit Article'}
             </Button>
+            <PayDialog userData={userData} setopen={setopen} open={open} vet={vet} setvet={setvet}/>
           </div>
         </form>
       </div>

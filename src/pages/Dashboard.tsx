@@ -9,6 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ProcessinFeeDialog } from '@/components/submission/paystackDialogBox';
+import { toast } from '@/hooks/use-toast';
+
 
 interface Submission {
   id: string;
@@ -21,13 +24,18 @@ interface Submission {
     status: string;
     authors: any;
   };
+  vetting_fee:boolean,
+  processing_fee:boolean
 }
 
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  // const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [open,setopen] = useState(false)
+  const [userdat, setuserdat] = useState({})
 
   useEffect(() => {
     if (!user) {
@@ -51,13 +59,16 @@ export const Dashboard = () => {
           articles (
             title,
             abstract,
+            corresponding_author_email,
             status,
             authors
-          )
+          ),
+          vetting_fee,
+          processing_fee
         `)
         .eq('submitter_id', user.id)
         .order('submitted_at', { ascending: false });
-
+            console.log(data)
       if (error) throw error;
       setSubmissions(data || []);
     } catch (error) {
@@ -84,6 +95,15 @@ export const Dashboard = () => {
     }
   };
 
+  const getPaymentColor = (bool:Boolean) => {
+    switch(bool){
+      case true:
+        return 'bg-green-100 text-green-800'
+      case false:
+        return 'bg-red-100 text-red-800'
+    }
+  }
+
   const formatStatus = (status: string) => {
     return status.split('_').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
@@ -93,6 +113,52 @@ export const Dashboard = () => {
   if (!user) {
     return null;
   }
+
+  const onSuccess = async (pReponse) => {
+      try {
+        console.log(pReponse.reference)
+        const transactionReference = pReponse.reference
+        const confirm = await fetch("http://localhost:4500/api/verify-payment",{
+          method:"POST",
+          headers:{ 'Content-Type':'application/json'},
+          body:JSON.stringify({reference:transactionReference,amount:2000000})
+        }) 
+        const {success,message,data} = await confirm.json()
+        console.log({success,message,data})
+        if(!success) throw "server error"
+        if(!data.status) throw "payment not verified"
+        if(data.amount != 2000000) throw 'amount not equal'
+
+        const {data : submisionData,error} = await supabase
+        .from('submissions')
+        .update({processing_fee:true})
+        .eq('submitter_id', user.id)
+        if(error){
+          throw "couldn't process payment, try again later"
+        }
+  
+        toast({
+            title:'payment successful',
+            description:`your payment has been successfully verified, kindly proceed to submit your article`
+          })
+      } catch (error) {
+        if(error){
+          console.log(error)
+  
+          toast({
+            title:'payment failed',
+            description:`payment failed due to ${error}, please contact support or try again later`,
+            variant:'destructive'
+          })
+        }
+      }
+    }
+
+    const handleSubmit = (userData) => {
+        setuserdat(userData)
+        setopen(true)
+    }
+    
 
   if (loading) {
     return (
@@ -192,8 +258,23 @@ export const Dashboard = () => {
               </CardContent>
             </Card>
           ) : (
-            submissions.map((submission) => (
-              <Card key={submission.id} className="hover:shadow-md transition-shadow">
+            submissions.map((submission) => {
+                      const userData = {
+                      email:submission.articles.corresponding_author_email,
+                      amount:2000000,
+                      metadata:{
+                        name:name
+                      },
+                      onSuccess: (response) => onSuccess(response),
+                      onClose:() => {    
+                      toast({
+                        title: 'payment cancelled',
+                        description: `you cancelled payment for the vet fee`,
+                        variant: 'destructive',
+                      });
+                        }
+                      } 
+              return <Card key={submission.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -213,9 +294,37 @@ export const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  <div className='flex items-center justify-between'>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                     {submission.articles.abstract}
-                  </p>
+                    </p>
+                    <div className='flex flex-col items-center'>
+                          <Badge
+                            variant='secondary'
+                            className={getPaymentColor(submission.vetting_fee)}
+                          >
+                            <p>vetting fee: {submission.vetting_fee ? "paid" : "not paid"}</p>
+                          </Badge>
+
+                            {/* <Badge
+                            variant='secondary'
+                            className={getPaymentColor(submission.processing_fee)}
+                            >
+                            <p>processing fee: {submission.processing_fee ? "paid" : "not paid"}</p>
+                          </Badge> */}
+                          {
+                            submission.processing_fee? <div>
+                                <Badge
+                            variant='secondary'
+                            className={getPaymentColor(submission.processing_fee)}
+                            >processing fee: paid</Badge>
+                            </div>:
+                            <button className='bg-black p-1 rounded-sm m-3' onClick={() => {handleSubmit(userData)}}>
+                              <p className='text-[9px] text-white'>click to pay for processing fee</p>
+                            </button>
+                          }
+                    </div>
+                  </div>
                   
                   {submission.status === 'rejected' && (
                     <div className="mb-4">
@@ -237,10 +346,12 @@ export const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))
+            })
           )}
         </div>
       </div>
+      {/* <processinFeeDialog open={open} setopen={setopen} userData={userdat}/> */}
+      <ProcessinFeeDialog  open={open} setopen={setopen} userData={userdat}/>
       <Footer/>
     </div>
   );

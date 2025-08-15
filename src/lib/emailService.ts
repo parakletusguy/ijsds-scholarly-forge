@@ -136,6 +136,7 @@ export const generateReviewInvitationEmail = (reviewerName: string, submissionTi
         <p><strong>Review Deadline:</strong> ${deadline}</p>
         
         <p>Please log into the system to accept or decline this review invitation and access the manuscript.</p>
+        <a href='https://ijsds.org/auth/:signin' >Login</a>
         
         <p>Thank you for your contribution to the peer review process.</p>
         
