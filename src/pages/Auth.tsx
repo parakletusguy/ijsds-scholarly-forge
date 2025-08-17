@@ -85,7 +85,8 @@ export const Auth = () => {
     try {
       // const { error } = await signInWithOrcid();
       const client_id = "APP-GKE87FTH6QV1ZK9D"
-      const redirect = encodeURIComponent("https://ijsdsbackend.onrender.com/auth/orcid")
+      // const redirect = encodeURIComponent("https://ijsdsbackend.onrender.com/auth/orcid")
+      const redirect = encodeURIComponent("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/auth/orcid")
       // const redirect = encodeURIComponent("https://orcidtest.loca.lt/auth/orcid")
       window.location.href = `https://orcid.org/oauth/authorize?client_id=${client_id}&response_type=code&scope=/authenticate&redirect_uri=${redirect}`
     

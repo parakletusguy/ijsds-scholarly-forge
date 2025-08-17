@@ -282,13 +282,14 @@ export const Submit = () => {
 
   const onSuccess = async (pReponse) => {
     try {
-      console.log(pReponse.reference)
+      console.log(pReponse)
       const transactionReference = pReponse.reference
-      const confirm = await fetch("http://localhost:4500/api/verify-payment",{
+      const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
         method:"POST",
         headers:{ 'Content-Type':'application/json'},
         body:JSON.stringify({reference:transactionReference,amount:500000})
       }) 
+      console.log('real')
       const {success,message,data} = await confirm.json()
       console.log({success,message,data})
       if(!success) throw "server error"
