@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 
 const EditorialBoard = () => {
   const boardMembers = [
-    { name: "Dr. Mina Ogbanga", role: "Editor-in-Chief", isChief: true },
+    { name: "Dr. Mina Margaret Ogbanga", role: "Editor-in-Chief", isChief: true },
     { name: "Professor Okon Godwin", role: "Editorial Board Member" },
     { name: "Professor Margaret Akpomi", role: "Editorial Board Member" },
     { name: "Professor Margaret Adamek", role: "Editorial Board Member" },
@@ -60,6 +60,7 @@ const EditorialBoard = () => {
                 <Card key={index} className="mb-4 border-primary/20 bg-primary/5">
                   <CardHeader className="text-center">
                     <CardTitle className="text-xl">{member.name}</CardTitle>
+                    <CardTitle className="text-sm"><a href="https://minaogbanga.com">www.minaogbanga.com </a></CardTitle>
                     <Badge variant="default" className="mx-auto">{member.role}</Badge>
                   </CardHeader>
                 </Card>
