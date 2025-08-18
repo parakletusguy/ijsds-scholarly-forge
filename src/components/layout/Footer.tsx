@@ -29,7 +29,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
               <li><a href="/editorial-board" className="hover:text-foreground transition-colors">Editorial Board</a></li>
-              <li><a href="/archives" className="hover:text-foreground transition-colors">Archives</a></li>
+              {/* <li><a href="/archives" className="hover:text-foreground transition-colors">Archives</a></li> */}
             </ul>
           </div>
 

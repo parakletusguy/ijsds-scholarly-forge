@@ -98,13 +98,13 @@ export const Header = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   Reviewer
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/publication')}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Publication
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/production')}>
                   <FileText className="h-4 w-4 mr-2" />
                   Production
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/publication')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Publication
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/external-integrations')}>
                   <Settings className="h-4 w-4 mr-2" />
