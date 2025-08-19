@@ -97,7 +97,7 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
   };
 
   const viewArticle = async (url) => {
-    const getHtml = await fetch('ttps://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
+    const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
       method: 'POST',
       headers: {"Content-Type" : "application/json"},
       body:JSON.stringify({
