@@ -42,7 +42,7 @@ export const DataManagement = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -92,12 +92,11 @@ export const DataManagement = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
         <Tabs defaultValue="export" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="export">Data Export</TabsTrigger>
-            <TabsTrigger value="backup">Backup & Security</TabsTrigger>
             <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
           </TabsList>
 
@@ -105,105 +104,11 @@ export const DataManagement = () => {
             <DataExport />
           </TabsContent>
 
-          <TabsContent value="backup">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Backup Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span>Last Backup</span>
-                      <Badge variant="outline">2 hours ago</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Backup Frequency</span>
-                      <Badge variant="outline">Daily</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Backup Size</span>
-                      <Badge variant="outline">1.8 GB</Badge>
-                    </div>
-                    <Button className="w-full">
-                      Create Manual Backup
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Security Audit</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span>Data Encryption</span>
-                      <Badge variant="default">Active</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Access Control</span>
-                      <Badge variant="default">Compliant</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Audit Logging</span>
-                      <Badge variant="default">Enabled</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>GDPR Compliance</span>
-                      <Badge variant="default">Verified</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+         
 
           <TabsContent value="maintenance">
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Maintenance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Database Optimization</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Optimize database performance and clean up old data
-                        </p>
-                      </div>
-                      <Button variant="outline">Run Now</Button>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Cache Cleanup</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Clear application cache and temporary files
-                        </p>
-                      </div>
-                      <Button variant="outline">Run Now</Button>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Storage Cleanup</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Remove orphaned files and compress old data
-                        </p>
-                      </div>
-                      <Button variant="outline">Run Now</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
+  
               <Card>
                 <CardHeader>
                   <CardTitle>System Logs</CardTitle>

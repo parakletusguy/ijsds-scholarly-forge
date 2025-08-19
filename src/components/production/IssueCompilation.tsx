@@ -39,6 +39,7 @@ interface IssueInfo {
 export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [processload,setProcessLoad] = useState(false)
   const [issueInfo, setIssueInfo] = useState<IssueInfo>({
     volume: article.volume || 1,
     issue: article.issue || 1,
@@ -142,6 +143,33 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
     }
     return 'Unknown Author';
   };
+
+  const approveProcessing = async () => {
+    setProcessLoad(true)
+    try {
+      const {error: updateError} = await supabase
+    .from("articles")
+    .update({status:"processed"}).
+    eq('id',article.id)
+
+     toast({
+        title: "processed",
+        description: "article approved for processing",
+      });
+
+    if (updateError) throw updateError
+    } catch (error) {
+      console.error('Error processing:', error);
+    setProcessLoad(false)
+      toast({
+        title: "Error",
+        description: "Failed to process article",
+        variant: "destructive",
+      });
+    }finally{
+      setProcessLoad(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -372,9 +400,9 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
               <Save className="h-4 w-4" />
               Save Issue
             </Button>
-            <Button variant="outline" disabled={loading}>
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule Publication
+            <Button variant="outline" disabled={processload} onClick={approveProcessing} >
+              {processload? 'processing...': <p className='flex'>Approve for Processing</p>}
+              
             </Button>
             <Button variant="outline" disabled={loading}>
               <FileText className="h-4 w-4 mr-2" />

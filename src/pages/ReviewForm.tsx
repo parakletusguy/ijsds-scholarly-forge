@@ -101,13 +101,13 @@ export const ReviewForm = () => {
 
     try {
       const updateData: any = {
-        recommendation,
+        recommendation:recommendation,
         comments_to_author: commentsToAuthor,
         comments_to_editor: commentsToEditor,
       };
 
       if (isSubmission) {
-        updateData.submitted_at = new Date().toISOString();
+        updateData.submitted_at = new Date().toISOString() || null
       }
 
       const { error } = await supabase
@@ -126,6 +126,7 @@ export const ReviewForm = () => {
         navigate('/reviewer-dashboard');
       }
     } catch (error: any) {
+      console.error("Supabase update error:", error.message, error.details, error.hint);
       toast({
         title: 'Error',
         description: 'Failed to save review',

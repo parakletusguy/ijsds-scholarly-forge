@@ -14,6 +14,8 @@ import { Footer } from '@/components/layout/Footer';
 import { ArrowLeft, Calendar, FileText, Globe, Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 interface Article {
   id: string;
@@ -178,6 +180,14 @@ export const Publication = () => {
           </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+          <Tabs>
+            <TabsList>
+                  <TabsTrigger value="processed">processed </TabsTrigger>
+                  <TabsTrigger value="published">publisheed</TabsTrigger>
+            </TabsList>
+          </Tabs>
+      
           {/* Articles List */}
           <Card>
             <CardHeader>
@@ -235,7 +245,110 @@ export const Publication = () => {
             <CardContent>
               {selectedArticle ? (
                 <div className="space-y-6">
+                  <div><Card>
+            <CardHeader>
+              <CardTitle>Publication Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {selectedArticle ? (
+                <div className="space-y-6">
                   <div>
+                    <h3 className="font-medium mb-2">{selectedArticle.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedArticle.abstract.substring(0, 200)}...
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="doi">DOI</Label>
+                      <div className="flex gap-2">
+                        {/* <Input
+                          id="doi"
+                          value={publicationData.doi}
+                          onChange={(e) => setPublicationData(prev => ({ ...prev, doi: e.target.value }))}
+                          placeholder="10.1234/journal.2024.123456"
+                        /> */}
+                        {/* <Button variant="outline" onClick={generateDOI}>
+                          <Globe className="h-4 w-4 mr-2" />
+                          Generate
+                        </Button> */}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volume">Volume</Label>
+                        <Input
+                          id="volume"
+                          type="number"
+                          value={publicationData.volume}
+                          onChange={(e) => setPublicationData(prev => ({ ...prev, volume: e.target.value }))}
+                          placeholder="1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="issue">Issue</Label>
+                        <Input
+                          id="issue"
+                          type="number"
+                          value={publicationData.issue}
+                          onChange={(e) => setPublicationData(prev => ({ ...prev, issue: e.target.value }))}
+                          placeholder="1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="page-start">Start Page</Label>
+                        <Input
+                          id="page-start"
+                          type="number"
+                          value={publicationData.pageStart}
+                          onChange={(e) => setPublicationData(prev => ({ ...prev, pageStart: e.target.value }))}
+                          placeholder="1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="page-end">End Page</Label>
+                        <Input
+                          id="page-end"
+                          type="number"
+                          value={publicationData.pageEnd}
+                          onChange={(e) => setPublicationData(prev => ({ ...prev, pageEnd: e.target.value }))}
+                          placeholder="10"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="publication-date">Publication Date</Label>
+                      <Input
+                        id="publication-date"
+                        type="date"
+                        value={publicationData.publicationDate}
+                        onChange={(e) => setPublicationData(prev => ({ ...prev, publicationDate: e.target.value }))}
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={handlePublish} 
+                      disabled={updating || !publicationData.doi}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      {updating ? 'Publishing...' : 'Publish Article'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Select an article to configure publication details
+                </div>
+              )}
+            </CardContent>
+          </Card>
                     <h3 className="font-medium mb-2">{selectedArticle.title}</h3>
                     <p className="text-sm text-muted-foreground">
                       {selectedArticle.abstract.substring(0, 200)}...

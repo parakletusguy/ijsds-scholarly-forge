@@ -291,13 +291,13 @@ export const Editorial = () => {
                         submissionTitle={submission.articles.title}
                         onInvite={fetchSubmissions}
                       />
-                      <DeskRejectDialog
+                      {/* <DeskRejectDialog
                         submissionId={submission.id}
                         submissionTitle={submission.articles.title}
                         authorEmail={submission.articles.corresponding_author_email}
                         authorName={submission.profiles.full_name}
                         onReject={fetchSubmissions}
-                      />
+                      /> */}
                     </div>
                   </CardContent>
                 </Card>
