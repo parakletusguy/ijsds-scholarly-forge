@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, Calendar, FileText, Globe, Save } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Globe, Save, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -40,6 +40,8 @@ export const Publication = () => {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [processed, setProcessed] = useState<Article[] | null>([])
+  const [published, setPublished] = useState<Article[] | null>([])
 
   const [publicationData, setPublicationData] = useState({
     doi: '',
@@ -60,10 +62,24 @@ export const Publication = () => {
       const { data, error } = await supabase
         .from('articles')
         .select('*')
-        .in('status', ['accepted', 'published'])
+        .in('status', ['processed', 'published'])
         .order('submission_date', { ascending: false });
 
       if (error) throw error;
+      const proccessedArray = []
+      const publishedArray = []
+      data.forEach((item,index) => {
+        if(item.status == 'processed'){
+          proccessedArray.push(item);
+        }
+        else if(item.status == 'published'){
+          publishedArray.push(item)
+        }
+      }
+    )
+
+      setProcessed(proccessedArray)
+      setPublished(publishedArray)
       setArticles(data || []);
     } catch (error) {
       console.error('Error fetching articles:', error);
@@ -179,28 +195,27 @@ export const Publication = () => {
             Back
           </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="">
 
-          <Tabs>
-            <TabsList>
-                  <TabsTrigger value="processed">processed </TabsTrigger>
-                  <TabsTrigger value="published">publisheed</TabsTrigger>
+        <Card>
+             <Tabs defaultValue='processed'>
+             <CardHeader>
+                <TabsList className='flex justify-evenly'>
+                  <TabsTrigger className='w-[50%]' value="processed">ready for publication </TabsTrigger>
+                  <TabsTrigger className='w-[50%]' value="published">published</TabsTrigger>
             </TabsList>
-          </Tabs>
-      
-          {/* Articles List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Accepted Articles</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {articles.length === 0 ? (
+             </CardHeader>
+          <CardContent>
+           
+
+             <TabsContent value='processed' className='flex flex-col items-center'>
+              <div className="space-y-4 w-[100%] mb-7">
+                {processed.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    No accepted articles found
+                    No processed articles found
                   </p>
                 ) : (
-                  articles.map((article) => (
+                  processed.map((article) => (
                     <div
                       key={article.id}
                       className={`p-4 rounded-lg border cursor-pointer transition-colors ${
@@ -234,217 +249,60 @@ export const Publication = () => {
                   ))
                 )}
               </div>
-            </CardContent>
-          </Card>
+              <Button className='m-auto w-full'>
+                <Upload className='max-w-sm' />
+                  publish all processed article
+              </Button>
+            </TabsContent>
 
-          {/* Publication Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Publication Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedArticle ? (
-                <div className="space-y-6">
-                  <div><Card>
-            <CardHeader>
-              <CardTitle>Publication Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedArticle ? (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-medium mb-2">{selectedArticle.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedArticle.abstract.substring(0, 200)}...
-                    </p>
-                  </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="doi">DOI</Label>
-                      <div className="flex gap-2">
-                        {/* <Input
-                          id="doi"
-                          value={publicationData.doi}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, doi: e.target.value }))}
-                          placeholder="10.1234/journal.2024.123456"
-                        /> */}
-                        {/* <Button variant="outline" onClick={generateDOI}>
-                          <Globe className="h-4 w-4 mr-2" />
-                          Generate
-                        </Button> */}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="volume">Volume</Label>
-                        <Input
-                          id="volume"
-                          type="number"
-                          value={publicationData.volume}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, volume: e.target.value }))}
-                          placeholder="1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="issue">Issue</Label>
-                        <Input
-                          id="issue"
-                          type="number"
-                          value={publicationData.issue}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, issue: e.target.value }))}
-                          placeholder="1"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="page-start">Start Page</Label>
-                        <Input
-                          id="page-start"
-                          type="number"
-                          value={publicationData.pageStart}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, pageStart: e.target.value }))}
-                          placeholder="1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="page-end">End Page</Label>
-                        <Input
-                          id="page-end"
-                          type="number"
-                          value={publicationData.pageEnd}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, pageEnd: e.target.value }))}
-                          placeholder="10"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="publication-date">Publication Date</Label>
-                      <Input
-                        id="publication-date"
-                        type="date"
-                        value={publicationData.publicationDate}
-                        onChange={(e) => setPublicationData(prev => ({ ...prev, publicationDate: e.target.value }))}
-                      />
-                    </div>
-
-                    <Button 
-                      onClick={handlePublish} 
-                      disabled={updating || !publicationData.doi}
-                      className="w-full"
+            <TabsContent value='published'>
+              <div className="space-y-4">
+                {published.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    No published articles found
+                  </p>
+                ) : (
+                  published.map((article) => (
+                    <div
+                      key={article.id}
+                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                        selectedArticle?.id === article.id 
+                          ? 'border-primary bg-primary/5' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleArticleSelect(article)}
                     >
-                      <FileText className="h-4 w-4 mr-2" />
-                      {updating ? 'Publishing...' : 'Publish Article'}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Select an article to configure publication details
-                </div>
-              )}
-            </CardContent>
-          </Card>
-                    <h3 className="font-medium mb-2">{selectedArticle.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedArticle.abstract.substring(0, 200)}...
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="doi">DOI</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="doi"
-                          value={publicationData.doi}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, doi: e.target.value }))}
-                          placeholder="10.1234/journal.2024.123456"
-                        />
-                        {/* <Button variant="outline" onClick={generateDOI}>
-                          <Globe className="h-4 w-4 mr-2" />
-                          Generate
-                        </Button> */}
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium line-clamp-2">{article.title}</h3>
+                        <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
+                          {article.status}
+                        </Badge>
                       </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Authors: {Array.isArray(article.authors) 
+                          ? article.authors.map((a: any) => a.name).join(', ')
+                          : 'Unknown'
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
+                      </p>
+                      {article.doi && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          DOI: {article.doi}
+                        </p>
+                      )}
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="volume">Volume</Label>
-                        <Input
-                          id="volume"
-                          type="number"
-                          value={publicationData.volume}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, volume: e.target.value }))}
-                          placeholder="1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="issue">Issue</Label>
-                        <Input
-                          id="issue"
-                          type="number"
-                          value={publicationData.issue}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, issue: e.target.value }))}
-                          placeholder="1"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="page-start">Start Page</Label>
-                        <Input
-                          id="page-start"
-                          type="number"
-                          value={publicationData.pageStart}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, pageStart: e.target.value }))}
-                          placeholder="1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="page-end">End Page</Label>
-                        <Input
-                          id="page-end"
-                          type="number"
-                          value={publicationData.pageEnd}
-                          onChange={(e) => setPublicationData(prev => ({ ...prev, pageEnd: e.target.value }))}
-                          placeholder="10"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="publication-date">Publication Date</Label>
-                      <Input
-                        id="publication-date"
-                        type="date"
-                        value={publicationData.publicationDate}
-                        onChange={(e) => setPublicationData(prev => ({ ...prev, publicationDate: e.target.value }))}
-                      />
-                    </div>
-
-                    <Button 
-                      onClick={handlePublish} 
-                      disabled={updating || !publicationData.doi}
-                      className="w-full"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      {updating ? 'Publishing...' : 'Publish Article'}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Select an article to configure publication details
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          
+          </CardContent>
+          </Tabs>
+        </Card>
+      
         </div>
       </main>
       <Footer />

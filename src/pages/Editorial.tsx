@@ -337,6 +337,7 @@ export const Editorial = () => {
                       <ApproveSubmissionDialog 
                         submissionId={submission.id}
                         onApprove={fetchSubmissions}
+                        articleId={submission.article_id}
                       />
                       <RevisionRequestDialog
                         submissionId={submission.id}
