@@ -7,11 +7,12 @@ import { CheckCircle } from 'lucide-react';
 
 interface ApproveSubmissionDialogProps {
   submissionId: string;
+  articleId:string;
   onApprove: () => void;
   disabled?: boolean;
 }
 
-export const ApproveSubmissionDialog = ({ submissionId, onApprove, disabled }: ApproveSubmissionDialogProps) => {
+export const ApproveSubmissionDialog = ({ submissionId,articleId, onApprove, disabled }: ApproveSubmissionDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +34,16 @@ export const ApproveSubmissionDialog = ({ submissionId, onApprove, disabled }: A
         .eq('id', submissionId);
 
       if (error) throw error;
+      //update article with approval
+
+            const { error: articleError } = await supabase
+        .from('articles')
+        .update({
+          status: 'accepted',
+    
+        })
+        .eq('id', articleId);
+        if(articleError) throw articleError
 
       // Generate Zenodo DOI automatically
       try {

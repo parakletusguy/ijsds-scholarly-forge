@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Edit3, Save, FileText, Clock, User, CheckCircle } from 'lucide-react';
+import { TextEditor } from '../editor/joditEditor';
 
 interface Article {
   id: string;
@@ -25,6 +26,8 @@ interface CopyeditingToolsProps {
 export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) => {
   const { toast } = useToast();
   const [editingNotes, setEditingNotes] = useState('');
+  const [html, sethtml] = useState('');
+  const [editor, setEditor] = useState(false);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([
     { id: 1, type: 'grammar', text: 'Consider revising sentence structure in paragraph 3', status: 'pending' },
@@ -93,6 +96,20 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     );
   };
 
+  const viewArticle = async (url) => {
+    const getHtml = await fetch('http://localhost:4500/supabase/getFile', {
+      method: 'POST',
+      headers: {"Content-Type" : "application/json"},
+      body:JSON.stringify({
+        url:url
+      })
+    })
+    console.log("oo")
+    const htmlValue = await getHtml.json()
+    sethtml(htmlValue.data)
+    setEditor(true)
+  }
+
   return (
     <div className="space-y-6">
       {/* Article Information */}
@@ -112,11 +129,9 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
                 {article.status.replace('_', ' ')}
               </Badge>
               {article.manuscript_file_url && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={article.manuscript_file_url} target="_blank" rel="noopener noreferrer">
-                    <FileText className="h-4 w-4 mr-2" />
-                    View Manuscript
-                  </a>
+                <Button variant="outline" className='cursor-pointer' size="sm" asChild onClick={() => viewArticle(article.manuscript_file_url)}>
+                   <p className='flex'> <FileText className="h-4 w-4 mr-2" />
+                    View Manuscript</p>
                 </Button>
               )}
             </div>
@@ -248,6 +263,8 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
           </div>
         </CardContent>
       </Card>
+
+      { editor && <TextEditor html={html} editor={editor} setEditor={setEditor}/>}
     </div>
   );
 };
