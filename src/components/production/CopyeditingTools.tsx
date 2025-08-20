@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Edit3, Save, FileText, Clock, User, CheckCircle } from 'lucide-react';
+import { Edit3, Save, FileText, Clock, User, CheckCircle, Eye } from 'lucide-react';
 import { TextEditor } from '../editor/joditEditor';
+import DownloadDocx from '@/lib/html-docx';
 
 interface Article {
   id: string;
@@ -26,9 +27,11 @@ interface CopyeditingToolsProps {
 export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) => {
   const { toast } = useToast();
   const [editingNotes, setEditingNotes] = useState('');
-  const [html, sethtml] = useState('');
   const [editor, setEditor] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [content,setContent] = useState('')
+  const [fileName, setfileName] = useState('')
+  
   const [suggestions, setSuggestions] = useState([
     { id: 1, type: 'grammar', text: 'Consider revising sentence structure in paragraph 3', status: 'pending' },
     { id: 2, type: 'style', text: 'Standardize citation format throughout', status: 'pending' },
@@ -63,15 +66,24 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     }
   };
 
-  const saveCopyeditingNotes = async () => {
-    if (!editingNotes.trim()) return;
+  const saveEditing = async () => {
+    
 
     setLoading(true);
     try {
+
       // In a real implementation, you'd save to a copyediting_notes table
+       const docFile = await DownloadDocx(content,fileName)
+       const {data,error} = await supabase.storage
+       .from('journal-website-db1')
+      .upload(docFile.fileName,docFile.converted, {
+        upsert:true
+      });
+      if(error) throw error
+
       toast({
         title: "Notes Saved",
-        description: "Copyediting notes have been saved",
+        description: "Edited file has been savedhave been saved",
       });
       setEditingNotes('');
     } catch (error) {
@@ -97,16 +109,24 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
   };
 
   const viewArticle = async (url) => {
-    const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
+
+    if(content == ''){  
+      const fileNameUrl = url.split("/").pop(); 
+      console.log(fileName);  
+      const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
       method: 'POST',
       headers: {"Content-Type" : "application/json"},
       body:JSON.stringify({
         url:url
       })
     })
-    console.log("oo")
     const htmlValue = await getHtml.json()
-    sethtml(htmlValue.data)
+    setfileName(fileNameUrl)
+    setContent(htmlValue.data)
+  }else{
+    setContent(content)
+  }
+
     setEditor(true)
   }
 
@@ -154,13 +174,14 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
               Grammar Check
             </Button>
             <Button variant="outline" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Spell Check
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Style Guide
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Fact Check
-            </Button>
+            
           </div>
 
           <Separator />
@@ -174,12 +195,12 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
               className="min-h-[100px] mb-3"
             />
             <Button 
-              onClick={saveCopyeditingNotes}
-              disabled={!editingNotes.trim() || loading}
+              onClick={saveEditing}
+              // disabled={!editingNotes.trim() || loading}
               className="flex items-center gap-2"
             >
               <Save className="h-4 w-4" />
-              Save Notes
+              Save Edited File
             </Button>
           </div>
         </CardContent>
@@ -264,7 +285,7 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
         </CardContent>
       </Card>
 
-      { editor && <TextEditor html={html} editor={editor} setEditor={setEditor}/>}
+      { editor && <TextEditor content={content} setContent={setContent} editor={editor} setEditor={setEditor}/>}
     </div>
   );
 };
