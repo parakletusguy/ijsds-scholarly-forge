@@ -3,11 +3,8 @@ import { useState, useRef, useMemo } from 'react'
 import mammoth from 'mammoth'
 import { X } from 'lucide-react'
 
-export const TextEditor = ({html,editor,setEditor}) => {
+export const TextEditor = ({content,setContent,editor,setEditor}) => {
     const editorRef = useRef(null)
-    const [content,setContent] = useState(html)
-
-
 
     const config = {
         readonly: false,

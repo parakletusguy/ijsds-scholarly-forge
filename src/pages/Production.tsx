@@ -181,14 +181,14 @@ export const Production = () => {
                     <Edit3 className="h-4 w-4" />
                     Copyedit
                   </TabsTrigger>
-                  <TabsTrigger value="proofreading" className="flex items-center gap-2">
+                  {/* <TabsTrigger value="proofreading" className="flex items-center gap-2">
                     <Eye className="h-4 w-4" />
                     Proofread
-                  </TabsTrigger>
-                  <TabsTrigger value="typesetting" className="flex items-center gap-2">
+                  </TabsTrigger> */}
+                  {/* <TabsTrigger value="typesetting" className="flex items-center gap-2">
                     <Layout className="h-4 w-4" />
                     Typeset
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                   <TabsTrigger value="pdf" className="flex items-center gap-2">
                     <Download className="h-4 w-4" />
                     PDF
@@ -210,19 +210,19 @@ export const Production = () => {
                   />
                 </TabsContent>
 
-                <TabsContent value="proofreading">
+                {/* <TabsContent value="proofreading">
                   <ProofreadingSystem 
                     article={selectedArticle} 
                     onUpdate={fetchProductionArticles}
                   />
-                </TabsContent>
+                </TabsContent> */}
 
-                <TabsContent value="typesetting">
+                {/* <TabsContent value="typesetting">
                   <TypesettingIntegration 
                     article={selectedArticle} 
                     onUpdate={fetchProductionArticles}
                   />
-                </TabsContent>
+                </TabsContent> */}
 
                 <TabsContent value="pdf">
                   <PDFGeneration 
