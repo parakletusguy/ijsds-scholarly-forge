@@ -290,6 +290,7 @@ export const Editorial = () => {
                         submissionId={submission.id}
                         submissionTitle={submission.articles.title}
                         onInvite={fetchSubmissions}
+                        submission={submission}
                       />
                       {/* <DeskRejectDialog
                         submissionId={submission.id}
