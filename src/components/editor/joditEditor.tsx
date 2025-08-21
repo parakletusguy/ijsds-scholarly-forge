@@ -41,6 +41,7 @@ buttons: [
         uploader: {
             insertImageAsBase64URI: true,
         },
+        spellcheck:true
     };
 
     return (

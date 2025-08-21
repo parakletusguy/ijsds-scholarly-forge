@@ -11,11 +11,14 @@ import { toast } from '@/hooks/use-toast';
 import { UserPlus, AlertCircle } from 'lucide-react';
 import { sendEmailNotification, generateReviewInvitationEmail } from '@/lib/emailService';
 import { ReviewStatusIndicator } from '@/components/review/ReviewStatusIndicator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AutomatedReviewerMatchingInterface } from '../workflow/AutomatedReviewerMatchingInterface';
 
 interface ReviewerInvitationDialogProps {
   submissionId: string;
   submissionTitle: string;
   onInvite: () => void;
+  submission:any
 }
 
 interface Reviewer {
@@ -25,7 +28,7 @@ interface Reviewer {
   affiliation: string;
 }
 
-export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvite }: ReviewerInvitationDialogProps) => {
+export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvite,submission }: ReviewerInvitationDialogProps) => {
   const [open, setOpen] = useState(false);
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
   const [selectedReviewerId, setSelectedReviewerId] = useState('');
@@ -141,13 +144,20 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
           Invite Reviewer
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Invite Reviewer</DialogTitle>
+
+    <DialogContent className="max-w-2xl">
+        <Tabs defaultValue="assignReviewer" className="space-y-6">
+              <DialogHeader>
+          <TabsList>
+                      <TabsTrigger value="assignReviewer">Assign Reviewer </TabsTrigger>
+                      <TabsTrigger value="workflow">Under Review</TabsTrigger>
+            </TabsList>
+        </DialogHeader>
+          <TabsContent value='assignReviewer'>
+        <DialogTitle>Invite Reviewer</DialogTitle>
           <DialogDescription>
             Send a review invitation for: {submissionTitle}
           </DialogDescription>
-        </DialogHeader>
         
         <div className="space-y-4">
           <div className="space-y-2">
@@ -202,14 +212,30 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+       <div>
+           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleInvite} disabled={loading}>
             {loading ? 'Sending...' : 'Send Invitation'}
           </Button>
-        </DialogFooter>
+       </div>
+    </TabsContent>
+
+  <TabsContent value='workflow'>
+              <AutomatedReviewerMatchingInterface 
+                                  articleData={{
+                                      title: submission.articles.title,
+                                      abstract: submission.articles.abstract,
+                                    keywords: [],
+                                    subject_area: ''
+                                  }}
+                                />
+            </TabsContent>
+
+
+            
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

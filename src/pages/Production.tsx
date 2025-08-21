@@ -175,11 +175,11 @@ export const Production = () => {
           {/* Production Tools */}
           <div className="lg:col-span-2">
             {selectedArticle ? (
-              <Tabs defaultValue="copyediting" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="copyediting" className="flex items-center gap-2">
+              <Tabs defaultValue="editing" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="editing" className="flex items-center gap-2">
                     <Edit3 className="h-4 w-4" />
-                    Copyedit
+                    edit
                   </TabsTrigger>
                   {/* <TabsTrigger value="proofreading" className="flex items-center gap-2">
                     <Eye className="h-4 w-4" />
@@ -189,21 +189,21 @@ export const Production = () => {
                     <Layout className="h-4 w-4" />
                     Typeset
                   </TabsTrigger> */}
-                  <TabsTrigger value="pdf" className="flex items-center gap-2">
+                  {/* <TabsTrigger value="pdf" className="flex items-center gap-2">
                     <Download className="h-4 w-4" />
                     PDF
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                   <TabsTrigger value="issues" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Issues
                   </TabsTrigger>
-                  <TabsTrigger value="workflow" className="flex items-center gap-2">
+                  {/* <TabsTrigger value="workflow" className="flex items-center gap-2">
                     <Layout className="h-4 w-4" />
                     Workflow
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                 </TabsList>
 
-                <TabsContent value="copyediting">
+                <TabsContent value="editing">
                   <CopyeditingTools 
                     article={selectedArticle} 
                     onUpdate={fetchProductionArticles}
@@ -238,7 +238,7 @@ export const Production = () => {
                   />
                 </TabsContent>
 
-                <TabsContent value="workflow">
+                {/* <TabsContent value="workflow">
                   <AutomatedReviewerMatchingInterface 
                     articleData={{
                       title: selectedArticle.title,
@@ -247,7 +247,7 @@ export const Production = () => {
                       subject_area: ''
                     }}
                   />
-                </TabsContent>
+                </TabsContent> */}
               </Tabs>
             ) : (
               <Card>

@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Edit3, Save, FileText, Clock, User, CheckCircle, Eye } from 'lucide-react';
+import { Edit3, Save, FileText, Clock, User, CheckCircle, Eye, Download, Car, File } from 'lucide-react';
 import { TextEditor } from '../editor/joditEditor';
 import DownloadDocx from '@/lib/html-docx';
+import { spellCheck } from '@/lib/languagetool';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PdfFile } from './html-pdf';
 
 interface Article {
   id: string;
@@ -112,7 +115,7 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
 
     if(content == ''){  
       const fileNameUrl = url.split("/").pop(); 
-      console.log(fileName);  
+      console.log(fileName); 
       const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
       method: 'POST',
       headers: {"Content-Type" : "application/json"},
@@ -129,6 +132,29 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
 
     setEditor(true)
   }
+
+const Check = async (html) => {
+  console.log('...running checks')
+    const tempDiv =document.createElement('div')
+    tempDiv.innerHTML = html
+    const text = tempDiv.innerText || tempDiv.textContent
+    const spellCheckMatches = await spellCheck(text)
+    console.log(spellCheckMatches)
+    console.log(spellCheckMatches.matches)
+    spellCheckMatches.matches.forEach(element => {
+      console.log(element)
+    });
+}
+
+const DownloadButton = () => (
+  <PDFDownloadLink document={<PdfFile htmlContent={content} />} fileName={`${fileName.split(".")[0]}`}>
+    {({ blob, url, loading, error }) => (
+      <Button disabled={loading}>
+        {loading ? 'Generating PDF...' : 'Download PDF'}
+      </Button>
+    )}
+  </PDFDownloadLink>
+);
 
   return (
     <div className="space-y-6">
@@ -151,7 +177,7 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
               {article.manuscript_file_url && (
                 <Button variant="outline" className='cursor-pointer' size="sm" asChild onClick={() => viewArticle(article.manuscript_file_url)}>
                    <p className='flex'> <FileText className="h-4 w-4 mr-2" />
-                    View Manuscript</p>
+                    Edit/View Manuscript</p>
                 </Button>
               )}
             </div>
@@ -159,30 +185,43 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
         </CardContent>
       </Card>
 
-      {/* Copyediting Tools */}
+      {/* download pdf */}
       <Card>
         <CardHeader>
+          <CardTitle className='flex space-x-2'>
+            <File className='h-5 w-5 mx-3'/>
+            Download Pdf
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+                      <DownloadButton/>
+        </CardContent>
+      </Card>
+
+      {/* Copyediting Tools */}
+      <Card>
+        {/* <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Edit3 className="h-5 w-5" />
             Copyediting Tools
           </CardTitle>
-        </CardHeader>
+        </CardHeader> */}
         <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-3 gap-4">
+          {/* <div className="grid md:grid-cols-3 gap-4">
+                 <Button variant="outline" onClick={() => {Check(content)}} className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Spell Check
+            </Button>
             <Button variant="outline" className="flex items-center gap-2">
               <Edit3 className="h-4 w-4" />
               Grammar Check
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Spell Check
             </Button>
             <Button variant="outline" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Style Guide
             </Button>
             
-          </div>
+          </div> */}
 
           <Separator />
 
@@ -207,7 +246,7 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
       </Card>
 
       {/* Editing Suggestions */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
@@ -255,10 +294,10 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
             ))}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Status Actions */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Status Actions</CardTitle>
         </CardHeader>
@@ -283,9 +322,10 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       { editor && <TextEditor content={content} setContent={setContent} editor={editor} setEditor={setEditor}/>}
+
     </div>
   );
 };

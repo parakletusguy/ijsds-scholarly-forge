@@ -306,37 +306,7 @@ export const AutomatedReviewerMatchingInterface = ({
 
           <Separator />
 
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="flex items-center justify-between">
-              <Label>Conflict Avoidance</Label>
-              <Switch
-                checked={criteria.conflictAvoidance}
-                onCheckedChange={(checked) => setCriteria(prev => ({ ...prev, conflictAvoidance: checked }))}
-              />
-            </div>
-            
-            <div>
-              <Label>Min Experience (years)</Label>
-              <Input
-                type="number"
-                value={criteria.minimumExperience}
-                onChange={(e) => setCriteria(prev => ({ ...prev, minimumExperience: parseInt(e.target.value) || 0 }))}
-                min="0"
-                max="20"
-              />
-            </div>
-            
-            <div>
-              <Label>Max Reviews per Reviewer</Label>
-              <Input
-                type="number"
-                value={criteria.maxReviewsPerReviewer}
-                onChange={(e) => setCriteria(prev => ({ ...prev, maxReviewsPerReviewer: parseInt(e.target.value) || 1 }))}
-                min="1"
-                max="10"
-              />
-            </div>
-          </div>
+          
         </CardContent>
       </Card>
 
