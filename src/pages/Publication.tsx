@@ -150,7 +150,6 @@ export const Publication = () => {
       });
 
       fetchAcceptedArticles();
-      setSelectedArticle(null);
     } catch (error) {
       console.error('Error publishing article:', error);
       toast({
