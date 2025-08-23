@@ -37,7 +37,7 @@ export const Publication = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  // const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [processed, setProcessed] = useState<Article[] | null>([])
@@ -93,17 +93,7 @@ export const Publication = () => {
     }
   };
 
-  const handleArticleSelect = (article: Article) => {
-    setSelectedArticle(article);
-    setPublicationData({
-      doi: article.doi || '',
-      volume: article.volume?.toString() || '',
-      issue: article.issue?.toString() || '',
-      pageStart: article.page_start?.toString() || '',
-      pageEnd: article.page_end?.toString() || '',
-      publicationDate: article.publication_date || '',
-    });
-  };
+
 
   const generateDOI = () => {
     const randomId = Math.random().toString(36).substring(2, 8);
@@ -112,25 +102,20 @@ export const Publication = () => {
   };
 
   const handlePublish = async () => {
-    if (!selectedArticle) return;
+    if (processed.length == 0) return;
 
     setUpdating(true);
-    try {
+    processed.forEach( async (processedArticles) => {
+      try {
       const updateData: any = {
         status: 'published',
         publication_date: publicationData.publicationDate || new Date().toISOString(),
       };
 
-      if (publicationData.doi) updateData.doi = publicationData.doi;
-      if (publicationData.volume) updateData.volume = parseInt(publicationData.volume);
-      if (publicationData.issue) updateData.issue = parseInt(publicationData.issue);
-      if (publicationData.pageStart) updateData.page_start = parseInt(publicationData.pageStart);
-      if (publicationData.pageEnd) updateData.page_end = parseInt(publicationData.pageEnd);
-
       const { error } = await supabase
         .from('articles')
         .update(updateData)
-        .eq('id', selectedArticle.id);
+        .eq('id', processedArticles.id);
 
       if (error) throw error;
 
@@ -138,9 +123,9 @@ export const Publication = () => {
       await supabase
         .from('notifications')
         .insert({
-          user_id: selectedArticle.corresponding_author_email, // This should be user_id in real implementation
+          user_id: processedArticles.corresponding_author_email, // This should be user_id in real implementation
           title: 'Article Published',
-          message: `Your article "${selectedArticle.title}" has been published!`,
+          message: `Your article "${processedArticles.title}" has been published!`,
           type: 'success'
         });
 
@@ -150,6 +135,7 @@ export const Publication = () => {
       });
 
       fetchAcceptedArticles();
+      // setSelectedArticle(null);
     } catch (error) {
       console.error('Error publishing article:', error);
       toast({
@@ -160,6 +146,8 @@ export const Publication = () => {
     } finally {
       setUpdating(false);
     }
+    })
+    
   };
 
   if (loading) {
@@ -217,12 +205,12 @@ export const Publication = () => {
                   processed.map((article) => (
                     <div
                       key={article.id}
-                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                        selectedArticle?.id === article.id 
-                          ? 'border-primary bg-primary/5' 
-                          : 'hover:bg-muted/50'
-                      }`}
-                      onClick={() => handleArticleSelect(article)}
+                      // className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                      //   selectedArticle?.id === article.id 
+                      //     ? 'border-primary bg-primary/5' 
+                      //     : 'hover:bg-muted/50'
+                      // }`}
+                      // onClick={() => handleArticleSelect(article)}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-medium line-clamp-2">{article.title}</h3>
@@ -248,9 +236,10 @@ export const Publication = () => {
                   ))
                 )}
               </div>
-              <Button className='m-auto w-full'>
-                <Upload className='max-w-sm' />
-                  publish all processed article
+              <Button className='m-auto w-full' onClick={() => {handlePublish()}} style={{backgroundColor:updating?'#916E99':null}} >
+                {updating?
+                <p>  ....publishing</p>:
+                <p className='flex'><Upload className='max-w-sm mx-2' />publish all processed article</p>}
               </Button>
             </TabsContent>
 
@@ -265,12 +254,12 @@ export const Publication = () => {
                   published.map((article) => (
                     <div
                       key={article.id}
-                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                        selectedArticle?.id === article.id 
-                          ? 'border-primary bg-primary/5' 
-                          : 'hover:bg-muted/50'
-                      }`}
-                      onClick={() => handleArticleSelect(article)}
+                      // className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                      //   // selectedArticle?.id === article.id 
+                      //     ? 'border-primary bg-primary/5' 
+                      //     : 'hover:bg-muted/50'
+                      // }`}
+                      // onClick={() => handleArticleSelect(article)}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-medium line-clamp-2">{article.title}</h3>
