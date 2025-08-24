@@ -30,6 +30,7 @@ import { SubmissionReviews } from "./pages/SubmissionReviews";
 import { Reports } from "./pages/Reports";
 import { RevisionSubmissionPortal } from "./components/revisions/RevisionSubmissionPortal";
 import NotFound from "./pages/NotFound";
+import { ManageRequests } from "./pages/approveRequest";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/submission/:submissionId/details" element={<SubmissionDetail />} />
               <Route path="/submission/:submissionId/reviews" element={<SubmissionReviews />} />
               <Route path="/submission/:submissionId/revision" element={<RevisionSubmissionPortal />} />
+              <Route path="/requests" element={<ManageRequests />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
