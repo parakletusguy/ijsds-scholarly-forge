@@ -26,13 +26,12 @@ export const ManageRequests = () => {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
-      checkAdminStatus()
-      fetchRequests()
       return;
     }
 
     if (user) {
-
+        checkAdminStatus()
+        fetchRequests()
     }
   }, [user, loading, navigate]);
 
@@ -63,9 +62,7 @@ export const ManageRequests = () => {
         const {data,error} = await supabase
         .from('profiles')
         .select('*')
-        .eq('request_editor',true)
-        .gt('request_reviewer', true)
-
+        .or('request_editor.eq.true,request_reviewer.eq.true')
         if(error) throw error
         const edi = []
         const rev = []
@@ -78,6 +75,7 @@ export const ManageRequests = () => {
         })
         seteditorRequests(edi)
         setreviewerRequests(rev)
+        console.log(edi)
     } catch (error) {
         if(error){
             //toast
@@ -90,21 +88,30 @@ export const ManageRequests = () => {
             if(type == 'approve'){
                 const {data,error} = await supabase
                 .from('profiles')
-                .update({is_editor:true})
-                .eq('id',id)
-
+                .update({is_editor:true,request_editor:false})
+                .eq('id',id).select()
+                    console.log(data)
                 if(error) throw error
             }else{
                 toast({
                 title: 'Request Denied',
                 description: `you've rejected the request`
                 });
+                return
             }
+
+            const {error} = await supabase
+                .from('profiles')
+                .update({request_editor:false})
+                .eq('id',id)
+            
+            if(error) throw error
 
             toast({
                 title: 'Request Approved',
                 description: `you've accepted the request, user is now an editor`
                 });
+            
         } catch (error) {
              if(error){
                 console.error(error)
@@ -122,7 +129,7 @@ export const ManageRequests = () => {
             if(type == 'approve'){
                 const {data,error} = await supabase
                 .from('profiles')
-                .update({is_reviewer:true})
+                .update({is_reviewer:true, request_reviewer:false})
                 .eq('id',id)
 
                 if(error) throw error
@@ -131,6 +138,14 @@ export const ManageRequests = () => {
                 title: 'Request Denied',
                 description: `you've rejected the request`
                 });
+
+                const {data,error} = await supabase
+                .from('profiles')
+                .update({request_editor:false})
+                .eq('id',id)
+            
+                if(error) throw error
+                return
             }
 
             toast({
@@ -161,7 +176,7 @@ export const ManageRequests = () => {
         </TabsList>
 
         <TabsContent value="reviewers" className="mt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="">
             {reviewerRequests.map(profile => (
               <ProfileCard
                 key={profile.id}
@@ -174,7 +189,7 @@ export const ManageRequests = () => {
         </TabsContent>
 
         <TabsContent value="editors" className="mt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="">
             {editorRequests.map(profile => (
               <ProfileCard
                 key={profile.id}
