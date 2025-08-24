@@ -398,7 +398,7 @@ export const Analytics = () => {
             </Card>
           </div>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Decision Distribution</CardTitle>
               <CardDescription>Breakdown of editorial decisions by type</CardDescription>
@@ -432,7 +432,7 @@ export const Analytics = () => {
                 </PieChart>
               </ChartContainer>
             </CardContent>
-          </Card>
+          </Card> */}
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-6">
