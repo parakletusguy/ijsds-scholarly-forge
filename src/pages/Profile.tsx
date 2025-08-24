@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,8 @@ interface Profile {
   orcid_id?: string;
   is_editor: boolean;
   is_reviewer: boolean;
+  request_reviewer: boolean;
+  request_editor:boolean;
 }
 
 export const Profile = () => {
@@ -30,6 +32,7 @@ export const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
@@ -40,6 +43,8 @@ export const Profile = () => {
     orcidId: '',
     isEditor: false,
     isReviewer: false,
+    request_reviewer:false,
+    request_editor:false
   });
 
   useEffect(() => {
@@ -70,6 +75,8 @@ export const Profile = () => {
           orcidId: data.orcid_id || '',
           isEditor: data.is_editor || false,
           isReviewer: data.is_reviewer || false,
+          request_reviewer:data.request_reviewer || false,
+          request_editor:data.request_editor || false
         });
       } else {
         // Create new profile
@@ -81,6 +88,8 @@ export const Profile = () => {
           orcidId: '',
           isEditor: false,
           isReviewer: false,
+          request_reviewer:false,
+          request_editor:false
         });
       }
     } catch (error) {
@@ -109,6 +118,8 @@ export const Profile = () => {
         orcid_id: formData.orcidId,
         is_editor: formData.isEditor,
         is_reviewer: formData.isReviewer,
+        request_reviewer:formData.request_reviewer,
+        request_editor:formData.request_editor
       };
 
       const { error } = await supabase
@@ -140,6 +151,45 @@ export const Profile = () => {
     return orcidRegex.test(orcid) || orcid === '';
   };
 
+    const request =  async(type) => {
+         try {
+           if(type == 'editor'){
+
+              const {data,error} = await supabase
+              .from('profiles')
+              .update({request_editor:true})
+              .eq('id',user.id)
+              if(error) throw error
+
+              toast({
+               title: "Success",
+                description: "Request sent successfully",
+                });
+
+          }else if(type == 'reviewer'){
+
+             const {data,error} = await supabase
+              .from('profiles')
+              .update({request_editor:true})
+              .eq('id',user.id)
+              if(error) throw error
+              
+              toast({
+               title: "Success",
+                description: "Request sent successfully",
+                });
+          }
+         } catch (error) {
+            if(error){
+              console.log(error)
+                    toast({
+                      title: "Error",
+                      description: "couldn't send request, try again later",
+                      variant: "destructive",
+                      });
+         }
+         }
+    }
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -275,6 +325,8 @@ export const Profile = () => {
               </CardContent>
             </Card>
 
+           
+
             {/* Roles */}
             {/* <Card>
               <CardHeader>
@@ -321,6 +373,27 @@ export const Profile = () => {
               {saving ? 'Saving...' : 'Save Profile'}
             </Button>
           </div>
+
+               <Card className='my-4'>
+                <CardHeader>
+                <CardTitle>Request Access</CardTitle>
+                <CardDescription>
+                      You can request to be a reviewer or an editor, upon requesting,
+                      your request will either be accepted or rejected, you will be informed by a mail
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                    <div className='flex flex-row items-center justify-evenly'>
+                      <Button disabled={profile.request_reviewer || profile.is_reviewer} onClick={() => request('reviewer')}>
+                         Request Reviewer
+                      </Button>
+                          <Button disabled={profile.request_editor || profile.is_editor} onClick={() => request('editor')}>
+                         Request Editor
+                      </Button>
+                    </div>
+              </CardContent>
+            </Card>
+
         </div>
       </main>
       <Footer />

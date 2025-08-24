@@ -122,6 +122,10 @@ export const Header = () => {
                   <User className="h-4 w-4 mr-2" />
                   Edit Profile
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/requests')}>
+                  <User className="h-4 w-4 mr-2" />
+                  Check Requests
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out

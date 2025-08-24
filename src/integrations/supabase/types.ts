@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -29,12 +29,14 @@ export type Database = {
           manuscript_file_url: string | null
           page_end: number | null
           page_start: number | null
+          Processing_fee: boolean | null
           publication_date: string | null
           status: string | null
           subject_area: string | null
           submission_date: string | null
           title: string
           updated_at: string | null
+          vetting_fee: boolean
           volume: number | null
         }
         Insert: {
@@ -51,12 +53,14 @@ export type Database = {
           manuscript_file_url?: string | null
           page_end?: number | null
           page_start?: number | null
+          Processing_fee?: boolean | null
           publication_date?: string | null
           status?: string | null
           subject_area?: string | null
           submission_date?: string | null
           title: string
           updated_at?: string | null
+          vetting_fee?: boolean
           volume?: number | null
         }
         Update: {
@@ -73,12 +77,14 @@ export type Database = {
           manuscript_file_url?: string | null
           page_end?: number | null
           page_start?: number | null
+          Processing_fee?: boolean | null
           publication_date?: string | null
           status?: string | null
           subject_area?: string | null
           submission_date?: string | null
           title?: string
           updated_at?: string | null
+          vetting_fee?: boolean
           volume?: number | null
         }
         Relationships: []
@@ -362,9 +368,12 @@ export type Database = {
           email_notifications_enabled: boolean | null
           full_name: string | null
           id: string
+          is_admin: boolean
           is_editor: boolean | null
           is_reviewer: boolean | null
           orcid_id: string | null
+          request_editor: boolean
+          request_reviewer: boolean
           updated_at: string | null
         }
         Insert: {
@@ -376,9 +385,12 @@ export type Database = {
           email_notifications_enabled?: boolean | null
           full_name?: string | null
           id: string
+          is_admin?: boolean
           is_editor?: boolean | null
           is_reviewer?: boolean | null
           orcid_id?: string | null
+          request_editor?: boolean
+          request_reviewer?: boolean
           updated_at?: string | null
         }
         Update: {
@@ -390,9 +402,12 @@ export type Database = {
           email_notifications_enabled?: boolean | null
           full_name?: string | null
           id?: string
+          is_admin?: boolean
           is_editor?: boolean | null
           is_reviewer?: boolean | null
           orcid_id?: string | null
+          request_editor?: boolean
+          request_reviewer?: boolean
           updated_at?: string | null
         }
         Relationships: []
@@ -541,12 +556,14 @@ export type Database = {
           cover_letter: string | null
           editor_notes: string | null
           id: string
+          processing_fee: boolean | null
           reviewer_suggestions: string | null
           status: string | null
           submission_type: string | null
           submitted_at: string | null
           submitter_id: string | null
           updated_at: string | null
+          vetting_fee: boolean | null
         }
         Insert: {
           approved_at?: string | null
@@ -556,12 +573,14 @@ export type Database = {
           cover_letter?: string | null
           editor_notes?: string | null
           id?: string
+          processing_fee?: boolean | null
           reviewer_suggestions?: string | null
           status?: string | null
           submission_type?: string | null
           submitted_at?: string | null
           submitter_id?: string | null
           updated_at?: string | null
+          vetting_fee?: boolean | null
         }
         Update: {
           approved_at?: string | null
@@ -571,12 +590,14 @@ export type Database = {
           cover_letter?: string | null
           editor_notes?: string | null
           id?: string
+          processing_fee?: boolean | null
           reviewer_suggestions?: string | null
           status?: string | null
           submission_type?: string | null
           submitted_at?: string | null
           submitter_id?: string | null
           updated_at?: string | null
+          vetting_fee?: boolean | null
         }
         Relationships: [
           {
@@ -639,23 +660,23 @@ export type Database = {
       }
       find_potential_reviewers: {
         Args: {
-          _submission_id: string
-          _subject_area: string
           _keywords: string[]
           _limit?: number
+          _subject_area: string
+          _submission_id: string
         }
         Returns: {
-          reviewer_id: string
           match_score: number
           profile_data: Json
+          reviewer_id: string
         }[]
       }
       get_editorial_analytics: {
-        Args: { _start_date?: string; _end_date?: string }
+        Args: { _end_date?: string; _start_date?: string }
         Returns: Json
       }
       validate_status_transition: {
-        Args: { old_status: string; new_status: string; user_role: string }
+        Args: { new_status: string; old_status: string; user_role: string }
         Returns: boolean
       }
     }
