@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { Footer } from "@/components/layout/Footer";
 import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
 import { Articles } from "./pages/Articles";
@@ -34,6 +37,23 @@ import { ManageRequests } from "./pages/approveRequest";
 
 const queryClient = new QueryClient();
 
+const PageLayout = ({ children }: { children: React.ReactNode }) => (
+  <SidebarProvider>
+    <div className="min-h-screen flex w-full">
+      <AppSidebar />
+      <div className="flex-1 flex flex-col">
+        <header className="h-12 flex items-center border-b border-border bg-background p-4">
+          <SidebarTrigger />
+        </header>
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </div>
+  </SidebarProvider>
+);
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -44,32 +64,32 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/articles" element={<Articles />} />
-              <Route path="/submit" element={<Submit />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/editorial" element={<Editorial />} />
-              <Route path="/review-assignment/:submissionId" element={<ReviewAssignment />} />
-              <Route path="/reviewer-dashboard" element={<ReviewerDashboard />} />
-              <Route path="/review/:reviewId" element={<ReviewForm />} />
-              <Route path="/publication" element={<Publication />} />
-              <Route path="/production" element={<Production />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/data-management" element={<DataManagement />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/copyright" element={<Copyright />} />
-              <Route path="/editorial-board" element={<EditorialBoard />} />
-              <Route path="/submission-guidelines" element={<SubmissionGuidelines />} />
-              <Route path="/peer-review" element={<PeerReview />} />
-              <Route path="/external-integrations" element={<ExternalIntegrations />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/submission/:submissionId/details" element={<SubmissionDetail />} />
-              <Route path="/submission/:submissionId/reviews" element={<SubmissionReviews />} />
-              <Route path="/submission/:submissionId/revision" element={<RevisionSubmissionPortal />} />
-              <Route path="/requests" element={<ManageRequests />} />
+              <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
+              <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
+              <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
+              <Route path="/dashboard" element={<PageLayout><Dashboard /></PageLayout>} />
+              <Route path="/editorial" element={<PageLayout><Editorial /></PageLayout>} />
+              <Route path="/review-assignment/:submissionId" element={<PageLayout><ReviewAssignment /></PageLayout>} />
+              <Route path="/reviewer-dashboard" element={<PageLayout><ReviewerDashboard /></PageLayout>} />
+              <Route path="/review/:reviewId" element={<PageLayout><ReviewForm /></PageLayout>} />
+              <Route path="/publication" element={<PageLayout><Publication /></PageLayout>} />
+              <Route path="/production" element={<PageLayout><Production /></PageLayout>} />
+              <Route path="/analytics" element={<PageLayout><Analytics /></PageLayout>} />
+              <Route path="/data-management" element={<PageLayout><DataManagement /></PageLayout>} />
+              <Route path="/profile" element={<PageLayout><Profile /></PageLayout>} />
+              <Route path="/about" element={<PageLayout><About /></PageLayout>} />
+              <Route path="/copyright" element={<PageLayout><Copyright /></PageLayout>} />
+              <Route path="/editorial-board" element={<PageLayout><EditorialBoard /></PageLayout>} />
+              <Route path="/submission-guidelines" element={<PageLayout><SubmissionGuidelines /></PageLayout>} />
+              <Route path="/peer-review" element={<PageLayout><PeerReview /></PageLayout>} />
+              <Route path="/external-integrations" element={<PageLayout><ExternalIntegrations /></PageLayout>} />
+              <Route path="/reports" element={<PageLayout><Reports /></PageLayout>} />
+              <Route path="/submission/:submissionId/details" element={<PageLayout><SubmissionDetail /></PageLayout>} />
+              <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
+              <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
+              <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
