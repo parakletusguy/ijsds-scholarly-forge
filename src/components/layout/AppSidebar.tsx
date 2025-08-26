@@ -84,7 +84,7 @@ export const AppSidebar = () => {
   ] : [];
 
   return (
-    <Sidebar className="border-r border-sidebar-border">
+    <Sidebar className="border-r border-sidebar-border fixed z-30">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div 
           className="flex items-center space-x-2 cursor-pointer" 

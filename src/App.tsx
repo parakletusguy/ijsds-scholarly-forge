@@ -44,7 +44,7 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <header className="h-12 flex items-center border-b border-border bg-background p-4">
-          <SidebarTrigger />
+          <SidebarTrigger className="fixed z-30" />
         </header>
         <main className="flex-1">
           {children}
