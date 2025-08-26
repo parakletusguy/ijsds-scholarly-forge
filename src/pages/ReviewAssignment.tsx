@@ -287,7 +287,6 @@ export const ReviewAssignment = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

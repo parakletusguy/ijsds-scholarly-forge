@@ -257,7 +257,6 @@ export const SubmissionDetail = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

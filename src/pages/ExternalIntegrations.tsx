@@ -552,7 +552,6 @@ export const ExternalIntegrations = () => {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
     </div>
   );
 };

@@ -303,7 +303,6 @@ export const ReviewerDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
     </div>
   );
 };

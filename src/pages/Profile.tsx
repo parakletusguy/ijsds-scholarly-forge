@@ -396,7 +396,6 @@ export const Profile = () => {
 
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

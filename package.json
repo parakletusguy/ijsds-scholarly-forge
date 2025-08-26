@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -47,6 +48,7 @@
     "date-fns": "^3.6.0",
     "docshift": "^0.0.73",
     "embla-carousel-react": "^8.3.0",
+    "feather-icons": "^4.29.2",
     "file-saver": "^2.0.5",
     "html-docx-js": "^0.3.1",
     "html-docx-js-typescript": "^0.1.5",
@@ -64,15 +66,22 @@
     "react-pdf-html": "^2.1.3",
     "react-resizable-panels": "^2.1.3",
     "react-router-dom": "^6.26.2",
+    "react-slick": "^0.31.0",
     "recharts": "^2.12.7",
+    "slick-carousel": "^1.8.1",
     "sonner": "^1.5.0",
+    "styled-components": "^6.1.19",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "twin.macro": "^3.4.1",
     "vaul": "^0.9.3",
+    "vite-plugin-babel-macros": "^1.0.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@swc/core": "^1.13.5",
+    "@swc/plugin-styled-components": "^9.0.3",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
@@ -89,6 +98,8 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vite-plugin-babel": "^1.3.2",
+    "vite-plugin-node-polyfills": "^0.24.0"
   }
 }
