@@ -25,17 +25,18 @@ export const DataManagement = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="mb-8">
-             <Button 
+   <div className="relative py-3">
+          <Button 
             variant="outline" 
             onClick={() => navigate(-1)}
-            className="mb-4"
+            className="mb-4 absolute top-1 left-3"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
+        </div>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Data Management</h1>
           <p className="text-muted-foreground">
             Export data, generate reports, and monitor system health

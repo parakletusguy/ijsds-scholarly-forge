@@ -173,7 +173,16 @@ export const ExternalIntegrations = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+  <div className="relative py-3">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4 absolute top-1 left-3"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">External Integrations</h1>
@@ -181,15 +190,6 @@ export const ExternalIntegrations = () => {
             Manage integrations with DOAJ, AJOL, and other journal directories
           </p>
         </div>
-        <Button 
-                    variant="outline" 
-                    onClick={() => navigate(-1)}
-                    className="mb-4"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>

@@ -11,8 +11,16 @@ export const SubmissionGuidelines = () => {
   const navigate = useNavigate()
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      
+            <div className="relative py-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4 absolute top-1 left-3"
+                    >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="text-center space-y-4">
@@ -21,15 +29,6 @@ export const SubmissionGuidelines = () => {
               Guidelines for authors submitting to the International Journal for Social Work and Development Studies
             </p>
           </div>
-          <Button 
-                      variant="outline" 
-                      onClick={() => navigate(-1)}
-                      className="mb-4"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back
-                    </Button>
-
           <div className="grid gap-6">
             <Card>
               <CardHeader>
@@ -244,8 +243,6 @@ export const SubmissionGuidelines = () => {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 };

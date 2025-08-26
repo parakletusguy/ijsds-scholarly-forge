@@ -23,6 +23,16 @@ const EditorialBoard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
+      <div className="relative py-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate(-1)}
+                  className="mb-4 absolute top-1 left-3"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </div>
       <section className="py-16 px-4 text-center bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -32,14 +42,7 @@ const EditorialBoard = () => {
             International Journal of Social Work and Development Studies
           </p>
         </div>
-        <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+     
       </section>
 
       {/* Editorial Board Content */}

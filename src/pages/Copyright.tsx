@@ -9,6 +9,7 @@ const Copyright = () => {
   const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-background">
+      
       {/* Hero Section */}
       <section className="py-16 px-4 text-center bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="container mx-auto max-w-4xl">
@@ -19,14 +20,6 @@ const Copyright = () => {
             International Journal of Social Work and Development Studies
           </p>
         </div>
-           <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
       </section>
 
       {/* Copyright Notice Content */}

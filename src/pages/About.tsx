@@ -12,7 +12,6 @@ export const About = () => {
   const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-background">
-      <Header/>
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-primary/5 to-background py-20">
         <div className="container mx-auto px-4 text-center">

@@ -166,7 +166,6 @@ export const ManageRequests = () => {
 
 
     return (<div className="p-8">
-        <Header/>
       <h1 className="text-3xl font-bold mb-6">Access Requests</h1>
 
       <Tabs defaultValue="reviewers" className="w-full min-h-[300px]">

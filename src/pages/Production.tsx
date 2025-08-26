@@ -95,20 +95,27 @@ export const Production = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+              < div className="relative py-3">
+                      <Button 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                      className="mb-4 absolute top-1 left-3"
+                        >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back
+                      </Button>
+                      </div>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Production Workflow</h1>
@@ -116,14 +123,6 @@ export const Production = () => {
             Manage copyediting, proofreading, typesetting, and final production of accepted articles
           </p>
         </div>
-        <Button 
-                    variant="outline" 
-                    onClick={() => navigate(-1)}
-                    className="mb-4"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Articles List */}
