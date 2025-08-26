@@ -10,17 +10,17 @@ import SvgDotPattern from "../../images/dot-pattern.svg";
 const Container = tw.div`relative`;
 const TwoColumn = tw.div`flex flex-col md:flex-row justify-between max-w-screen-xl mx-auto py-12 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8`;
 const Column = tw.div`w-full max-w-md mx-auto md:max-w-none md:mx-0`;
-const ImageColumn = tw(Column)`md:w-5/12 flex-shrink-0 h-80 md:h-auto relative`;
+const ImageColumn = tw(Column)`md:w-[45%] flex-shrink-0 h-80 md:h-auto`;
 const TextColumn = styled(Column)<any>(props => [
-  tw`md:w-7/12 mt-12 md:mt-0`,
-  props.textOnLeft ? tw`md:mr-12 lg:mr-16 md:order-first` : tw`md:ml-12 lg:ml-16 md:order-last`
+  tw`md:w-[45%] mt-12 md:mt-0 md:ml-[40px]`,
+  props.textOnLeft ? tw`md:mr-12 lg:mr-16 md:order-first md:w-[45%] md:ml-[40px]` : tw`md:ml-12 lg:ml-16 md:order-last md:w-[45%]`
 ]);
 
 const Image = styled.div<any>(props => [
   `background-image: url("${props.imageSrc}");`,
   tw`rounded bg-contain bg-no-repeat bg-center h-full`
 ]);
-const TextContent = tw.div`lg:py-8 text-center md:text-left`;
+const TextContent = tw.div`lg:py-8 text-center md:text-left md:ml-[50px]`;
 
 const Subheading = tw(SubheadingBase)`text-center md:text-left`;
 const Heading = tw(
@@ -48,7 +48,7 @@ export const MainFeatures = ({
   ),
   description = "The International Journal On Social Work and Development Studies (IJSDS) is a peer-reviewed journal dedicated to advancing knowledge and practice in social work and development studies. Our aim is to provide a platform for researchers, practitioners, and policymakers to share their experiences, insights, and research findings.",
   primaryButtonText = "Learn More",
-  primaryButtonUrl = "https://timerse.com",
+  primaryButtonUrl = "https://ijsds.org/about",
   imageSrc = StatsIllustrationSrc,
   imageCss = null,
   imageContainerCss = null,

@@ -3,7 +3,7 @@ import tw from "twin.macro";
 import styled from "styled-components";
 import { SectionHeading, Subheading as SubheadingBase } from "../misc/Headings.js";
 import { PrimaryButton as PrimaryButtonBase } from "../misc/Buttons.js";
-import TeamIllustrationSrc from "../../images/2741857.jpg";
+import TeamIllustrationSrc from "../../images/4895162-removebg-preview.png";
 import { Briefcase, DollarSign } from 'lucide-react'; // Import icons
 
 const Container = tw.div`relative`;
