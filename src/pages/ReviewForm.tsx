@@ -374,7 +374,6 @@ export const ReviewForm = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

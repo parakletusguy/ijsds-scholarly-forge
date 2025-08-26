@@ -265,7 +265,6 @@ export const Production = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

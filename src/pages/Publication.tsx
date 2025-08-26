@@ -293,7 +293,6 @@ export const Publication = () => {
       
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

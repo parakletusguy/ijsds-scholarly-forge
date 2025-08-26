@@ -427,7 +427,6 @@ export const Editorial = () => {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
     </div>
   );
 };

@@ -34,6 +34,7 @@ import { Reports } from "./pages/Reports";
 import { RevisionSubmissionPortal } from "./components/revisions/RevisionSubmissionPortal";
 import NotFound from "./pages/NotFound";
 import { ManageRequests } from "./pages/approveRequest";
+import { Landing } from "./pages/landingPage";
 
 const queryClient = new QueryClient();
 
@@ -63,7 +64,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
               <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
               <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
@@ -88,6 +89,7 @@ const App = () => (
               <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
               <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
               <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
+              <Route path="/landing" element={<Landing/>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>

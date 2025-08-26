@@ -138,7 +138,6 @@ export const DataManagement = () => {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
     </div>
   );
 };
