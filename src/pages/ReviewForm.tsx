@@ -163,11 +163,9 @@ export const ReviewForm = () => {
   if (loading || loadingData) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <LoadingSpinner size="lg" text="Loading review details..." />
         </main>
-        <Footer />
       </div>
     );
   }
@@ -175,14 +173,29 @@ export const ReviewForm = () => {
   if (!review) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+              <div className="relative py-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4 absolute top-1 left-3"
+                    >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">Review Not Found</h2>
-            <Button onClick={() => navigate('/reviewer-dashboard')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
+                <div className="relative py-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4 absolute top-1 left-3"
+                    >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
           </div>
         </main>
         <Footer />

@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProcessinFeeDialog } from '@/components/submission/paystackDialogBox';
 import { toast } from '@/hooks/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
 
 interface Submission {
@@ -188,7 +189,16 @@ export const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Header/>
+      <div className="relative py-3">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="mb-4 absolute top-1 left-3"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
       <div className="space-y-6  mt-6">
         <div className="flex items-center justify-between">
           <div>
@@ -352,7 +362,6 @@ export const Dashboard = () => {
       </div>
       {/* <processinFeeDialog open={open} setopen={setopen} userData={userdat}/> */}
       <ProcessinFeeDialog  open={open} setopen={setopen} userData={userdat}/>
-      <Footer/>
     </div>
   );
 };

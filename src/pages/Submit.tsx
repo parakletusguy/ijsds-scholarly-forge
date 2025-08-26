@@ -349,6 +349,16 @@ export const Submit = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+                < div className="relative py-6">
+                      <Button 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                      className="mb-4 absolute top-1 left-3"
+                        >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back
+                      </Button>
+                      </div>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -358,15 +368,6 @@ export const Submit = () => {
                 Submit your research article for peer review and publication in IJSDS
               </p>
             </div>
-            <Button 
-                        variant="outline" 
-                        onClick={() => navigate(-1)}
-                        className="mb-4"
-                      >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back
-                      </Button>
-            
             {/* Auto-save status indicator */}
             <div className="text-sm text-muted-foreground flex items-center gap-2">
               {autoSaving ? (

@@ -163,11 +163,9 @@ export const Editorial = () => {
   if (loading || !isEditor) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="animate-pulse">Loading...</div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -179,16 +177,17 @@ export const Editorial = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+   <div className="relative py-3">
+             <Button 
+               variant="outline" 
+               onClick={() => navigate(-1)}
+               className="mb-4 absolute top-1 left-3"
+             >
+               <ArrowLeft className="h-4 w-4 mr-2" />
+               Back
+             </Button>
+           </div>
       <main className="flex-1 container mx-auto px-4 py-8">
-           <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Editorial Dashboard</h1>
           <p className="text-muted-foreground">Manage journal submissions and reviews</p>

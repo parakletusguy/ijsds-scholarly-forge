@@ -139,11 +139,9 @@ export const ReviewAssignment = () => {
   if (loading || loadingData) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="animate-pulse">Loading...</div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -151,7 +149,16 @@ export const ReviewAssignment = () => {
   if (!submission) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+              <div className="relative py-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4 absolute top-1 left-3"
+                    >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">Submission Not Found</h2>

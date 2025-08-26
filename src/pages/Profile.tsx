@@ -193,18 +193,25 @@ export const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <div className="flex-1 flex items-center justify-center">
           <div>Loading...</div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+                < div className="relative py-3">
+                      <Button 
+                      variant="outline" 
+                      onClick={() => navigate(-1)}
+                      className="mb-4 absolute top-1 left-3"
+                        >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back
+                      </Button>
+                      </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
@@ -213,15 +220,6 @@ export const Profile = () => {
               Manage your personal information and academic profile
             </p>
           </div>
-          <Button 
-                      variant="outline" 
-                      onClick={() => navigate(-1)}
-                      className="mb-4"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back
-                    </Button>
-
           <div className="space-y-6">
             {/* Personal Information */}
             <Card>

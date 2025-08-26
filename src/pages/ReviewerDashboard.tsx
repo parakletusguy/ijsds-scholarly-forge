@@ -127,11 +127,9 @@ export const ReviewerDashboard = () => {
   if (loading || !isReviewer) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="animate-pulse">Loading...</div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -141,21 +139,21 @@ export const ReviewerDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+                      <div className="relative py-3">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate(-1)}
+                          className="mb-4 absolute top-1 left-3"
+                          >
+                          <ArrowLeft className="h-4 w-4 mr-2" />
+                          Back
+                        </Button>
+                      </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Reviewer Dashboard</h1>
           <p className="text-muted-foreground">Manage your assigned reviews</p>
         </div>
-        <Button 
-                    variant="outline" 
-                    onClick={() => navigate(-1)}
-                    className="mb-4"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

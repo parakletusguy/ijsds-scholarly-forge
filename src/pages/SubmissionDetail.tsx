@@ -103,11 +103,9 @@ export const SubmissionDetail = () => {
   if (loading || loadingData) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1">
           <LoadingSpinner size="lg" text="Loading submission details..." />
         </main>
-        <Footer />
       </div>
     );
   }
@@ -115,35 +113,39 @@ export const SubmissionDetail = () => {
   if (!submission) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">Submission Not Found</h2>
-            <Button onClick={() => navigate('/dashboard')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
+                <div className="relative py-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4 absolute top-1 left-3"
+                    >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+          <div className="relative py-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="mb-4 absolute top-1 left-3"
+                    >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-foreground">
               Submission Details
