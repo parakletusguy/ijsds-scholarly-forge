@@ -120,14 +120,16 @@ export const Articles = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mb-4 relative left-3"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+  < div className="relative py-3">
+                <Button 
+                variant="outline" 
+                onClick={() => navigate(-1)}
+                className="mb-4 absolute top-1 left-3"
+                  >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+                </div>
         <div className="flex-1 container mx-auto px-4 py-8">
              
           <div className="space-y-6">
@@ -157,7 +159,16 @@ export const Articles = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      < div className="relative py-3">
+                <Button 
+                variant="outline" 
+                onClick={() => navigate(-1)}
+                className="mb-4 absolute top-1 left-3"
+                  >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+                </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div>
@@ -264,7 +275,6 @@ export const Articles = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

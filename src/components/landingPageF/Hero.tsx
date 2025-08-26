@@ -10,7 +10,7 @@ const Container = styled.div`
   background-image: url("https://images.unsplash.com/photo-1632152053988-e94d3d77829b?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
 `;
 
-const OpacityOverlay = tw.div`z-10 absolute w-[100%] inset-0 bg-[#FBE5B6] opacity-30`;
+const OpacityOverlay = tw.div`z-10 absolute w-[100%] h-[106%] inset-0 bg-[#FBE5B6] opacity-30`;
 
 const HeroContainer = tw.div`z-20 absolute h-full`;
 
@@ -43,7 +43,7 @@ export const Hero = () => {
       <HeroContainer className="z-10">
         <div className=" h-full flex flex-col items-center justify-center backdrop-blur-[4px] p-4 lg:p-8">
           <img src="" alt="" />
-          <div className="w-full sm:w-11/12 md:w-3/4 lg:w-3/5 xl:w-2/5 text-center px-4">
+          <div className="w-full sm:w-11/12 md:w-3/4 lg:w-3/5 xl:w-[80%] text-center px-4">
             <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold">
               International Journal On Social Work and Development Studies
             </p>
@@ -52,7 +52,7 @@ export const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center my-6">
-              <Button size="lg" className="bg-[#561217] border-2 border-white" onClick={() => navigate('/articles')}>
+              <Button size="lg" className="bg-[#561217] border-[1px] border-white" onClick={() => navigate('/articles')}>
                 Browse Articles
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

@@ -15,7 +15,7 @@ const Column = styled.div`
 `;
 
 const Card = styled.div`
-  ${tw`flex flex-col mx-auto max-w-xs items-center px-6 py-10 rounded-lg mt-12 border border-2 border-black bg-opacity-50`}
+  ${tw`flex flex-col mx-auto max-w-xs items-center px-6 py-10 rounded-lg mt-12 border border-2 border-gray-300 bg-white bg-opacity-50`}
   .imageContainer {
     ${tw`text-center rounded-full p-1 `}
     img {

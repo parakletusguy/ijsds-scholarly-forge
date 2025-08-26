@@ -22,7 +22,7 @@ import {
   Globe,
   CheckSquare
 } from 'lucide-react';
-import icon from "../../../public/WhatsApp_Image_2025-08-12_at_1.50.31_PM-removebg-preview.png";
+import icon from "/WhatsApp_Image_2025-08-26_at_1.13.52_PM-removebg-preview.png";
 import {
   Sidebar,
   SidebarContent,
@@ -84,8 +84,8 @@ export const AppSidebar = () => {
   ] : [];
 
   return (
-    <Sidebar className="border-r border-sidebar-border fixed z-30">
-      <SidebarHeader className="border-b border-sidebar-border p-4">
+    <Sidebar className="border-r border-sidebar-border fixed z-30 rounded-sm">
+      <SidebarHeader className="border-sidebar-border">
         <div 
           className="flex items-center space-x-2 cursor-pointer" 
           onClick={() => navigate('/')}
@@ -93,12 +93,12 @@ export const AppSidebar = () => {
           <img 
             src={icon} 
             alt="ijsds_icon" 
-            className={open ? 'w-24 h-auto' : 'w-8 h-8'} 
+            className={open ? 'w-50 h-auto' : 'w-8 h-8'} 
           />
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className='mt-[-45px] border-t'>
         <SidebarGroup>
           <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
