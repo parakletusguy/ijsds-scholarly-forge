@@ -85,7 +85,7 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar className="border-r border-sidebar-border fixed z-30 rounded-sm">
-      <SidebarHeader className="border-sidebar-border">
+      <SidebarHeader className="border-sidebar-border mt-[-35px]">
         <div 
           className="flex items-center space-x-2 cursor-pointer" 
           onClick={() => navigate('/')}
