@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { BookOpen, Users, Globe, ArrowRight, Calendar, User } from 'lucide-react';
 
 const Container = styled.div`
-  ${tw`bg-center bg-cover w-screen `}
+  ${tw`bg-center bg-cover `}
   background-image: url("https://images.unsplash.com/photo-1632152053988-e94d3d77829b?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
 `;
 
-const OpacityOverlay = tw.div`z-10 absolute inset-0 bg-[#FBE5B6] opacity-30`;
+const OpacityOverlay = tw.div`z-10 absolute w-[100%] inset-0 bg-[#FBE5B6] opacity-30`;
 
 const HeroContainer = tw.div`z-20 absolute h-full`;
 
@@ -39,9 +39,9 @@ export const Hero = () => {
 
   return (
     <Container className="h-screen overflow-hidden">
-      <OpacityOverlay />
+      <OpacityOverlay className="w-[100%]" />
       <HeroContainer className="z-10">
-        <div className="w-screen h-full flex flex-col items-center justify-center backdrop-blur-[4px] p-4 lg:p-8">
+        <div className=" h-full flex flex-col items-center justify-center backdrop-blur-[4px] p-4 lg:p-8">
           <img src="" alt="" />
           <div className="w-full sm:w-11/12 md:w-3/4 lg:w-3/5 xl:w-2/5 text-center px-4">
             <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold">
