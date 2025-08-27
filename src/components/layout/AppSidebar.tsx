@@ -84,8 +84,8 @@ export const AppSidebar = () => {
   ] : [];
 
   return (
-    <Sidebar className="border-r border-sidebar-border fixed z-30 rounded-sm">
-      <SidebarHeader className="border-sidebar-border mt-[-35px]">
+    <Sidebar className="border-r border-sidebar-border fixed z-30 rounded-sm ">
+      <SidebarHeader className="border-sidebar-border mt-[-35px] bg-[#FBE5B6] ">
         <div 
           className="flex items-center space-x-2 cursor-pointer" 
           onClick={() => navigate('/')}
@@ -98,7 +98,7 @@ export const AppSidebar = () => {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className='mt-[-45px] border-t'>
+      <SidebarContent className='mt-[-45px] border-t bg-[#FBE5B6] '>
         <SidebarGroup>
           <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -124,7 +124,7 @@ export const AppSidebar = () => {
         {user && (
           <>
             <SidebarSeparator />
-            <SidebarGroup>
+            <SidebarGroup >
               <SidebarGroupLabel>User Dashboard</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -149,7 +149,7 @@ export const AppSidebar = () => {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
+      <SidebarFooter className="border-t border-sidebar-border p-4 bg-[#FBE5B6]">
         <div className="flex items-center gap-2 mb-4">
           <HelpSystem />
           {user && <NotificationBell />}

@@ -46,7 +46,8 @@ All colors MUST be HSL.
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    /* --sidebar-accent: 240 4.8% 95.9%; */
+    --sidebar-accent: 40, 90.18%, 68.04%;
 
     --sidebar-accent-foreground: 240 5.9% 10%;
 
