@@ -62,7 +62,8 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <div className="font-Roboto">
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={<PageLayout><Landing /></PageLayout>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
@@ -94,6 +95,7 @@ const App = () => (
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
           </BrowserRouter>
+          </div>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -61,7 +61,7 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -104,7 +104,11 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s ease-out',
 				'slide-up': 'slide-up 0.3s ease-out'
+			},
+			fontFamily:{
+				Roboto:['Roboto Slab','sans-serif']
 			}
+
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
