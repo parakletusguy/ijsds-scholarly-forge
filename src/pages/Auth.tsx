@@ -50,7 +50,7 @@ export const Auth = () => {
         } else {
           toast({
             title: 'Account created successfully',
-            description: 'Please check your email to verify your account.',
+            description: 'Please check your email to verify your account and welcome information.',
           });
           setMode('signin');
         }
