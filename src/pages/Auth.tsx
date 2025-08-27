@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { signIn, signUp, signInWithOrcid } from '@/lib/auth';
+import { sendWelcomeEmail, sendAuthorWelcomeEmail } from '@/lib/emailService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
@@ -40,7 +41,7 @@ export const Auth = () => {
           is_editor: role === 'editor',
           is_reviewer: role === 'reviewer' || role === 'editor'
         };
-        const { error } = await signUp(email, password, fullName, roleConfig);
+        const { data, error } = await signUp(email, password, fullName, roleConfig);
         if (error) {
           toast({
             title: 'Error',
@@ -48,6 +49,19 @@ export const Auth = () => {
             variant: 'destructive',
           });
         } else {
+          // Send welcome email based on role
+          if (data.user) {
+            try {
+              if (role === 'author') {
+                await sendAuthorWelcomeEmail(data.user.id, fullName, email);
+              } else {
+                await sendWelcomeEmail(data.user.id, fullName, email);
+              }
+            } catch (emailError) {
+              console.error('Failed to send welcome email:', emailError);
+              // Don't block signup if email fails
+            }
+          }
           toast({
             title: 'Account created successfully',
             description: 'Please check your email to verify your account and welcome information.',

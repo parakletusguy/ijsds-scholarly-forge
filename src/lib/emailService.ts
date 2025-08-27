@@ -22,6 +22,16 @@ export const sendEmailNotification = async (data: EmailNotificationData) => {
       throw error;
     }
 
+    // If userId is provided, also create an in-app notification
+    if (data.userId) {
+      await supabase.from('notifications').insert({
+        user_id: data.userId,
+        title: data.subject,
+        message: data.htmlContent ? data.htmlContent.replace(/<[^>]*>/g, '').substring(0, 200) + '...' : 'You have a new email notification',
+        type: 'info'
+      });
+    }
+
     return { success: true };
   } catch (error) {
     console.error('Failed to send email notification:', error);
