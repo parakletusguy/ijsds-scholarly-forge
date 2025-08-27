@@ -219,3 +219,66 @@ export const generateDeadlineReminderEmail = (reviewerName: string, submissionTi
     </html>
   `;
 };
+
+// Function to notify all admins about main actions
+export const notifyAdmins = async (title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  try {
+    // Get all admin users
+    const { data: admins, error } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('is_admin', true);
+
+    if (error) throw error;
+
+    if (!admins || admins.length === 0) {
+      console.log('No admin users found');
+      return;
+    }
+
+    // Send email and in-app notifications to all admins
+    for (const admin of admins) {
+      // Send email notification
+      await sendEmailNotification({
+        to: admin.email,
+        subject: title,
+        htmlContent: `
+          <h2>${title}</h2>
+          <p>Dear ${admin.full_name || 'Admin'},</p>
+          <p>${message}</p>
+          <br>
+          <p>Best regards,<br>IJSDS Editorial System</p>
+        `,
+        userId: admin.id
+      });
+
+      // In-app notification is already handled by sendEmailNotification function
+    }
+  } catch (error) {
+    console.error('Error notifying admins:', error);
+  }
+};
+
+export const notifyAdminsSubmission = async (submissionTitle: string, authorName: string) => {
+  await notifyAdmins(
+    'New Article Submission',
+    `A new article "${submissionTitle}" has been submitted by ${authorName}. Please review and assign reviewers.`,
+    'info'
+  );
+};
+
+export const notifyAdminsRevisionComplete = async (submissionTitle: string, authorName: string) => {
+  await notifyAdmins(
+    'Revision Submitted',
+    `${authorName} has submitted revised version of "${submissionTitle}". Please review the revision.`,
+    'info'
+  );
+};
+
+export const notifyAdminsAcceptance = async (submissionTitle: string, authorName: string) => {
+  await notifyAdmins(
+    'Article Accepted',
+    `The article "${submissionTitle}" by ${authorName} has been accepted and is ready for production workflow.`,
+    'success'
+  );
+};

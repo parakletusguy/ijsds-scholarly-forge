@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, Calendar, FileText, Globe, Save, Upload } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,25 +37,57 @@ export const Publication = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
-  // const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [processed, setProcessed] = useState<Article[] | null>([])
-  const [published, setPublished] = useState<Article[] | null>([])
+  const [processed, setProcessed] = useState<Article[] | null>([]);
+  const [published, setPublished] = useState<Article[] | null>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [bulkVolume, setBulkVolume] = useState('');
+  const [bulkIssue, setBulkIssue] = useState('');
 
-  const [publicationData, setPublicationData] = useState({
-    doi: '',
-    volume: '',
-    issue: '',
-    pageStart: '',
-    pageEnd: '',
-    publicationDate: '',
-  });
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAcceptedArticles();
-  }, []);
+    checkAdminAccess();
+  }, [user]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAcceptedArticles();
+    }
+  }, [isAdmin]);
+
+  const checkAdminAccess = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (!profile?.is_admin) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page",
+          variant: "destructive",
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      setIsAdmin(true);
+    } catch (error) {
+      console.error('Error checking admin access:', error);
+      navigate('/dashboard');
+    }
+  };
 
   const fetchAcceptedArticles = async () => {
     try {
@@ -98,59 +130,91 @@ export const Publication = () => {
   const generateDOI = () => {
     const randomId = Math.random().toString(36).substring(2, 8);
     const doi = `10.1234/journal.${new Date().getFullYear()}.${randomId}`;
-    setPublicationData(prev => ({ ...prev, doi }));
   };
 
-  const handlePublish = async () => {
-    if (processed.length == 0) return;
+  const handleBulkPublish = async () => {
+    if (!bulkVolume || !bulkIssue) {
+      toast({
+        title: "Error",
+        description: "Please enter both volume and issue numbers",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const matchingArticles = processed.filter(
+      article => 
+        article.volume?.toString() === bulkVolume && 
+        article.issue?.toString() === bulkIssue
+    );
+
+    if (matchingArticles.length === 0) {
+      toast({
+        title: "No Articles Found",
+        description: `No processed articles found for Volume ${bulkVolume}, Issue ${bulkIssue}`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setUpdating(true);
-    processed.forEach( async (processedArticles) => {
-      try {
-      const updateData: any = {
+    try {
+      const updateData = {
         status: 'published',
-        publication_date: publicationData.publicationDate || new Date().toISOString(),
+        publication_date: new Date().toISOString(),
       };
 
       const { error } = await supabase
         .from('articles')
         .update(updateData)
-        .eq('id', processedArticles.id);
+        .eq('volume', parseInt(bulkVolume))
+        .eq('issue', parseInt(bulkIssue))
+        .eq('status', 'processed');
 
       if (error) throw error;
 
-      // Create notification for author
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: processedArticles.corresponding_author_email, // This should be user_id in real implementation
-          title: 'Article Published',
-          message: `Your article "${processedArticles.title}" has been published!`,
-          type: 'success'
-        });
+      // Create notifications for all published article authors
+      for (const article of matchingArticles) {
+        // Get the user ID from the corresponding author email
+        const { data: authorProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', article.corresponding_author_email)
+          .single();
+
+        if (authorProfile) {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: authorProfile.id,
+              title: 'Article Published',
+              message: `Your article "${article.title}" has been published in Volume ${bulkVolume}, Issue ${bulkIssue}!`,
+              type: 'success'
+            });
+        }
+      }
 
       toast({
         title: "Success",
-        description: "Article published successfully",
+        description: `Published ${matchingArticles.length} articles from Volume ${bulkVolume}, Issue ${bulkIssue}`,
       });
 
       fetchAcceptedArticles();
-      // setSelectedArticle(null);
+      setBulkVolume('');
+      setBulkIssue('');
     } catch (error) {
-      console.error('Error publishing article:', error);
+      console.error('Error bulk publishing articles:', error);
       toast({
         title: "Error",
-        description: "Failed to publish article",
+        description: "Failed to publish articles",
         variant: "destructive",
       });
     } finally {
       setUpdating(false);
     }
-    })
-    
   };
 
-  if (loading) {
+  if (loading || !isAdmin) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -194,53 +258,105 @@ export const Publication = () => {
           <CardContent>
            
 
-             <TabsContent value='processed' className='flex flex-col items-center'>
-              <div className="space-y-4 w-[100%] mb-7">
-                {processed.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    No processed articles found
-                  </p>
-                ) : (
-                  processed.map((article) => (
-                    <div
-                      key={article.id}
-                      // className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                      //   selectedArticle?.id === article.id 
-                      //     ? 'border-primary bg-primary/5' 
-                      //     : 'hover:bg-muted/50'
-                      // }`}
-                      // onClick={() => handleArticleSelect(article)}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-medium line-clamp-2">{article.title}</h3>
-                        <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
-                          {article.status}
-                        </Badge>
+              <TabsContent value='processed' className='flex flex-col items-center'>
+                {/* Bulk Publishing Controls */}
+                <Card className="w-full mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Bulk Publish by Volume & Issue</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4 items-end">
+                      <div className="flex-1">
+                        <Label htmlFor="volume">Volume Number</Label>
+                        <Input
+                          id="volume"
+                          type="number"
+                          placeholder="e.g., 15"
+                          value={bulkVolume}
+                          onChange={(e) => setBulkVolume(e.target.value)}
+                        />
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Authors: {Array.isArray(article.authors) 
-                          ? article.authors.map((a: any) => a.name).join(', ')
-                          : 'Unknown'
-                        }
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
-                      </p>
-                      {article.doi && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          DOI: {article.doi}
-                        </p>
-                      )}
+                      <div className="flex-1">
+                        <Label htmlFor="issue">Issue Number</Label>
+                        <Input
+                          id="issue"
+                          type="number"
+                          placeholder="e.g., 3"
+                          value={bulkIssue}
+                          onChange={(e) => setBulkIssue(e.target.value)}
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleBulkPublish}
+                        disabled={updating || !bulkVolume || !bulkIssue}
+                        className="px-6"
+                      >
+                        {updating ? (
+                          <>Publishing...</>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Publish Issue
+                          </>
+                        )}
+                      </Button>
                     </div>
-                  ))
-                )}
-              </div>
-              <Button className='m-auto w-full' onClick={() => {handlePublish()}} style={{backgroundColor:updating?'#916E99':null}} >
-                {updating?
-                <p>  ....publishing</p>:
-                <p className='flex'><Upload className='max-w-sm mx-2' />publish all processed article</p>}
-              </Button>
-            </TabsContent>
+                    {bulkVolume && bulkIssue && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {processed.filter(
+                          article => 
+                            article.volume?.toString() === bulkVolume && 
+                            article.issue?.toString() === bulkIssue
+                        ).length} articles will be published for Volume {bulkVolume}, Issue {bulkIssue}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Articles List */}
+                <div className="space-y-4 w-[100%]">
+                  {processed.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No processed articles found
+                    </p>
+                  ) : (
+                    processed.map((article) => (
+                      <div
+                        key={article.id}
+                        className="p-4 rounded-lg border"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-medium line-clamp-2">{article.title}</h3>
+                          <div className="flex gap-2">
+                            {article.volume && article.issue && (
+                              <Badge variant="outline">
+                                Vol {article.volume}, Issue {article.issue}
+                              </Badge>
+                            )}
+                            <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
+                              {article.status}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Authors: {Array.isArray(article.authors) 
+                            ? article.authors.map((a: any) => a.name).join(', ')
+                            : 'Unknown'
+                          }
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
+                        </p>
+                        {article.doi && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            DOI: {article.doi}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </TabsContent>
 
 
             <TabsContent value='published'>
