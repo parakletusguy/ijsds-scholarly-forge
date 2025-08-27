@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { HelpSystem } from '@/components/help/HelpSystem';
 import { 
@@ -44,6 +46,36 @@ export const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { open } = useSidebar();
+  const [userRole, setUserRole] = useState<{
+    is_admin: boolean;
+    is_editor: boolean;
+    is_reviewer: boolean;
+  }>({ is_admin: false, is_editor: false, is_reviewer: false });
+
+  useEffect(() => {
+    if (user) {
+      fetchUserRole();
+    }
+  }, [user]);
+
+  const fetchUserRole = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('is_admin, is_editor, is_reviewer')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      if (profile) {
+        setUserRole(profile);
+      }
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -69,19 +101,43 @@ export const AppSidebar = () => {
     { title: 'About', url: '/about', icon: Info },
   ];
 
-  const userNavItems = user ? [
-    { title: 'Submit Article', url: '/submit', icon: PenTool },
-    { title: 'Dashboard', url: '/dashboard', icon: FileText },
-    { title: 'Editorial', url: '/editorial', icon: FileCheck },
-    { title: 'Reviewer', url: '/reviewer-dashboard', icon: Eye },
-    { title: 'Production', url: '/production', icon: Wrench },
-    { title: 'Publication', url: '/publication', icon: Globe },
-    { title: 'External Integrations', url: '/external-integrations', icon: Settings },
-    { title: 'Data Management', url: '/data-management', icon: Database },
-    { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-    { title: 'Edit Profile', url: '/profile', icon: User },
-    { title: 'Check Requests', url: '/requests', icon: CheckSquare },
-  ] : [];
+  // Dynamic navigation based on user roles
+  const getNavItemsForRole = () => {
+    if (!user) return [];
+
+    const baseItems = [
+      { title: 'Submit Article', url: '/submit', icon: PenTool, roles: ['author', 'editor', 'reviewer', 'admin'] },
+      { title: 'Dashboard', url: '/dashboard', icon: FileText, roles: ['author', 'editor', 'reviewer', 'admin'] },
+      { title: 'Edit Profile', url: '/profile', icon: User, roles: ['author', 'editor', 'reviewer', 'admin'] },
+    ];
+
+    const roleSpecificItems = [
+      // Reviewer items (visible to reviewers, editors, admins)
+      { title: 'Reviewer Dashboard', url: '/reviewer-dashboard', icon: Eye, roles: ['reviewer', 'editor', 'admin'] },
+      
+      // Editor items (visible to editors and admins)
+      { title: 'Editorial', url: '/editorial', icon: FileCheck, roles: ['editor', 'admin'] },
+      { title: 'Production', url: '/production', icon: Wrench, roles: ['editor', 'admin'] },
+      
+      // Admin-only items
+      { title: 'Publication', url: '/publication', icon: Globe, roles: ['admin'] },
+      { title: 'External Integrations', url: '/external-integrations', icon: Settings, roles: ['admin'] },
+      { title: 'Data Management', url: '/data-management', icon: Database, roles: ['admin'] },
+      { title: 'Analytics', url: '/analytics', icon: BarChart3, roles: ['admin'] },
+      { title: 'Check Requests', url: '/requests', icon: CheckSquare, roles: ['admin'] },
+    ];
+
+    const allItems = [...baseItems, ...roleSpecificItems];
+    
+    return allItems.filter(item => {
+      if (userRole.is_admin) return item.roles.includes('admin');
+      if (userRole.is_editor) return item.roles.includes('editor');
+      if (userRole.is_reviewer) return item.roles.includes('reviewer');
+      return item.roles.includes('author');
+    });
+  };
+
+  const userNavItems = getNavItemsForRole();
 
   return (
     <Sidebar className="border-r border-sidebar-border fixed z-30 rounded-sm ">
