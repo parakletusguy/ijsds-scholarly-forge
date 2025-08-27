@@ -62,10 +62,10 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <div className="font-Roboto">
+          <div className="font-Roboto bg-[#ffefcc]">
             <BrowserRouter>
             <Routes>
-              <Route path="/" element={<PageLayout><Landing /></PageLayout>} />
+              <Route path="/" element={<Index/>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
               <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
               <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />

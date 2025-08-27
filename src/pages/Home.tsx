@@ -54,9 +54,9 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen my-12">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-background py-20">
+      <section className="">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <BookOpen className="h-16 w-16 text-primary mr-4" />
@@ -83,7 +83,7 @@ export const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Why Choose IJSDS?</h2>
           
@@ -142,8 +142,8 @@ export const Home = () => {
               {[1, 2, 3].map(i => (
                 <Card key={i}>
                   <CardHeader>
-                    <div className="h-6 bg-muted animate-pulse rounded" />
-                    <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                    <div className="h-6 animate-pulse rounded" />
+                    <div className="h-4  animate-pulse rounded w-3/4" />
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
