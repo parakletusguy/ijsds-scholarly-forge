@@ -11,9 +11,9 @@ import { useNavigate } from 'react-router-dom';
 export const About = () => {
   const navigate = useNavigate()
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-background py-20">
+      <section className=" from-primary/5 to-background py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <BookOpen className="h-16 w-16 text-primary mr-4" />
@@ -74,7 +74,7 @@ export const About = () => {
       </section>
 
       {/* Objectives Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-16 b">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Objectives</h2>
           
