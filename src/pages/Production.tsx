@@ -223,12 +223,12 @@ export const Production = () => {
                   />
                 </TabsContent> */}
 
-                <TabsContent value="pdf">
+                {/* <TabsContent value="pdf">
                   <PDFGeneration 
                     article={selectedArticle} 
                     onUpdate={fetchProductionArticles}
                   />
-                </TabsContent>
+                </TabsContent> */}
 
                 <TabsContent value="issues">
                   <IssueCompilation 

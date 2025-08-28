@@ -24,7 +24,7 @@ import {
   Globe,
   CheckSquare
 } from 'lucide-react';
-import icon from "/WhatsApp_Image_2025-08-26_at_1.13.52_PM-removebg-preview.png";
+import icon from "/public/Logo_Black_Edited-removebg-preview.png";
 import {
   Sidebar,
   SidebarContent,

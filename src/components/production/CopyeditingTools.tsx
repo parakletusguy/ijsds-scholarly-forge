@@ -10,7 +10,7 @@ import { Edit3, Save, FileText, Clock, User, CheckCircle, Eye, Download, Car, Fi
 import { TextEditor } from '../editor/joditEditor';
 import DownloadDocx from '@/lib/html-docx';
 import { spellCheck } from '@/lib/languagetool';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet  } from '@react-pdf/renderer';
 import { PdfFile } from './html-pdf';
 
 interface Article {
@@ -146,15 +146,34 @@ const Check = async (html) => {
     });
 }
 
-const DownloadButton = () => (
-  <PDFDownloadLink document={<PdfFile htmlContent={content} />} fileName={`${fileName.split(".")[0]}`}>
+const DownloadButton = () => {
+  const styles = StyleSheet.create({
+  page: {
+    padding: 30, // Adds a 30-point margin on all sides
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+});
+//  const MyDocument = () => (
+//   <Document>
+//     <Page size="A4" style={styles.page}>
+//       <View style={styles.section}>
+//         <PdfFile htmlContent={content}/>
+//       </View>
+//     </Page>
+//   </Document>
+// );
+  return <PDFDownloadLink document={<PdfFile htmlContent={content}/>} fileName={`${fileName.split(".")[0]}`}>
     {({ blob, url, loading, error }) => (
       <Button disabled={loading}>
         {loading ? 'Generating PDF...' : 'Download PDF'}
       </Button>
     )}
   </PDFDownloadLink>
-);
+};
 
   return (
     <div className="space-y-6">
