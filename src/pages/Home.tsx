@@ -62,7 +62,7 @@ export const Home = () => {
             <BookOpen className="h-16 w-16 text-primary mr-4" />
           <div className="text-left">
             <h1 className="text-5xl font-bold text-foreground mb-2">IJSDS</h1>
-            <p className="text-xl text-muted-foreground">International Journal On Social Work and Development Studies</p>
+            <p className="text-xl text-muted-foreground">International Journal of Social Work and Development Studies</p>
           </div>
         </div>
         

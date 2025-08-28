@@ -11,7 +11,7 @@ export const Footer = () => {
               <span className="text-lg font-semibold">IJSDS</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              International Journal for Social Work and Development Studies - A peer-reviewed academic journal.
+              International Journal of Social Work and Development Studies - A peer-reviewed academic journal.
             </p>
           </div>
 
