@@ -13,8 +13,8 @@ const EditorialBoard = () => {
     { name: "Professor Margaret Adamek", role: "Editorial Board Member" },
     { name: "Professor Shashikant Nishant Sharma", role: "Editorial Board Member" },
     { name: "Professor Godspower J. Irikana", role: "Editorial Board Member" },
-    { name: "Professor Uzoma Okoye", role: "Editorial Board Member" },
-    { name: "Professor Onyeama", role: "Editorial Board Member" },
+    // { name: "Professor Uzoma Okoye", role: "Editorial Board Member" },
+    // { name: "Professor Onyeama", role: "Editorial Board Member" },
     { name: "Professor Uranta Daniel", role: "Editorial Board Member" },
     { name: "Professor T. Adolphus", role: "Editorial Board Member" },
   ];
