@@ -174,24 +174,28 @@ export const Publication = () => {
       if (error) throw error;
 
       // Create notifications for all published article authors
-      for (const article of matchingArticles) {
-        // Get the user ID from the corresponding author email
-        const { data: authorProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', article.corresponding_author_email)
-          .single();
+      try {
+        const { notifyUserArticlePublished } = await import('@/lib/emailService');
+        
+        for (const article of matchingArticles) {
+          // Get the user ID and profile from the corresponding author email
+          const { data: authorProfile } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('email', article.corresponding_author_email)
+            .single();
 
-        if (authorProfile) {
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: authorProfile.id,
-              title: 'Article Published',
-              message: `Your article "${article.title}" has been published in Volume ${bulkVolume}, Issue ${bulkIssue}!`,
-              type: 'success'
-            });
+          if (authorProfile) {
+            await notifyUserArticlePublished(
+              authorProfile.id,
+              authorProfile.full_name || 'Author',
+              article.title
+            );
+          }
         }
+      } catch (notificationError) {
+        console.error('Error sending publication notifications:', notificationError);
+        // Don't fail publication if notifications fail
       }
 
       toast({

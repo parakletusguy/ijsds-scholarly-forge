@@ -256,6 +256,41 @@ export const Submit = () => {
       // Clear the draft after successful submission
       clearDraft();
 
+      // Send notifications
+      try {
+        // Get user profile for notifications
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+
+        const authorName = profile?.full_name || 'Author';
+
+        // Get total submissions count for admin notification
+        const { count: totalSubmissions } = await supabase
+          .from('submissions')
+          .select('*', { count: 'exact', head: true })
+          .gte('submitted_at', new Date().toDateString());
+
+        // Import notification functions
+        const { notifyUserSubmissionReceived, notifyAdminsNewSubmission } = await import('@/lib/emailService');
+        
+        // Notify user about successful submission
+        await notifyUserSubmissionReceived(user.id, authorName, title.trim());
+        
+        // Notify admins about new submission with details
+        await notifyAdminsNewSubmission(
+          title.trim(), 
+          authorName, 
+          correspondingAuthorEmail, 
+          (totalSubmissions || 0) + 1
+        );
+      } catch (notificationError) {
+        console.error('Error sending notifications:', notificationError);
+        // Don't fail the submission if notifications fail
+      }
+
       toast({
         title: 'Article submitted successfully',
         description: 'Your article has been submitted for review. You will receive updates via email.',

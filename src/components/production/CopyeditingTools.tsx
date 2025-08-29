@@ -51,6 +51,33 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
 
       if (error) throw error;
 
+      // Send notification if article is being marked as processed
+      if (newStatus === 'processed') {
+        try {
+          // Get article and submission details for notification
+          const { data: submission } = await supabase
+            .from('submissions')
+            .select(`
+              submitter_id,
+              profiles!inner(full_name)
+            `)
+            .eq('article_id', article.id)
+            .single();
+
+          if (submission) {
+            const { notifyUserArticleProcessed } = await import('@/lib/emailService');
+            await notifyUserArticleProcessed(
+              submission.submitter_id,
+              submission.profiles.full_name || 'Author',
+              article.title
+            );
+          }
+        } catch (notificationError) {
+          console.error('Error sending processed notification:', notificationError);
+          // Don't fail the status update if notification fails
+        }
+      }
+
       toast({
         title: "Status Updated",
         description: `Article status changed to ${newStatus.replace('_', ' ')}`,
@@ -316,32 +343,39 @@ const DownloadButton = () => {
       </Card> */}
 
       {/* Status Actions */}
-      {/* <Card>
+      <Card>
         <CardHeader>
-          <CardTitle>Status Actions</CardTitle>
+          <CardTitle>Production Status</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-3">
-            {article.status !== 'copyediting' && (
+            {article.status === 'accepted' && (
               <Button
-                onClick={() => updateArticleStatus('copyediting')}
+                onClick={() => updateArticleStatus('in_production')}
                 disabled={loading}
                 variant="outline"
               >
-                Start Copyediting
+                Start Production
               </Button>
             )}
-            {article.status === 'copyediting' && (
+            {['accepted', 'in_production'].includes(article.status) && (
               <Button
-                onClick={() => updateArticleStatus('proofreading')}
+                onClick={() => updateArticleStatus('processed')}
                 disabled={loading}
+                variant="default"
               >
-                Complete Copyediting
+                Mark as Processed
               </Button>
+            )}
+            {article.status === 'processed' && (
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle className="h-4 w-4" />
+                <span className="font-medium">Ready for Publication</span>
+              </div>
             )}
           </div>
         </CardContent>
-      </Card> */}
+      </Card>
 
       { editor && <TextEditor content={content} setContent={setContent} editor={editor} setEditor={setEditor}/>}
 

@@ -282,3 +282,152 @@ export const notifyAdminsAcceptance = async (submissionTitle: string, authorName
     'success'
   );
 };
+
+// User notification functions
+export const notifyUserSubmissionReceived = async (userId: string, authorName: string, submissionTitle: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Submission Received',
+        message: `Your article "${submissionTitle}" has been successfully submitted for review.`,
+        type: 'success',
+        emailNotification: true,
+        emailTemplate: 'submission_received',
+        emailData: {
+          authorName,
+          submissionTitle,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error notifying user of submission:', error);
+  }
+};
+
+export const notifyUserApprovalForProcessing = async (userId: string, authorName: string, submissionTitle: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Article Approved for Processing',
+        message: `Great news! Your article "${submissionTitle}" has been approved and is now moving to the production stage.`,
+        type: 'success',
+        emailNotification: true,
+        emailTemplate: 'approval_processing',
+        emailData: {
+          authorName,
+          submissionTitle,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error notifying user of approval:', error);
+  }
+};
+
+export const notifyUserArticleProcessed = async (userId: string, authorName: string, submissionTitle: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Article Processed',
+        message: `Your article "${submissionTitle}" has been processed and is ready for publication.`,
+        type: 'success',
+        emailNotification: true,
+        emailTemplate: 'article_processed',
+        emailData: {
+          authorName,
+          submissionTitle,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error notifying user of processing:', error);
+  }
+};
+
+export const notifyUserArticlePublished = async (userId: string, authorName: string, submissionTitle: string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Article Published!',
+        message: `Congratulations! Your article "${submissionTitle}" has been published and is now available online.`,
+        type: 'success',
+        emailNotification: true,
+        emailTemplate: 'article_published',
+        emailData: {
+          authorName,
+          submissionTitle,
+          platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error notifying user of publication:', error);
+  }
+};
+
+// Enhanced admin notification for submissions
+export const notifyAdminsNewSubmission = async (submissionTitle: string, authorName: string, authorEmail: string, totalSubmissions: number) => {
+  try {
+    // Get all admin users
+    const { data: admins, error } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('is_admin', true);
+
+    if (error) throw error;
+
+    if (!admins || admins.length === 0) {
+      console.log('No admin users found');
+      return;
+    }
+
+    // Send email and in-app notifications to all admins
+    for (const admin of admins) {
+      // Send email notification with detailed submission info
+      await sendEmailNotification({
+        to: admin.email,
+        subject: 'New Article Submission - Action Required',
+        htmlContent: `
+          <h2>New Article Submission</h2>
+          <p>Dear ${admin.full_name || 'Admin'},</p>
+          
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #007cba;">Submission Details</h3>
+            <p><strong>Article Title:</strong> ${submissionTitle}</p>
+            <p><strong>Author Name:</strong> ${authorName}</p>
+            <p><strong>Author Email:</strong> ${authorEmail}</p>
+            <p><strong>Submission Time:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>Total Submissions Today:</strong> ${totalSubmissions}</p>
+          </div>
+          
+          <p>Please review this submission and assign reviewers as appropriate.</p>
+          <p>Access the editorial dashboard to process this submission.</p>
+          
+          <br>
+          <p>Best regards,<br>IJSDS Editorial System</p>
+        `,
+        userId: admin.id,
+        type: 'submission'
+      });
+
+      // In-app notification is already handled by sendEmailNotification function
+    }
+  } catch (error) {
+    console.error('Error notifying admins of new submission:', error);
+  }
+};
