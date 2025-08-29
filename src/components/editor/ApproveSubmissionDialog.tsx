@@ -79,6 +79,32 @@ export const ApproveSubmissionDialog = ({ submissionId,articleId, onApprove, dis
         });
       }
 
+      // Send notification to author about approval
+      try {
+        // Get submission details for notification
+        const { data: submission } = await supabase
+          .from('submissions')
+          .select(`
+            submitter_id,
+            articles!inner(title),
+            profiles!inner(full_name)
+          `)
+          .eq('id', submissionId)
+          .single();
+
+        if (submission) {
+          const { notifyUserApprovalForProcessing } = await import('@/lib/emailService');
+          await notifyUserApprovalForProcessing(
+            submission.submitter_id,
+            submission.profiles.full_name || 'Author',
+            submission.articles.title
+          );
+        }
+      } catch (notificationError) {
+        console.error('Error sending approval notification:', notificationError);
+        // Don't fail the approval if notification fails
+      }
+
       setOpen(false);
       onApprove();
     } catch (error) {
