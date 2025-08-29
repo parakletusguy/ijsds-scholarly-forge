@@ -355,7 +355,7 @@ const DownloadButton = () => {
                 >
                   <Upload className="h-4 w-4" />
                   {uploading ? 'Uploading...' : 'Upload & Replace Document'}
-                </Button>
+                </Button> 
               </div>
             </div>
           </div>
@@ -363,7 +363,7 @@ const DownloadButton = () => {
       </Card>
 
       {/* Download PDF */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className='flex space-x-2'>
             <File className='h-5 w-5 mx-3'/>
@@ -373,17 +373,17 @@ const DownloadButton = () => {
         <CardContent className='space-y-4'>
           <DownloadButton/>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Copyediting Tools */}
-      <Card>
+      {/* <Card> */}
         {/* <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Edit3 className="h-5 w-5" />
             Copyediting Tools
           </CardTitle>
         </CardHeader> */}
-        <CardContent className="space-y-4">
+        {/* <CardContent className="space-y-4"> */}
           {/* <div className="grid md:grid-cols-3 gap-4">
                  <Button variant="outline" onClick={() => {Check(content)}} className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -400,9 +400,9 @@ const DownloadButton = () => {
             
           </div> */}
 
-          <Separator />
+          {/* <Separator /> */}
 
-          <div>
+          {/* <div>
             <h4 className="font-semibold mb-3">Copyediting Notes</h4>
             <Textarea
               placeholder="Add copyediting notes and suggestions..."
@@ -418,9 +418,9 @@ const DownloadButton = () => {
               <Save className="h-4 w-4" />
               Save Edited File
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </div> */}
+        {/* </CardContent> */}
+      {/* </Card> */}
 
       {/* Editing Suggestions */}
       {/* <Card>
@@ -474,7 +474,7 @@ const DownloadButton = () => {
       </Card> */}
 
       {/* Status Actions */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Production Status</CardTitle>
         </CardHeader>
@@ -506,7 +506,7 @@ const DownloadButton = () => {
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       { editor && <TextEditor content={content} setContent={setContent} editor={editor} setEditor={setEditor}/>}
 
