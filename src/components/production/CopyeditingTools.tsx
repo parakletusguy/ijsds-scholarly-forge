@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Edit3, Save, FileText, Clock, User, CheckCircle, Eye, Download, Car, File } from 'lucide-react';
+import { Edit3, Save, FileText, Clock, User, CheckCircle, Eye, Download, Car, File, Upload } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { TextEditor } from '../editor/joditEditor';
 import DownloadDocx from '@/lib/html-docx';
 import { spellCheck } from '@/lib/languagetool';
@@ -34,6 +36,8 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
   const [loading, setLoading] = useState(false);
   const [content,setContent] = useState('')
   const [fileName, setfileName] = useState('')
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   const [suggestions, setSuggestions] = useState([
     { id: 1, type: 'grammar', text: 'Consider revising sentence structure in paragraph 3', status: 'pending' },
@@ -173,6 +177,96 @@ const Check = async (html) => {
     });
 }
 
+  const downloadOriginalDocument = async () => {
+    if (!article.manuscript_file_url) {
+      toast({
+        title: "No Document",
+        description: "No manuscript file available for download",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Get the public URL from Supabase storage
+      const { data } = supabase.storage
+        .from('journal-website-db1')
+        .getPublicUrl(article.manuscript_file_url);
+
+      // Create a temporary link to download the file
+      const link = document.createElement('a');
+      link.href = data.publicUrl;
+      link.download = `${article.title.replace(/[^a-z0-9]/gi, '_')}_original.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Download Started",
+        description: "Document download has started",
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the document",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!uploadedFile) {
+      toast({
+        title: "No File Selected",
+        description: "Please select a file to upload",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Upload the file to replace the original
+      const fileExt = uploadedFile.name.split('.').pop();
+      const fileName = `${article.id}_edited.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('journal-website-db1')
+        .upload(fileName, uploadedFile, {
+          cacheControl: '3600',
+          upsert: true // This will replace the existing file
+        });
+
+      if (error) throw error;
+
+      // Update the article with the new file URL
+      const { error: updateError } = await supabase
+        .from('articles')
+        .update({ manuscript_file_url: fileName })
+        .eq('id', article.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Upload Successful",
+        description: "Document has been updated successfully",
+      });
+      
+      setUploadedFile(null);
+      onUpdate(); // Refresh the article data
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload the document",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
 const DownloadButton = () => {
   const styles = StyleSheet.create({
   page: {
@@ -184,15 +278,6 @@ const DownloadButton = () => {
     flexGrow: 1,
   },
 });
-//  const MyDocument = () => (
-//   <Document>
-//     <Page size="A4" style={styles.page}>
-//       <View style={styles.section}>
-//         <PdfFile htmlContent={content}/>
-//       </View>
-//     </Page>
-//   </Document>
-// );
   return <PDFDownloadLink document={<PdfFile htmlContent={content}/>} fileName={`${fileName.split(".")[0]}`}>
     {({ blob, url, loading, error }) => (
       <Button disabled={loading}>
@@ -231,16 +316,62 @@ const DownloadButton = () => {
         </CardContent>
       </Card>
 
-      {/* download pdf */}
+      {/* Download and Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5" />
+            Document Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-semibold mb-2">Download for Editing</h4>
+              <Button 
+                onClick={downloadOriginalDocument}
+                variant="outline" 
+                className="w-full flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Original Document
+              </Button>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2">Upload Edited Document</h4>
+              <div className="space-y-2">
+                <Label htmlFor="file-upload">Select edited file</Label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  accept=".docx,.doc,.pdf"
+                  onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
+                />
+                <Button 
+                  onClick={handleFileUpload}
+                  disabled={!uploadedFile || uploading}
+                  className="w-full flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploading ? 'Uploading...' : 'Upload & Replace Document'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Download PDF */}
       <Card>
         <CardHeader>
           <CardTitle className='flex space-x-2'>
             <File className='h-5 w-5 mx-3'/>
-            Download Pdf
+            Download PDF
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-                      <DownloadButton/>
+          <DownloadButton/>
         </CardContent>
       </Card>
 
