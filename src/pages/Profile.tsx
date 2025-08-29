@@ -24,6 +24,7 @@ interface Profile {
   is_reviewer: boolean;
   request_reviewer: boolean;
   request_editor:boolean;
+  is_admin:boolean
 }
 
 export const Profile = () => {
@@ -44,7 +45,8 @@ export const Profile = () => {
     isEditor: false,
     isReviewer: false,
     request_reviewer:false,
-    request_editor:false
+    request_editor:false,
+    isAdmin:false
   });
 
   useEffect(() => {
@@ -76,7 +78,8 @@ export const Profile = () => {
           isEditor: data.is_editor || false,
           isReviewer: data.is_reviewer || false,
           request_reviewer:data.request_reviewer || false,
-          request_editor:data.request_editor || false
+          request_editor:data.request_editor || false,
+          isAdmin:data.is_admin || false
         });
       } else {
         // Create new profile
@@ -89,7 +92,8 @@ export const Profile = () => {
           isEditor: false,
           isReviewer: false,
           request_reviewer:false,
-          request_editor:false
+          request_editor:false,
+          isAdmin:false
         });
       }
     } catch (error) {
@@ -119,7 +123,8 @@ export const Profile = () => {
         is_editor: formData.isEditor,
         is_reviewer: formData.isReviewer,
         request_reviewer:formData.request_reviewer,
-        request_editor:formData.request_editor
+        request_editor:formData.request_editor,
+        is_admin:formData.isAdmin
       };
 
       const { error } = await supabase
@@ -316,6 +321,9 @@ export const Profile = () => {
               <CardContent className='space-y-4'>
                 <p className='text-sm'>
                   {
+                    // formData.isEditor?"Editor":
+                    // formData.isReviewer?"Reviewer":"Author"
+                    formData.isAdmin?"Admin":
                     formData.isEditor?"Editor":
                     formData.isReviewer?"Reviewer":"Author"
                   }
