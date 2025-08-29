@@ -416,7 +416,7 @@ export const notifyAdminsNewSubmission = async (submissionTitle: string, authorN
           </div>
           
           <p>Please review this submission and assign reviewers as appropriate.</p>
-          <p>Access the editorial dashboard to process this submission.</p>
+          <p>Access the editorial dashboard to process this submission. <a href="https://ijsds.org/editorial">Editorial Dashboard</a> </p>
           
           <br>
           <p>Best regards,<br>IJSDS Editorial System</p>

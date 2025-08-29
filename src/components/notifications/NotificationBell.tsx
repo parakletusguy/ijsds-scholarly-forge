@@ -5,11 +5,27 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog';
+import { useState } from 'react';
 
 export const NotificationBell = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+const [selectedNotification, setSelectedNotification] = useState(null);
   const { notifications, loading, markAsRead, markAllAsRead } = useNotifications();
   
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const clickNotification = (notification) => {
+      !notification.read && markAsRead(notification.id)
+      setSelectedNotification(notification);
+    setIsDialogOpen(true);
+  }
 
   const getNotificationIcon = (type: string) => {
     const colors = {
@@ -63,7 +79,7 @@ export const NotificationBell = () => {
                       ? 'bg-muted/50' 
                       : 'bg-background hover:bg-muted/50'
                   }`}
-                  onClick={() => !notification.read && markAsRead(notification.id)}
+                  onClick={() => clickNotification(notification)}
                 >
                   <div className="flex items-start gap-2">
                     <div className={`w-2 h-2 rounded-full mt-2 ${
@@ -85,6 +101,27 @@ export const NotificationBell = () => {
           </ScrollArea>
         )}
       </PopoverContent>
+
+       {/* The new Dialog component */}
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogContent>
+        {selectedNotification && (
+          <>
+            <DialogHeader>
+              <DialogTitle>{selectedNotification.title}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-muted-foreground">
+                {selectedNotification.message}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {formatDistanceToNow(new Date(selectedNotification.created_at), { addSuffix: true })}
+              </p>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
     </Popover>
   );
 };
