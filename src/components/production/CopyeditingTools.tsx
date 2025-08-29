@@ -308,7 +308,7 @@ const DownloadButton = () => {
               {article.manuscript_file_url && (
                 <Button variant="outline" className='cursor-pointer' size="sm" asChild onClick={() => viewArticle(article.manuscript_file_url)}>
                    <p className='flex'> <FileText className="h-4 w-4 mr-2" />
-                    Edit/View Manuscript</p>
+                  View Manuscript</p>
                 </Button>
               )}
             </div>
