@@ -2,7 +2,7 @@ import { Footer } from '@/components/layout/Footer';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Home } from './Home';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import logo_2 from "../../public/riversstate-removebg-preview.png"
+import logo_2 from "/riversstate-removebg-preview.png"
 
 
 const Index = () => {
