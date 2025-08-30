@@ -35,6 +35,7 @@ import { RevisionSubmissionPortal } from "./components/revisions/RevisionSubmiss
 import NotFound from "./pages/NotFound";
 import { ManageRequests } from "./pages/approveRequest";
 import { Landing } from "./pages/landingPage";
+import logo_2 from "../public/riversstate-removebg-preview.png"
 
 const queryClient = new QueryClient();
 
@@ -43,8 +44,11 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen flex w-full">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
-        <header className="h-12 flex items-center border-b border-border bg-background p-4">
+        <header className="md:h-24 h-20 flex items-center border-b border-border bg-[#ffffff9c] p-4">
           <SidebarTrigger className="fixed z-30" />
+          <div className="md:w-20 w-14 fixed right-6">
+            <img src={logo_2} alt="Rivers State University Logo" />
+          </div>
         </header>
         <main className="flex-1">
           {children}
