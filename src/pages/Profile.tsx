@@ -177,7 +177,7 @@ export const Profile = () => {
 
              const {data,error} = await supabase
               .from('profiles')
-              .update({request_editor:true})
+              .update({request_reviewer:true})
               .eq('id',user.id)
               if(error) throw error
               
