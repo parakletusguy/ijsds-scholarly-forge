@@ -256,13 +256,13 @@ export const Articles = () => {
                           <span>DOI: {article.doi}</span>
                         )}
                       </div>
-                      {/* <Button 
+                      <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => navigate(`/article/${article.id}`)}
                       >
-                        Read Article
-                      </Button> */}
+                        View Article details
+                      </Button>
                         <PaperDownload 
                                 manuscriptFileUrl={article.manuscript_file_url}
                               title={article.title}

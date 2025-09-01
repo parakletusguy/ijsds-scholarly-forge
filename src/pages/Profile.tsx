@@ -158,7 +158,8 @@ export const Profile = () => {
 
     const request =  async(type) => {
          try {
-           if(type == 'editor'){
+          console.log(type)
+           if(type === 'editor'){
 
               const {data,error} = await supabase
               .from('profiles')
@@ -171,7 +172,7 @@ export const Profile = () => {
                 description: "Request sent successfully",
                 });
 
-          }else if(type == 'reviewer'){
+          }else if(type === 'reviewer'){
 
              const {data,error} = await supabase
               .from('profiles')
