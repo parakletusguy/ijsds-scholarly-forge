@@ -159,7 +159,7 @@ export const Profile = () => {
     const request =  async(type) => {
          try {
           console.log(type)
-           if(type === 'editor'){
+           if(type == 'editor'){
 
               const {data,error} = await supabase
               .from('profiles')
@@ -172,7 +172,8 @@ export const Profile = () => {
                 description: "Request sent successfully",
                 });
 
-          }else if(type === 'reviewer'){
+          }
+          if(type == 'reviewer'){
 
              const {data,error} = await supabase
               .from('profiles')
@@ -390,11 +391,12 @@ export const Profile = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className='space-y-4'>
-                    <div className='flex flex-row items-center justify-evenly'>
+                    <div className='flex flex-row items-center justify-evenly space-x-2 '>
                       <Button disabled={profile.request_reviewer || profile.is_reviewer} onClick={() => request('reviewer')}>
                          Request Reviewer
                       </Button>
-                          <Button disabled={profile.request_editor || profile.is_editor} onClick={() => request('editor')}>
+
+                      <Button disabled={profile.request_editor || profile.is_editor} onClick={() => request('editor')}>
                          Request Editor
                       </Button>
                     </div>
