@@ -73,7 +73,7 @@ const App = () => (
               <Route path="/" element={<Index/>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
               <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
-              <Route path="/article/:articleId" element={<PageLayout><ArticleInfo /></PageLayout>} />
+              <Route path="/article/:ArticleId" element={<PageLayout><ArticleInfo /></PageLayout>} />
               <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
               <Route path="/dashboard" element={<PageLayout><Dashboard /></PageLayout>} />
               <Route path="/editorial" element={<PageLayout><Editorial /></PageLayout>} />

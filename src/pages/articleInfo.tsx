@@ -29,48 +29,30 @@ interface SubmissionDetails {
 }
 
 export const ArticleInfo = () => {
-  const { submissionId } = useParams();
-  const { user, loading } = useAuth();
+  const { ArticleId } = useParams();
   const navigate = useNavigate();
-  const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
+  const [article, setArticle] = useState<any | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-      return;
-    }
-
-    if (user && submissionId) {
+    if (ArticleId) {
       fetchSubmissionDetails();
     }
-  }, [user, loading, submissionId, navigate]);
+  }, [ArticleId, navigate]);
 
   const fetchSubmissionDetails = async () => {
+    console.log(ArticleId)
     try {
       const { data, error } = await supabase
-        .from('submissions')
+        .from('articles')
         .select(`
-          id,
-          status,
-          submitted_at,
-          articles (
-            title,
-            abstract,
-            subject_area,
-            authors,
-            manuscript_file_url
-          ),
-          profiles (
-            full_name,
-            email
-          )
+            *
         `)
-        .eq('id', submissionId)
+        .eq('id', ArticleId)
         .single();
-
       if (error) throw error;
-      setSubmission(data);
+      setArticle(data);
+      setLoadingData(false)
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -100,9 +82,9 @@ export const ArticleInfo = () => {
     }
   };
 
-  if (loading || loadingData) {
+  if (loadingData) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col items-center justify-center">
         <main className="flex-1">
           <LoadingSpinner size="lg" text="Loading submission details..." />
         </main>
@@ -110,12 +92,12 @@ export const ArticleInfo = () => {
     );
   }
 
-  if (!submission) {
+  if (!article) {
     return (
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2">Submission Not Found</h2>
+            <h2 className="text-2xl font-bold mb-2">Article Not Found</h2>
                 <div className="relative py-3">
                   <Button 
                     variant="outline" 
@@ -150,13 +132,13 @@ export const ArticleInfo = () => {
             <h1 className="text-3xl font-bold text-foreground">
               Submission Details
             </h1>
-            <Badge className={getStatusColor(submission.status)}>
+            {/* <Badge className={getStatusColor(submission.status)}>
               {submission.status.replace('_', ' ').toUpperCase()}
-            </Badge>
+            </Badge> */}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1  gap-8">
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -167,10 +149,10 @@ export const ArticleInfo = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-2xl font-semibold mb-2">{submission.articles.title}</h3>
-                  {submission.articles.subject_area && (
+                  <h3 className="text-2xl font-semibold mb-2">{article.title}</h3>
+                  {article.subject_area && (
                     <Badge variant="secondary" className="mb-4">
-                      {submission.articles.subject_area}
+                      {article.subject_area}
                     </Badge>
                   )}
                 </div>
@@ -178,15 +160,15 @@ export const ArticleInfo = () => {
                 <div>
                   <h4 className="font-medium text-lg mb-2">Abstract</h4>
                   <p className="text-muted-foreground leading-relaxed">
-                    {submission.articles.abstract}
+                    {article.abstract}
                   </p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-lg mb-2">Authors</h4>
-                  {submission.articles.authors && Array.isArray(submission.articles.authors) ? (
+                  {article.authors && Array.isArray(article.authors) ? (
                     <div className="space-y-2">
-                      {submission.articles.authors.map((author: any, index: number) => (
+                      {article.authors.map((author: any, index: number) => (
                         <div key={index} className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span>{author.name}</span>
@@ -203,12 +185,12 @@ export const ArticleInfo = () => {
                   )}
                 </div>
 
-                {submission.articles.manuscript_file_url && (
+                {article.manuscript_file_url && (
                   <div>
                     <h4 className="font-medium text-lg mb-2">Manuscript</h4>
                     <Button 
                       variant="outline"
-                      onClick={() => window.open(submission.articles.manuscript_file_url, '_blank')}
+                      onClick={() => window.open(article.manuscript_file_url, '_blank')}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Manuscript
@@ -219,7 +201,7 @@ export const ArticleInfo = () => {
             </Card>
           </div>
 
-          <div className="lg:col-span-1">
+          {/* <div className="lg:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle>Submission Information</CardTitle>
@@ -256,7 +238,7 @@ export const ArticleInfo = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
       </main>
     </div>
