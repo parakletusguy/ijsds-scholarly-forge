@@ -33,6 +33,8 @@ export const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadingE, setLoadingE] = useState(false);
+  const [loadingR, setLoadingR] = useState(false);
 
   const navigate = useNavigate()
 
@@ -160,7 +162,7 @@ export const Profile = () => {
          try {
           console.log(type)
            if(type == 'editor'){
-
+              setLoadingE(true)
               const {data,error} = await supabase
               .from('profiles')
               .update({request_editor:true,request_reviewer:true})
@@ -174,7 +176,7 @@ export const Profile = () => {
 
           }
           if(type == 'reviewer'){
-
+              setLoadingR(true)
              const {data,error} = await supabase
               .from('profiles')
               .update({request_reviewer:true})
@@ -393,11 +395,12 @@ export const Profile = () => {
               <CardContent className='space-y-4'>
                     <div className='flex flex-row items-center justify-evenly space-x-2 '>
                       <Button disabled={profile.request_reviewer || profile.is_reviewer} onClick={() => request('reviewer')}>
-                         Request Reviewer
+                         {loadingR?'requesting...':'Request Reviewer'}
                       </Button>
 
                       <Button disabled={profile.request_editor || profile.is_editor} onClick={() => request('editor')}>
-                         Request Editor
+                        {loadingE?'requesting...':'Request Editor'}
+
                       </Button>
                     </div>
               </CardContent>
