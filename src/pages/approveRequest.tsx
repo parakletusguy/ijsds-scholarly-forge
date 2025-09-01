@@ -84,84 +84,135 @@ export const ManageRequests = () => {
   }
 
   const handleApproveEditor = async (id,type) :Promise<void> => {
+    try {
+      const target = editorRequests.find((p:any) => p.id === id);
+      if(type == 'approve'){
+        const { error } = await supabase
+          .from('profiles')
+          .update({is_editor:true,request_editor:false})
+          .eq('id',id)
+        if(error) throw error
+
+        // Notify requester of approval
         try {
-            if(type == 'approve'){
-                const {data,error} = await supabase
-                .from('profiles')
-                .update({is_editor:true,request_editor:false})
-                .eq('id',id).select()
-                    console.log(data)
-                if(error) throw error
-            }else{
-                toast({
-                title: 'Request Denied',
-                description: `you've rejected the request`
-                });
-                return
-            }
-
-            const {error} = await supabase
-                .from('profiles')
-                .update({request_editor:false})
-                .eq('id',id)
-            
-            if(error) throw error
-
-            toast({
-                title: 'Request Approved',
-                description: `you've accepted the request, user is now an editor`
-                });
-            
-        } catch (error) {
-             if(error){
-                console.error(error)
-                toast({
-                    title: 'Request Error',
-                    description: 'An error occured',
-                    variant: 'destructive',
-                });
-            }
+          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
+          await notifyRequesterOfRoleDecision({
+            userId: id,
+            email: target?.email || '',
+            name: target?.full_name || '',
+            role: 'editor',
+            decision: 'accepted'
+          });
+        } catch (e) {
+          console.warn('Failed to notify editor approval:', e);
         }
+
+        toast({
+          title: 'Request Approved',
+          description: `you've accepted the request, user is now an editor`
+        });
+      } else {
+        // Reject path: clear request flag and notify requester
+        const { error } = await supabase
+          .from('profiles')
+          .update({request_editor:false})
+          .eq('id',id)
+        if(error) throw error
+
+        try {
+          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
+          await notifyRequesterOfRoleDecision({
+            userId: id,
+            email: target?.email || '',
+            name: target?.full_name || '',
+            role: 'editor',
+            decision: 'rejected'
+          });
+        } catch (e) {
+          console.warn('Failed to notify editor rejection:', e);
+        }
+
+        toast({
+          title: 'Request Denied',
+          description: `you've rejected the request`
+        });
+      }
+    } catch (error) {
+      if(error){
+        console.error(error)
+        toast({
+          title: 'Request Error',
+          description: 'An error occured',
+          variant: 'destructive',
+        });
+      }
+    }
   }
 
-    const handleApproveReviewer = async (id,type) : Promise<void> => {
+  const handleApproveReviewer = async (id,type) : Promise<void> => {
+    try {
+      const target = reviewerRequests.find((p:any) => p.id === id);
+      if(type == 'approve'){
+        const { error } = await supabase
+          .from('profiles')
+          .update({is_reviewer:true, request_reviewer:false})
+          .eq('id',id)
+        if(error) throw error
+
+        // Notify requester of approval
         try {
-            if(type == 'approve'){
-                const {data,error} = await supabase
-                .from('profiles')
-                .update({is_reviewer:true, request_reviewer:false})
-                .eq('id',id)
-
-                if(error) throw error
-            }else{
-                toast({
-                title: 'Request Denied',
-                description: `you've rejected the request`
-                });
-
-                const {data,error} = await supabase
-                .from('profiles')
-                .update({request_editor:false})
-                .eq('id',id)
-            
-                if(error) throw error
-                return
-            }
-
-            toast({
-                title: 'Request Approved',
-                description: `you've accepted the request, user is now a reviewer`
-                });
-        } catch (error) {
-            if(error){
-                console.error(error)
-                toast({
-                    title: 'Request Error',
-                    description: 'An error occured',
-                    variant: 'destructive',
-                });
-            }
+          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
+          await notifyRequesterOfRoleDecision({
+            userId: id,
+            email: target?.email || '',
+            name: target?.full_name || '',
+            role: 'reviewer',
+            decision: 'accepted'
+          });
+        } catch (e) {
+          console.warn('Failed to notify reviewer approval:', e);
         }
+
+        toast({
+          title: 'Request Approved',
+          description: `you've accepted the request, user is now a reviewer`
+        });
+      } else {
+        toast({
+          title: 'Request Denied',
+          description: `you've rejected the request`
+        });
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({request_reviewer:false})
+          .eq('id',id)
+        if(error) throw error
+
+        // Notify requester of rejection
+        try {
+          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
+          await notifyRequesterOfRoleDecision({
+            userId: id,
+            email: target?.email || '',
+            name: target?.full_name || '',
+            role: 'reviewer',
+            decision: 'rejected'
+          });
+        } catch (e) {
+          console.warn('Failed to notify reviewer rejection:', e);
+        }
+      }
+    } catch (error) {
+      if(error){
+        console.error(error)
+        toast({
+          title: 'Request Error',
+          description: 'An error occured',
+          variant: 'destructive',
+        });
+      }
+    }
   }
 
 

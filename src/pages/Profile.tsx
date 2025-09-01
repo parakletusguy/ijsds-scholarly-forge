@@ -158,47 +158,76 @@ export const Profile = () => {
     return orcidRegex.test(orcid) || orcid === '';
   };
 
-    const request =  async(type) => {
-         try {
-          console.log(type)
-           if(type == 'editor'){
-              setLoadingE(true)
-              const {data,error} = await supabase
-              .from('profiles')
-              .update({request_editor:true,request_reviewer:true})
-              .eq('id',user.id)
-              if(error) throw error
+  const request =  async(type) => {
+    try {
+      console.log(type)
+      if(type == 'editor'){
+        setLoadingE(true)
+        const { error } = await supabase
+          .from('profiles')
+          .update({request_editor:true,request_reviewer:true})
+          .eq('id',user.id)
+        if(error) throw error
 
-              toast({
-               title: "Success",
-                description: "Request sent successfully",
-                });
+        // Notify admins of role request
+        try {
+          const { notifyAdminsOfRoleRequest } = await import('@/lib/roleNotificationService');
+          await notifyAdminsOfRoleRequest({
+            requesterId: user.id,
+            requesterName: formData.fullName || profile?.full_name || '',
+            requesterEmail: formData.email || profile?.email || '',
+            role: 'editor'
+          });
+        } catch (e) {
+          console.warn('Failed to notify admins of editor request:', e);
+        }
 
-          }
-          if(type == 'reviewer'){
-              setLoadingR(true)
-             const {data,error} = await supabase
-              .from('profiles')
-              .update({request_reviewer:true})
-              .eq('id',user.id)
-              if(error) throw error
-              
-              toast({
-               title: "Success",
-                description: "Request sent successfully",
-                });
-          }
-         } catch (error) {
-            if(error){
-              console.log(error)
-                    toast({
-                      title: "Error",
-                      description: "couldn't send request, try again later",
-                      variant: "destructive",
-                      });
-         }
-         }
+        toast({
+          title: "Success",
+          description: "Request sent successfully",
+        });
+
+      }
+      if(type == 'reviewer'){
+        setLoadingR(true)
+        const { error } = await supabase
+          .from('profiles')
+          .update({request_reviewer:true})
+          .eq('id',user.id)
+        if(error) throw error
+
+        // Notify admins of role request
+        try {
+          const { notifyAdminsOfRoleRequest } = await import('@/lib/roleNotificationService');
+          await notifyAdminsOfRoleRequest({
+            requesterId: user.id,
+            requesterName: formData.fullName || profile?.full_name || '',
+            requesterEmail: formData.email || profile?.email || '',
+            role: 'reviewer'
+          });
+        } catch (e) {
+          console.warn('Failed to notify admins of reviewer request:', e);
+        }
+        
+        toast({
+          title: "Success",
+          description: "Request sent successfully",
+        });
+      }
+    } catch (error) {
+      if(error){
+        console.log(error)
+        toast({
+          title: "Error",
+          description: "couldn't send request, try again later",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setLoadingE(false);
+      setLoadingR(false);
     }
+  }
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
