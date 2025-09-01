@@ -36,6 +36,7 @@ import NotFound from "./pages/NotFound";
 import { ManageRequests } from "./pages/approveRequest";
 import { Landing } from "./pages/landingPage";
 import logo_2 from "../public/riversstate-removebg-preview.png"
+import { ArticleInfo } from "./pages/articleInfo";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="/" element={<Index/>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
               <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
+              <Route path="/article/:articleId" element={<PageLayout><ArticleInfo /></PageLayout>} />
               <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
               <Route path="/dashboard" element={<PageLayout><Dashboard /></PageLayout>} />
               <Route path="/editorial" element={<PageLayout><Editorial /></PageLayout>} />
