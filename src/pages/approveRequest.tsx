@@ -251,6 +251,5 @@ export const ManageRequests = () => {
           </div>
         </TabsContent>
       </Tabs>
-      <Footer/>
     </div>)
   }

@@ -187,6 +187,7 @@ export const Profile = () => {
           description: "Request sent successfully",
         });
 
+      setLoadingE(false);
       }
       if(type == 'reviewer'){
         setLoadingR(true)
@@ -205,6 +206,7 @@ export const Profile = () => {
             requesterEmail: formData.email || profile?.email || '',
             role: 'reviewer'
           });
+
         } catch (e) {
           console.warn('Failed to notify admins of reviewer request:', e);
         }
@@ -213,6 +215,8 @@ export const Profile = () => {
           title: "Success",
           description: "Request sent successfully",
         });
+
+      setLoadingE(false);
       }
     } catch (error) {
       if(error){
