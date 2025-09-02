@@ -98,6 +98,8 @@ export const AppSidebar = () => {
   const mainNavItems = [
     { title: 'Home', url: '/', icon: Home },
     { title: 'Articles', url: '/articles', icon: FileText },
+    { title: 'Blog', url: '/blog', icon: BookOpen },
+    { title: 'Partners', url: '/partners', icon: Users },
     { title: 'About', url: '/about', icon: Info },
   ];
 
