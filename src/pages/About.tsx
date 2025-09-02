@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-
+import logo from "/public/Logo_Black_Edited-removebg-preview.png"
 
 
 export const About = () => {
@@ -16,7 +16,9 @@ export const About = () => {
       <section className=" from-primary/5 to-background py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
-            <BookOpen className="h-16 w-16 text-primary mr-4" />
+            {/* <BookOpen className="h-16 w-16 text-primary mr-4" /> */}
+            <img src={logo} alt="IJSDS logo" className="w-56 text-primary mr-4" />
+
             <div className="text-left">
               <h1 className="text-5xl font-bold text-foreground mb-2">About IJSDS</h1>
               <p className="text-xl text-muted-foreground">International Journal of Social Work and Development Studies</p>
@@ -186,7 +188,6 @@ export const About = () => {
           </div>
         </div>
       </section>
-      <Footer/>
     </div>
   );
 };

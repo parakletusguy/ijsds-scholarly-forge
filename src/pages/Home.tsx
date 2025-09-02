@@ -6,6 +6,7 @@ import { BookOpen, Users, Globe, ArrowRight, Calendar, User } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import logo from "/public/Logo_Black_Edited-removebg-preview.png"
 
 interface Article {
   id: string;
@@ -59,7 +60,8 @@ export const Home = () => {
       <section className="">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
-            <BookOpen className="h-16 w-16 text-primary mr-4" />
+            {/* <logo className="h-16 w-16 text-primary mr-4" /> */}
+            <img src={logo} alt="IJSDS logo" className="w-56 text-primary mr-4" />
           <div className="text-left">
             <h1 className="text-5xl font-bold text-foreground mb-2">IJSDS</h1>
             <p className="text-xl text-muted-foreground">International Journal of Social Work and Development Studies</p>
