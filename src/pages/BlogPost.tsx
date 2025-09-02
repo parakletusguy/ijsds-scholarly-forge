@@ -44,7 +44,7 @@ export const BlogPost = () => {
         .from('blog_posts')
         .select(`
           *,
-          author_profile:profiles!blog_posts_author_id_fkey(full_name, bio)
+          author_profile:profiles(full_name, bio)
         `)
         .eq('id', id)
         .eq('status', 'published')
@@ -52,15 +52,15 @@ export const BlogPost = () => {
 
       if (error) throw error;
 
-      setPost(data);
+      setPost(data as BlogPost);
       
       // Fetch related posts
       if (data.category) {
         const { data: related } = await supabase
           .from('blog_posts')
           .select(`
-            id, title, featured_image_url, published_at,
-            author_profile:profiles!blog_posts_author_id_fkey(full_name)
+            id, title, content, excerpt, category, tags, featured_image_url, published_at,
+            author_profile:profiles(full_name)
           `)
           .eq('status', 'published')
           .eq('category', data.category)
@@ -68,7 +68,7 @@ export const BlogPost = () => {
           .order('published_at', { ascending: false })
           .limit(3);
 
-        setRelatedPosts(related || []);
+        setRelatedPosts((related || []) as BlogPost[]);
       }
     } catch (error) {
       console.error('Error fetching post:', error);
