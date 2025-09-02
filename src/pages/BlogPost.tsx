@@ -42,33 +42,63 @@ export const BlogPost = () => {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select(`
-          *,
-          author_profile:profiles(full_name, bio)
-        `)
+        .select('*')
         .eq('id', id)
         .eq('status', 'published')
         .single();
 
       if (error) throw error;
 
-      setPost(data as BlogPost);
+      // Fetch author profile separately
+      let authorProfile = { full_name: 'Unknown', bio: null };
+      if (data.author_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, bio')
+          .eq('id', data.author_id)
+          .single();
+
+        if (profile?.full_name) {
+          authorProfile = {
+            full_name: profile.full_name,
+            bio: profile.bio || null
+          };
+        }
+      }
+
+      setPost({
+        ...data,
+        author_profile: authorProfile
+      } as BlogPost);
       
       // Fetch related posts
       if (data.category) {
         const { data: related } = await supabase
           .from('blog_posts')
-          .select(`
-            id, title, content, excerpt, category, tags, featured_image_url, published_at,
-            author_profile:profiles(full_name)
-          `)
+          .select('id, title, content, excerpt, category, tags, featured_image_url, published_at, author_id')
           .eq('status', 'published')
           .eq('category', data.category)
           .neq('id', id)
           .order('published_at', { ascending: false })
           .limit(3);
 
-        setRelatedPosts((related || []) as BlogPost[]);
+        // Get author profiles for related posts
+        const relatedAuthorIds = [...new Set(related?.map(post => post.author_id).filter(Boolean))];
+        const { data: relatedProfiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', relatedAuthorIds);
+
+        const relatedProfileMap = new Map(relatedProfiles?.map(profile => [profile.id, profile]) || []);
+
+        const typedRelated = (related || []).map(post => ({
+          ...post,
+          author_profile: post.author_id && relatedProfileMap.has(post.author_id)
+            ? { full_name: relatedProfileMap.get(post.author_id)!.full_name }
+            : { full_name: 'Anonymous' }
+        }));
+
+        setRelatedPosts(typedRelated as BlogPost[]);
       }
     } catch (error) {
       console.error('Error fetching post:', error);

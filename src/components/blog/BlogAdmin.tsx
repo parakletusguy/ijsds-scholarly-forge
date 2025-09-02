@@ -115,15 +115,31 @@ export const BlogAdmin = () => {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select(`
-          *,
-          author_profile:profiles!blog_posts_author_id_fkey(full_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setPosts(data || []);
+      // Get unique author IDs
+      const authorIds = [...new Set(data?.map(post => post.author_id).filter(Boolean))];
+      
+      // Fetch author profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', authorIds);
+
+      const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || []);
+
+      const typedData = (data || []).map(post => ({
+        ...post,
+        status: post.status as 'draft' | 'published',
+        author_profile: post.author_id && profileMap.has(post.author_id)
+          ? { full_name: profileMap.get(post.author_id)!.full_name }
+          : { full_name: 'Unknown' }
+      }));
+
+      setPosts(typedData as BlogPost[]);
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
