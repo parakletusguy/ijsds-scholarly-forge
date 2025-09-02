@@ -93,10 +93,7 @@ export const Blog = () => {
     try {
       let query = supabase
         .from('blog_posts')
-        .select(`
-          *,
-          author_profile:profiles!blog_posts_author_id_fkey(full_name)
-        `)
+        .select('*', { count: 'exact' })
         .eq('status', 'published')
         .order('published_at', { ascending: false });
 
@@ -115,7 +112,25 @@ export const Blog = () => {
 
       if (error) throw error;
 
-      setPosts(data || []);
+      // Get unique author IDs
+      const authorIds = [...new Set(data?.map(post => post.author_id).filter(Boolean))];
+      
+      // Fetch author profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', authorIds);
+
+      const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || []);
+
+      const typedData = (data || []).map(post => ({
+        ...post,
+        author_profile: post.author_id && profileMap.has(post.author_id)
+          ? { full_name: profileMap.get(post.author_id)!.full_name }
+          : { full_name: 'Anonymous' }
+      }));
+
+      setPosts(typedData as BlogPost[]);
       setTotalPages(Math.ceil((count || 0) / POSTS_PER_PAGE));
     } catch (error) {
       console.error('Error fetching posts:', error);
