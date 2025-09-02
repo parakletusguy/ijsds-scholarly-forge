@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { HelpCircle, Search, BookOpen, Users, FileText, Settings, User, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const helpCategories = [
   {
@@ -128,6 +129,7 @@ export const HelpSystem = ({ trigger }: HelpSystemProps) => {
 
         <div className="space-y-4">
           {/* Search */}
+          <p>Need help with uploading on ORCID? check our  <Link className='text-blue-500' to={'/orcidGuide'}>Guide</Link> </p>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
