@@ -38,6 +38,11 @@ import { Landing } from "./pages/landingPage";
 import logo_2 from "../public/riversstate-removebg-preview.png"
 import { ArticleInfo } from "./pages/articleInfo";
 import { Guide } from "./pages/guide";
+import { Blog } from "./pages/Blog";
+import { BlogPost } from "./pages/BlogPost";
+import { Partners } from "./pages/Partners";
+import { BlogAdmin } from "./components/blog/BlogAdmin";
+import { PartnersAdmin } from "./components/partners/PartnersAdmin";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +104,11 @@ const App = () => (
               <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
               <Route path="/landing" element={<Landing/>} />
               <Route path="/orcidGuide" element={<PageLayout><Guide/></PageLayout>}/>
+              <Route path="/blog" element={<PageLayout><Blog /></PageLayout>} />
+              <Route path="/blog/:id" element={<PageLayout><BlogPost /></PageLayout>} />
+              <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
+              <Route path="/partners" element={<PageLayout><Partners /></PageLayout>} />
+              <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
