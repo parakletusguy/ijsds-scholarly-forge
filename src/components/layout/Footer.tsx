@@ -9,7 +9,7 @@ export const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               {/* <BookOpen className="h-6 w-6 text-primary" /> */}
-            <img src={logo} alt="IJSDS logo" className="w-16 m-[-15px] sm:w-56 text-primary " />
+            <img src={logo} alt="IJSDS logo" className="w-16 m-[-15px] text-primary " />
               <span className="text-lg font-semibold">IJSDS</span>
             </div>
             <p className="text-sm text-muted-foreground">
