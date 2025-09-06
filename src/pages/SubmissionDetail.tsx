@@ -12,11 +12,13 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
 import Monnify from 'monnify-ts'
 import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
+import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
 
 interface SubmissionDetails {
   id: string;
   status: string;
   submitted_at: string;
+  submitter_id: string;
   articles: {
     id,
     title: string;
@@ -63,6 +65,7 @@ export const SubmissionDetail = () => {
           id,
           status,
           submitted_at,
+          submitter_id,
           articles (
             id,
             title,
@@ -239,7 +242,7 @@ export const SubmissionDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -299,6 +302,15 @@ export const SubmissionDetail = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Author File Management */}
+            <SubmissionFileManager
+              submissionId={submissionId!}
+              articleId={submission.articles.id}
+              isAuthor={user?.id === submission.submitter_id}
+              vettingFee={submission.articles.vetting_fee}
+              processingFee={submission.articles.Processing_fee}
+            />
           </div>
 
           <div className="lg:col-span-1">

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { FileText, Users, Clock, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
+import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
 import { ApproveSubmissionDialog } from '@/components/editor/ApproveSubmissionDialog';
 import { ReviewerInvitationDialog } from '@/components/editor/ReviewerInvitationDialog';
@@ -31,6 +32,8 @@ interface Submission {
     corresponding_author_email: string;
     authors: any;
     manuscript_file_url: string;
+    vetting_fee: boolean;
+    Processing_fee: boolean;
   };
   profiles: {
     full_name: string;
@@ -90,7 +93,9 @@ export const Editorial = () => {
             abstract,
             corresponding_author_email,
             authors,
-            manuscript_file_url
+            manuscript_file_url,
+            vetting_fee,
+            Processing_fee
           ),
           profiles (
             full_name,
@@ -274,6 +279,12 @@ export const Editorial = () => {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                       {submission.articles.abstract}
                     </p>
+                    <div className="mb-4">
+                      <PaymentStatusBadge 
+                        vettingFee={submission.articles.vetting_fee}
+                        processingFee={submission.articles.Processing_fee}
+                      />
+                    </div>
                     <div className="flex gap-2 flex-wrap">
                       <PaperDownload 
                         manuscriptFileUrl={submission.articles.manuscript_file_url}
@@ -329,6 +340,12 @@ export const Editorial = () => {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {submission.articles.abstract}
                     </p>
+                    <div className="mb-4">
+                      <PaymentStatusBadge 
+                        vettingFee={submission.articles.vetting_fee}
+                        processingFee={submission.articles.Processing_fee}
+                      />
+                    </div>
                     <div className="flex gap-2 flex-wrap">
                       <PaperDownload 
                         manuscriptFileUrl={submission.articles.manuscript_file_url}
