@@ -10,17 +10,22 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
+import Monnify from 'monnify-ts'
+import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
 
 interface SubmissionDetails {
   id: string;
   status: string;
   submitted_at: string;
   articles: {
+    id,
     title: string;
     abstract: string;
     subject_area: string;
     authors: any;
     manuscript_file_url: string | null;
+    vetting_fee : boolean,
+    Processing_fee : boolean
   };
   profiles: {
     full_name: string;
@@ -34,6 +39,10 @@ export const SubmissionDetail = () => {
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [open,setopen] = useState(false)
+  const [vet,setvet] = useState(false)
+  const [processing,setprocessing] = useState(false)
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -55,11 +64,14 @@ export const SubmissionDetail = () => {
           status,
           submitted_at,
           articles (
+            id,
             title,
             abstract,
             subject_area,
             authors,
-            manuscript_file_url
+            manuscript_file_url,
+            vetting_fee,
+            Processing_fee
           ),
           profiles (
             full_name,
@@ -100,6 +112,76 @@ export const SubmissionDetail = () => {
     }
   };
 
+    let userData = null
+    let userDataPro = null
+   {submission ?  userData = {
+      email:submission.profiles.email,
+      amount:500000,
+      metadata:{
+        name:submission.profiles.full_name
+      },
+      onSuccess: (response) => onSuccess(response,"vetting",500000),
+      onClose:() => {    toast({
+          title: 'payment cancelled',
+          description: `you cancelled payment for the processing fee`,
+          variant: 'destructive',
+        });}
+    } : null}
+
+       {submission ?  userDataPro = {
+      email:submission.profiles.email,
+      amount:2000000,
+      metadata:{
+        name:submission.profiles.full_name
+      },
+      onSuccess: (response) => onSuccess(response,"processing",2000000),
+      onClose:() => {    toast({
+          title: 'payment cancelled',
+          description: `you cancelled payment for the processing fee`,
+          variant: 'destructive',
+        });}
+    } : null}
+
+
+    const onSuccess = async (pReponse, type:string, amount:number) => {
+      try {
+        const transactionReference = pReponse.reference
+        // const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
+        //   method:"POST",
+        //   headers:{ 'Content-Type':'application/json'},
+        //   body:JSON.stringify({reference:transactionReference,amount:500000})
+        // }) 
+        const confirm = await fetch("http://localhost:4500/api/verify-payment",{
+          method:"POST",
+          headers:{ 'Content-Type':'application/json'},
+          body:JSON.stringify({reference:transactionReference,amount:amount,articleId:submission.articles.id,type:type})
+        }) 
+        const {success,message,data} = await confirm.json()
+        console.log({success,message,data})
+        if(!success) throw "server error"
+        if(!data.status) throw "payment not verified"
+        // if(data.amount != 500000) throw 'amount not equal'
+        
+        
+
+        toast({
+            title:'payment successful',
+            description:`your payment has been successfully verified`
+          })
+      } catch (error) {
+        if(error){
+          console.log(error)
+  
+          toast({
+            title:'payment failed',
+            description:`payment failed due to ${error}, please contact support or try again later`,
+            variant:'destructive'
+          })
+        }
+      }
+    }
+
+
   if (loading || loadingData) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -134,7 +216,7 @@ export const SubmissionDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-          <div className="relative py-3">
+          <div className="relative py-3">   
                   <Button 
                     variant="outline" 
                     onClick={() => navigate(-1)}
@@ -256,6 +338,23 @@ export const SubmissionDetail = () => {
                 </div>
               </CardContent>
             </Card>
+            <Card className=' py-3 mt-3'>
+              <CardHeader>
+                <CardTitle> Payment Info</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                 <div className='flex justify-between items-center'>
+                <p>Click here to pay for vetting</p>
+                <button className='rounded-sm bg-black text-white px-3 py-1 h-9' onClick={() => setvet(true)} >Pay</button>
+            </div>
+                  <div className='flex justify-between '>
+                <p>Click here to pay for processing</p>
+                <button className='rounded-sm bg-black text-white px-3 py-1 h-9' onClick={() => setprocessing(true)}>Pay</button>
+            </div>
+              </CardContent>
+            </Card>
+            <VettingDialog userData={userData} vet={vet} setvet={setvet}/>
+            <ProcessinFeeDialog userData={userDataPro} processing={processing} setprocessing={setprocessing}/>
           </div>
         </div>
       </main>

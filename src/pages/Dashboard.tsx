@@ -62,7 +62,9 @@ export const Dashboard = () => {
             abstract,
             corresponding_author_email,
             status,
-            authors
+            authors,
+            vetting_fee,
+            Processing_fee
           ),
           vetting_fee,
           processing_fee
@@ -308,21 +310,21 @@ export const Dashboard = () => {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                     {submission.articles.abstract}
                     </p>
-                    <div className='flex flex-col items-center'>
+                    <div className='flex flex-col items-center justify-between h-16'>
                           <Badge
                             variant='secondary'
-                            className={getPaymentColor(submission.vetting_fee)}
+                            className={getPaymentColor(submission.articles.vetting_fee) }
                           >
-                            <p>vetting fee: {submission.vetting_fee ? "paid" : "not paid"}</p>
+                            <p>vetting fee: {submission.articles.vetting_fee ? "paid" : "not paid"}</p>
                           </Badge>
 
-                            {/* <Badge
+                            <Badge
                             variant='secondary'
-                            className={getPaymentColor(submission.processing_fee)}
+                            className={getPaymentColor(submission.articles.Processing_fee)}
                             >
-                            <p>processing fee: {submission.processing_fee ? "paid" : "not paid"}</p>
-                          </Badge> */}
-                          {
+                            <p>processing fee: {submission.articles.Processing_fee ? "paid" : "not paid"}</p>
+                          </Badge>
+                          {/* {
                             submission.processing_fee? <div>
                                 <Badge
                             variant='secondary'
@@ -332,7 +334,7 @@ export const Dashboard = () => {
                             <button className='bg-black p-1 rounded-sm m-3' onClick={() => {handleSubmit(userData)}}>
                               <p className='text-[9px] text-white'>click to pay for processing fee</p>
                             </button>
-                          }
+                          } */}
                     </div>
                   </div>
                   
@@ -350,6 +352,7 @@ export const Dashboard = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => navigate(`/submission/${submission.id}/details`)}
+                      className='m-4'
                     >
                       View Details
                     </Button>
@@ -361,7 +364,7 @@ export const Dashboard = () => {
         </div>
       </div>
       {/* <processinFeeDialog open={open} setopen={setopen} userData={userdat}/> */}
-      <ProcessinFeeDialog  open={open} setopen={setopen} userData={userdat}/>
+      {/* <ProcessinFeeDialog  open={open} setopen={setopen} userData={userdat}/> */}
     </div>
   );
 };
