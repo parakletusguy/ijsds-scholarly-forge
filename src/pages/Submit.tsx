@@ -272,9 +272,13 @@ export const Submit = () => {
 
         // Import notification functions
         const { notifyUserSubmissionReceived, notifyAdminsNewSubmission } = await import('@/lib/emailService');
+        const { notifySubmissionAcceptance } = await import('@/lib/paymentNotificationService');
         
         // Notify user about successful submission
         await notifyUserSubmissionReceived(user.id, authorName, title.trim());
+        
+        // Notify about submission acceptance
+        await notifySubmissionAcceptance(user.id, authorName, correspondingAuthorEmail, title.trim());
         
         // Notify admins about new submission with details
         await notifyAdminsNewSubmission(

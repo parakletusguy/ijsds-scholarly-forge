@@ -12,6 +12,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ArrowLeft, FileText, Save } from 'lucide-react';
+import { ReviewerFileManager } from '@/components/reviewer/ReviewerFileManager';
+import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 
 interface Review {
   id: string;
@@ -22,11 +24,14 @@ interface Review {
   comments_to_editor: string | null;
   submissions: {
     articles: {
+      id: string;
       title: string;
       abstract: string;
       subject_area: string;
       authors: any;
       manuscript_file_url: string | null;
+      vetting_fee: boolean;
+      Processing_fee: boolean;
     };
   };
 }
@@ -62,11 +67,14 @@ export const ReviewForm = () => {
           *,
           submissions (
             articles (
+              id,
               title,
               abstract,
               subject_area,
               authors,
-              manuscript_file_url
+              manuscript_file_url,
+              vetting_fee,
+              Processing_fee
             )
           )
         `)
@@ -228,7 +236,7 @@ export const ReviewForm = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -267,6 +275,16 @@ export const ReviewForm = () => {
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">Abstract</h4>
                   <p className="text-sm">{review.submissions.articles.abstract}</p>
                 </div>
+
+                {/* Payment Status */}
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Payment Status</h4>
+                  <PaymentStatusBadge 
+                    vettingFee={review.submissions.articles.vetting_fee}
+                    processingFee={review.submissions.articles.Processing_fee}
+                    showLabels={false}
+                  />
+                </div>
                 
                 {review.submissions.articles.manuscript_file_url && (
                   <div>
@@ -281,6 +299,12 @@ export const ReviewForm = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* File Management */}
+            <ReviewerFileManager 
+              articleId={review.submissions.articles.id}
+              submissionId={review.submission_id}
+            />
           </div>
 
           <div className="lg:col-span-2">

@@ -18,7 +18,7 @@ interface NotificationRequest {
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   emailNotification?: boolean;
-  emailTemplate?: 'user_welcome' | 'author_welcome' | 'submission_received' | 'fee_information' | 'review_assigned' | 'decision_made' | 'article_published';
+  emailTemplate?: 'user_welcome' | 'author_welcome' | 'submission_received' | 'fee_information' | 'review_assigned' | 'decision_made' | 'article_published' | 'submission_accepted' | 'payment_confirmed' | 'payment_received_editor' | 'payment_pending_editor';
   emailData?: Record<string, any>;
 }
 
@@ -266,6 +266,110 @@ const emailTemplates = {
       <p>Your article is now available online and accessible to the global research community.</p>
       <p>Thank you for choosing our journal for your publication.</p>
       <p>Best regards,<br>Editorial Team</p>
+    `,
+  },
+  submission_accepted: {
+    subject: 'Submission Accepted for Review - {{title}}',
+    content: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Submission Accepted!</h1>
+          <p style="color: #a7f3d0; margin: 10px 0 0 0; font-size: 16px;">Your manuscript has been accepted for peer review</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 24px;">Dear {{authorName}},</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+            Congratulations! Your submission "<strong>{{title}}</strong>" has been accepted and is now proceeding to the peer review stage.
+          </p>
+          <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 18px;">✅ Next Steps</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Your manuscript will be assigned to qualified reviewers</li>
+              <li style="margin-bottom: 8px;">The peer review process typically takes 4-6 weeks</li>
+              <li style="margin-bottom: 8px;">You will receive updates throughout the review process</li>
+              <li>You can track progress through your dashboard</li>
+            </ul>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{platformUrl}}/dashboard" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Dashboard</a>
+          </div>
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Best regards,<br>
+              <strong>Editorial Team</strong><br>
+              International Journal of Social Work and Development Studies
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+  payment_confirmed: {
+    subject: '{{paymentType}} Payment Confirmed - {{articleTitle}}',
+    content: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Payment Confirmed</h1>
+          <p style="color: #a7f3d0; margin: 10px 0 0 0; font-size: 16px;">Your payment has been successfully processed</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 24px;">Dear {{userName}},</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+            Your {{paymentType}} payment of <strong>₦{{amount}}</strong> for the article "{{articleTitle}}" has been successfully confirmed.
+          </p>
+          <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 18px;">✅ Payment Details</h3>
+            <table style="width: 100%; color: #374151;">
+              <tr><td style="padding: 8px 0; font-weight: 500;">Payment Type:</td><td style="padding: 8px 0;">{{paymentType}}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: 500;">Amount:</td><td style="padding: 8px 0;">₦{{amount}}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: 500;">Article:</td><td style="padding: 8px 0;">{{articleTitle}}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: 500;">Status:</td><td style="padding: 8px 0;"><span style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Confirmed</span></td></tr>
+            </table>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{platformUrl}}/dashboard" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Dashboard</a>
+          </div>
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Best regards,<br>
+              <strong>Editorial Team</strong><br>
+              International Journal of Social Work and Development Studies
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+  payment_received_editor: {
+    subject: 'Payment Received - {{paymentType}} for {{articleTitle}}',
+    content: `
+      <h2>Payment Received Notification</h2>
+      <p>Dear {{editorName}},</p>
+      <p>A payment has been received for the following article:</p>
+      <ul>
+        <li><strong>Article:</strong> {{articleTitle}}</li>
+        <li><strong>Author:</strong> {{userName}}</li>
+        <li><strong>Payment Type:</strong> {{paymentType}}</li>
+        <li><strong>Amount:</strong> ₦{{amount}}</li>
+      </ul>
+      <p>The payment has been confirmed and the article can proceed in the review process.</p>
+      <p>Best regards,<br>Editorial System</p>
+    `,
+  },
+  payment_pending_editor: {
+    subject: 'Payment Pending - {{paymentType}} for {{articleTitle}}',
+    content: `
+      <h2>Payment Pending Notification</h2>
+      <p>Dear {{editorName}},</p>
+      <p>The following payment is still pending:</p>
+      <ul>
+        <li><strong>Article:</strong> {{articleTitle}}</li>
+        <li><strong>Author:</strong> {{userName}} ({{userEmail}})</li>
+        <li><strong>Payment Type:</strong> {{paymentType}}</li>
+        <li><strong>Status:</strong> Pending</li>
+      </ul>
+      <p>Please follow up with the author if necessary.</p>
+      <p>Best regards,<br>Editorial System</p>
     `,
   },
 };
