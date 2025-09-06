@@ -151,7 +151,7 @@ export const SubmissionDetail = () => {
         //   headers:{ 'Content-Type':'application/json'},
         //   body:JSON.stringify({reference:transactionReference,amount:500000})
         // }) 
-        const confirm = await fetch("http://localhost:4500/api/verify-payment",{
+        const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
           method:"POST",
           headers:{ 'Content-Type':'application/json'},
           body:JSON.stringify({reference:transactionReference,amount:amount,articleId:submission.articles.id,type:type})
