@@ -1,25 +1,27 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Paystackbtn from '../paystack/paystackFunction';
-export const PayDialog = ({open, setopen,userData,vet,setvet}) => {
+export const VettingDialog = ({userData,vet,setvet}) => {
     
-    return <Dialog onOpenChange={setopen} open={open}>
+    return <Dialog onOpenChange={setvet} open={vet}>
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Pay for Vetting</DialogTitle>
                 <DialogDescription>
-                    you have to pay for vetting before submission
+                    You want to pay for vetting, Click "Pay" to proceed
                 </DialogDescription>
             </DialogHeader>
             <div className='flex items-center justify-between'>
-                <button onClick={() => {setopen(false)}}>Cancel</button>
-                <Paystackbtn info={userData}/>
+                <button onClick={() => {setvet(false)}}>Cancel</button>
+                <div onClick={() => {setvet(false)}}>
+                    <Paystackbtn info={userData} />
+                </div>
             </div>
         </DialogContent>
     </Dialog>
 }
 
-export const ProcessinFeeDialog = ({open,setopen,userData}) => {
-  return  <Dialog onOpenChange={setopen} open={open}>
+export const ProcessinFeeDialog = ({processing,setprocessing,userData}) => {
+  return  <Dialog onOpenChange={setprocessing} open={processing}>
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Pay for Processing</DialogTitle>
@@ -29,8 +31,11 @@ export const ProcessinFeeDialog = ({open,setopen,userData}) => {
                 </DialogDescription>
             </DialogHeader>
             <div className='flex items-center justify-between'>
-                <button onClick={() => {setopen(false)}}>Cancel</button>
-                <Paystackbtn info={userData}/>
+                <button onClick={() => {setprocessing(false)}}>Cancel</button>
+
+                <div onClick={() => {setprocessing(false)}}>
+                    <Paystackbtn info={userData} />
+                </div>
             </div>
         </DialogContent>
     </Dialog>
