@@ -119,11 +119,13 @@ export const SubmissionDetail = () => {
     let userDataPro = null
    {submission ?  userData = {
       email:submission.profiles.email,
-      amount:500000,
+      // amount:500000,
+      amount:10000,
       metadata:{
         name:submission.profiles.full_name
       },
-      onSuccess: (response) => onSuccess(response,"vetting",500000),
+      // onSuccess: (response) => onSuccess(response,"vetting",500000),
+      onSuccess: (response) => onSuccess(response,"vetting",10000),
       onClose:() => {    toast({
           title: 'payment cancelled',
           description: `you cancelled payment for the processing fee`,
