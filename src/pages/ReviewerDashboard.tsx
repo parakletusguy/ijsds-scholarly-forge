@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { FileText, Clock, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
+import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { useNavigate } from 'react-router-dom';
 
 interface Review {
@@ -28,6 +29,8 @@ interface Review {
       subject_area: string;
       corresponding_author_email: string;
       manuscript_file_url: string;
+      vetting_fee: boolean;
+      Processing_fee: boolean;
     };
   };
 }
@@ -89,7 +92,9 @@ export const ReviewerDashboard = () => {
               abstract,
               subject_area,
               corresponding_author_email,
-              manuscript_file_url
+              manuscript_file_url,
+              vetting_fee,
+              Processing_fee
             )
           )
         `)
@@ -229,6 +234,12 @@ export const ReviewerDashboard = () => {
                       <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                         {review.submissions.articles.abstract}
                       </p>
+                      <div className="mb-4">
+                        <PaymentStatusBadge 
+                          vettingFee={review.submissions.articles.vetting_fee}
+                          processingFee={review.submissions.articles.Processing_fee}
+                        />
+                      </div>
                       <div className="flex gap-2 flex-wrap">
                         <PaperDownload 
                           manuscriptFileUrl={review.submissions.articles.manuscript_file_url}
