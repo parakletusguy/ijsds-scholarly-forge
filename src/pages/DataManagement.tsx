@@ -98,44 +98,10 @@ export const DataManagement = () => {
         <Tabs defaultValue="export" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="export">Data Export</TabsTrigger>
-            <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
           </TabsList>
 
           <TabsContent value="export">
             <DataExport />
-          </TabsContent>
-
-         
-
-          <TabsContent value="maintenance">
-            <div className="space-y-6">
-  
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Logs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">2024-01-30 14:23:15</span>
-                      {" "}- Database backup completed successfully
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">2024-01-30 12:15:08</span>
-                      {" "}- User authentication session refreshed
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">2024-01-30 10:45:32</span>
-                      {" "}- New submission processed (ID: sub_12345)
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">2024-01-30 09:12:44</span>
-                      {" "}- Email notification sent successfully
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </main>

@@ -119,11 +119,11 @@ export const SubmissionDetail = () => {
     let userDataPro = null
    {submission ?  userData = {
       email:submission.profiles.email,
-      amount:500000,
+      amount: 512500,
       metadata:{
         name:submission.profiles.full_name
       },
-      onSuccess: (response) => onSuccess(response,"vetting",500000),
+      onSuccess: (response) => onSuccess(response,"vetting",512500),
       onClose:() => {    toast({
           title: 'payment cancelled',
           description: `you cancelled payment for the processing fee`,
@@ -133,11 +133,11 @@ export const SubmissionDetail = () => {
 
        {submission ?  userDataPro = {
       email:submission.profiles.email,
-      amount:2000000,
+      amount:2050000,
       metadata:{
         name:submission.profiles.full_name
       },
-      onSuccess: (response) => onSuccess(response,"processing",2000000),
+      onSuccess: (response) => onSuccess(response,"processing",2050000),
       onClose:() => {    toast({
           title: 'payment cancelled',
           description: `you cancelled payment for the processing fee`,
