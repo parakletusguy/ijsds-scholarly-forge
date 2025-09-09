@@ -56,6 +56,35 @@ export const notifyPaymentConfirmation = async (
         });
       }
     }
+
+    // Notify admins about payment
+    const { data: admins } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('is_admin', true);
+
+    if (admins) {
+      for (const admin of admins) {
+        await supabase.functions.invoke('notification-service', {
+          body: {
+            userId: admin.id,
+            title: `Payment Received - ${paymentLabel}`,
+            message: `${userName} has paid the ${paymentLabel.toLowerCase()} (₦${amount.toLocaleString()}) for article "${articleTitle}".`,
+            type: 'info',
+            emailNotification: true,
+            // Reuse editor template for admins as the content is the same
+            emailTemplate: 'payment_received_editor',
+            emailData: {
+              adminName: admin.full_name,
+              userName,
+              articleTitle,
+              paymentType: paymentLabel,
+              amount: amount.toLocaleString()
+            }
+          }
+        });
+      }
+    }
   } catch (error) {
     console.error('Error sending payment confirmation notifications:', error);
   }
