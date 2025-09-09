@@ -13,7 +13,7 @@ import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
 import Monnify from 'monnify-ts'
 import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
-
+import { notifyPaymentConfirmation } from '@/lib/paymentNotificationService';
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -166,6 +166,21 @@ export const SubmissionDetail = () => {
         // if(data.amount != 500000) throw 'amount not equal'
         
         
+
+        // Notify user and admins/editors about confirmed payment
+        try {
+          const paymentTypeKey = type === 'vetting' ? 'vetting_fee' : 'processing_fee';
+          await notifyPaymentConfirmation(
+            submission.submitter_id,
+            submission.profiles.email,
+            submission.profiles.full_name,
+            submission.articles.title,
+            paymentTypeKey as 'vetting_fee' | 'processing_fee',
+            amount
+          );
+        } catch (notifyErr) {
+          console.error('Error notifying payment confirmation:', notifyErr);
+        }
 
         toast({
             title:'payment successful',
