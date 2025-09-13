@@ -1,5 +1,6 @@
 // Receipt.tsx
 import React from "react";
+import logo from "../../../public/Logo Symbol.png"
 import {
   Page,
   Text,
@@ -69,7 +70,7 @@ const Receipt = ({ receiptNo, name, amount, description, date }) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
-        <Image style={styles.logo} src="/path/to/logo.png" />
+        <Image style={styles.logo} src={logo} />
         <View style={styles.companyInfo}>
           <Text style={{ fontSize: 14, fontWeight: "bold" }}>
             International Journal of Sustainable Development Studies (IJSDS)

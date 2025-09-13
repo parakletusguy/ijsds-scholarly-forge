@@ -14,6 +14,7 @@ import Monnify from 'monnify-ts'
 import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
 import { notifyPaymentConfirmation } from '@/lib/paymentNotificationService';
+import ReceiptDown from '@/components/receiptGeneration/receiptDownload';
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -138,7 +139,14 @@ export const SubmissionDetail = () => {
         name:submission.profiles.full_name
       },
       onSuccess: (response) => onSuccess(response,"processing",2050000),
-      onClose:() => {    toast({
+      onClose:() => {    
+      const blob = ReceiptDown({
+        name:submission.profiles.full_name,
+        amount:"20,500",
+        type:"processing fee"
+      })
+        
+        toast({
           title: 'payment cancelled',
           description: `you cancelled payment for the processing fee`,
           variant: 'destructive',
