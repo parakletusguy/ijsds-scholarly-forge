@@ -15,6 +15,8 @@ import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/payst
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
 import { notifyPaymentConfirmation } from '@/lib/paymentNotificationService';
 import ReceiptDown from '@/components/receiptGeneration/receiptDownload';
+import { sendEmailNotification, SendRecieptMail } from '@/lib/emailService';
+import { uploadPdf } from '@/lib/cloudinary';
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -127,7 +129,7 @@ export const SubmissionDetail = () => {
       onSuccess: (response) => onSuccess(response,"vetting",512500),
       onClose:() => {    toast({
           title: 'payment cancelled',
-          description: `you cancelled payment for the processing fee`,
+          description: `you cancelled payment for the vetting fee`,
           variant: 'destructive',
         });}
     } : null}
@@ -139,12 +141,12 @@ export const SubmissionDetail = () => {
         name:submission.profiles.full_name
       },
       onSuccess: (response) => onSuccess(response,"processing",2050000),
-      onClose:() => {    
-      const blob = ReceiptDown({
-        name:submission.profiles.full_name,
-        amount:"20,500",
-        type:"processing fee"
-      })
+      onClose: async () => {    
+      
+
+      // In-app notification is already handled by sendEmailNotification function
+
+      
         
         toast({
           title: 'payment cancelled',
@@ -171,7 +173,54 @@ export const SubmissionDetail = () => {
         console.log({success,message,data})
         if(!success) throw "server error"
         if(!data.status) throw "payment not verified"
-        // if(data.amount != 500000) throw 'amount not equal'
+
+        // generate custom receipt
+
+        if(type == "vetting"){
+          const blob = await ReceiptDown({
+        name:submission.profiles.full_name,
+        amount:"5125",
+        type:"vetting fee",
+        reference:transactionReference
+      })
+
+      const url = await uploadPdf(blob)
+        await sendEmailNotification({
+        to: submission.profiles.email,
+        subject: 'payment',
+        htmlContent: `
+         <h2>Payment Receipt</h2>
+        <p>Dear ${submission.profiles.full_name || 'user'},</p>
+        <p>Your payment of ₦5125 for article vetting has been received.</p>
+        <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
+        <p>Best regards,<br>Editorial System</p>
+        `,
+        userId: user.id,
+        type: 'payment'
+      });
+        } else if(type == "processing"){
+            const blob = await ReceiptDown({
+          name:submission.profiles.full_name,
+          amount:"20,500",
+          type:"processing fee",
+        reference:transactionReference
+          })
+
+          const url = await uploadPdf(blob)
+          await sendEmailNotification({
+          to: submission.profiles.email,
+          subject: 'payment',
+          htmlContent: `
+          <h2>Payment Receipt</h2>
+          <p>Dear ${submission.profiles.full_name || 'user'},</p>
+          <p>Your payment of ₦20,500 for article processing has been received.</p>
+          <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
+          <p>Best regards,<br>Editorial System</p>
+          `,
+          userId: user.id,
+          type: 'payment'
+              });
+        }
         
         
 

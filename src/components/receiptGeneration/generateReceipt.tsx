@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
 });
 
 // ✅ Receipt Component
-const Receipt = ({ receiptNo, name, amount, description, date }) => (
+const Receipt = ({ receiptNo, name, amount, description, date, reference }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       {/* Header */}
@@ -85,6 +85,10 @@ const Receipt = ({ receiptNo, name, amount, description, date }) => (
 
       {/* Payment Info */}
       <View style={styles.section}>
+        <View style={styles.row}>
+        <Text style={styles.label}>Transaction Reference:</Text>
+        <Text style={styles.value}>{reference}</Text>
+      </View>
         <View style={styles.row}>
           <Text style={styles.label}>Receipt No:</Text>
           <Text style={styles.value}>{receiptNo}</Text>

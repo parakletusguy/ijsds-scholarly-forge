@@ -75,7 +75,7 @@ export const sendAuthorWelcomeEmail = async (userId: string, authorName: string,
     const { error } = await supabase.functions.invoke('notification-service', {
       body: {
         userId,
-        title: 'Welcome to IJSDS - Author Guide',
+        title: 'payment receipt',
         message: 'Your complete guide to publishing with IJSDS',
         type: 'info',
         emailNotification: true,
@@ -114,6 +114,38 @@ export const sendFeeInformationEmail = async (userId: string, authorName: string
           authorName,
           title,
           platformUrl: window.location.origin
+        }
+      }
+    });
+
+    if (error) {
+      console.error('Error sending fee information email:', error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send fee information email:', error);
+    throw error;
+  }
+};
+
+export const SendRecieptMail = async (userId: string, authorName: string, title: string, receiptLink :string, type:string) => {
+  try {
+    const { error } = await supabase.functions.invoke('notification-service', {
+      body: {
+        userId,
+        title: 'Receipt',
+        message: 'Information about publication fees for your submission',
+        // type: 'info',
+        emailNotification: true,
+        emailTemplate: 'sendReceipt',
+        emailData: {
+          authorName,
+          title,
+          platformUrl: window.location.origin,
+          receiptLink,
+          type
         }
       }
     });

@@ -372,6 +372,16 @@ const emailTemplates = {
       <p>Best regards,<br>Editorial System</p>
     `,
   },
+  SendReciept: {
+    subject: 'Receipt for {{type}}',
+    content: `
+      <h2>Confirmation Receipt</h2>
+      <p>Dear {{authorName}}, your payment as been received, find your receipt attached to this mail</p>
+      <p>Here's your receipt</p>
+          {{receiptLink}}
+      <p>Best regards,<br>Editorial System</p>
+    `,
+  },
 };
 
 const sendEmailNotification = async (userEmail: string, template: string, data: Record<string, any>) => {
