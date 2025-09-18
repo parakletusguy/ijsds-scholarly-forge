@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { FileUpload } from '@/components/file-management/FileUpload';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { DialogHeader } from '@/components/ui/dialog';
 // import {PayDialog} from '@/components/submission/paystackDialogBox';
 
 interface Author {
@@ -41,6 +43,7 @@ export const Submit = () => {
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
+  const [submissionClose,setSubmissionClose] = useState(true)
 
   // Load saved draft on mount
   useEffect(() => {
@@ -150,6 +153,7 @@ export const Submit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     
     if (!user) {
       toast({
@@ -336,6 +340,9 @@ export const Submit = () => {
     );
   }
 
+        const submissionCloseconst = true
+  
+
   return (
     <div className="container mx-auto px-4 py-8">
                 < div className="relative py-6">
@@ -374,7 +381,7 @@ export const Submit = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={ submissionCloseconst? () => {setSubmissionClose(true)} : handleSubmit} className="space-y-8">
           {/* Article Information */}
           <Card>
             <CardHeader>
@@ -603,6 +610,26 @@ export const Submit = () => {
           </div>
         </form>
       </div>
+
+ <Dialog  open={submissionClose} onOpenChange={setSubmissionClose}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Article submission have closed for volume 1 issue !</DialogTitle>
+                <DialogDescription>
+                    Kindly wait for next volume and issue, you'll be notified by mail.
+                    Thank You
+                </DialogDescription>
+            </DialogHeader>
+            {/* <div className='flex items-center justify-between'>
+                <button onClick={() => {setprocessing(false)}}>Cancel</button>
+
+                <div onClick={() => {setprocessing(false)}}>
+                    <Paystackbtn info={userData} />
+                </div>
+            </div> */}
+        </DialogContent>
+    </Dialog>
+  
     </div>
   );
 };
