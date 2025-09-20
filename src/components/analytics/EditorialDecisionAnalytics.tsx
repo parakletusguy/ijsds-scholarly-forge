@@ -206,7 +206,7 @@ export const EditorialDecisionAnalytics = () => {
       </div>
 
       {/* Decision Trends Chart */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Editorial Decision Trends</CardTitle>
         </CardHeader>
@@ -231,10 +231,10 @@ export const EditorialDecisionAnalytics = () => {
             </BarChart>
           </ChartContainer>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Decision Distribution */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Decision Distribution</CardTitle>
         </CardHeader>
@@ -264,7 +264,7 @@ export const EditorialDecisionAnalytics = () => {
             </PieChart>
           </ChartContainer>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };
