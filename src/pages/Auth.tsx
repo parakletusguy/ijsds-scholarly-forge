@@ -210,8 +210,6 @@ export const Auth = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="author">Author</SelectItem>
-                        <SelectItem value="reviewer">Reviewer</SelectItem>
-                        <SelectItem value="editor">Editor (Admin)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
