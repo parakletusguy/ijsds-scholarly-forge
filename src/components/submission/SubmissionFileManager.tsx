@@ -44,33 +44,25 @@ export const SubmissionFileManager = ({
             vettingFee={vettingFee}
             processingFee={processingFee}
           />
-          {!vettingFee && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Vetting Fee Required:</strong> Please pay the vetting fee (₦5,000) to proceed with peer review.
-              </p>
-            </div>
-          )}
-          {!processingFee && vettingFee && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Processing Fee:</strong> This will be required upon acceptance (₦20,000).
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
       {/* File Management for Authors */}
-      {isAuthor && (
+      {/* {isAuthor && (
         <AuthorFileManager 
           articleId={articleId}
           submissionId={submissionId}
         />
-      )}
+      )} */}
+
+
+        <AuthorFileManager 
+          articleId={articleId}
+          submissionId={submissionId}
+        />
 
       {/* Submission Info for Non-Authors */}
-      {!isAuthor && (
+      {/* {!isAuthor && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -90,7 +82,7 @@ export const SubmissionFileManager = ({
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
     </div>
   );
 };

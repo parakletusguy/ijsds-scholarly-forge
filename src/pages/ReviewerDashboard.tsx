@@ -144,16 +144,16 @@ export const ReviewerDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-                      <div className="relative py-3">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => navigate(-1)}
-                          className="mb-4 absolute top-1 left-3"
-                          >
-                          <ArrowLeft className="h-4 w-4 mr-2" />
-                          Back
-                        </Button>
-                      </div>
+      <div className="relative py-3">
+        <Button 
+        variant="outline" 
+        onClick={() => navigate(-1)}
+        className="mb-4 absolute top-1 left-3"
+        >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back
+      </Button>
+    </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Reviewer Dashboard</h1>
@@ -252,7 +252,7 @@ export const ReviewerDashboard = () => {
                         </Button>
                         <Button 
                           variant="outline"
-                          onClick={() => navigate(`/submission/${review.submission_id}/details`)}
+                          onClick={() => navigate(`/reviewerSubmission/${review.submission_id}/details`)}
                         >
                           View Details
                         </Button>

@@ -43,6 +43,7 @@ import { BlogPost } from "./pages/BlogPost";
 import { Partners } from "./pages/Partners";
 import { BlogAdmin } from "./components/blog/BlogAdmin";
 import { PartnersAdmin } from "./components/partners/PartnersAdmin";
+import { ReviewerDetail } from "./pages/reviewersDetails";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
               <Route path="/editorial" element={<PageLayout><Editorial /></PageLayout>} />
               <Route path="/review-assignment/:submissionId" element={<PageLayout><ReviewAssignment /></PageLayout>} />
               <Route path="/reviewer-dashboard" element={<PageLayout><ReviewerDashboard /></PageLayout>} />
+              <Route path="/reviewerSubmission/:submissionId/details" element={<PageLayout><ReviewerDetail/></PageLayout>} />
               <Route path="/review/:reviewId" element={<PageLayout><ReviewForm /></PageLayout>} />
               <Route path="/publication" element={<PageLayout><Publication /></PageLayout>} />
               <Route path="/production" element={<PageLayout><Production /></PageLayout>} />

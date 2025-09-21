@@ -2,20 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
-import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
-import { notifyPaymentConfirmation } from '@/lib/paymentNotificationService';
-import ReceiptDown from '@/components/receiptGeneration/receiptDownload';
-import { sendEmailNotification, SendRecieptMail } from '@/lib/emailService';
-import { uploadPdf } from '@/lib/cloudinary';
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -37,15 +30,12 @@ interface SubmissionDetails {
   };
 }
 
-export const SubmissionDetail = () => {
+export const ReviewerDetail = () => {
   const { submissionId } = useParams();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-  const [open,setopen] = useState(false)
-  const [vet,setvet] = useState(false)
-  const [processing,setprocessing] = useState(false)
 
 
   useEffect(() => {
@@ -117,144 +107,6 @@ export const SubmissionDetail = () => {
     }
   };
 
-    let userData = null
-    let userDataPro = null
-   {submission ?  userData = {
-      email:submission.profiles.email,
-      amount: 512500,
-      metadata:{
-        name:submission.profiles.full_name
-      },
-      onSuccess: (response) => onSuccess(response,"vetting",512500),
-      onClose:() => {    toast({
-          title: 'payment cancelled',
-          description: `you cancelled payment for the vetting fee`,
-          variant: 'destructive',
-        });}
-    } : null}
-
-       {submission ?  userDataPro = {
-      email:submission.profiles.email,
-      amount:2050000,
-      metadata:{
-        name:submission.profiles.full_name
-      },
-      onSuccess: (response) => onSuccess(response,"processing",2050000),
-      onClose: async () => {    
-      
-
-      // In-app notification is already handled by sendEmailNotification function
-
-      
-        
-        toast({
-          title: 'payment cancelled',
-          description: `you cancelled payment for the processing fee`,
-          variant: 'destructive',
-        });}
-    } : null}
-
-
-    const onSuccess = async (pReponse, type:string, amount:number) => {
-      try {
-        const transactionReference = pReponse.reference
-        // const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
-        //   method:"POST",
-        //   headers:{ 'Content-Type':'application/json'},
-        //   body:JSON.stringify({reference:transactionReference,amount:500000})
-        // }) 
-        const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
-          method:"POST",
-          headers:{ 'Content-Type':'application/json'},
-          body:JSON.stringify({reference:transactionReference,amount:amount,articleId:submission.articles.id,type:type})
-        }) 
-        const {success,message,data} = await confirm.json()
-        console.log({success,message,data})
-        if(!success) throw "server error"
-        if(!data.status) throw "payment not verified"
-
-        // generate custom receipt
-
-        if(type == "vetting"){
-          const blob = await ReceiptDown({
-        name:submission.profiles.full_name,
-        amount:"5125",
-        type:"vetting fee",
-        reference:transactionReference
-      })
-
-      const url = await uploadPdf(blob)
-        await sendEmailNotification({
-        to: submission.profiles.email,
-        subject: 'payment',
-        htmlContent: `
-         <h2>Payment Receipt</h2>
-        <p>Dear ${submission.profiles.full_name || 'user'},</p>
-        <p>Your payment of ₦5125 for article vetting has been received.</p>
-        <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
-        <p>Best regards,<br>Editorial System</p>
-        `,
-        userId: user.id,
-        type: 'payment'
-      });
-        } else if(type == "processing"){
-            const blob = await ReceiptDown({
-          name:submission.profiles.full_name,
-          amount:"20,500",
-          type:"processing fee",
-        reference:transactionReference
-          })
-
-          const url = await uploadPdf(blob)
-          await sendEmailNotification({
-          to: submission.profiles.email,
-          subject: 'payment',
-          htmlContent: `
-          <h2>Payment Receipt</h2>
-          <p>Dear ${submission.profiles.full_name || 'user'},</p>
-          <p>Your payment of ₦20,500 for article processing has been received.</p>
-          <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
-          <p>Best regards,<br>Editorial System</p>
-          `,
-          userId: user.id,
-          type: 'payment'
-              });
-        }
-        
-        
-
-        // Notify user and admins/editors about confirmed payment
-        try {
-          const paymentTypeKey = type === 'vetting' ? 'vetting_fee' : 'processing_fee';
-          await notifyPaymentConfirmation(
-            submission.submitter_id,
-            submission.profiles.email,
-            submission.profiles.full_name,
-            submission.articles.title,
-            paymentTypeKey as 'vetting_fee' | 'processing_fee',
-            amount
-          );
-        } catch (notifyErr) {
-          console.error('Error notifying payment confirmation:', notifyErr);
-        }
-
-        toast({
-            title:'payment successful',
-            description:`your payment has been successfully verified`
-          })
-      } catch (error) {
-        if(error){
-          console.log(error)
-  
-          toast({
-            title:'payment failed',
-            description:`payment failed due to ${error}, please contact support or try again later`,
-            variant:'destructive'
-          })
-        }
-      }
-    }
-
 
   if (loading || loadingData) {
     return (
@@ -304,7 +156,7 @@ export const SubmissionDetail = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-foreground">
-              Submission Details
+              Reviewer edit Details
             </h1>
             <Badge className={getStatusColor(submission.status)}>
               {submission.status.replace('_', ' ').toUpperCase()}
@@ -421,23 +273,6 @@ export const SubmissionDetail = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className=' py-3 mt-3'>
-              <CardHeader>
-                <CardTitle> Payment Info</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-3'>
-                 <div className='flex justify-between items-center'>
-                <p>Click here to pay for vetting</p>
-                <button className='rounded-sm bg-black text-white px-3 py-1 h-9' onClick={() => setvet(true)} >Pay</button>
-            </div>
-                  <div className='flex justify-between '>
-                <p>Click here to pay for processing</p>
-                <button className='rounded-sm bg-black text-white px-3 py-1 h-9' onClick={() => setprocessing(true)}>Pay</button>
-            </div>
-              </CardContent>
-            </Card>
-            <VettingDialog userData={userData} vet={vet} setvet={setvet}/>
-            <ProcessinFeeDialog userData={userDataPro} processing={processing} setprocessing={setprocessing}/>
           </div>
         </div>
       </main>
