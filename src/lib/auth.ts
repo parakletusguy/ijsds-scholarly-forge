@@ -12,7 +12,7 @@ export const signUp = async (email: string, password: string, fullName: string, 
     email,
     password,
     options: {
-      emailRedirectTo: `${window.location.origin}/`,
+      emailRedirectTo: `${window.location.origin}/auth?confirmed=true`,
       data: {
         full_name: fullName,
         is_editor: roles.is_editor || false,

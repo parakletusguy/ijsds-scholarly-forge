@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 export const Auth = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
+  const isConfirmed = searchParams.get('confirmed') === 'true';
   
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot-password'>(initialMode);
   const [email, setEmail] = useState('');
@@ -29,7 +30,14 @@ export const Auth = () => {
     if (user) {
       navigate('/');
     }
-  }, [user, navigate]);
+    
+    if (isConfirmed) {
+      toast({
+        title: 'Email confirmed successfully',
+        description: 'Your account has been verified. You can now sign in.',
+      });
+    }
+  }, [user, navigate, isConfirmed]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +87,7 @@ export const Auth = () => {
           }
           toast({
             title: 'Account created successfully',
-            description: 'Please check your email to verify your account and welcome information.',
+            description: 'Please check your email to confirm your account before signing in.',
           });
           setMode('signin');
         }
@@ -92,10 +100,27 @@ export const Auth = () => {
             variant: 'destructive',
           });
         } else {
-          toast({
-            title: 'Signed in successfully',
-          });
-          navigate('/');
+          const { error } = await signIn(email, password);
+          if (error) {
+            if (error.message.includes('Email not confirmed')) {
+              toast({
+                title: 'Email not confirmed',
+                description: 'Please check your email and click the confirmation link before signing in.',
+                variant: 'destructive',
+              });
+            } else {
+              toast({
+                title: 'Error',
+                description: error.message,
+                variant: 'destructive',
+              });
+            }
+          } else {
+            toast({
+              title: 'Signed in successfully',
+            });
+            navigate('/');
+          }
         }
       }
     } catch (error) {
