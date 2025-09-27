@@ -147,10 +147,20 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
   const approveProcessing = async () => {
     setProcessLoad(true)
     try {
-      const {error: updateError} = await supabase
-    .from("articles")
-    .update({status:"processed"}).
-    eq('id',article.id)
+            const { error } = await supabase
+        .from('articles')
+        .update({
+          volume: issueInfo.volume,
+          issue: issueInfo.issue,
+          page_start: issueArticles.find(a => a.id === article.id)?.pageStart,
+          page_end: issueArticles.find(a => a.id === article.id)?.pageEnd,
+        })
+        .eq('id', article.id);
+
+          const {error: updateError} = await supabase
+        .from("articles")
+        .update({status:"processed"}).
+        eq('id',article.id)
 
      toast({
         title: "processed",
@@ -241,7 +251,7 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
       </Card>
 
       {/* Articles in Issue */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -337,10 +347,10 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Issue Preview */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Issue Preview</CardTitle>
         </CardHeader>
@@ -383,7 +393,7 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Actions */}
       <Card>
@@ -391,7 +401,7 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
           <CardTitle>Issue Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-3">
+          <div className="flex gap-3 overflow-hidden">
             <Button
               onClick={saveIssue}
               disabled={loading}
