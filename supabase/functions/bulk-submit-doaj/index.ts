@@ -6,6 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'An unknown error occurred';
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -67,7 +73,7 @@ serve(async (req) => {
           errors.push(`Article ${article.id}: ${errorData}`);
         }
       } catch (articleError) {
-        errors.push(`Article ${article.id}: ${articleError.message}`);
+        errors.push(`Article ${article.id}: ${getErrorMessage(articleError)}`);
       }
     }
 
@@ -83,7 +89,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in bulk DOAJ submission:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: getErrorMessage(error),
       success: false 
     }), {
       status: 500,

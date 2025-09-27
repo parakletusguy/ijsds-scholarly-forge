@@ -79,7 +79,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in OAI-PMH endpoint:', error);
-    const errorResponse = generateErrorResponse('badRequest', error.message);
+    const errorResponse = generateErrorResponse('badRequest', error instanceof Error ? error.message : 'An unknown error occurred');
     return new Response(errorResponse, {
       status: 500,
       headers: { 

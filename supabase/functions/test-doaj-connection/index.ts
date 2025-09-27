@@ -44,7 +44,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error testing DOAJ connection:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
       success: false 
     }), {
       status: 500,
