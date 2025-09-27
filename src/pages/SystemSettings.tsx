@@ -173,6 +173,7 @@ export const SystemSettings = () => {
   const submissionEnabledSetting = settings.find(s => s.setting_key === 'submission_enabled');
   const maintenanceModeSetting = settings.find(s => s.setting_key === 'maintenance_mode');
   const maxFileSizeSetting = settings.find(s => s.setting_key === 'max_file_size_mb');
+  const authorReuploadEnabledSetting = settings.find(s => s.setting_key === 'author_reupload_enabled');
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -271,7 +272,32 @@ export const SystemSettings = () => {
                 Configure file upload limits and restrictions
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Author Reupload Control */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Allow Author File Reuploads</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Controls whether authors can update/reupload their manuscript files after submission. Reviewers are always allowed to upload files.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={authorReuploadEnabledSetting?.setting_value === 'true' ? 'default' : 'destructive'}>
+                    {authorReuploadEnabledSetting?.setting_value === 'true' ? 'Enabled' : 'Disabled'}
+                  </Badge>
+                  <Switch
+                    checked={authorReuploadEnabledSetting?.setting_value === 'true'}
+                    onCheckedChange={(checked) => 
+                      updateSetting('author_reupload_enabled', checked.toString())
+                    }
+                    disabled={saving}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* File Size Setting */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Maximum File Size (MB)</Label>
                 <div className="flex items-center gap-2">

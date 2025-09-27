@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileUpload } from '@/components/file-management/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Upload, FileText, Calendar, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Calendar, RefreshCw, Lock } from 'lucide-react';
 
 interface FileVersion {
   id: string;
@@ -34,10 +35,29 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [fileDescription, setFileDescription] = useState('');
+  const [reuploadEnabled, setReuploadEnabled] = useState(true);
 
   useEffect(() => {
     fetchFiles();
+    checkReuploadPermission();
   }, [articleId]);
+
+  const checkReuploadPermission = async () => {
+    try {
+      const { data: setting, error } = await supabase
+        .from('system_settings')
+        .select('setting_value')
+        .eq('setting_key', 'author_reupload_enabled')
+        .single();
+
+      if (error) throw error;
+      setReuploadEnabled(setting?.setting_value === 'true');
+    } catch (error) {
+      console.error('Error checking reupload permission:', error);
+      // Default to disabled if there's an error
+      setReuploadEnabled(false);
+    }
+  };
 
   const fetchFiles = async () => {
     try {
@@ -224,7 +244,17 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
           <h4 className="font-medium flex items-center gap-2">
             <RefreshCw className="h-4 w-4" />
             Update Manuscript
+            {!reuploadEnabled && <Lock className="h-4 w-4 text-muted-foreground" />}
           </h4>
+          
+          {!reuploadEnabled && (
+            <Alert>
+              <Lock className="h-4 w-4" />
+              <AlertDescription>
+                File reuploads have been disabled by the administrator. Contact the editorial team if you need to update your manuscript.
+              </AlertDescription>
+            </Alert>
+          )}
           
           <div>
             <Label htmlFor="file-description">Update Description</Label>
@@ -233,6 +263,7 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
               value={fileDescription}
               onChange={(e) => setFileDescription(e.target.value)}
               placeholder="Describe the changes made in this version"
+              disabled={!reuploadEnabled}
             />
           </div>
 
@@ -242,6 +273,7 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
             onFileUploaded={handleFileUpdate}
             acceptedTypes=".pdf,.doc,.docx"
             maxSizeMB={10}
+            disabled={!reuploadEnabled}
           />
         </div>
 

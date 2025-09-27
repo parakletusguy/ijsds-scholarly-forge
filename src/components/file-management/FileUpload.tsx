@@ -13,6 +13,7 @@ interface FileUploadProps {
   onFileUploaded: (fileUrl: string, fileName: string) => void;
   acceptedTypes?: string;
   maxSizeMB?: number;
+  disabled?: boolean;
 }
 
 export const FileUpload = ({ 
@@ -20,13 +21,15 @@ export const FileUpload = ({
   folder = '', 
   onFileUploaded, 
   acceptedTypes = '.pdf,.doc,.docx',
-  maxSizeMB = 10 
+  maxSizeMB = 10,
+  disabled = false
 }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
 
   const uploadFile = async (file: File) => {
+    if (disabled) return;
     setUploading(true);
     
     try {
@@ -77,6 +80,7 @@ export const FileUpload = ({
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const file = event.target.files?.[0];
     if (file) uploadFile(file);
   };
@@ -103,6 +107,7 @@ export const FileUpload = ({
     e.stopPropagation();
     setDragActive(false);
 
+    if (disabled) return;
     const file = e.dataTransfer.files?.[0];
     if (file) uploadFile(file);
   };
@@ -110,23 +115,34 @@ export const FileUpload = ({
   return (
     <Card 
       className={`border-2 border-dashed transition-colors ${
-        dragActive ? 'border-primary' : 'border-border'
+        disabled 
+          ? 'border-border opacity-50 cursor-not-allowed' 
+          : dragActive 
+            ? 'border-primary' 
+            : 'border-border'
       }`}
-      onDragEnter={handleDragIn}
-      onDragLeave={handleDragOut}
-      onDragOver={handleDrag}
-      onDrop={handleDrop}
+      onDragEnter={disabled ? undefined : handleDragIn}
+      onDragLeave={disabled ? undefined : handleDragOut}
+      onDragOver={disabled ? undefined : handleDrag}
+      onDrop={disabled ? undefined : handleDrop}
     >
       <CardContent className="p-6">
         <div className="text-center">
-          <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <Label htmlFor="file-upload" className="cursor-pointer">
+          <Upload className={`h-12 w-12 mx-auto mb-4 ${disabled ? 'text-muted-foreground/50' : 'text-muted-foreground'}`} />
+          <Label htmlFor="file-upload" className={disabled ? 'cursor-not-allowed' : 'cursor-pointer'}>
             <span className="text-lg font-medium">
-              {uploading ? 'Uploading...' : 'Drop your file here or click to browse'}
+              {disabled 
+                ? 'File uploads disabled by administrator' 
+                : uploading 
+                  ? 'Uploading...' 
+                  : 'Drop your file here or click to browse'
+              }
             </span>
-            <p className="text-sm text-muted-foreground mt-2">
-              Supported formats: {acceptedTypes} (max {maxSizeMB}MB)
-            </p>
+            {!disabled && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Supported formats: {acceptedTypes} (max {maxSizeMB}MB)
+              </p>
+            )}
           </Label>
           <Input
             id="file-upload"
@@ -134,16 +150,21 @@ export const FileUpload = ({
             className="hidden"
             accept={acceptedTypes}
             onChange={handleFileSelect}
-            disabled={uploading}
+            disabled={uploading || disabled}
           />
           <Button 
             variant="outline" 
             className="mt-4"
-            disabled={uploading}
-            onClick={() => document.getElementById('file-upload')?.click()}
+            disabled={uploading || disabled}
+            onClick={() => !disabled && document.getElementById('file-upload')?.click()}
           >
             <FileText className="h-4 w-4 mr-2" />
-            {uploading ? 'Uploading...' : 'Select File'}
+            {disabled 
+              ? 'Upload Disabled' 
+              : uploading 
+                ? 'Uploading...' 
+                : 'Select File'
+            }
           </Button>
         </div>
       </CardContent>
