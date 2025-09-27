@@ -33,6 +33,7 @@ import { SubmissionReviews } from "./pages/SubmissionReviews";
 import { Reports } from "./pages/Reports";
 import { RevisionSubmissionPortal } from "./components/revisions/RevisionSubmissionPortal";
 import NotFound from "./pages/NotFound";
+import { SystemSettings } from "./pages/SystemSettings";
 import { ManageRequests } from "./pages/approveRequest";
 import { Landing } from "./pages/landingPage";
 import logo_2 from "../public/riversstate-removebg-preview.png"
@@ -104,6 +105,7 @@ const App = () => (
               <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
               <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
               <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
+              <Route path="/system-settings" element={<PageLayout><SystemSettings /></PageLayout>} />
               <Route path="/landing" element={<Landing/>} />
               <Route path="/orcidGuide" element={<PageLayout><Guide/></PageLayout>}/>
               <Route path="/blog" element={<PageLayout><Blog /></PageLayout>} />

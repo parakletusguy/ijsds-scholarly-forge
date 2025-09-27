@@ -43,14 +43,40 @@ export const Submit = () => {
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [submissionClose,setSubmissionClose] = useState(true)
+  const [submissionEnabled, setSubmissionEnabled] = useState(true)
+  const [checkingSubmissionStatus, setCheckingSubmissionStatus] = useState(true)
 
-  // Load saved draft on mount
+  // Load saved draft and check submission status on mount
   useEffect(() => {
     if (user) {
       loadDraft();
     }
+    checkSubmissionStatus();
   }, [user]);
+
+  const checkSubmissionStatus = async () => {
+    setCheckingSubmissionStatus(true);
+    try {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('setting_value')
+        .eq('setting_key', 'submission_enabled')
+        .single();
+
+      if (error) {
+        console.error('Error checking submission status:', error);
+        // Default to enabled if we can't check
+        setSubmissionEnabled(true);
+      } else {
+        setSubmissionEnabled(data.setting_value === 'true');
+      }
+    } catch (error) {
+      console.error('Error checking submission status:', error);
+      setSubmissionEnabled(true);
+    } finally {
+      setCheckingSubmissionStatus(false);
+    }
+  };
 
   // Auto-save functionality
   useEffect(() => {
@@ -340,7 +366,7 @@ export const Submit = () => {
     );
   }
 
-        const submissionCloseconst = true
+        
   
 
   return (
@@ -381,7 +407,26 @@ export const Submit = () => {
           </div>
         </div>
 
-        <form onSubmit={ submissionCloseconst? () => {setSubmissionClose(true)} : handleSubmit} className="space-y-8">
+        {checkingSubmissionStatus ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : !submissionEnabled ? (
+          <Card>
+            <CardContent className="py-8 text-center">
+              <div className="max-w-md mx-auto">
+                <h2 className="text-xl font-semibold mb-2 text-destructive">Submissions Currently Closed</h2>
+                <p className="text-muted-foreground mb-4">
+                  New submissions are temporarily disabled. Please check back later or contact the editorial office for more information.
+                </p>
+                <Button variant="outline" onClick={() => navigate('/dashboard')}>
+                  Back to Dashboard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-8">
           {/* Article Information */}
           <Card>
             <CardHeader>
@@ -609,27 +654,8 @@ export const Submit = () => {
             </Button>
           </div>
         </form>
+        )}
       </div>
-
- <Dialog  open={submissionClose} onOpenChange={setSubmissionClose}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Article submission have closed for volume 1 issue !</DialogTitle>
-                <DialogDescription>
-                    Kindly wait for next volume and issue, you'll be notified by mail.
-                    Thank You
-                </DialogDescription>
-            </DialogHeader>
-            {/* <div className='flex items-center justify-between'>
-                <button onClick={() => {setprocessing(false)}}>Cancel</button>
-
-                <div onClick={() => {setprocessing(false)}}>
-                    <Paystackbtn info={userData} />
-                </div>
-            </div> */}
-        </DialogContent>
-    </Dialog>
-  
     </div>
   );
 };

@@ -123,6 +123,7 @@ export const AppSidebar = () => {
       
       // Admin-only items
       { title: 'Publication', url: '/publication', icon: Globe, roles: ['admin'] },
+      { title: 'System Settings', url: '/system-settings', icon: Settings, roles: ['admin'] },
       { title: 'External Integrations', url: '/external-integrations', icon: Settings, roles: ['admin'] },
       { title: 'Data Management', url: '/data-management', icon: Database, roles: ['admin'] },
       { title: 'Analytics', url: '/analytics', icon: BarChart3, roles: ['admin'] },
