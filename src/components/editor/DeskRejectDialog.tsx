@@ -34,6 +34,15 @@ export const DeskRejectDialog = ({ submissionId, submissionTitle, authorEmail, a
 
     setLoading(true);
     try {
+      // Get submission to find article_id
+      const { data: submission, error: fetchError } = await supabase
+        .from('submissions')
+        .select('article_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       // Update submission status
       const { error: submissionError } = await supabase
         .from('submissions')
@@ -41,6 +50,16 @@ export const DeskRejectDialog = ({ submissionId, submissionTitle, authorEmail, a
         .eq('id', submissionId);
 
       if (submissionError) throw submissionError;
+
+      // Update article status
+      if (submission?.article_id) {
+        const { error: articleError } = await supabase
+          .from('articles')
+          .update({ status: 'rejected' })
+          .eq('id', submission.article_id);
+
+        if (articleError) throw articleError;
+      }
 
       // Create editorial decision
       const { data: { user } } = await supabase.auth.getUser();

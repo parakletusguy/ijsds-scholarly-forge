@@ -119,12 +119,32 @@ export const Editorial = () => {
 
   const updateSubmissionStatus = async (submissionId: string, newStatus: string) => {
     try {
+      // Get submission to find article_id
+      const { data: submission, error: fetchError } = await supabase
+        .from('submissions')
+        .select('article_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Update submission status
       const { error } = await supabase
         .from('submissions')
         .update({ status: newStatus })
         .eq('id', submissionId);
 
       if (error) throw error;
+
+      // Update article status
+      if (submission?.article_id) {
+        const { error: articleError } = await supabase
+          .from('articles')
+          .update({ status: newStatus })
+          .eq('id', submission.article_id);
+
+        if (articleError) throw articleError;
+      }
 
       toast({
         title: 'Success',

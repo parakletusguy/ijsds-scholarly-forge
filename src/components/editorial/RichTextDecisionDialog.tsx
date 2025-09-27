@@ -45,6 +45,15 @@ export const RichTextDecisionDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Get submission to find article_id
+      const { data: submission, error: fetchError } = await supabase
+        .from('submissions')
+        .select('article_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       // Update submission status
       const newStatus = type === 'accept' ? 'accepted' : 'rejected';
       const { error: submissionError } = await supabase
@@ -60,6 +69,16 @@ export const RichTextDecisionDialog = ({
         .eq('id', submissionId);
 
       if (submissionError) throw submissionError;
+
+      // Update article status
+      if (submission?.article_id) {
+        const { error: articleError } = await supabase
+          .from('articles')
+          .update({ status: newStatus })
+          .eq('id', submission.article_id);
+
+        if (articleError) throw articleError;
+      }
 
       // Create editorial decision record
       const { error: decisionError } = await supabase

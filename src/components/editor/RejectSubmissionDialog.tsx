@@ -30,6 +30,15 @@ export const RejectSubmissionDialog = ({ submissionId, onReject }: RejectSubmiss
 
     setLoading(true);
     try {
+      // Get submission to find article_id
+      const { data: submission, error: fetchError } = await supabase
+        .from('submissions')
+        .select('article_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       // Update submission status to rejected
       const { error: submissionError } = await supabase
         .from('submissions')
@@ -37,6 +46,16 @@ export const RejectSubmissionDialog = ({ submissionId, onReject }: RejectSubmiss
         .eq('id', submissionId);
 
       if (submissionError) throw submissionError;
+
+      // Update article status
+      if (submission?.article_id) {
+        const { error: articleError } = await supabase
+          .from('articles')
+          .update({ status: 'rejected' })
+          .eq('id', submission.article_id);
+
+        if (articleError) throw articleError;
+      }
 
       // Create rejection message
       const { data: { user } } = await supabase.auth.getUser();

@@ -113,6 +113,15 @@ export const RevisionSubmissionPortal = () => {
 
     setSubmitting(true);
     try {
+      // Get submission to find article_id
+      const { data: submission, error: fetchError } = await supabase
+        .from('submissions')
+        .select('article_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       // Update submission status
       await supabase
         .from('submissions')
@@ -121,6 +130,14 @@ export const RevisionSubmissionPortal = () => {
           updated_at: new Date().toISOString()
         })
         .eq('id', submissionId);
+
+      // Update article status
+      if (submission?.article_id) {
+        await supabase
+          .from('articles')
+          .update({ status: 'under_review' })
+          .eq('id', submission.article_id);
+      }
 
       // Create editorial decision record
       await supabase
