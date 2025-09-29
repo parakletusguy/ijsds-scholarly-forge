@@ -301,26 +301,6 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
         </CardContent>
       </Card>
 
-      {/* DOI Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>About DOIs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground space-y-2">
-            <p>
-              <strong>Digital Object Identifier (DOI)</strong> is a unique alphanumeric string 
-              assigned to articles to provide persistent identification and linking.
-            </p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>DOIs ensure permanent access to articles even if URLs change</li>
-              <li>They improve citation tracking and scholarly communication</li>
-              <li>Required for indexing in major academic databases</li>
-              <li>Format: 10.xxxx/xxxxxx (e.g., 10.1234/journal.2024.001)</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
