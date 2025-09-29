@@ -12,7 +12,8 @@ import { ProofreadingSystem } from '@/components/production/ProofreadingSystem';
 import { TypesettingIntegration } from '@/components/production/TypesettingIntegration';
 import { PDFGeneration } from '@/components/production/PDFGeneration';
 import { IssueCompilation } from '@/components/production/IssueCompilation';
-import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft } from 'lucide-react';
+import { DOIManager } from '@/components/production/DOIManager';
+import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft, Link } from 'lucide-react';
 import { AutomatedReviewerMatchingInterface } from '@/components/workflow/AutomatedReviewerMatchingInterface';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -175,31 +176,19 @@ export const Production = () => {
           <div className="lg:col-span-2">
             {selectedArticle ? (
               <Tabs defaultValue="editing" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="editing" className="flex items-center gap-2">
                     <Edit3 className="h-4 w-4" />
-                    edit
+                    Edit
                   </TabsTrigger>
-                  {/* <TabsTrigger value="proofreading" className="flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    Proofread
-                  </TabsTrigger> */}
-                  {/* <TabsTrigger value="typesetting" className="flex items-center gap-2">
-                    <Layout className="h-4 w-4" />
-                    Typeset
-                  </TabsTrigger> */}
-                  {/* <TabsTrigger value="pdf" className="flex items-center gap-2">
-                    <Download className="h-4 w-4" />
-                    PDF
-                  </TabsTrigger> */}
+                  <TabsTrigger value="doi" className="flex items-center gap-2">
+                    <Link className="h-4 w-4" />
+                    DOI
+                  </TabsTrigger>
                   <TabsTrigger value="issues" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Issues
                   </TabsTrigger>
-                  {/* <TabsTrigger value="workflow" className="flex items-center gap-2">
-                    <Layout className="h-4 w-4" />
-                    Workflow
-                  </TabsTrigger> */}
                 </TabsList>
 
                 <TabsContent value="editing">
@@ -209,26 +198,12 @@ export const Production = () => {
                   />
                 </TabsContent>
 
-                {/* <TabsContent value="proofreading">
-                  <ProofreadingSystem 
+                <TabsContent value="doi">
+                  <DOIManager 
                     article={selectedArticle} 
                     onUpdate={fetchProductionArticles}
                   />
-                </TabsContent> */}
-
-                {/* <TabsContent value="typesetting">
-                  <TypesettingIntegration 
-                    article={selectedArticle} 
-                    onUpdate={fetchProductionArticles}
-                  />
-                </TabsContent> */}
-
-                {/* <TabsContent value="pdf">
-                  <PDFGeneration 
-                    article={selectedArticle} 
-                    onUpdate={fetchProductionArticles}
-                  />
-                </TabsContent> */}
+                </TabsContent>
 
                 <TabsContent value="issues">
                   <IssueCompilation 
