@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
 import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
+import { EditorFileManager } from '@/components/editor/EditorFileManager';
 import { notifyPaymentConfirmation } from '@/lib/paymentNotificationService';
 import ReceiptDown from '@/components/receiptGeneration/receiptDownload';
 import { sendEmailNotification, SendRecieptMail } from '@/lib/emailService';
@@ -46,6 +47,7 @@ export const SubmissionDetail = () => {
   const [open,setopen] = useState(false)
   const [vet,setvet] = useState(false)
   const [processing,setprocessing] = useState(false)
+  const [isEditor, setIsEditor] = useState(false);
 
 
   useEffect(() => {
@@ -56,8 +58,27 @@ export const SubmissionDetail = () => {
 
     if (user && submissionId) {
       fetchSubmissionDetails();
+      checkEditorStatus();
     }
   }, [user, loading, submissionId, navigate]);
+
+  const checkEditorStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_editor')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      setIsEditor(data?.is_editor || false);
+    } catch (error) {
+      console.error('Error checking editor status:', error);
+      setIsEditor(false);
+    }
+  };
 
   const fetchSubmissionDetails = async () => {
     try {
@@ -374,7 +395,7 @@ export const SubmissionDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Author File Management */}
+            {/* File Management */}
             <SubmissionFileManager
               submissionId={submissionId!}
               articleId={submission.articles.id}
@@ -382,6 +403,14 @@ export const SubmissionDetail = () => {
               vettingFee={submission.articles.vetting_fee}
               processingFee={submission.articles.Processing_fee}
             />
+
+            {/* Editor File Management */}
+            {isEditor && (
+              <EditorFileManager
+                submissionId={submissionId!}
+                articleId={submission.articles.id}
+              />
+            )}
           </div>
 
           <div className="lg:col-span-1">
