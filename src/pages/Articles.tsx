@@ -253,7 +253,7 @@ export const Articles = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         {article.doi && (
-                          <span>DOI: {article.doi}</span>
+                          <span>DOI: https://doi.org/{article.doi}</span>
                         )}
                       </div>
                       <Button 
