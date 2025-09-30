@@ -435,7 +435,7 @@ export const Submit = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="title">Article Title *</Label>
+                <Label htmlFor="title">Article Title *(article title should Specifically initial capital letters)</Label>
                 <Input
                   id="title"
                   value={title}

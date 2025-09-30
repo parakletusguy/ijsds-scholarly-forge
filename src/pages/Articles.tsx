@@ -158,7 +158,7 @@ export const Articles = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-[100vw]">
       < div className="relative py-3">
                 <Button 
                 variant="outline" 
@@ -169,7 +169,7 @@ export const Articles = () => {
                   Back
                 </Button>
                 </div>
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8 ">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">Published Articles</h1>
@@ -250,8 +250,8 @@ export const Articles = () => {
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex-col lg:flex-row items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground my-3">
                         {article.doi && (
                           <span>DOI: https://doi.org/{article.doi}</span>
                         )}
@@ -260,6 +260,7 @@ export const Articles = () => {
                         variant="outline" 
                         size="sm"
                         onClick={() => navigate(`/article/${article.id}`)}
+                        className='mb-3'
                       >
                         View Article details
                       </Button>
