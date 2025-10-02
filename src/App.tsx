@@ -45,7 +45,9 @@ import { Partners } from "./pages/Partners";
 import { BlogAdmin } from "./components/blog/BlogAdmin";
 import { PartnersAdmin } from "./components/partners/PartnersAdmin";
 import { ReviewerDetail } from "./pages/reviewersDetails";
-
+import OpenAccessPage from "./pages/openAccessPage";
+import { Button } from "./components/ui/button";
+import { Link } from "react-router-dom";
 const queryClient = new QueryClient();
 
 const PageLayout = ({ children }: { children: React.ReactNode }) => (
@@ -53,13 +55,14 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen flex w-full">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
-        <header className="md:h-24 h-20 flex items-center border-b border-border bg-[#ffffff9c] p-4">
+        <header className="fixed w-[100%] md:h-24 h-20 flex items-center border-b border-border bg-[#ffffff9c] p-4">
           <SidebarTrigger className="fixed z-30" />
+          <Link to={"/openAccess"}><Button className="ml-10">Open Access Notice</Button></Link>
           <div className="md:w-20 w-14 fixed right-6">
             <img src={logo_2} alt="Rivers State University Logo" />
           </div>
         </header>
-        <main className="flex-1">
+        <main className="flex-1 mt-24">
           {children}
         </main>
         <Footer />
@@ -113,6 +116,7 @@ const App = () => (
               <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
               <Route path="/partners" element={<PageLayout><Partners /></PageLayout>} />
               <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
+              <Route path="/openAccess" element={<PageLayout><OpenAccessPage /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
