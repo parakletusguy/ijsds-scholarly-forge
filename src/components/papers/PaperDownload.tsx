@@ -12,7 +12,7 @@ export const PaperDownload = ({ manuscriptFileUrl, title, className }: PaperDown
     if (manuscriptFileUrl) {
       // Create a temporary link to trigger download
       const link = document.createElement('a');
-      link.href = manuscriptFileUrl;
+      link.href = `https://csihixcdxcldarcnclvq.supabase.co/storage/v1/object/public/journal-website-db1/${manuscriptFileUrl}`;
       link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
       link.target = '_blank';
       document.body.appendChild(link);
