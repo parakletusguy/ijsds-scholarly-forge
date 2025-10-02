@@ -260,7 +260,7 @@ export const Articles = () => {
                         variant="outline" 
                         size="sm"
                         onClick={() => navigate(`/article/${article.id}`)}
-                        className='mb-3'
+                        className='mb-3 mx-3'
                       >
                         View Article details
                       </Button>

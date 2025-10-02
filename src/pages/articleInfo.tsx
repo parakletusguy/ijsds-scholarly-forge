@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
+import { PaperDownload } from '@/components/papers/PaperDownload';
 
 interface SubmissionDetails {
   id: string;
@@ -84,9 +85,9 @@ export const ArticleInfo = () => {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
+      <div className="min-h-[100vh] flex flex-col items-center justify-center">
         <main className="flex-1">
-          <LoadingSpinner size="lg" text="Loading submission details..." />
+          <LoadingSpinner size="lg" text="Loading article details..." />
         </main>
       </div>
     );
@@ -130,7 +131,7 @@ export const ArticleInfo = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-foreground">
-              Submission Details
+              Article Details
             </h1>
             {/* <Badge className={getStatusColor(submission.status)}>
               {submission.status.replace('_', ' ').toUpperCase()}
@@ -188,13 +189,17 @@ export const ArticleInfo = () => {
                 {article.manuscript_file_url && (
                   <div>
                     <h4 className="font-medium text-lg mb-2">Manuscript</h4>
-                    <Button 
+                    {/* <Button 
                       variant="outline"
                       onClick={() => window.open(article.manuscript_file_url, '_blank')}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Manuscript
-                    </Button>
+                    </Button> */}
+                    <PaperDownload 
+                        manuscriptFileUrl={article.manuscript_file_url}
+                        title={article.title}
+                    />
                   </div>
                 )}
               </CardContent>

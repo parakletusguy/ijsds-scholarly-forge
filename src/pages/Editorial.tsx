@@ -328,7 +328,7 @@ export const Editorial = () => {
                         authorEmail={submission.articles.corresponding_author_email}
                         authorName={submission.profiles.full_name}
                         onReject={fetchSubmissions}
-                      /> */}
+                     51c40e28-c42c-489a-b700-cf72e0188c9f_edited.docx /> */}
                     </div>
                   </CardContent>
                 </Card>
