@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle, FileUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { EditorFileManager } from '@/components/editor/EditorFileManager';
 
 
 interface Article {
@@ -31,6 +33,7 @@ interface Article {
   page_start?: number;
   page_end?: number;
   publication_date?: string;
+  submission_id?: string;
 }
 
 export const Publication = () => {
@@ -98,9 +101,26 @@ export const Publication = () => {
         .order('submission_date', { ascending: false });
 
       if (error) throw error;
+
+      // Fetch submission IDs for each article
+      const articlesWithSubmissions = await Promise.all(
+        (data || []).map(async (article) => {
+          const { data: submission } = await supabase
+            .from('submissions')
+            .select('id')
+            .eq('article_id', article.id)
+            .single();
+          
+          return {
+            ...article,
+            submission_id: submission?.id
+          };
+        })
+      );
+
       const proccessedArray = []
       const publishedArray = []
-      data.forEach((item,index) => {
+      articlesWithSubmissions.forEach((item,index) => {
         if(item.status == 'processed'){
           proccessedArray.push(item);
         }
@@ -112,7 +132,7 @@ export const Publication = () => {
 
       setProcessed(proccessedArray)
       setPublished(publishedArray)
-      setArticles(data || []);
+      setArticles(articlesWithSubmissions || []);
     } catch (error) {
       console.error('Error fetching articles:', error);
       toast({
@@ -371,20 +391,38 @@ export const Publication = () => {
                   </p>
                 ) : (
                   published.map((article) => (
-                    <div
-                      key={article.id}
-                      // className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                      //   // selectedArticle?.id === article.id 
-                      //     ? 'border-primary bg-primary/5' 
-                      //     : 'hover:bg-muted/50'
-                      // }`}
-                      // onClick={() => handleArticleSelect(article)}
-                    >
+                    <Card key={article.id} className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-medium line-clamp-2">{article.title}</h3>
-                        <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
-                          {article.status}
-                        </Badge>
+                        <div className="flex-1">
+                          <h3 className="font-medium line-clamp-2">{article.title}</h3>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
+                            {article.status}
+                          </Badge>
+                          {article.submission_id && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <FileUp className="h-4 w-4 mr-2" />
+                                  Manage Files
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>Manage Article Files</DialogTitle>
+                                  <DialogDescription>
+                                    Upload new versions or view file history for this published article
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <EditorFileManager 
+                                  articleId={article.id}
+                                  submissionId={article.submission_id}
+                                />
+                              </DialogContent>
+                            </Dialog>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         Authors: {Array.isArray(article.authors) 
@@ -395,12 +433,17 @@ export const Publication = () => {
                       <p className="text-xs text-muted-foreground">
                         Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
                       </p>
+                      {article.publication_date && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Published: {format(new Date(article.publication_date), 'MMM dd, yyyy')}
+                        </p>
+                      )}
                       {article.doi && (
                         <p className="text-xs text-muted-foreground mt-1">
                           DOI: {article.doi}
                         </p>
                       )}
-                    </div>
+                    </Card>
                   ))
                 )}
               </div>
