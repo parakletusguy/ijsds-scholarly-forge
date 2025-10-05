@@ -120,9 +120,9 @@ export const AppSidebar = () => {
       // Editor items (visible to editors and admins)
       { title: 'Editorial', url: '/editorial', icon: FileCheck, roles: ['editor', 'admin'] },
       { title: 'Production', url: '/production', icon: Wrench, roles: ['editor', 'admin'] },
+      { title: 'Publication', url: '/publication', icon: Globe, roles: ['editor','admin'] },
       
       // Admin-only items
-      { title: 'Publication', url: '/publication', icon: Globe, roles: ['admin'] },
       { title: 'System Settings', url: '/system-settings', icon: Settings, roles: ['admin'] },
       { title: 'External Integrations', url: '/external-integrations', icon: Settings, roles: ['admin'] },
       { title: 'Data Management', url: '/data-management', icon: Database, roles: ['admin'] },
