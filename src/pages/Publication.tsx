@@ -69,13 +69,13 @@ export const Publication = () => {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('is_admin')
+        .select('is_editor')
         .eq('id', user.id)
         .single();
 
       if (error) throw error;
 
-      if (!profile?.is_admin) {
+      if (!profile?.is_editor) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to access this page",
