@@ -86,6 +86,32 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
 
     setUploading(true);
     try {
+      // Get the current manuscript URL to delete the old file
+      const { data: article } = await supabase
+        .from('articles')
+        .select('manuscript_file_url')
+        .eq('id', articleId)
+        .single();
+
+      // Delete the old file from storage if it exists
+      if (article?.manuscript_file_url) {
+        try {
+          // Extract file path from URL
+          const url = new URL(article.manuscript_file_url);
+          const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/[^/]+\/(.+)/);
+          
+          if (pathMatch && pathMatch[1]) {
+            const filePath = decodeURIComponent(pathMatch[1]);
+            await supabase.storage
+              .from('journal-website-db1')
+              .remove([filePath]);
+          }
+        } catch (deleteError) {
+          console.error('Error deleting old file:', deleteError);
+          // Continue with upload even if deletion fails
+        }
+      }
+
       const fileName = fileUrl.split('/').pop() || 'manuscript-update';
       const maxVersion = Math.max(...files.map(f => f.version_number), 0);
 
