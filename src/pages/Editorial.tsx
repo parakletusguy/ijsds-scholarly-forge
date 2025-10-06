@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Users, Clock, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { FileText, Users, Clock, CheckCircle2, ArrowLeft, FileUp } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
@@ -17,6 +18,7 @@ import { ReviewerInvitationDialog } from '@/components/editor/ReviewerInvitation
 import { DeskRejectDialog } from '@/components/editor/DeskRejectDialog';
 import { RevisionRequestDialog } from '@/components/editor/RevisionRequestDialog';
 import { SystemVerification } from '@/components/testing/SystemVerification';
+import { EditorFileManager } from '@/components/editor/EditorFileManager';
 import { useNavigate } from 'react-router-dom';
 
 interface Submission {
@@ -322,13 +324,23 @@ export const Editorial = () => {
                         onInvite={fetchSubmissions}
                         submission={submission}
                       />
-                      {/* <DeskRejectDialog
-                        submissionId={submission.id}
-                        submissionTitle={submission.articles.title}
-                        authorEmail={submission.articles.corresponding_author_email}
-                        authorName={submission.profiles.full_name}
-                        onReject={fetchSubmissions}
-                     51c40e28-c42c-489a-b700-cf72e0188c9f_edited.docx /> */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <FileUp className="h-4 w-4 mr-2" />
+                            Manage Files
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Manage Files - {submission.articles.title}</DialogTitle>
+                          </DialogHeader>
+                          <EditorFileManager
+                            submissionId={submission.id}
+                            articleId={submission.article_id}
+                          />
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
@@ -394,6 +406,23 @@ export const Editorial = () => {
                       >
                         View Reviews
                       </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <FileUp className="h-4 w-4 mr-2" />
+                            Manage Files
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Manage Files - {submission.articles.title}</DialogTitle>
+                          </DialogHeader>
+                          <EditorFileManager
+                            submissionId={submission.id}
+                            articleId={submission.article_id}
+                          />
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
