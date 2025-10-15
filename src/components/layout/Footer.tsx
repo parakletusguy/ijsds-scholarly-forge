@@ -42,7 +42,7 @@ export const Footer = () => {
               <li>Phone: +234 808 022 4405</li><div className='mb-2'>
             <li>ISSN: <span className='font-semibold'>3115-6940</span></li>
             <li>eISSN: <span className='font-semibold'>3115-6932</span></li>
-            <li>Date: <span className='font-semibold'>3th of October, 2025</span></li>
+            <li>Date: <span className='font-semibold'>13th of October, 2025</span></li>
           </div>
             </ul>
           </div>

@@ -216,7 +216,7 @@ export const AppSidebar = () => {
           <div className='mb-2'>
             <p>ISSN: <span className='font-semibold'>3115-6940</span></p>
             <p>eISSN: <span className='font-semibold'>3115-6932</span></p>
-            <p>Date: <span className='font-semibold'>3th of October, 2025</span></p>
+            <p>Date: <span className='font-semibold'>13th of October, 2025</span></p>
           </div>
         
         {loading ? (
