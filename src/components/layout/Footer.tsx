@@ -39,8 +39,11 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>Email: editor.ijsds@gmail.com</li>
-              <li>Phone: +234 808 022 4405</li>
-              {/* <li>ISSN: 3027-3075</li> */}
+              <li>Phone: +234 808 022 4405</li><div className='mb-2'>
+            <li>ISSN: <span className='font-semibold'>3115-6940</span></li>
+            <li>eISSN: <span className='font-semibold'>3115-6932</span></li>
+            <li>Date: <span className='font-semibold'>3th of October, 2025</span></li>
+          </div>
             </ul>
           </div>
         </div>

@@ -209,10 +209,15 @@ export const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4 bg-[#FBE5B6]">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-1">
           <HelpSystem />
           {user && <NotificationBell />}
         </div>
+          <div className='mb-2'>
+            <p>ISSN: <span className='font-semibold'>3115-6940</span></p>
+            <p>eISSN: <span className='font-semibold'>3115-6932</span></p>
+            <p>Date: <span className='font-semibold'>3th of October, 2025</span></p>
+          </div>
         
         {loading ? (
           <div className="h-10 w-full bg-sidebar-accent animate-pulse rounded" />
