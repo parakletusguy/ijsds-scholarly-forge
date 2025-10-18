@@ -158,7 +158,7 @@ export const Articles = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col w-[100vw]">
+    <div className="min-h-screen flex flex-col">
       < div className="relative py-3">
                 <Button 
                 variant="outline" 
