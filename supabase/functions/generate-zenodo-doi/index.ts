@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { submissionId } = await req.json()
+    const { submissionId, existingDoi } = await req.json()
     
     if (!submissionId) {
       throw new Error('Missing submissionId')
@@ -73,24 +73,97 @@ serve(async (req) => {
       throw new Error('Zenodo API token not configured')
     }
 
-    // Create deposition in Zenodo
-    const depositionResponse = await fetch('https://zenodo.org/api/deposit/depositions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${zenodoToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(zenodoMetadata)
-    })
+    let deposition: any;
+    let isNewVersion = false;
 
-    if (!depositionResponse.ok) {
-      const errorText = await depositionResponse.text()
-      console.error('Zenodo API error:', errorText)
-      throw new Error(`Failed to create Zenodo deposition: ${depositionResponse.status}`)
+    // If there's an existing DOI, create a new version instead
+    if (existingDoi) {
+      console.log('Updating existing Zenodo record with DOI:', existingDoi)
+      
+      // Get the deposition ID from the DOI
+      const doiParts = existingDoi.split('zenodo.')
+      if (doiParts.length < 2) {
+        throw new Error('Invalid Zenodo DOI format')
+      }
+      const depositionId = doiParts[1]
+      
+      // Create a new version
+      const newVersionResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${depositionId}/actions/newversion`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${zenodoToken}`
+        }
+      })
+
+      if (!newVersionResponse.ok) {
+        const errorText = await newVersionResponse.text()
+        console.error('Zenodo new version API error:', errorText)
+        throw new Error(`Failed to create new Zenodo version: ${newVersionResponse.status}`)
+      }
+
+      const versionData = await newVersionResponse.json()
+      const latestDraftUrl = versionData.links.latest_draft
+      
+      // Get the new draft deposition
+      const draftResponse = await fetch(latestDraftUrl, {
+        headers: {
+          'Authorization': `Bearer ${zenodoToken}`
+        }
+      })
+
+      if (!draftResponse.ok) {
+        throw new Error('Failed to get draft deposition')
+      }
+
+      deposition = await draftResponse.json()
+      isNewVersion = true
+      
+      // Delete old files from the new version draft
+      if (deposition.files && deposition.files.length > 0) {
+        for (const file of deposition.files) {
+          await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files/${file.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${zenodoToken}`
+            }
+          })
+        }
+      }
+
+      // Update metadata
+      const updateResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${zenodoToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(zenodoMetadata)
+      })
+
+      if (!updateResponse.ok) {
+        const errorText = await updateResponse.text()
+        console.error('Failed to update metadata:', errorText)
+      }
+    } else {
+      // Create new deposition in Zenodo
+      const depositionResponse = await fetch('https://zenodo.org/api/deposit/depositions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${zenodoToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(zenodoMetadata)
+      })
+
+      if (!depositionResponse.ok) {
+        const errorText = await depositionResponse.text()
+        console.error('Zenodo API error:', errorText)
+        throw new Error(`Failed to create Zenodo deposition: ${depositionResponse.status}`)
+      }
+
+      deposition = await depositionResponse.json()
+      console.log('Created Zenodo deposition:', deposition.id)
     }
-
-    const deposition = await depositionResponse.json()
-    console.log('Created Zenodo deposition:', deposition.id)
 
     // Upload file if manuscript URL is available
     if (article.manuscript_file_url) {
@@ -162,7 +235,8 @@ serve(async (req) => {
         success: true, 
         doi,
         zenodo_id: publishedDeposition.id,
-        zenodo_url: publishedDeposition.links.record_html
+        zenodo_url: publishedDeposition.links.record_html,
+        is_new_version: isNewVersion
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

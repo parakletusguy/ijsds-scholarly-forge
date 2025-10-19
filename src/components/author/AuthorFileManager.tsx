@@ -131,10 +131,37 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
       if (error) throw error;
 
       // Update article's manuscript file URL to latest version
-      await supabase
+      const { data: updatedArticle } = await supabase
         .from('articles')
         .update({ manuscript_file_url: fileUrl })
-        .eq('id', articleId);
+        .eq('id', articleId)
+        .select('doi')
+        .single();
+
+      // If article has a DOI, update Zenodo with new version
+      if (updatedArticle?.doi) {
+        try {
+          const { data: zenodoResult, error: zenodoError } = await supabase.functions.invoke('generate-zenodo-doi', {
+            body: { 
+              submissionId,
+              existingDoi: updatedArticle.doi
+            }
+          });
+
+          if (zenodoError) {
+            console.error('Error updating Zenodo:', zenodoError);
+            toast({
+              title: 'Warning',
+              description: 'File updated locally but failed to update Zenodo. The DOI remains unchanged.',
+              variant: 'default',
+            });
+          } else if (zenodoResult?.success) {
+            console.log('Zenodo updated with new version:', zenodoResult.zenodo_url);
+          }
+        } catch (zenodoError) {
+          console.error('Error updating Zenodo:', zenodoError);
+        }
+      }
 
       // Send notifications to reviewers and editors
       await notifyFileUpdate(fileName);
