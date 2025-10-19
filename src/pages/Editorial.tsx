@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Users, Clock, CheckCircle2, ArrowLeft, FileUp } from 'lucide-react';
+import { FileText, Users, Clock, CheckCircle2, ArrowLeft, FileUp, RefreshCw } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
@@ -36,6 +36,7 @@ interface Submission {
     manuscript_file_url: string;
     vetting_fee: boolean;
     Processing_fee: boolean;
+    doi: string | null;
   };
   profiles: {
     full_name: string;
@@ -97,7 +98,8 @@ export const Editorial = () => {
             authors,
             manuscript_file_url,
             vetting_fee,
-            Processing_fee
+            Processing_fee,
+            doi
           ),
           profiles (
             full_name,
@@ -116,6 +118,37 @@ export const Editorial = () => {
       });
     } finally {
       setLoadingSubmissions(false);
+    }
+  };
+
+  const updateDOIVersion = async (submissionId: string, articleDoi: string) => {
+    try {
+      toast({
+        title: 'Updating DOI',
+        description: 'Creating new version on Zenodo...',
+      });
+
+      const { data, error } = await supabase.functions.invoke('generate-zenodo-doi', {
+        body: { submissionId, existingDoi: articleDoi }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast({
+          title: 'Success',
+          description: `DOI updated to new version: ${data.doi}`,
+        });
+        fetchSubmissions();
+      } else {
+        throw new Error(data.error || 'Failed to update DOI');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update DOI version',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -341,6 +374,16 @@ export const Editorial = () => {
                           />
                         </DialogContent>
                       </Dialog>
+                      {submission.articles.doi && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => updateDOIVersion(submission.id, submission.articles.doi!)}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Update DOI
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -423,6 +466,16 @@ export const Editorial = () => {
                           />
                         </DialogContent>
                       </Dialog>
+                      {submission.articles.doi && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => updateDOIVersion(submission.id, submission.articles.doi!)}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Update DOI
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
