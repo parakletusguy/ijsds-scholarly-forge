@@ -374,16 +374,6 @@ export const Editorial = () => {
                           />
                         </DialogContent>
                       </Dialog>
-                      {submission.articles.doi && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => updateDOIVersion(submission.id, submission.articles.doi!)}
-                        >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Update DOI
-                        </Button>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -533,10 +523,22 @@ export const Editorial = () => {
                           Submitted by {submission.profiles.full_name} • {new Date(submission.submitted_at).toLocaleDateString()}
                         </CardDescription>
                       </div>
-                      <Badge className={getStatusColor(submission.status)}>
+                      <div className='flex flex-col items-center justify-evenly gap-4'>
+                        <Badge className={getStatusColor(submission.status)}>
                         {getStatusIcon(submission.status)}
                         <span className="ml-1">{submission.status.replace('_', ' ')}</span>
                       </Badge>
+                      {submission.articles.doi && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => updateDOIVersion(submission.id, submission.articles.doi!)}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Update DOI
+                        </Button>
+                      )}
+                      </div>
                     </div>
                   </CardHeader>
                 </Card>
