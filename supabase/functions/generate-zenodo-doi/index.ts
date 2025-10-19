@@ -212,17 +212,24 @@ serve(async (req) => {
     }
 
     const publishedDeposition = await publishResponse.json()
-    const doi = publishedDeposition.doi
+    const versionDoi = publishedDeposition.doi
+    const conceptDoi = publishedDeposition.conceptdoi || versionDoi
 
-    console.log('Generated DOI:', doi)
+    console.log('Generated version DOI:', versionDoi)
+    console.log('Concept DOI:', conceptDoi)
 
-    // Update article with DOI
+    // If updating existing version, keep the original DOI; if new, use concept DOI
+    let doiToStore = existingDoi || conceptDoi
+
+    // Update article with DOI (only update if it's a new DOI)
+    const updateData: any = { status: 'accepted' }
+    if (!existingDoi) {
+      updateData.doi = doiToStore
+    }
+
     const { error: updateError } = await supabaseClient
       .from('articles')
-      .update({
-        doi: doi,
-        status: 'accepted'
-      })
+      .update(updateData)
       .eq('id', article.id)
 
     if (updateError) {
@@ -233,7 +240,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        doi,
+        doi: doiToStore,
+        version_doi: versionDoi,
+        concept_doi: conceptDoi,
         zenodo_id: publishedDeposition.id,
         zenodo_url: publishedDeposition.links.record_html,
         is_new_version: isNewVersion
