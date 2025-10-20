@@ -3,7 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-
+import mina from "../images/editors/Mina.jpeg"
+import ariel from "../images/editors/Ariel.jpeg"
+import ukamaka from "../images/editors/Ukamaka.jpeg"
+import adesope from "../images/editors/Adesope.jpeg"
+import khadija from "../images/editors/Khadija.jpeg"
+import adolphus from "../images/editors/Adolphus.jpeg"
+// import uranta from "../images/editors/"
+import irikana from "../images/editors/irkana.jpeg"
+import sharma from "../images/editors/Sharma.jpeg"
 
 const EditorialBoard = () => {
   const boardMembers = [
@@ -17,7 +25,8 @@ const EditorialBoard = () => {
     Education: "",
     Expertise: "",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:mina
   },
   { 
     name: "Professor Roberto Ariel Abeldaño Zuñiga", 
@@ -29,7 +38,8 @@ const EditorialBoard = () => {
     Education: "Ph.D. in Demography (National University of Córdoba, Argentina)",
     Expertise: "Demography",
     ResearchInterests: "Public health and environment; disasters, mental health and vulnerable populations; public health in disaster situations.",
-    Location: ""
+    Location: "",
+    image:ariel
   },
   { 
     name: "Professor Ukamaka M. Oruche", 
@@ -41,7 +51,8 @@ const EditorialBoard = () => {
     Education: "PhD, RN, PMHCNS-BC, FAAN",
     Expertise: "Nursing Research, PMHCNS-BC, FAAN",
     ResearchInterests: "",
-    Location: "12901 Bruce B. Downs Blvd., MDC 22 | Tampa, FL | 33612"
+    Location: "12901 Bruce B. Downs Blvd., MDC 22 | Tampa, FL | 33612",
+    image:ukamaka
   },
   { 
     name: "Professor Olufemi Martins Adesope", 
@@ -53,7 +64,8 @@ const EditorialBoard = () => {
     Education: "",
     Expertise: "Data Analyst (Quantitative & Qualitative), ICT integration, Agricultural Extension, Rural Sociology, Research Methods.",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:adesope
   },
   { 
     name: "Dr. Khadija Khaja", 
@@ -65,7 +77,8 @@ const EditorialBoard = () => {
     Education: "MSW, PhD",
     Expertise: "Social Work",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:khadija
   },
   { 
     name: "Professor T. Adolphus", 
@@ -77,7 +90,8 @@ const EditorialBoard = () => {
     Education: "",
     Expertise: "Science Education",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:adolphus
   },
   { 
     name: "Professor Daniel Uranta", 
@@ -89,7 +103,8 @@ const EditorialBoard = () => {
     Education: "",
     Expertise: "Social Work and Community Development",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:""
   },
   { 
     name: "Professor Godspower Jackson Irikana", 
@@ -101,7 +116,8 @@ const EditorialBoard = () => {
     Education: "Ph.D. in Sociology of Development (2007); M.Sc. in Sociology of Development (2002); B.A. in Political Science and Education (1988)",
     Expertise: "Sociology of Development; External Examiner/Assessor; NUC/NCCE accreditation team member; Consultant (RSSDA, CASS, OSIWA, INEC).",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:irikana
   },
   { 
     name: "Shashikant Nishant Sharma", 
@@ -113,7 +129,8 @@ const EditorialBoard = () => {
     Education: "",
     Expertise: "Research",
     ResearchInterests: "",
-    Location: ""
+    Location: "",
+    image:sharma
   }
 ];
   const navigate = useNavigate()
@@ -159,7 +176,10 @@ const EditorialBoard = () => {
               .filter(member => member.isChief)
               .map((member, index) => (
                 <Card key={index} className="mb-4 border-primary/20 bg-primary/5">
-                  <CardHeader className="text-center">
+                  <CardHeader className="text-center flex flex-col items-center">
+                    <div className="w-[200px] rounded-lg overflow-hidden p-[6px] bg-gray-400 shadow-gray-600 shadow-lg">
+                      {member.image && <img src={member.image} alt="Editor Image" className="w-[100%]" />}
+                    </div>
                     <CardTitle className="text-xl">{member.name}</CardTitle>
                     <CardTitle className="text-sm"><a href="https://minaogbanga.com">www.minaogbanga.com </a></CardTitle>
                     <Badge variant="default" className="mx-auto">{member.role}</Badge>
@@ -192,7 +212,10 @@ const EditorialBoard = () => {
                 .filter(member => !member.isChief)
                 .map((member, index) => (
                   <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                    <CardHeader>
+                    <CardHeader className="flex flex-col items-center">
+                      <div className="w-[250px] rounded-lg overflow-hidden p-[5px] bg-gray-400 shadow-gray-600 flex flex-row items-center justify-center max-h-[250px]  ">
+                      {member.image && <img src={member.image} alt="Editor Image" className="w-[100%]" />}
+                    </div>
                       <CardTitle className="text-lg">{member.name}</CardTitle>
                       <Badge variant="secondary" className="mx-auto">{member.role}</Badge>
                     </CardHeader>
