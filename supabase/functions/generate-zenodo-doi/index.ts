@@ -221,20 +221,20 @@ serve(async (req) => {
     // If updating existing version, keep the original DOI; if new, use concept DOI
     let doiToStore = existingDoi || conceptDoi
 
-    // Update article with DOI (only update if it's a new DOI)
-    const updateData: any = { status: 'accepted' }
+    // Only update article for new DOIs (not when updating existing versions)
     if (!existingDoi) {
-      updateData.doi = doiToStore
-    }
+      const { error: updateError } = await supabaseClient
+        .from('articles')
+        .update({ 
+          status: 'accepted',
+          doi: doiToStore 
+        })
+        .eq('id', article.id)
 
-    const { error: updateError } = await supabaseClient
-      .from('articles')
-      .update(updateData)
-      .eq('id', article.id)
-
-    if (updateError) {
-      console.error('Failed to update article with DOI:', updateError)
-      throw new Error('Failed to update article with DOI')
+      if (updateError) {
+        console.error('Failed to update article with DOI:', updateError)
+        throw new Error('Failed to update article with DOI')
+      }
     }
 
     return new Response(
