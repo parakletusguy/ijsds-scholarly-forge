@@ -12,6 +12,7 @@ import adolphus from "../images/editors/Adolphus.jpeg"
 // import uranta from "../images/editors/"
 import irikana from "../images/editors/irkana.jpeg"
 import sharma from "../images/editors/Sharma.jpeg"
+import daniel from "../images/editors/daniel.jpeg"
 
 const EditorialBoard = () => {
   const boardMembers = [
@@ -104,7 +105,7 @@ const EditorialBoard = () => {
     Expertise: "Social Work and Community Development",
     ResearchInterests: "",
     Location: "",
-    image:""
+    image:daniel
   },
   { 
     name: "Professor Godspower Jackson Irikana", 
