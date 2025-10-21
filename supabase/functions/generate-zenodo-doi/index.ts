@@ -74,10 +74,12 @@ serve(async (req) => {
     }
 
     let deposition: any;
+    let isNewVersion = false;
 
-    // If there's an existing DOI, edit the existing record (no new version, same DOI)
+    // If there's an existing DOI, create a new version (Zenodo requirement)
     if (existingDoi) {
-      console.log('Editing existing Zenodo record with DOI:', existingDoi)
+      console.log('Creating new version for existing Zenodo record with DOI:', existingDoi)
+      console.log('NOTE: Zenodo will assign a new DOI to this version. The concept DOI links all versions.')
       
       // Get the deposition ID from the DOI
       const doiParts = existingDoi.split('zenodo.')
@@ -88,26 +90,42 @@ serve(async (req) => {
       
       console.log('Extracted deposition ID:', depositionId)
       
-      // Unlock the published record for editing (keeps same DOI)
-      const editResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${depositionId}/actions/edit`, {
+      // Create new version (this creates a draft for the new version)
+      const newVersionResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${depositionId}/actions/newversion`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${zenodoToken}`
         }
       })
 
-      if (!editResponse.ok) {
-        const errorText = await editResponse.text()
-        console.error('Zenodo edit API error:', errorText)
-        throw new Error(`Failed to unlock Zenodo record for editing: ${editResponse.status}`)
+      if (!newVersionResponse.ok) {
+        const errorText = await newVersionResponse.text()
+        console.error('Zenodo new version API error:', errorText)
+        throw new Error(`Failed to create new version: ${newVersionResponse.status}`)
       }
 
-      deposition = await editResponse.json()
-      console.log('Record unlocked for editing, deposition ID:', deposition.id)
+      const newVersionData = await newVersionResponse.json()
+      console.log('New version created, accessing draft at:', newVersionData.links.latest_draft)
       
-      // Delete old files before uploading new ones
+      // Get the draft of the new version
+      const draftUrl = newVersionData.links.latest_draft
+      const draftResponse = await fetch(draftUrl, {
+        headers: {
+          'Authorization': `Bearer ${zenodoToken}`
+        }
+      })
+
+      if (!draftResponse.ok) {
+        throw new Error('Failed to fetch draft of new version')
+      }
+
+      deposition = await draftResponse.json()
+      isNewVersion = true
+      console.log('New version draft ID:', deposition.id)
+      
+      // Delete old files from the draft
       if (deposition.files && deposition.files.length > 0) {
-        console.log('Deleting', deposition.files.length, 'old files')
+        console.log('Deleting', deposition.files.length, 'old files from new version draft')
         for (const file of deposition.files) {
           try {
             const deleteResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files/${file.id}`, {
@@ -129,7 +147,7 @@ serve(async (req) => {
         }
       }
 
-      // Update metadata
+      // Update metadata for new version
       const updateResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}`, {
         method: 'PUT',
         headers: {
@@ -143,7 +161,7 @@ serve(async (req) => {
         const errorText = await updateResponse.text()
         console.error('Failed to update metadata:', errorText)
       } else {
-        console.log('Metadata updated successfully')
+        console.log('Metadata updated successfully for new version')
       }
     } else {
       // Create new deposition in Zenodo
@@ -230,39 +248,42 @@ serve(async (req) => {
     console.log('DOI:', doi)
     console.log('Concept DOI:', conceptDoi)
 
-    // Always use the DOI from the published deposition (same for new and updates)
-    const finalDoi = existingDoi || doi
+    console.log('✅ Publication successful!')
+    console.log('DOI:', doi)
+    console.log('Concept DOI:', conceptDoi)
+
+    // For new versions, Zenodo creates a new DOI but we keep the concept DOI
+    // We'll update the article with the new version DOI
+    const finalDoi = doi
     
     console.log('Final DOI:', finalDoi)
 
-    // Only update article status and DOI for new DOIs (not when updating existing records)
-    if (!existingDoi) {
-      console.log('Updating article with new DOI')
-      const { error: updateError } = await supabaseClient
-        .from('articles')
-        .update({ 
-          status: 'accepted',
-          doi: finalDoi 
-        })
-        .eq('id', article.id)
+    // Update article with the DOI (new or updated version)
+    const { error: updateError } = await supabaseClient
+      .from('articles')
+      .update({ 
+        status: 'accepted',
+        doi: finalDoi 
+      })
+      .eq('id', article.id)
 
-      if (updateError) {
-        console.error('Failed to update article with DOI:', updateError)
-        throw new Error('Failed to update article with DOI')
-      }
-    } else {
-      console.log('Updating existing DOI - content updated, DOI unchanged')
+    if (updateError) {
+      console.error('Failed to update article with DOI:', updateError)
+      throw new Error('Failed to update article with DOI')
     }
+    
+    console.log('Article updated with DOI:', finalDoi)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         doi: finalDoi,
+        concept_doi: conceptDoi,
         zenodo_id: publishedDeposition.id,
         zenodo_url: publishedDeposition.links.record_html,
-        is_update: !!existingDoi,
-        message: existingDoi 
-          ? 'DOI content updated successfully (same DOI, updated file)'
+        is_new_version: isNewVersion,
+        message: isNewVersion 
+          ? `New version created with DOI: ${finalDoi}. Concept DOI (all versions): ${conceptDoi}`
           : 'New DOI created successfully'
       }),
       { 

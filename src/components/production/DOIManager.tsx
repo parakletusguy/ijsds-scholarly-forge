@@ -47,15 +47,20 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
 
       // Call the edge function to generate DOI
       const { data, error } = await supabase.functions.invoke('generate-zenodo-doi', {
-        body: { submissionId }
+        body: { 
+          submissionId,
+          existingDoi: article.doi || null
+        }
       });
 
       if (error) throw error;
 
       if (data.success) {
         toast({
-          title: "DOI Generated Successfully",
-          description: `DOI: ${data.doi}`,
+          title: data.is_new_version ? "New Version Published" : "DOI Generated Successfully",
+          description: data.is_new_version 
+            ? `New version DOI: ${data.doi}\nConcept DOI (all versions): ${data.concept_doi}`
+            : `DOI: ${data.doi}`,
         });
         onUpdate();
         setShowManualInput(false);
@@ -223,11 +228,19 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
           {/* Auto-generate DOI */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <h4 className="font-medium">Automatic DOI Generation</h4>
                 <p className="text-sm text-muted-foreground">
-                  Generate a DOI automatically using Zenodo
+                  {article.doi 
+                    ? 'Update article and create new Zenodo version (new DOI will be assigned)'
+                    : 'Generate a DOI automatically using Zenodo'
+                  }
                 </p>
+                {article.doi && (
+                  <p className="text-xs text-orange-600 mt-1">
+                    Note: Zenodo's versioning system assigns a new DOI to each version. The concept DOI links all versions.
+                  </p>
+                )}
               </div>
               <Button
                 onClick={generateDOI}
@@ -235,7 +248,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                 className="flex items-center gap-2"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Generating...' : (article.doi ? 'Regenerate DOI' : 'Generate DOI')}
+                {loading ? 'Processing...' : (article.doi ? 'Update & Create New Version' : 'Generate DOI')}
               </Button>
             </div>
           </div>
