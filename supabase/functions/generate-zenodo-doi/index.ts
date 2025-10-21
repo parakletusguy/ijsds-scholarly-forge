@@ -249,25 +249,23 @@ serve(async (req) => {
     console.log('Concept DOI:', conceptDoi)
 
     console.log('✅ Publication successful!')
-    console.log('DOI:', doi)
-    console.log('Concept DOI:', conceptDoi)
+    console.log('Version DOI:', doi)
+    console.log('Concept DOI (persistent across versions):', conceptDoi)
 
-    // Always store the latest version DOI in the database
-    const finalDoi = doi // This is the new version DOI from Zenodo
+    // Store the concept DOI - it's persistent and always points to latest version
+    const doiToStore = conceptDoi || doi
     
-    console.log('Updating database with latest version DOI:', finalDoi)
+    console.log('Storing concept DOI in database:', doiToStore)
     if (isNewVersion) {
-      console.log('Previous DOI:', existingDoi)
-      console.log('New version DOI:', finalDoi)
-      console.log('Concept DOI (links all versions):', conceptDoi)
+      console.log('This is version', doi, 'but concept DOI remains:', doiToStore)
     }
 
-    // Update article with the latest version DOI
+    // Update article with the concept DOI (or version DOI if concept not available)
     const { error: updateError } = await supabaseClient
       .from('articles')
       .update({ 
         status: 'accepted',
-        doi: finalDoi 
+        doi: doiToStore 
       })
       .eq('id', article.id)
 
@@ -276,19 +274,20 @@ serve(async (req) => {
       throw new Error('Failed to update article with DOI')
     }
     
-    console.log('✅ Database updated with latest version DOI:', finalDoi)
+    console.log('✅ Database updated with concept DOI:', doiToStore)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        doi: finalDoi,
+        doi: doiToStore,
+        version_doi: doi,
         concept_doi: conceptDoi,
         zenodo_id: publishedDeposition.id,
         zenodo_url: publishedDeposition.links.record_html,
         is_new_version: isNewVersion,
         message: isNewVersion 
-          ? `New version created with DOI: ${finalDoi}. Concept DOI (all versions): ${conceptDoi}`
-          : 'New DOI created successfully'
+          ? `New version created. Concept DOI (stored): ${doiToStore} always points to latest version.`
+          : `DOI created: ${doiToStore}`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

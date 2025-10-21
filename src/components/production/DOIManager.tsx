@@ -59,7 +59,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
         toast({
           title: data.is_new_version ? "New Version Published" : "DOI Generated Successfully",
           description: data.is_new_version 
-            ? `New version DOI: ${data.doi}\nConcept DOI (all versions): ${data.concept_doi}`
+            ? `Concept DOI: ${data.doi} (always points to latest version)`
             : `DOI: ${data.doi}`,
         });
         onUpdate();
@@ -232,13 +232,13 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                 <h4 className="font-medium">Automatic DOI Generation</h4>
                 <p className="text-sm text-muted-foreground">
                   {article.doi 
-                    ? 'Update article and create new Zenodo version (new DOI will be assigned)'
-                    : 'Generate a DOI automatically using Zenodo'
+                    ? 'Update article and create new Zenodo version (DOI remains the same - concept DOI)'
+                    : 'Generate a concept DOI using Zenodo (remains constant across versions)'
                   }
                 </p>
                 {article.doi && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    Note: Zenodo's versioning system assigns a new DOI to each version. The concept DOI links all versions.
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your concept DOI will automatically point to the latest version on Zenodo.
                   </p>
                 )}
               </div>
