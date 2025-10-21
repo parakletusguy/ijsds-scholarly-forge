@@ -75,24 +75,108 @@ serve(async (req) => {
 
     let deposition: any;
 
-    // If there's an existing DOI, just return it (concept DOI doesn't change)
+    // If there's an existing DOI, verify it's a concept DOI and update if needed
     if (existingDoi) {
       console.log('Article already has DOI:', existingDoi)
-      console.log('Returning existing concept DOI (no new version needed)')
       
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          doi: existingDoi,
-          concept_doi: existingDoi,
-          is_existing: true,
-          message: 'Using existing concept DOI (points to latest version on Zenodo)'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
+      try {
+        // Extract the record ID from the DOI (format: 10.5281/zenodo.XXXXXX)
+        const recordId = existingDoi.split('/').pop()
+        
+        // Fetch the record details from Zenodo
+        console.log('Fetching Zenodo record:', recordId)
+        const recordResponse = await fetch(`https://zenodo.org/api/records/${recordId}`, {
+          headers: {
+            'Authorization': `Bearer ${zenodoToken}`
+          }
+        })
+
+        if (recordResponse.ok) {
+          const recordData = await recordResponse.json()
+          const conceptDoi = recordData.conceptdoi
+          
+          console.log('Retrieved concept DOI from Zenodo:', conceptDoi)
+          
+          // Check if the stored DOI is different from the concept DOI
+          if (existingDoi !== conceptDoi) {
+            console.log('Stored DOI is a version DOI, updating to concept DOI')
+            
+            // Update the database with the concept DOI
+            const { error: updateError } = await supabaseClient
+              .from('articles')
+              .update({ doi: conceptDoi })
+              .eq('id', article.id)
+
+            if (updateError) {
+              console.error('Failed to update article with concept DOI:', updateError)
+            } else {
+              console.log('✅ Database updated with concept DOI:', conceptDoi)
+            }
+
+            return new Response(
+              JSON.stringify({ 
+                success: true, 
+                doi: conceptDoi,
+                concept_doi: conceptDoi,
+                was_updated: true,
+                old_doi: existingDoi,
+                message: 'Updated to use concept DOI (persistent across versions)'
+              }),
+              { 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200 
+              }
+            )
+          }
+          
+          // Already has concept DOI, no update needed
+          console.log('DOI is already a concept DOI, no update needed')
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              doi: conceptDoi,
+              concept_doi: conceptDoi,
+              is_existing: true,
+              message: 'Using existing concept DOI (points to latest version on Zenodo)'
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 200 
+            }
+          )
+        } else {
+          console.log('Could not fetch Zenodo record, returning existing DOI')
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              doi: existingDoi,
+              concept_doi: existingDoi,
+              is_existing: true,
+              message: 'Using existing DOI'
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 200 
+            }
+          )
         }
-      )
+      } catch (error) {
+        console.error('Error checking/updating DOI:', error)
+        // Return existing DOI on error
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            doi: existingDoi,
+            concept_doi: existingDoi,
+            is_existing: true,
+            message: 'Using existing DOI'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200 
+          }
+        )
+      }
     }
 
     // Create new deposition in Zenodo (only for first-time DOI generation)
