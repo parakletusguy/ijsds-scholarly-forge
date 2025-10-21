@@ -252,13 +252,17 @@ serve(async (req) => {
     console.log('DOI:', doi)
     console.log('Concept DOI:', conceptDoi)
 
-    // For new versions, Zenodo creates a new DOI but we keep the concept DOI
-    // We'll update the article with the new version DOI
-    const finalDoi = doi
+    // Always store the latest version DOI in the database
+    const finalDoi = doi // This is the new version DOI from Zenodo
     
-    console.log('Final DOI:', finalDoi)
+    console.log('Updating database with latest version DOI:', finalDoi)
+    if (isNewVersion) {
+      console.log('Previous DOI:', existingDoi)
+      console.log('New version DOI:', finalDoi)
+      console.log('Concept DOI (links all versions):', conceptDoi)
+    }
 
-    // Update article with the DOI (new or updated version)
+    // Update article with the latest version DOI
     const { error: updateError } = await supabaseClient
       .from('articles')
       .update({ 
@@ -272,7 +276,7 @@ serve(async (req) => {
       throw new Error('Failed to update article with DOI')
     }
     
-    console.log('Article updated with DOI:', finalDoi)
+    console.log('✅ Database updated with latest version DOI:', finalDoi)
 
     return new Response(
       JSON.stringify({ 
