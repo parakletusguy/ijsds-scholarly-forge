@@ -1,9 +1,266 @@
+// import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// const corsHeaders = {
+//   'Access-Control-Allow-Origin': '*',
+//   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+// };
+// // Helper function to extract Zenodo ID from DOI
+// function extractZenodoId(doi) {
+//   const cleanDoi = doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, '');
+//   const match = cleanDoi.match(/zenodo\.(\d+)/);
+//   if (!match) {
+//     throw new Error(`Invalid Zenodo DOI format: ${doi}. Expected format: 10.5281/zenodo.12345`);
+//   }
+//   return match[1];
+// }
+// serve(async (req)=>{
+//   if (req.method === 'OPTIONS') {
+//     return new Response(null, {
+//       headers: corsHeaders
+//     });
+//   }
+//   try {
+//     const { submissionId, existingDoi } = await req.json();
+//     if (!submissionId) {
+//       throw new Error('Missing submissionId');
+//     }
+//     const supabaseClient = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
+//     // Get submission and article data
+//     const { data: submission, error: submissionError } = await supabaseClient.from('submissions').select(`
+//         *,
+//         articles (
+//           id,
+//           title,
+//           abstract,
+//           authors,
+//           keywords,
+//           subject_area,
+//           manuscript_file_url
+//         )
+//       `).eq('id', submissionId).single();
+//     if (submissionError || !submission) {
+//       throw new Error('Failed to fetch submission data');
+//     }
+//     const article = submission.articles;
+//     if (!article) {
+//       throw new Error('No article found for submission');
+//     }
+//     // Prepare Zenodo metadata
+//     const zenodoMetadata = {
+//       metadata: {
+//         title: article.title,
+//         description: article.abstract,
+//         creators: Array.isArray(article.authors) ? article.authors.map((author)=>({
+//             name: author.name,
+//             affiliation: author.affiliation || ''
+//           })) : [],
+//         keywords: article.keywords || [],
+//         subjects: article.subject_area ? [
+//           {
+//             term: article.subject_area
+//           }
+//         ] : [],
+//         upload_type: 'publication',
+//         publication_type: 'article',
+//         access_right: 'open',
+//         license: 'cc-by'
+//       }
+//     };
+//     const zenodoToken = Deno.env.get('ZENODO_API_TOKEN');
+//     if (!zenodoToken) {
+//       throw new Error('Zenodo API token not configured');
+//     }
+//     let deposition;
+//     let isUpdatingExisting = false;
+//     // If there's an existing DOI, create a new DRAFT to edit the existing record
+//     if (existingDoi) {
+//       console.log('Updating existing Zenodo record with DOI:', existingDoi);
+//       const depositionId = extractZenodoId(existingDoi);
+//       console.log('Extracted deposition ID:', depositionId);
+//       // Step 1: Create a new draft from the published record (to edit it)
+//       const editResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${depositionId}/actions/edit`, {
+//         method: 'POST',
+//         headers: {
+//           'Authorization': `Bearer ${zenodoToken}`
+//         }
+//       });
+//       if (!editResponse.ok) {
+//         const errorText = await editResponse.text();
+//         console.error('Failed to create edit draft:', errorText);
+//         if (editResponse.status === 403) {
+//           throw new Error('Permission denied: You may not own this Zenodo record');
+//         } else if (editResponse.status === 404) {
+//           throw new Error('Record not found: Check if the DOI is correct');
+//         } else if (editResponse.status === 400) {
+//           throw new Error('Cannot edit: Record may already be in draft state or not published');
+//         }
+//         throw new Error(`Failed to create edit draft: ${editResponse.status} - ${errorText}`);
+//       }
+//       deposition = await editResponse.json();
+//       isUpdatingExisting = true;
+//       console.log('Edit draft created for deposition:', deposition.id);
+//       // Step 2: Delete old files
+//       if (deposition.files && deposition.files.length > 0) {
+//         console.log(`Deleting ${deposition.files.length} old files`);
+//         for (const file of deposition.files){
+//           const deleteResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files/${file.id}`, {
+//             method: 'DELETE',
+//             headers: {
+//               'Authorization': `Bearer ${zenodoToken}`
+//             }
+//           });
+//           if (deleteResponse.ok) {
+//             console.log(`Deleted file: ${file.filename}`);
+//           } else {
+//             console.warn(`Failed to delete file: ${file.filename}`);
+//           }
+//         }
+//       }
+//       // Step 3: Update metadata
+//       const updateResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}`, {
+//         method: 'PUT',
+//         headers: {
+//           'Authorization': `Bearer ${zenodoToken}`,
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(zenodoMetadata)
+//       });
+//       if (!updateResponse.ok) {
+//         const errorText = await updateResponse.text();
+//         console.error('Failed to update metadata:', errorText);
+//         throw new Error('Failed to update metadata');
+//       }
+//       console.log('Metadata updated successfully');
+//     } else {
+//       // Create brand new deposition
+//       console.log('Creating new Zenodo deposition');
+//       const depositionResponse = await fetch('https://zenodo.org/api/deposit/depositions', {
+//         method: 'POST',
+//         headers: {
+//           'Authorization': `Bearer ${zenodoToken}`,
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(zenodoMetadata)
+//       });
+//       if (!depositionResponse.ok) {
+//         const errorText = await depositionResponse.text();
+//         console.error('Zenodo API error:', errorText);
+//         throw new Error(`Failed to create Zenodo deposition: ${depositionResponse.status} - ${errorText}`);
+//       }
+//       deposition = await depositionResponse.json();
+//       console.log('Created new Zenodo deposition:', deposition.id);
+//     }
+//     // Upload new file if manuscript URL is available
+//     if (article.manuscript_file_url) {
+//       console.log('Uploading manuscript file...');
+//       try {
+//         const fileResponse = await fetch(article.manuscript_file_url);
+//         if (fileResponse.ok) {
+//           const fileBlob = await fileResponse.blob();
+//           const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+//           const formData = new FormData();
+//           formData.append('file', fileBlob, fileName);
+//           const uploadResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files`, {
+//             method: 'POST',
+//             headers: {
+//               'Authorization': `Bearer ${zenodoToken}`
+//             },
+//             body: formData
+//           });
+//           if (uploadResponse.ok) {
+//             console.log('File uploaded successfully:', fileName);
+//           } else {
+//             const uploadError = await uploadResponse.text();
+//             console.warn('Failed to upload file to Zenodo:', uploadError);
+//           }
+//         } else {
+//           console.warn('Failed to download manuscript file from storage');
+//         }
+//       } catch (fileError) {
+//         console.warn('Error uploading file:', fileError);
+//       }
+//     }
+//     // Publish the deposition
+//     console.log('Publishing deposition...');
+//     const publishResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/actions/publish`, {
+//       method: 'POST',
+//       headers: {
+//         'Authorization': `Bearer ${zenodoToken}`
+//       }
+//     });
+//     if (!publishResponse.ok) {
+//       const errorText = await publishResponse.text();
+//       console.error('Failed to publish deposition:', errorText);
+//       throw new Error(`Failed to publish: ${publishResponse.status} - ${errorText}`);
+//     }
+//     const publishedDeposition = await publishResponse.json();
+//     const doi = publishedDeposition.doi;
+//     const conceptDoi = publishedDeposition.conceptdoi || doi;
+//     console.log('✅ Publication successful!');
+//     console.log('DOI:', doi);
+//     console.log('Concept DOI:', conceptDoi);
+//     // Only update database for NEW records (not when updating existing ones)
+//     if (!existingDoi) {
+//       const { error: updateError } = await supabaseClient.from('articles').update({
+//         status: 'accepted',
+//         doi: conceptDoi
+//       }).eq('id', article.id);
+//       if (updateError) {
+//         console.error('Failed to update article with DOI:', updateError);
+//         throw new Error('Failed to update article with DOI');
+//       }
+//       console.log('Article updated with DOI in database');
+//     } else {
+//       console.log('Skipping database update (updating existing DOI)');
+//     }
+//     return new Response(JSON.stringify({
+//       success: true,
+//       doi: doi,
+//       concept_doi: conceptDoi,
+//       zenodo_id: publishedDeposition.id,
+//       zenodo_url: publishedDeposition.links.record_html,
+//       is_update: isUpdatingExisting,
+//       message: isUpdatingExisting ? `Successfully updated existing record. DOI remains: ${doi}` : `New record created with DOI: ${conceptDoi}`
+//     }), {
+//       headers: {
+//         ...corsHeaders,
+//         'Content-Type': 'application/json'
+//       },
+//       status: 200
+//     });
+//   } catch (error) {
+//     console.error('Error with Zenodo DOI:', error);
+//     return new Response(JSON.stringify({
+//       success: false,
+//       error: error instanceof Error ? error.message : 'Failed to process DOI'
+//     }), {
+//       headers: {
+//         ...corsHeaders,
+//         'Content-Type': 'application/json'
+//       },
+//       status: 500
+//     });
+//   }
+// });
+
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Helper function to robustly extract the numerical Zenodo ID from a DOI string or URL
+function extractZenodoId(doi: string): string {
+  // Cleans up DOI URLs or prefixes like '10.5281/zenodo.'
+  const cleanDoi = doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, '').replace(/^[^\/]+\/zenodo\./, '');
+  const recordId = cleanDoi.match(/^\d+$/);
+  if (!recordId) {
+    throw new Error(`Invalid Zenodo DOI or ID format: ${doi}`);
+  }
+  return recordId[0];
 }
 
 serve(async (req) => {
@@ -23,7 +280,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get submission and article data
+    // Get submission and article data from Supabase
     const { data: submission, error: submissionError } = await supabaseClient
       .from('submissions')
       .select(`
@@ -42,15 +299,16 @@ serve(async (req) => {
       .single()
 
     if (submissionError || !submission) {
-      throw new Error('Failed to fetch submission data')
+      console.error('Supabase fetch error:', submissionError);
+      throw new Error('Failed to fetch submission data');
     }
 
-    const article = submission.articles
+    const article = submission.articles;
     if (!article) {
-      throw new Error('No article found for submission')
+      throw new Error('No article found for this submission');
     }
 
-    // Prepare Zenodo metadata
+    // Prepare Zenodo metadata from the article
     const zenodoMetadata = {
       metadata: {
         title: article.title,
@@ -64,254 +322,207 @@ serve(async (req) => {
         upload_type: 'publication',
         publication_type: 'article',
         access_right: 'open',
-        license: 'cc-by'
+        license: 'cc-by-sa-4.0',
+        // Add a version string based on the current date
+        version: new Date().toISOString().split('T')[0]
       }
-    }
+    };
 
-    const zenodoToken = Deno.env.get('ZENODO_API_TOKEN')
+    const zenodoToken = Deno.env.get('ZENODO_API_TOKEN');
     if (!zenodoToken) {
-      throw new Error('Zenodo API token not configured')
+      throw new Error('Zenodo API token not configured');
     }
+    
+    const zenodoApiUrl = Deno.env.get('ZENODO_API_URL') || 'https://zenodo.org/api';
+    console.log(`Using Zenodo API base URL: ${zenodoApiUrl}`);
 
     let deposition: any;
+    let isNewVersion = false;
 
-    // If there's an existing DOI, verify it's a concept DOI and update if needed
+    // --- REVAMPED LOGIC FOR RESILIENT VERSIONING ---
     if (existingDoi) {
-      console.log('Article already has DOI:', existingDoi)
-      
-      try {
-        // Extract the record ID from the DOI (format: 10.5281/zenodo.XXXXXX)
-        const recordId = existingDoi.split('/').pop()?.replace('zenodo.', '') || ''
+      console.log(`Starting update for existing DOI: ${existingDoi}`);
+
+      // 1. Find the concept ID from the provided DOI.
+      const initialRecordId = extractZenodoId(existingDoi);
+      const initialRecordResponse = await fetch(`${zenodoApiUrl}/records/${initialRecordId}`);
+      if (!initialRecordResponse.ok) throw new Error(`Could not find record for ID ${initialRecordId} on Zenodo.`);
+      const initialRecord = await initialRecordResponse.json();
+      const conceptrecid = initialRecord.conceptrecid;
+      console.log(`Found Concept ID: ${conceptrecid}`);
+
+      // 2. Check if an unsubmitted draft already exists for this concept.
+      const draftSearchResponse = await fetch(`${zenodoApiUrl}/deposit/depositions?q=conceptrecid:${conceptrecid}&status=unsubmitted`, {
+        headers: { 'Authorization': `Bearer ${zenodoToken}` }
+      });
+      const existingDrafts = await draftSearchResponse.json();
+
+      if (existingDrafts && existingDrafts.length > 0) {
+        // 2a. If a draft exists, reuse it.
+        deposition = existingDrafts[0];
+        isNewVersion = true;
+        console.log(`Found existing unsubmitted draft ID: ${deposition.id}. Reusing it.`);
+      } else {
+        // 2b. If no draft exists, create a new one.
+        console.log('No existing draft found. Creating a new version...');
+        // Find the ID of the LATEST published version using the concept ID.
+        const searchResponse = await fetch(`${zenodoApiUrl}/records/?q=conceptrecid:${conceptrecid}&sort=version&size=1&all_versions=true`);
+        if (!searchResponse.ok) throw new Error('Failed to search for the latest version.');
+        const searchData = await searchResponse.json();
+        if (!searchData.hits.hits.length) throw new Error('No published versions found for this concept.');
+        const latestPublishedId = searchData.hits.hits[0].id;
+        console.log(`Found latest published version ID: ${latestPublishedId}`);
+
+        // Create a new version DRAFT from the latest published version.
+        const newVersionResponse = await fetch(`${zenodoApiUrl}/deposit/depositions/${latestPublishedId}/actions/newversion`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${zenodoToken}` }
+        });
+        if (!newVersionResponse.ok) {
+          const err = await newVersionResponse.json();
+          throw new Error(`Failed to create new version draft: ${err.message || 'A validation error occurred.'}`);
+        }
         
-        // Fetch the record details from Zenodo
-        console.log('Fetching Zenodo record ID:', recordId)
-        const recordResponse = await fetch(`https://zenodo.org/api/records/${recordId}`, {
-          headers: {
-            'Authorization': `Bearer ${zenodoToken}`
-          }
-        })
+        const newVersionData = await newVersionResponse.json();
+        const latestDraftUrl = newVersionData.links.latest_draft;
+        
+        const draftResponse = await fetch(latestDraftUrl, { headers: { 'Authorization': `Bearer ${zenodoToken}` }});
+        deposition = await draftResponse.json();
+        isNewVersion = true;
+        console.log(`Created new draft with ID: ${deposition.id}.`);
+      }
 
-        if (recordResponse.ok) {
-          const recordData = await recordResponse.json()
-          const conceptDoi = recordData.conceptdoi
-          
-          console.log('Retrieved concept DOI from Zenodo:', conceptDoi)
-          
-          // Check if the stored DOI is different from the concept DOI
-          if (existingDoi !== conceptDoi) {
-            console.log('Stored DOI is a version DOI, updating to concept DOI')
-            
-            // Update the database with the concept DOI
-            const { error: updateError } = await supabaseClient
-              .from('articles')
-              .update({ doi: conceptDoi })
-              .eq('id', article.id)
+      // 3. Unlock the draft AND re-fetch its state to get an accurate file list.
+      const editResponse = await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}/actions/edit`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${zenodoToken}` }
+      });
+      if (!editResponse.ok) {
+          // If it's already unlocked, this might fail, which is okay.
+          console.warn(`Could not unlock draft (it might already be unlocked). Status: ${editResponse.status}`);
+      }
+      
+      // Re-fetch the deposition to ensure the 'files' array is up-to-date.
+      const freshDraftResponse = await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}`, {
+          headers: { 'Authorization': `Bearer ${zenodoToken}` }
+      });
+      deposition = await freshDraftResponse.json();
+      console.log(`Unlocked and fetched fresh state for draft ID: ${deposition.id}`);
 
-            if (updateError) {
-              console.error('Failed to update article with concept DOI:', updateError)
-            } else {
-              console.log('✅ Database updated with concept DOI:', conceptDoi)
-            }
-
-            return new Response(
-              JSON.stringify({ 
-                success: true, 
-                doi: conceptDoi,
-                concept_doi: conceptDoi,
-                was_updated: true,
-                old_doi: existingDoi,
-                message: 'Updated to use concept DOI (persistent across versions)'
-              }),
-              { 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200 
-              }
-            )
-          }
-          
-          // Already has concept DOI, no update needed
-          console.log('DOI is already a concept DOI, no update needed')
-          return new Response(
-            JSON.stringify({ 
-              success: true, 
-              doi: conceptDoi,
-              concept_doi: conceptDoi,
-              is_existing: true,
-              message: 'Using existing concept DOI (points to latest version on Zenodo)'
-            }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200 
-            }
-          )
-        } else {
-          console.log('Could not fetch Zenodo record, returning existing DOI')
-          return new Response(
-            JSON.stringify({ 
-              success: true, 
-              doi: existingDoi,
-              concept_doi: existingDoi,
-              is_existing: true,
-              message: 'Using existing DOI'
-            }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200 
-            }
-          )
+      // 4. Reliably delete all files from the draft.
+      if (deposition.files && deposition.files.length > 0) {
+        console.log(`Deleting ${deposition.files.length} old file(s)...`);
+        for (const file of deposition.files) {
+          await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}/files/${file.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${zenodoToken}` }
+          });
+          console.log(`Deleted file: ${file.filename}`);
         }
-      } catch (error) {
-        console.error('Error checking/updating DOI:', error)
-        // Return existing DOI on error
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            doi: existingDoi,
-            concept_doi: existingDoi,
-            is_existing: true,
-            message: 'Using existing DOI'
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200 
-          }
-        )
+      } else {
+        console.log('No files to delete from this draft.');
       }
+
+    } else {
+      // Create a brand new deposition (no existing DOI)
+      console.log('Creating a new Zenodo deposition...');
+      const depositionResponse = await fetch(`${zenodoApiUrl}/deposit/depositions`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ metadata: zenodoMetadata.metadata }) // Send metadata on creation
+      });
+      if (!depositionResponse.ok) throw new Error('Failed to create initial deposition.');
+      deposition = await depositionResponse.json();
+      console.log(`New deposition created with ID: ${deposition.id}`);
     }
-
-    // Create new deposition in Zenodo (only for first-time DOI generation)
-    console.log('Creating new Zenodo deposition for first-time DOI generation')
-    const depositionResponse = await fetch('https://zenodo.org/api/deposit/depositions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${zenodoToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(zenodoMetadata)
-    })
-
-    if (!depositionResponse.ok) {
-      const errorText = await depositionResponse.text()
-      console.error('Zenodo API error:', errorText)
-      throw new Error(`Failed to create Zenodo deposition: ${depositionResponse.status}`)
-    }
-
-    deposition = await depositionResponse.json()
-    console.log('Created Zenodo deposition:', deposition.id)
-
-    // Upload file if manuscript URL is available
-    if (article.manuscript_file_url) {
-      try {
-        console.log('Downloading manuscript from:', article.manuscript_file_url)
-        // Download the manuscript file
-        const fileResponse = await fetch(article.manuscript_file_url)
-        if (fileResponse.ok) {
-          const fileBlob = await fileResponse.blob()
-          const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
-          
-          console.log('Uploading file to Zenodo:', fileName, 'Size:', fileBlob.size, 'bytes')
-          
-          // Upload to Zenodo
-          const formData = new FormData()
-          formData.append('file', fileBlob, fileName)
-          
-          const uploadResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${zenodoToken}`
-            },
-            body: formData
-          })
-
-          if (uploadResponse.ok) {
-            const uploadResult = await uploadResponse.json()
-            console.log('File uploaded successfully:', uploadResult.filename)
-          } else {
-            const errorText = await uploadResponse.text()
-            console.error('Failed to upload file to Zenodo. Status:', uploadResponse.status, 'Error:', errorText)
-            throw new Error(`File upload failed: ${uploadResponse.status}`)
-          }
-        } else {
-          console.error('Failed to download manuscript file. Status:', fileResponse.status)
-          throw new Error('Failed to download manuscript file')
-        }
-      } catch (fileError) {
-        console.error('Error handling file upload:', fileError)
-        throw fileError // Don't continue if file upload fails
-      }
-    }
-
-    // Publish the deposition to get DOI
-    const publishResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/actions/publish`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${zenodoToken}`
-      }
-    })
-
-    if (!publishResponse.ok) {
-      const errorText = await publishResponse.text()
-      console.error('Failed to publish deposition:', errorText)
-      throw new Error(`Failed to publish Zenodo deposition: ${publishResponse.status}`)
-    }
-
-    const publishedDeposition = await publishResponse.json()
-    const doi = publishedDeposition.doi
-    const conceptDoi = publishedDeposition.conceptdoi || doi
-
-    console.log('✅ Publication successful!')
-    console.log('Version DOI:', doi)
-    console.log('Concept DOI (persistent across versions):', conceptDoi)
-
-    // Store the concept DOI - it's persistent and always points to latest version
-    const doiToStore = conceptDoi || doi
     
-    console.log('Storing concept DOI in database:', doiToStore)
+    // Upload the new manuscript file
+    if (article.manuscript_file_url) {
+      console.log('Uploading manuscript file...');
+      const fileResponse = await fetch(article.manuscript_file_url);
+      if (!fileResponse.ok) throw new Error(`Failed to download manuscript file from URL: ${article.manuscript_file_url}`);
+      const fileBlob = await fileResponse.blob();
+      
+      // --- FIX: Append a timestamp to the filename to ensure uniqueness ---
+      const timestamp = Date.now();
+      const baseFileName = article.title.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${baseFileName}_${timestamp}.pdf`;
+      
+      console.log(`Uploading unique filename: ${fileName}`);
 
-    // Update article with the concept DOI (or version DOI if concept not available)
+      const formData = new FormData();
+      formData.append('file', fileBlob, fileName);
+
+      const uploadResponse = await fetch(deposition.links.files, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${zenodoToken}` },
+          body: formData
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("Zenodo file upload error:", errorText);
+        throw new Error('Failed to upload manuscript file to Zenodo.');
+      }
+      console.log('File uploaded successfully.');
+    }
+
+    // Publish the deposition to finalize it
+    console.log(`Publishing deposition ID: ${deposition.id}...`);
+    const publishResponse = await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}/actions/publish`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${zenodoToken}` }
+    });
+    if (!publishResponse.ok) {
+      const err = await publishResponse.json();
+      throw new Error(`Failed to publish Zenodo deposition: ${err.errors?.[0]?.message || err.message}`);
+    }
+
+    const publishedDeposition = await publishResponse.json();
+    const versionDoi = publishedDeposition.doi;
+    const conceptDoi = publishedDeposition.conceptdoi;
+
+    console.log('✅ Publication Successful!');
+    console.log('   Version DOI:', versionDoi);
+    console.log('   Concept DOI:', conceptDoi);
+
+    // ALWAYS update the database with the Concept DOI to ensure consistency.
+    console.log('Updating Supabase with the Concept DOI...');
     const { error: updateError } = await supabaseClient
       .from('articles')
-      .update({ 
-        status: 'accepted',
-        doi: doiToStore 
-      })
-      .eq('id', article.id)
+      .update({ doi: conceptDoi, status: 'accepted' })
+      .eq('id', article.id);
 
     if (updateError) {
-      console.error('Failed to update article with DOI:', updateError)
-      throw new Error('Failed to update article with DOI')
+      throw new Error('Failed to update article with Concept DOI in database.');
     }
-    
-    console.log('✅ Database updated with concept DOI:', doiToStore)
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        doi: doiToStore,
-        version_doi: doi,
-        concept_doi: conceptDoi,
-        zenodo_id: publishedDeposition.id,
-        zenodo_url: publishedDeposition.links.record_html,
-        message: `Concept DOI created: ${doiToStore}`
+      JSON.stringify({
+        success: true,
+        doi: conceptDoi,
+        version_doi: versionDoi,
+        zenodo_url: publishedDeposition.links.html,
+        message: isNewVersion ? `Successfully created new version for ${conceptDoi}` : `New record created with DOI ${conceptDoi}`
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
+        status: 200
       }
-    )
+    );
 
   } catch (error) {
-    console.error('Error generating Zenodo DOI:', error)
-    
+    console.error('Unhandled error in Zenodo function:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: (error instanceof Error ? error.message : 'Failed to generate DOI')
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'An unknown error occurred.'
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status: 500
       }
-    )
+    );
   }
-})
+});
+
