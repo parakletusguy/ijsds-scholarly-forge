@@ -81,10 +81,10 @@ serve(async (req) => {
       
       try {
         // Extract the record ID from the DOI (format: 10.5281/zenodo.XXXXXX)
-        const recordId = existingDoi.split('/').pop()
+        const recordId = existingDoi.split('/').pop()?.replace('zenodo.', '') || ''
         
         // Fetch the record details from Zenodo
-        console.log('Fetching Zenodo record:', recordId)
+        console.log('Fetching Zenodo record ID:', recordId)
         const recordResponse = await fetch(`https://zenodo.org/api/records/${recordId}`, {
           headers: {
             'Authorization': `Bearer ${zenodoToken}`
