@@ -57,10 +57,10 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
 
       if (data.success) {
         toast({
-          title: data.is_new_version ? "New Version Published" : "DOI Generated Successfully",
-          description: data.is_new_version 
-            ? `Concept DOI: ${data.doi} (always points to latest version)`
-            : `DOI: ${data.doi}`,
+          title: data.is_existing ? "DOI Already Exists" : "DOI Generated Successfully",
+          description: data.is_existing 
+            ? `Using existing concept DOI: ${data.doi}`
+            : `Concept DOI: ${data.doi}`,
         });
         onUpdate();
         setShowManualInput(false);
@@ -232,23 +232,18 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                 <h4 className="font-medium">Automatic DOI Generation</h4>
                 <p className="text-sm text-muted-foreground">
                   {article.doi 
-                    ? 'Update article and create new Zenodo version (DOI remains the same - concept DOI)'
-                    : 'Generate a concept DOI using Zenodo (remains constant across versions)'
+                    ? 'Article already has a concept DOI - no action needed'
+                    : 'Generate a concept DOI using Zenodo'
                   }
                 </p>
-                {article.doi && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Your concept DOI will automatically point to the latest version on Zenodo.
-                  </p>
-                )}
               </div>
               <Button
                 onClick={generateDOI}
-                disabled={loading}
+                disabled={loading || !!article.doi}
                 className="flex items-center gap-2"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Processing...' : (article.doi ? 'Update & Create New Version' : 'Generate DOI')}
+                {loading ? 'Processing...' : (article.doi ? 'DOI Exists' : 'Generate DOI')}
               </Button>
             </div>
           </div>

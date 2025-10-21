@@ -74,115 +74,46 @@ serve(async (req) => {
     }
 
     let deposition: any;
-    let isNewVersion = false;
 
-    // If there's an existing DOI, create a new version (Zenodo requirement)
+    // If there's an existing DOI, just return it (concept DOI doesn't change)
     if (existingDoi) {
-      console.log('Creating new version for existing Zenodo record with DOI:', existingDoi)
-      console.log('NOTE: Zenodo will assign a new DOI to this version. The concept DOI links all versions.')
+      console.log('Article already has DOI:', existingDoi)
+      console.log('Returning existing concept DOI (no new version needed)')
       
-      // Get the deposition ID from the DOI
-      const doiParts = existingDoi.split('zenodo.')
-      if (doiParts.length < 2) {
-        throw new Error('Invalid Zenodo DOI format')
-      }
-      const depositionId = doiParts[1]
-      
-      console.log('Extracted deposition ID:', depositionId)
-      
-      // Create new version (this creates a draft for the new version)
-      const newVersionResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${depositionId}/actions/newversion`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${zenodoToken}`
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          doi: existingDoi,
+          concept_doi: existingDoi,
+          is_existing: true,
+          message: 'Using existing concept DOI (points to latest version on Zenodo)'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
         }
-      })
-
-      if (!newVersionResponse.ok) {
-        const errorText = await newVersionResponse.text()
-        console.error('Zenodo new version API error:', errorText)
-        throw new Error(`Failed to create new version: ${newVersionResponse.status}`)
-      }
-
-      const newVersionData = await newVersionResponse.json()
-      console.log('New version created, accessing draft at:', newVersionData.links.latest_draft)
-      
-      // Get the draft of the new version
-      const draftUrl = newVersionData.links.latest_draft
-      const draftResponse = await fetch(draftUrl, {
-        headers: {
-          'Authorization': `Bearer ${zenodoToken}`
-        }
-      })
-
-      if (!draftResponse.ok) {
-        throw new Error('Failed to fetch draft of new version')
-      }
-
-      deposition = await draftResponse.json()
-      isNewVersion = true
-      console.log('New version draft ID:', deposition.id)
-      
-      // Delete old files from the draft
-      if (deposition.files && deposition.files.length > 0) {
-        console.log('Deleting', deposition.files.length, 'old files from new version draft')
-        for (const file of deposition.files) {
-          try {
-            const deleteResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files/${file.id}`, {
-              method: 'DELETE',
-              headers: {
-                'Authorization': `Bearer ${zenodoToken}`
-              }
-            })
-            
-            if (deleteResponse.ok) {
-              console.log('Successfully deleted file:', file.filename)
-            } else {
-              const errorText = await deleteResponse.text()
-              console.warn('Failed to delete file:', file.filename, 'Error:', errorText)
-            }
-          } catch (error) {
-            console.warn('Error deleting file:', file.filename, error)
-          }
-        }
-      }
-
-      // Update metadata for new version
-      const updateResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${zenodoToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(zenodoMetadata)
-      })
-
-      if (!updateResponse.ok) {
-        const errorText = await updateResponse.text()
-        console.error('Failed to update metadata:', errorText)
-      } else {
-        console.log('Metadata updated successfully for new version')
-      }
-    } else {
-      // Create new deposition in Zenodo
-      const depositionResponse = await fetch('https://zenodo.org/api/deposit/depositions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${zenodoToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(zenodoMetadata)
-      })
-
-      if (!depositionResponse.ok) {
-        const errorText = await depositionResponse.text()
-        console.error('Zenodo API error:', errorText)
-        throw new Error(`Failed to create Zenodo deposition: ${depositionResponse.status}`)
-      }
-
-      deposition = await depositionResponse.json()
-      console.log('Created Zenodo deposition:', deposition.id)
+      )
     }
+
+    // Create new deposition in Zenodo (only for first-time DOI generation)
+    console.log('Creating new Zenodo deposition for first-time DOI generation')
+    const depositionResponse = await fetch('https://zenodo.org/api/deposit/depositions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${zenodoToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(zenodoMetadata)
+    })
+
+    if (!depositionResponse.ok) {
+      const errorText = await depositionResponse.text()
+      console.error('Zenodo API error:', errorText)
+      throw new Error(`Failed to create Zenodo deposition: ${depositionResponse.status}`)
+    }
+
+    deposition = await depositionResponse.json()
+    console.log('Created Zenodo deposition:', deposition.id)
 
     // Upload file if manuscript URL is available
     if (article.manuscript_file_url) {
@@ -245,10 +176,6 @@ serve(async (req) => {
     const conceptDoi = publishedDeposition.conceptdoi || doi
 
     console.log('✅ Publication successful!')
-    console.log('DOI:', doi)
-    console.log('Concept DOI:', conceptDoi)
-
-    console.log('✅ Publication successful!')
     console.log('Version DOI:', doi)
     console.log('Concept DOI (persistent across versions):', conceptDoi)
 
@@ -256,9 +183,6 @@ serve(async (req) => {
     const doiToStore = conceptDoi || doi
     
     console.log('Storing concept DOI in database:', doiToStore)
-    if (isNewVersion) {
-      console.log('This is version', doi, 'but concept DOI remains:', doiToStore)
-    }
 
     // Update article with the concept DOI (or version DOI if concept not available)
     const { error: updateError } = await supabaseClient
@@ -284,10 +208,7 @@ serve(async (req) => {
         concept_doi: conceptDoi,
         zenodo_id: publishedDeposition.id,
         zenodo_url: publishedDeposition.links.record_html,
-        is_new_version: isNewVersion,
-        message: isNewVersion 
-          ? `New version created. Concept DOI (stored): ${doiToStore} always points to latest version.`
-          : `DOI created: ${doiToStore}`
+        message: `Concept DOI created: ${doiToStore}`
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
