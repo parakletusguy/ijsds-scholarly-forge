@@ -105,19 +105,26 @@ serve(async (req) => {
       deposition = await editResponse.json()
       console.log('Record unlocked for editing, deposition ID:', deposition.id)
       
-      // Delete old files
+      // Delete old files before uploading new ones
       if (deposition.files && deposition.files.length > 0) {
         console.log('Deleting', deposition.files.length, 'old files')
         for (const file of deposition.files) {
-          const deleteResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files/${file.id}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${zenodoToken}`
+          try {
+            const deleteResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files/${file.id}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${zenodoToken}`
+              }
+            })
+            
+            if (deleteResponse.ok) {
+              console.log('Successfully deleted file:', file.filename)
+            } else {
+              const errorText = await deleteResponse.text()
+              console.warn('Failed to delete file:', file.filename, 'Error:', errorText)
             }
-          })
-          
-          if (!deleteResponse.ok) {
-            console.warn('Failed to delete file:', file.filename)
+          } catch (error) {
+            console.warn('Error deleting file:', file.filename, error)
           }
         }
       }
@@ -162,14 +169,18 @@ serve(async (req) => {
     // Upload file if manuscript URL is available
     if (article.manuscript_file_url) {
       try {
+        console.log('Downloading manuscript from:', article.manuscript_file_url)
         // Download the manuscript file
         const fileResponse = await fetch(article.manuscript_file_url)
         if (fileResponse.ok) {
           const fileBlob = await fileResponse.blob()
+          const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
+          
+          console.log('Uploading file to Zenodo:', fileName, 'Size:', fileBlob.size, 'bytes')
           
           // Upload to Zenodo
           const formData = new FormData()
-          formData.append('file', fileBlob, `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`)
+          formData.append('file', fileBlob, fileName)
           
           const uploadResponse = await fetch(`https://zenodo.org/api/deposit/depositions/${deposition.id}/files`, {
             method: 'POST',
@@ -180,14 +191,20 @@ serve(async (req) => {
           })
 
           if (uploadResponse.ok) {
-            console.log('File uploaded successfully')
+            const uploadResult = await uploadResponse.json()
+            console.log('File uploaded successfully:', uploadResult.filename)
           } else {
-            console.warn('Failed to upload file to Zenodo')
+            const errorText = await uploadResponse.text()
+            console.error('Failed to upload file to Zenodo. Status:', uploadResponse.status, 'Error:', errorText)
+            throw new Error(`File upload failed: ${uploadResponse.status}`)
           }
+        } else {
+          console.error('Failed to download manuscript file. Status:', fileResponse.status)
+          throw new Error('Failed to download manuscript file')
         }
       } catch (fileError) {
-        console.warn('Error uploading file:', fileError)
-        // Continue without file upload
+        console.error('Error handling file upload:', fileError)
+        throw fileError // Don't continue if file upload fails
       }
     }
 
@@ -213,17 +230,19 @@ serve(async (req) => {
     console.log('DOI:', doi)
     console.log('Concept DOI:', conceptDoi)
 
-    // For updates, keep existing DOI; for new records, use the generated DOI
-    let doiToStore = existingDoi || doi
+    // Always use the DOI from the published deposition (same for new and updates)
+    const finalDoi = existingDoi || doi
+    
+    console.log('Final DOI:', finalDoi)
 
-    // Only update article for new DOIs (not when updating existing records)
+    // Only update article status and DOI for new DOIs (not when updating existing records)
     if (!existingDoi) {
       console.log('Updating article with new DOI')
       const { error: updateError } = await supabaseClient
         .from('articles')
         .update({ 
           status: 'accepted',
-          doi: doiToStore 
+          doi: finalDoi 
         })
         .eq('id', article.id)
 
@@ -232,16 +251,19 @@ serve(async (req) => {
         throw new Error('Failed to update article with DOI')
       }
     } else {
-      console.log('Skipping database update (editing existing DOI)')
+      console.log('Updating existing DOI - content updated, DOI unchanged')
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        doi: doiToStore,
+        doi: finalDoi,
         zenodo_id: publishedDeposition.id,
         zenodo_url: publishedDeposition.links.record_html,
-        is_update: !!existingDoi
+        is_update: !!existingDoi,
+        message: existingDoi 
+          ? 'DOI content updated successfully (same DOI, updated file)'
+          : 'New DOI created successfully'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
