@@ -280,7 +280,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get submission and article data from Supabase
+    // Get submission and article data
     const { data: submission, error: submissionError } = await supabaseClient
       .from('submissions')
       .select(`
@@ -322,9 +322,7 @@ serve(async (req) => {
         upload_type: 'publication',
         publication_type: 'article',
         access_right: 'open',
-        license: 'cc-by-sa-4.0',
-        // Add a version string based on the current date
-        version: new Date().toISOString().split('T')[0]
+        license: 'cc-by-sa-4.0'
       }
     };
 
@@ -351,7 +349,7 @@ serve(async (req) => {
       const conceptrecid = initialRecord.conceptrecid;
       console.log(`Found Concept ID: ${conceptrecid}`);
 
-      // 2. Check if an unsubmitted draft already exists for this concept.
+      // 2. **NEW**: Check if an unsubmitted draft already exists for this concept.
       const draftSearchResponse = await fetch(`${zenodoApiUrl}/deposit/depositions?q=conceptrecid:${conceptrecid}&status=unsubmitted`, {
         headers: { 'Authorization': `Bearer ${zenodoToken}` }
       });
@@ -386,30 +384,21 @@ serve(async (req) => {
         const newVersionData = await newVersionResponse.json();
         const latestDraftUrl = newVersionData.links.latest_draft;
         
+        // Fetch the new draft to work with it.
         const draftResponse = await fetch(latestDraftUrl, { headers: { 'Authorization': `Bearer ${zenodoToken}` }});
         deposition = await draftResponse.json();
         isNewVersion = true;
         console.log(`Created new draft with ID: ${deposition.id}.`);
       }
 
-      // 3. Unlock the draft AND re-fetch its state to get an accurate file list.
-      const editResponse = await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}/actions/edit`, {
+      // 3. Unlock the draft for editing (safe to run even if already unlocked).
+      await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}/actions/edit`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${zenodoToken}` }
       });
-      if (!editResponse.ok) {
-          // If it's already unlocked, this might fail, which is okay.
-          console.warn(`Could not unlock draft (it might already be unlocked). Status: ${editResponse.status}`);
-      }
-      
-      // Re-fetch the deposition to ensure the 'files' array is up-to-date.
-      const freshDraftResponse = await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}`, {
-          headers: { 'Authorization': `Bearer ${zenodoToken}` }
-      });
-      deposition = await freshDraftResponse.json();
-      console.log(`Unlocked and fetched fresh state for draft ID: ${deposition.id}`);
+      console.log(`Unlocked draft ID: ${deposition.id} for editing.`);
 
-      // 4. Reliably delete all files from the draft.
+      // 4. Delete old files from the draft.
       if (deposition.files && deposition.files.length > 0) {
         console.log(`Deleting ${deposition.files.length} old file(s)...`);
         for (const file of deposition.files) {
@@ -417,10 +406,7 @@ serve(async (req) => {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${zenodoToken}` }
           });
-          console.log(`Deleted file: ${file.filename}`);
         }
-      } else {
-        console.log('No files to delete from this draft.');
       }
 
     } else {
@@ -429,41 +415,35 @@ serve(async (req) => {
       const depositionResponse = await fetch(`${zenodoApiUrl}/deposit/depositions`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metadata: zenodoMetadata.metadata }) // Send metadata on creation
+        body: JSON.stringify({})
       });
       if (!depositionResponse.ok) throw new Error('Failed to create initial deposition.');
       deposition = await depositionResponse.json();
       console.log(`New deposition created with ID: ${deposition.id}`);
     }
+
+    // Update metadata for the draft (new or versioned)
+    console.log(`Updating metadata for deposition ID: ${deposition.id}...`);
+    await fetch(`${zenodoApiUrl}/deposit/depositions/${deposition.id}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(zenodoMetadata)
+    });
     
     // Upload the new manuscript file
     if (article.manuscript_file_url) {
       console.log('Uploading manuscript file...');
       const fileResponse = await fetch(article.manuscript_file_url);
-      if (!fileResponse.ok) throw new Error(`Failed to download manuscript file from URL: ${article.manuscript_file_url}`);
       const fileBlob = await fileResponse.blob();
+      const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
       
-      // --- FIX: Append a timestamp to the filename to ensure uniqueness ---
-      const timestamp = Date.now();
-      const baseFileName = article.title.replace(/[^a-zA-Z0-9]/g, '_');
-      const fileName = `${baseFileName}_${timestamp}.pdf`;
-      
-      console.log(`Uploading unique filename: ${fileName}`);
-
-      const formData = new FormData();
-      formData.append('file', fileBlob, fileName);
-
-      const uploadResponse = await fetch(deposition.links.files, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${zenodoToken}` },
-          body: formData
+      const uploadUrl = deposition.links.bucket + `/${encodeURIComponent(fileName)}`;
+      const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/octet-stream' },
+          body: fileBlob
       });
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error("Zenodo file upload error:", errorText);
-        throw new Error('Failed to upload manuscript file to Zenodo.');
-      }
+      if (!uploadResponse.ok) throw new Error('Failed to upload manuscript file to Zenodo.');
       console.log('File uploaded successfully.');
     }
 
@@ -475,7 +455,7 @@ serve(async (req) => {
     });
     if (!publishResponse.ok) {
       const err = await publishResponse.json();
-      throw new Error(`Failed to publish Zenodo deposition: ${err.errors?.[0]?.message || err.message}`);
+      throw new Error(`Failed to publish Zenodo deposition: ${err.message}`);
     }
 
     const publishedDeposition = await publishResponse.json();
