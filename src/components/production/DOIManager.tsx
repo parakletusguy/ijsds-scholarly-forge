@@ -13,9 +13,9 @@ interface Article {
   title: string;
   authors: any;
   status: string;
-  doi: string;
+  doi?: string;
   abstract: string;
-  manuscript_file_url: string;
+  manuscript_file_url?: string;
 }
 
 interface DOIManagerProps {

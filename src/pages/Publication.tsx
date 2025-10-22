@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
+import { DOIManager } from '@/components/production/DOIManager';
 
 
 interface Article {
@@ -34,6 +35,7 @@ interface Article {
   page_end?: number;
   publication_date?: string;
   submission_id?: string;
+  manuscript_file_url?: string;
 }
 
 export const Publication = () => {
@@ -415,10 +417,34 @@ export const Publication = () => {
                                     Upload new versions or view file history for this published article
                                   </DialogDescription>
                                 </DialogHeader>
-                                <EditorFileManager 
-                                  articleId={article.id}
-                                  submissionId={article.submission_id}
-                                />
+                                <Tabs defaultValue="files" className="w-full">
+                                  <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="files">File Management</TabsTrigger>
+                                    <TabsTrigger value="doi" disabled={!!article.doi}>
+                                      DOI Management
+                                      {!article.doi && (
+                                        <Badge variant="destructive" className="ml-2 h-5">
+                                          <AlertTriangle className="h-3 w-3 mr-1" />
+                                          No DOI
+                                        </Badge>
+                                      )}
+                                    </TabsTrigger>
+                                  </TabsList>
+                                  <TabsContent value="files">
+                                    <EditorFileManager 
+                                      articleId={article.id}
+                                      submissionId={article.submission_id}
+                                    />
+                                  </TabsContent>
+                                  <TabsContent value="doi">
+                                    {!article.doi && (
+                                      <DOIManager 
+                                        article={article}
+                                        onUpdate={fetchAcceptedArticles}
+                                      />
+                                    )}
+                                  </TabsContent>
+                                </Tabs>
                               </DialogContent>
                             </Dialog>
                           )}
