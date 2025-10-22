@@ -57,9 +57,9 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
 
       if (data.success) {
         toast({
-          title: data.is_existing ? "DOI Already Exists" : "DOI Generated Successfully",
-          description: data.is_existing 
-            ? `Using existing concept DOI: ${data.doi}`
+          title: article.doi ? "New Version Created" : "DOI Generated Successfully",
+          description: article.doi
+            ? `New version created. Concept DOI remains: ${data.doi}`
             : `Concept DOI: ${data.doi}`,
         });
         onUpdate();
@@ -232,18 +232,18 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                 <h4 className="font-medium">Automatic DOI Generation</h4>
                 <p className="text-sm text-muted-foreground">
                   {article.doi 
-                    ? 'Article already has a concept DOI - no action needed'
+                    ? 'Create a new version on Zenodo. The concept DOI will remain the same.'
                     : 'Generate a concept DOI using Zenodo'
                   }
                 </p>
               </div>
               <Button
                 onClick={generateDOI}
-                disabled={loading || !!article.doi}
+                disabled={loading || !article.manuscript_file_url}
                 className="flex items-center gap-2"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Processing...' : (article.doi ? 'DOI Exists' : 'Generate DOI')}
+                {loading ? 'Processing...' : (article.doi ? 'Create New Version' : 'Generate DOI')}
               </Button>
             </div>
           </div>
