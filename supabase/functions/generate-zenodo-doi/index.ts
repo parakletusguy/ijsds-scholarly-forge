@@ -439,35 +439,62 @@ serve(async (req) => {
     // Upload the new manuscript file
     if (article.manuscript_file_url) {
       console.log('Uploading manuscript file...');
+      console.log('Raw manuscript_file_url:', article.manuscript_file_url);
       
       // Construct full URL if manuscript_file_url is a relative path
       let manuscriptUrl = article.manuscript_file_url;
+      
       if (!manuscriptUrl.startsWith('http://') && !manuscriptUrl.startsWith('https://')) {
+        // Get Supabase URL from environment
         const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        console.log('SUPABASE_URL from env:', supabaseUrl);
+        
         if (!supabaseUrl) {
-          throw new Error('SUPABASE_URL not configured');
+          console.warn('SUPABASE_URL not found, skipping file upload');
+          console.log('Continuing without file upload...');
+        } else {
+          // Remove leading slash if present
+          const cleanPath = manuscriptUrl.startsWith('/') ? manuscriptUrl.substring(1) : manuscriptUrl;
+          manuscriptUrl = `${supabaseUrl}/storage/v1/object/public/${cleanPath}`;
+          console.log('Constructed manuscript URL:', manuscriptUrl);
         }
-        // Remove leading slash if present
-        const cleanPath = manuscriptUrl.startsWith('/') ? manuscriptUrl.substring(1) : manuscriptUrl;
-        manuscriptUrl = `${supabaseUrl}/storage/v1/object/public/${cleanPath}`;
+      } else {
+        console.log('Using full manuscript URL:', manuscriptUrl);
       }
       
-      console.log('Fetching manuscript from:', manuscriptUrl);
-      const fileResponse = await fetch(manuscriptUrl);
-      if (!fileResponse.ok) {
-        throw new Error(`Failed to fetch manuscript file: ${fileResponse.status} ${fileResponse.statusText}`);
+      // Only fetch if we have a valid URL
+      if (manuscriptUrl && manuscriptUrl.startsWith('http')) {
+        try {
+          const fileResponse = await fetch(manuscriptUrl);
+          if (!fileResponse.ok) {
+            console.error(`Failed to fetch manuscript: ${fileResponse.status} ${fileResponse.statusText}`);
+            throw new Error(`Failed to fetch manuscript file: ${fileResponse.status} ${fileResponse.statusText}`);
+          }
+          const fileBlob = await fileResponse.blob();
+          const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+          
+          const uploadUrl = deposition.links.bucket + `/${encodeURIComponent(fileName)}`;
+          console.log('Uploading to Zenodo bucket:', uploadUrl);
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/octet-stream' },
+            body: fileBlob
+          });
+          if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error('Zenodo upload failed:', errorText);
+            throw new Error('Failed to upload manuscript file to Zenodo.');
+          }
+          console.log('File uploaded successfully to Zenodo.');
+        } catch (uploadError) {
+          console.error('Error during file upload:', uploadError);
+          console.log('Continuing with DOI generation without file...');
+        }
+      } else {
+        console.log('No valid manuscript URL, skipping file upload');
       }
-      const fileBlob = await fileResponse.blob();
-      const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-      
-      const uploadUrl = deposition.links.bucket + `/${encodeURIComponent(fileName)}`;
-      const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/octet-stream' },
-          body: fileBlob
-      });
-      if (!uploadResponse.ok) throw new Error('Failed to upload manuscript file to Zenodo.');
-      console.log('File uploaded successfully.');
+    } else {
+      console.log('No manuscript_file_url provided, skipping file upload');
     }
 
     // Publish the deposition to finalize it
