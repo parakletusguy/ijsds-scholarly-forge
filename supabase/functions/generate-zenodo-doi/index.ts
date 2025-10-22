@@ -275,6 +275,12 @@ serve(async (req) => {
       throw new Error('Missing submissionId')
     }
 
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(submissionId)) {
+      throw new Error('Invalid submissionId format: must be a valid UUID')
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -433,7 +439,24 @@ serve(async (req) => {
     // Upload the new manuscript file
     if (article.manuscript_file_url) {
       console.log('Uploading manuscript file...');
-      const fileResponse = await fetch(article.manuscript_file_url);
+      
+      // Construct full URL if manuscript_file_url is a relative path
+      let manuscriptUrl = article.manuscript_file_url;
+      if (!manuscriptUrl.startsWith('http://') && !manuscriptUrl.startsWith('https://')) {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        if (!supabaseUrl) {
+          throw new Error('SUPABASE_URL not configured');
+        }
+        // Remove leading slash if present
+        const cleanPath = manuscriptUrl.startsWith('/') ? manuscriptUrl.substring(1) : manuscriptUrl;
+        manuscriptUrl = `${supabaseUrl}/storage/v1/object/public/${cleanPath}`;
+      }
+      
+      console.log('Fetching manuscript from:', manuscriptUrl);
+      const fileResponse = await fetch(manuscriptUrl);
+      if (!fileResponse.ok) {
+        throw new Error(`Failed to fetch manuscript file: ${fileResponse.status} ${fileResponse.statusText}`);
+      }
       const fileBlob = await fileResponse.blob();
       const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
       
