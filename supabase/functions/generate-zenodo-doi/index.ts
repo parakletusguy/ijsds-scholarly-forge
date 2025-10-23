@@ -319,10 +319,17 @@ serve(async (req) => {
       metadata: {
         title: article.title,
         description: article.abstract,
-        creators: Array.isArray(article.authors) ? article.authors.map((author: any) => ({
-          name: author.name,
-          affiliation: author.affiliation || ''
-        })) : [],
+        creators: Array.isArray(article.authors)
+          ? article.authors
+              .map((author: any) => {
+                const last = author?.last_name || author?.lastName || author?.surname || ''
+                const first = author?.first_name || author?.firstName || author?.given || ''
+                const full = author?.name || (last || first ? `${last}${last && first ? ', ' : ''}${first}` : '')
+                if (!full || !full.trim()) return null
+                return { name: full.trim(), affiliation: author?.affiliation || '' }
+              })
+              .filter((c: any) => c !== null)
+          : [],
         keywords: article.keywords || [],
         subjects: article.subject_area ? [{ term: article.subject_area }] : [],
         upload_type: 'publication',
@@ -473,12 +480,15 @@ serve(async (req) => {
           const fileBlob = await fileResponse.blob();
           const fileName = `${article.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
           
-          const uploadUrl = deposition.links.bucket + `/${encodeURIComponent(fileName)}`;
-          console.log('Uploading to Zenodo bucket:', uploadUrl);
-          const uploadResponse = await fetch(uploadUrl, {
-            method: 'PUT',
-            headers: { 'Authorization': `Bearer ${zenodoToken}`, 'Content-Type': 'application/octet-stream' },
-            body: fileBlob
+          // Use safer files endpoint (multipart) instead of bucket PUT to avoid undefined bucket links
+          const formData = new FormData();
+          formData.append('file', fileBlob, fileName);
+          const uploadEndpoint = `${zenodoApiUrl}/deposit/depositions/${deposition.id}/files`;
+          console.log('Uploading manuscript via files endpoint:', uploadEndpoint);
+          const uploadResponse = await fetch(uploadEndpoint, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${zenodoToken}` },
+            body: formData
           });
           if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
@@ -504,8 +514,15 @@ serve(async (req) => {
         headers: { 'Authorization': `Bearer ${zenodoToken}` }
     });
     if (!publishResponse.ok) {
-      const err = await publishResponse.json();
-      throw new Error(`Failed to publish Zenodo deposition: ${err.message}`);
+      let errText = await publishResponse.text();
+      try {
+        const errJson = JSON.parse(errText);
+        console.error('Zenodo publish error payload:', errJson);
+        errText = errJson.message || JSON.stringify(errJson);
+      } catch {
+        console.error('Zenodo publish error (non-JSON):', errText);
+      }
+      throw new Error(`Failed to publish Zenodo deposition: ${errText}`);
     }
 
     const publishedDeposition = await publishResponse.json();
