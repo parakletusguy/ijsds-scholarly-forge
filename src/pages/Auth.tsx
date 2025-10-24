@@ -22,6 +22,15 @@ export const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<'author' | 'reviewer' | 'editor'>('author');
   const [loading, setLoading] = useState(false);
+  const [signupfields,setSignupField] = useState({
+    email:false,
+    password: false,
+    fullName:false
+  })
+  const [signinfields,setSigninField] = useState({
+    email:false,
+    password: false
+  })
   
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -163,6 +172,97 @@ export const Auth = () => {
     }
   };
 
+  const checkField = (mode) : boolean => {
+    if(mode == 'signup'){
+    const {email, password,fullName} = signupfields
+   if(!email) return true  
+   if(!password) return true  
+   if(!fullName) return true  
+   return false
+    }
+
+    if(mode == 'signin'){
+      const {email,password} = signinfields
+        if(!email) return true  
+        if(!password) return true  
+        return false
+    }
+  }
+
+  const authNameField = (e : React.ChangeEvent<HTMLInputElement>) => {
+    setFullName(e.target.value)
+    const regex = /^[a-zA-Z]+$/
+    if(regex.test(fullName)){
+      setSignupField({
+        ...signupfields,
+        fullName:true
+      })
+    }else{
+      setSignupField({
+        ...signupfields,
+        fullName:false
+      })
+    }
+  }
+    const authEmailField = (e : React.ChangeEvent<HTMLInputElement>,mode) => {
+    setEmail(e.target.value)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(emailRegex.test(email)){
+      if(mode == "signup"){
+        setSignupField({
+        ...signupfields,
+        email:true
+      })
+      }else{
+        setSigninField({
+        ...signinfields,
+        email:true
+      })
+      }
+    }else{
+      if(mode == "signup"){
+        setSignupField({
+        ...signupfields,
+        email:false
+      })
+      }else{
+        setSigninField({
+        ...signinfields,
+        email:false
+      })
+      }
+    }
+  }
+      const authPasswordField = (e : React.ChangeEvent<HTMLInputElement>,mode) => {
+    setPassword(e.target.value)
+    if(password.length >= 9){
+      if(mode == "signup"){
+        setSignupField({
+        ...signupfields,
+        password:true
+      })
+      }else{
+        setSigninField({
+        ...signinfields,
+        password:true
+      })
+      }
+    }else{
+      if(mode == "signup"){
+        setSignupField({
+        ...signupfields,
+        password:false
+      })
+      }else{
+        setSigninField({
+        ...signinfields,
+        password:false
+      })
+      }
+    }
+  }
+  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md">
@@ -222,9 +322,11 @@ export const Auth = () => {
                       id="fullName"
                       type="text"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => authNameField(e)}
                       required
                     />
+                    {!signupfields.fullName ? <p className='text-red-500 text-[10px]'>name should contain only alphabets {signupfields.fullName}</p> : null}
+                    
                   </div>
                   
                   <div className="space-y-2">
@@ -247,9 +349,11 @@ export const Auth = () => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => authEmailField(e,mode)}
                   required
                 />
+                { mode == "signup" ? !signupfields.email ? <p className='text-red-500 text-[10px]'>Please input a correct Email</p> : null : !signinfields.email?<p className='text-red-500 text-[10px]'>Please input a correct Email</p>: null }
+
               </div>
               
               {mode !== 'forgot-password' && (
@@ -259,13 +363,15 @@ export const Auth = () => {
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => authPasswordField(e,mode)}
                     required
                   />
+                { mode == "signup" ? !signupfields.password ? <p className='text-red-500 text-[10px]'>password should be greater than 8 characters</p> : null : !signinfields.password?<p className='text-red-500 text-[10px]'>password should be greater than 8 characters</p>: null }
+
                 </div>
               )}
               
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading || checkField(mode)}>
                 {loading ? 'Processing...' : (
                   mode === 'signin' ? 'Sign In' : 
                   mode === 'signup' ? 'Sign Up' : 
