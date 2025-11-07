@@ -132,17 +132,14 @@ export const PlagiarismPolicy = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                IJSDS employs multiple methods to detect plagiarism:
+                IJSDS employs rigorous manual methods to detect plagiarism:
               </p>
               <ul className="space-y-2 text-sm text-muted-foreground ml-4">
-                <li>• Automated plagiarism detection software (e.g., Turnitin, iThenticate)</li>
-                <li>• Manual review by editors and peer reviewers</li>
+                <li>• Thorough manual review by editors and peer reviewers</li>
                 <li>• Cross-referencing with published literature databases</li>
-                <li>• Similarity index analysis (acceptable threshold: &lt;15% similarity excluding references)</li>
+                <li>• Careful examination of citations and references</li>
+                <li>• Comparison with existing research in the field</li>
               </ul>
-              <p className="text-sm text-muted-foreground mt-4">
-                All manuscripts must include a plagiarism report at the time of submission.
-              </p>
             </CardContent>
           </Card>
 
@@ -202,8 +199,6 @@ export const PlagiarismPolicy = () => {
                 <li>• Use quotation marks for direct quotes and provide page numbers</li>
                 <li>• Paraphrase properly by completely rewriting ideas in your own words, not just changing a few words</li>
                 <li>• Keep detailed notes of sources during your research</li>
-                <li>• Check your work with plagiarism detection software before submission</li>
-                <li>• Ensure similarity index is below 15% (excluding references and methodology sections)</li>
                 <li>• Disclose any previous publications or related manuscripts</li>
                 <li>• Obtain permission for reusing copyrighted materials</li>
                 <li>• Clearly indicate when using AI assistance in writing</li>
