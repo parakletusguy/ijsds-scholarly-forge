@@ -52,12 +52,12 @@ export const PreservationPolicy = () => {
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <p className="text-sm font-medium text-foreground mb-1">Archive Link (Google Drive):</p>
                   <a 
-                    href="https://drive.google.com/" 
+                    href="https://drive.google.com/drive/folders/18XbeNwgTpRgk72CLx2eTpTArpg5qAbxd?usp=sharing" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline break-all"
                   >
-                    https://drive.google.com/
+                    Internet Archive for articles
                   </a>
                 </div>
               </div>
