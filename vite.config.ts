@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+// import react from "@vitejs/plugin-react-swc"; // <--- REMOVE
+import react from "@vitejs/plugin-react"; // <--- ADD
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import macrosPlugin from "vite-plugin-babel-macros"
+// import macrosPlugin from "vite-plugin-babel-macros" // <-- 1. REMOVE THIS
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -11,8 +12,20 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
-    macrosPlugin(),
+    // react({ // <--- REMOVE OLD CONFIG
+    //   plugins: [
+    //     ['@swc/plugin-styled-components', {}]
+    //   ]
+    // }),
+    
+    // 2. CONFIGURE react() TO USE THE MACRO PLUGIN
+    react({
+      babel: {
+        plugins: ["babel-plugin-macros"],
+      },
+    }),
+
+    // macrosPlugin(), // <-- 1. REMOVE THIS
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -21,7 +34,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-   define: {
-    'process.env': {}
+  define: {
+    'process.env': {},
+    'process.version': '""' // <-- ADD THIS LINE
   }
 }));
