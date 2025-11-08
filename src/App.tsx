@@ -47,6 +47,7 @@ import { PartnersAdmin } from "./components/partners/PartnersAdmin";
 import { ReviewerDetail } from "./pages/reviewersDetails";
 import OpenAccessPage from "./pages/openAccessPage";
 import { PlagiarismPolicy } from "./pages/PlagiarismPolicy";
+import { PreservationPolicy } from "./pages/PreservationPolicy";
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ const App = () => (
               <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
               <Route path="/openAccess" element={<PageLayout><OpenAccessPage /></PageLayout>} />
               <Route path="/plagiarism-policy" element={<PageLayout><PlagiarismPolicy /></PageLayout>} />
+              <Route path="/preservation-policy" element={<PageLayout><PreservationPolicy /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>

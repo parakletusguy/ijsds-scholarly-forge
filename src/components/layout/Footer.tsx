@@ -23,6 +23,7 @@ export const Footer = () => {
               <li><a href="/submission-guidelines" className="hover:text-foreground transition-colors">Submission Guidelines</a></li>
               <li><a href="/peer-review" className="hover:text-foreground transition-colors">Peer Review Process</a></li>
               <li><a href="/plagiarism-policy" className="hover:text-foreground transition-colors">Plagiarism Policy</a></li>
+              <li><a href="/preservation-policy" className="hover:text-foreground transition-colors">Preservation & Archiving</a></li>
               <li><a href="/copyright" className="hover:text-foreground transition-colors">Copyright Notice</a></li>
             </ul>
           </div>
