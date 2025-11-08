@@ -57,7 +57,7 @@ export const PreservationPolicy = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline break-all"
                   >
-                    Internet Archive for articles
+                    Internet Archive for Journals
                   </a>
                 </div>
               </div>
