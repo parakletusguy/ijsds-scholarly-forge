@@ -31,33 +31,33 @@ export const PreservationPolicy = () => {
           </CardContent>
         </Card>
 
-        {/* Internet Archive */}
+        {/* Internet Archive - Google Drive */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Database className="h-5 w-5 text-primary" />
-              <CardTitle>Internet Archive</CardTitle>
+              <CardTitle>Internet Archive - Google Drive</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              IJSDS is committed to long-term preservation through the Internet Archive, a non-profit digital library providing permanent access to digital materials.
+              IJSDS is committed to long-term preservation through internet archiving using Google Drive, providing secure and permanent access to all published scholarly content.
             </p>
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Where to Find Preservation Information</h4>
                 <p className="text-sm text-muted-foreground mb-2">
-                  All preservation and archiving information for the International Journal of Social Work and Development Studies can be accessed through:
+                  All preservation and archiving information for the International Journal of Social Work and Development Studies can be accessed through our Google Drive archive:
                 </p>
                 <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-foreground mb-1">Internet Archive Link:</p>
+                  <p className="text-sm font-medium text-foreground mb-1">Archive Link (Google Drive):</p>
                   <a 
-                    href="https://archive.org/" 
+                    href="https://drive.google.com/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline break-all"
                   >
-                    https://archive.org/
+                    https://drive.google.com/
                   </a>
                 </div>
               </div>
@@ -65,14 +65,14 @@ export const PreservationPolicy = () => {
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Archival Policy</h4>
                 <p className="text-sm text-muted-foreground">
-                  Published articles are archived in the Internet Archive to ensure permanent public access. The Internet Archive maintains multiple copies of archived content in geographically distributed data centers, providing robust protection against data loss.
+                  Published articles are archived using Google Drive as our internet archiving solution to ensure permanent public access. Google Drive provides enterprise-grade security, redundancy, and global accessibility, with automatic backups and version control for all archived content.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Access & Retrieval</h4>
                 <p className="text-sm text-muted-foreground">
-                  Archived content remains freely accessible to the public indefinitely, even in the event of journal discontinuation or platform changes. The Internet Archive's Wayback Machine enables retrieval of historical versions of published articles.
+                  Archived content remains freely accessible to the public indefinitely through our Google Drive repository, even in the event of journal discontinuation or platform changes. All published articles are preserved in multiple formats with full metadata for easy discovery and citation.
                 </p>
               </div>
             </div>
