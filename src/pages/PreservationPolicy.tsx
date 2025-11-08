@@ -31,34 +31,48 @@ export const PreservationPolicy = () => {
           </CardContent>
         </Card>
 
-        {/* Archiving Infrastructure */}
+        {/* Internet Archive */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Database className="h-5 w-5 text-primary" />
-              <CardTitle>Archiving Infrastructure</CardTitle>
+              <CardTitle>Internet Archive</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              IJSDS is committed to long-term preservation through the Internet Archive, a non-profit digital library providing permanent access to digital materials.
+            </p>
             <div className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Primary Repository</h4>
-                <p className="text-sm text-muted-foreground">
-                  All published content is stored in our primary digital repository with multiple backup systems, ensuring data redundancy and protection against loss.
+                <h4 className="font-semibold text-foreground mb-2">Where to Find Preservation Information</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  All preservation and archiving information for the International Journal of Social Work and Development Studies can be accessed through:
                 </p>
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-foreground mb-1">Internet Archive Link:</p>
+                  <a 
+                    href="https://archive.org/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline break-all"
+                  >
+                    https://archive.org/
+                  </a>
+                </div>
               </div>
               
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Distributed Archiving</h4>
+                <h4 className="font-semibold text-foreground mb-2">Archival Policy</h4>
                 <p className="text-sm text-muted-foreground">
-                  Published articles are distributed across multiple geographic locations to ensure preservation in the face of natural disasters, institutional changes, or technical failures.
+                  Published articles are archived in the Internet Archive to ensure permanent public access. The Internet Archive maintains multiple copies of archived content in geographically distributed data centers, providing robust protection against data loss.
                 </p>
               </div>
 
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Format Migration</h4>
+                <h4 className="font-semibold text-foreground mb-2">Access & Retrieval</h4>
                 <p className="text-sm text-muted-foreground">
-                  We actively monitor technological developments and perform regular format migrations to ensure content remains accessible as file formats and technologies evolve.
+                  Archived content remains freely accessible to the public indefinitely, even in the event of journal discontinuation or platform changes. The Internet Archive's Wayback Machine enables retrieval of historical versions of published articles.
                 </p>
               </div>
             </div>
