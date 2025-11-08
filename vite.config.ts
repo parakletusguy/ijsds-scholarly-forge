@@ -11,11 +11,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react({
-      plugins: [
-        ['@swc/plugin-styled-components', {}]
-      ]
-    }),
+    react(),
     macrosPlugin(),
     mode === 'development' &&
     componentTagger(),
