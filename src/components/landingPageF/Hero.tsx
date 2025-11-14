@@ -44,9 +44,10 @@ export const Hero = () => {
         <div className=" h-full flex flex-col items-center justify-center backdrop-blur-[4px] p-4 lg:p-8">
           <img src="" alt="" />
           <div className="w-full sm:w-11/12 md:w-3/4 lg:w-3/5 xl:w-[80%] text-center px-4">
-            <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold">
-              International Journal For Social Work and Development Studies
-            </p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold leading-tight">
+              <span className="block mb-2">IJSDS</span>
+              <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl">International Journal On Social Work and Development Studies</span>
+            </h1>
             <p className="text-sm sm:text-base text-white mt-4">
               "Empowering Communities through Research and Practice" - A peer-reviewed journal dedicated to advancing knowledge and practice in social work and development studies.
             </p>
