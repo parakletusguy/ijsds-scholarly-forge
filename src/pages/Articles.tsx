@@ -9,6 +9,7 @@ import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PaperDownload } from '@/components/papers/PaperDownload';
+import { ArticleStructuredData } from '@/components/seo/ArticleStructuredData';
 
 interface Article {
   id: string;
@@ -159,6 +160,7 @@ export const Articles = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ArticleStructuredData articles={filteredArticles} />
       < div className="relative py-3">
                 <Button 
                 variant="outline" 
