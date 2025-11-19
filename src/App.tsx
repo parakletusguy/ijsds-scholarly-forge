@@ -48,6 +48,8 @@ import { ReviewerDetail } from "./pages/reviewersDetails";
 import OpenAccessPage from "./pages/openAccessPage";
 import { PlagiarismPolicy } from "./pages/PlagiarismPolicy";
 import { PreservationPolicy } from "./pages/PreservationPolicy";
+import Archive from "./pages/Archive";
+import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
 const queryClient = new QueryClient();
@@ -78,10 +80,11 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <div className="font-Roboto bg-[#ffefcc]">
-            <BrowserRouter>
+          <HelmetProvider>
+            <Toaster />
+            <Sonner />
+            <div className="font-Roboto bg-[#ffefcc]">
+              <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index/>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
@@ -121,11 +124,13 @@ const App = () => (
               <Route path="/openAccess" element={<PageLayout><OpenAccessPage /></PageLayout>} />
               <Route path="/plagiarism-policy" element={<PageLayout><PlagiarismPolicy /></PageLayout>} />
               <Route path="/preservation-policy" element={<PageLayout><PreservationPolicy /></PageLayout>} />
+              <Route path="/archive" element={<PageLayout><Archive /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
           </BrowserRouter>
           </div>
+          </HelmetProvider>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

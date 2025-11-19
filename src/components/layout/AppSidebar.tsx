@@ -22,7 +22,8 @@ import {
   Eye,
   Wrench,
   Globe,
-  CheckSquare
+  CheckSquare,
+  Archive
 } from 'lucide-react';
 import icon from "/public/Logo_Black_Edited-removebg-preview.png";
 import {
@@ -98,6 +99,7 @@ export const AppSidebar = () => {
   const mainNavItems = [
     { title: 'Home', url: '/', icon: Home },
     { title: 'Articles', url: '/articles', icon: FileText },
+    { title: 'Archive', url: '/archive', icon: Archive },
     { title: 'Blog', url: '/blog', icon: BookOpen },
     { title: 'Partners', url: '/partners', icon: Users },
     { title: 'About', url: '/about', icon: Info },
