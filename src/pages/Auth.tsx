@@ -25,14 +25,17 @@ export const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-  const [signupfields,setSignupField] = useState({
-    email:false,
-    password: false,
-    fullName:false
+  const [signupfields, setSignupField] = useState({
+    email: null as boolean | null,
+    password: null as boolean | null,
+    fullName: null as boolean | null
   })
-  const [signinfields,setSigninField] = useState({
-    email:false,
-    password: false
+  const [signinfields, setSigninField] = useState({
+    email: null as boolean | null,
+    password: null as boolean | null
+  })
+  const [forgotPasswordFields, setForgotPasswordFields] = useState({
+    email: null as boolean | null
   })
   
   const navigate = useNavigate();
@@ -106,33 +109,24 @@ export const Auth = () => {
       } else {
         const { error } = await signIn(email, password);
         if (error) {
-          toast({
-            title: 'Error',
-            description: error.message,
-            variant: 'destructive',
-          });
-        } else {
-          const { error } = await signIn(email, password);
-          if (error) {
-            if (error.message.includes('Email not confirmed')) {
-              toast({
-                title: 'Email not confirmed',
-                description: 'Please check your email and click the confirmation link before signing in.',
-                variant: 'destructive',
-              });
-            } else {
-              toast({
-                title: 'Error',
-                description: error.message,
-                variant: 'destructive',
-              });
-            }
+          if (error.message.includes('Email not confirmed')) {
+            toast({
+              title: 'Email not confirmed',
+              description: 'Please check your email and click the confirmation link before signing in.',
+              variant: 'destructive',
+            });
           } else {
             toast({
-              title: 'Signed in successfully',
+              title: 'Error',
+              description: error.message,
+              variant: 'destructive',
             });
-            navigate('/');
           }
+        } else {
+          toast({
+            title: 'Signed in successfully',
+          });
+          navigate('/');
         }
       }
     } catch (error) {
@@ -175,21 +169,22 @@ export const Auth = () => {
     }
   };
 
-  const checkField = (mode) : boolean => {
-    if(mode == 'signup'){
-    const {email, password,fullName} = signupfields
-   if(!email) return true  
-   if(!password) return true  
-   if(!fullName) return true  
-   return false
+  const checkField = (mode: string): boolean => {
+    if (mode === 'signup') {
+      const { email, password, fullName } = signupfields;
+      return email !== true || password !== true || fullName !== true;
     }
 
-    if(mode == 'signin'){
-      const {email,password} = signinfields
-        if(!email) return true  
-        if(!password) return true  
-        return false
+    if (mode === 'signin') {
+      const { email, password } = signinfields;
+      return email !== true || password !== true;
     }
+
+    if (mode === 'forgot-password') {
+      return forgotPasswordFields.email !== true;
+    }
+
+    return true;
   }
 
   const validatePassword = (pwd: string, name: string = '') => {
@@ -243,33 +238,26 @@ export const Auth = () => {
       validatePassword(password, value);
     }
   }
-    const authEmailField = (e : React.ChangeEvent<HTMLInputElement>,mode) => {
-    setEmail(e.target.value)
+  const authEmailField = (e: React.ChangeEvent<HTMLInputElement>, mode: string) => {
+    const value = e.target.value;
+    setEmail(value);
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if(emailRegex.test(email)){
-      if(mode == "signup"){
-        setSignupField({
+    const isValid = emailRegex.test(value);
+    
+    if (mode === "signup") {
+      setSignupField({
         ...signupfields,
-        email:true
-      })
-      }else{
-        setSigninField({
+        email: isValid
+      });
+    } else if (mode === "signin") {
+      setSigninField({
         ...signinfields,
-        email:true
-      })
-      }
-    }else{
-      if(mode == "signup"){
-        setSignupField({
-        ...signupfields,
-        email:false
-      })
-      }else{
-        setSigninField({
-        ...signinfields,
-        email:false
-      })
-      }
+        email: isValid
+      });
+    } else if (mode === "forgot-password") {
+      setForgotPasswordFields({
+        email: isValid
+      });
     }
   }
   const authPasswordField = (e : React.ChangeEvent<HTMLInputElement>,mode) => {
@@ -355,7 +343,7 @@ export const Auth = () => {
                       onChange={(e) => authNameField(e)}
                       required
                     />
-                    {!signupfields.fullName ? <p className='text-red-500 text-[10px]'>name should contain only alphabets {signupfields.fullName}</p> : null}
+                    {signupfields.fullName === false && <p className='text-destructive text-[10px]'>Name should contain only alphabets</p>}
                     
                   </div>
                   
@@ -382,7 +370,9 @@ export const Auth = () => {
                   onChange={(e) => authEmailField(e,mode)}
                   required
                 />
-                { mode == "signup" ? !signupfields.email ? <p className='text-red-500 text-[10px]'>Please input a correct Email</p> : null : !signinfields.email?<p className='text-red-500 text-[10px]'>Please input a correct Email</p>: null }
+                {mode === "signup" && signupfields.email === false && <p className='text-destructive text-[10px]'>Please input a valid email</p>}
+                {mode === "signin" && signinfields.email === false && <p className='text-destructive text-[10px]'>Please input a valid email</p>}
+                {mode === "forgot-password" && forgotPasswordFields.email === false && <p className='text-destructive text-[10px]'>Please input a valid email</p>}
 
               </div>
               
@@ -419,8 +409,8 @@ export const Auth = () => {
                       ))}
                     </div>
                   )}
-                  {mode === "signin" && !signinfields.password && (
-                    <p className='text-red-500 text-[10px]'>Password should be at least 9 characters</p>
+                  {mode === "signin" && signinfields.password === false && (
+                    <p className='text-destructive text-[10px]'>Password should be at least 9 characters</p>
                   )}
                 </div>
               )}
