@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getSubmission } from '@/lib/submissionService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,17 +22,18 @@ interface SubmissionDetails {
   status: string;
   submitted_at: string;
   submitter_id: string;
-  articles: {
-    id,
+  article_id: string;
+  article: {
+    id: string;
     title: string;
     abstract: string;
     subject_area: string;
     authors: any;
     manuscript_file_url: string | null;
-    vetting_fee : boolean,
-    Processing_fee : boolean
+    vetting_fee: boolean;
+    processing_fee: boolean;
   };
-  profiles: {
+  submitter: {
     full_name: string;
     email: string;
   };
@@ -40,15 +41,14 @@ interface SubmissionDetails {
 
 export const SubmissionDetail = () => {
   const { submissionId } = useParams();
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [open,setopen] = useState(false)
   const [vet,setvet] = useState(false)
   const [processing,setprocessing] = useState(false)
-  const [isEditor, setIsEditor] = useState(false);
-
+  const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -58,57 +58,13 @@ export const SubmissionDetail = () => {
 
     if (user && submissionId) {
       fetchSubmissionDetails();
-      checkEditorStatus();
     }
   }, [user, loading, submissionId, navigate]);
 
-  const checkEditorStatus = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('is_editor')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      setIsEditor(data?.is_editor || false);
-    } catch (error) {
-      console.error('Error checking editor status:', error);
-      setIsEditor(false);
-    }
-  };
-
   const fetchSubmissionDetails = async () => {
     try {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select(`
-          id,
-          status,
-          submitted_at,
-          submitter_id,
-          articles (
-            id,
-            title,
-            abstract,
-            subject_area,
-            authors,
-            manuscript_file_url,
-            vetting_fee,
-            Processing_fee
-          ),
-          profiles (
-            full_name,
-            email
-          )
-        `)
-        .eq('id', submissionId)
-        .single();
-
-      if (error) throw error;
-      setSubmission(data);
+      const data = await getSubmission(submissionId!);
+      setSubmission(data as any);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -141,10 +97,10 @@ export const SubmissionDetail = () => {
     let userData = null
     let userDataPro = null
    {submission ?  userData = {
-      email:submission.profiles.email,
+      email:submission.submitter.email,
       amount: 512500,
       metadata:{
-        name:submission.profiles.full_name
+        name:submission.submitter.full_name
       },
       onSuccess: (response) => onSuccess(response,"vetting",512500),
       onClose:() => {    toast({
@@ -155,10 +111,10 @@ export const SubmissionDetail = () => {
     } : null}
 
        {submission ?  userDataPro = {
-      email:submission.profiles.email,
+      email:submission.submitter.email,
       amount:2050000,
       metadata:{
-        name:submission.profiles.full_name
+        name:submission.submitter.full_name
       },
       onSuccess: (response) => onSuccess(response,"processing",2050000),
       onClose: async () => {    
@@ -187,7 +143,7 @@ export const SubmissionDetail = () => {
         const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
           method:"POST",
           headers:{ 'Content-Type':'application/json'},
-          body:JSON.stringify({reference:transactionReference,amount:amount,articleId:submission.articles.id,type:type})
+          body:JSON.stringify({reference:transactionReference,amount:amount,articleId:submission.article.id,type:type})
         }) 
         const {success,message,data} = await confirm.json()
         console.log({success,message,data})
@@ -198,7 +154,7 @@ export const SubmissionDetail = () => {
 
         if(type == "vetting"){
           const blob = await ReceiptDown({
-        name:submission.profiles.full_name,
+        name:submission.submitter.full_name,
         amount:"5125",
         type:"vetting fee",
         reference:transactionReference
@@ -206,11 +162,11 @@ export const SubmissionDetail = () => {
 
       const url = await uploadPdf(blob)
         await sendEmailNotification({
-        to: submission.profiles.email,
+        to: submission.submitter.email,
         subject: 'payment',
         htmlContent: `
          <h2>Payment Receipt</h2>
-        <p>Dear ${submission.profiles.full_name || 'user'},</p>
+        <p>Dear ${submission.submitter.full_name || 'user'},</p>
         <p>Your payment of ₦5125 for article vetting has been received.</p>
         <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
         <p>Best regards,<br>Editorial System</p>
@@ -220,7 +176,7 @@ export const SubmissionDetail = () => {
       });
         } else if(type == "processing"){
             const blob = await ReceiptDown({
-          name:submission.profiles.full_name,
+          name:submission.submitter.full_name,
           amount:"20,500",
           type:"processing fee",
         reference:transactionReference
@@ -228,11 +184,11 @@ export const SubmissionDetail = () => {
 
           const url = await uploadPdf(blob)
           await sendEmailNotification({
-          to: submission.profiles.email,
+          to: submission.submitter.email,
           subject: 'payment',
           htmlContent: `
           <h2>Payment Receipt</h2>
-          <p>Dear ${submission.profiles.full_name || 'user'},</p>
+          <p>Dear ${submission.submitter.full_name || 'user'},</p>
           <p>Your payment of ₦20,500 for article processing has been received.</p>
           <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
           <p>Best regards,<br>Editorial System</p>
@@ -249,9 +205,9 @@ export const SubmissionDetail = () => {
           const paymentTypeKey = type === 'vetting' ? 'vetting_fee' : 'processing_fee';
           await notifyPaymentConfirmation(
             submission.submitter_id,
-            submission.profiles.email,
-            submission.profiles.full_name,
-            submission.articles.title,
+            submission.submitter.email,
+            submission.submitter.full_name,
+            submission.article.title,
             paymentTypeKey as 'vetting_fee' | 'processing_fee',
             amount
           );
@@ -344,10 +300,10 @@ export const SubmissionDetail = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-2xl font-semibold mb-2">{submission.articles.title}</h3>
-                  {submission.articles.subject_area && (
+                  <h3 className="text-2xl font-semibold mb-2">{submission.article.title}</h3>
+                  {submission.article.subject_area && (
                     <Badge variant="secondary" className="mb-4">
-                      {submission.articles.subject_area}
+                      {submission.article.subject_area}
                     </Badge>
                   )}
                 </div>
@@ -355,15 +311,15 @@ export const SubmissionDetail = () => {
                 <div>
                   <h4 className="font-medium text-lg mb-2">Abstract</h4>
                   <p className="text-muted-foreground leading-relaxed">
-                    {submission.articles.abstract}
+                    {submission.article.abstract}
                   </p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-lg mb-2">Authors</h4>
-                  {submission.articles.authors && Array.isArray(submission.articles.authors) ? (
+                  {submission.article.authors && Array.isArray(submission.article.authors) ? (
                     <div className="space-y-2">
-                      {submission.articles.authors.map((author: any, index: number) => (
+                      {submission.article.authors.map((author: any, index: number) => (
                         <div key={index} className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span>{author.name}</span>
@@ -380,12 +336,12 @@ export const SubmissionDetail = () => {
                   )}
                 </div>
 
-                {submission.articles.manuscript_file_url && (
+                {submission.article.manuscript_file_url && (
                   <div>
                     <h4 className="font-medium text-lg mb-2">Manuscript</h4>
                     <Button 
                       variant="outline"
-                      onClick={() => window.open(submission.articles.manuscript_file_url, '_blank')}
+                      onClick={() => window.open(submission.article.manuscript_file_url, '_blank')}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Manuscript
@@ -398,17 +354,17 @@ export const SubmissionDetail = () => {
             {/* File Management */}
             <SubmissionFileManager
               submissionId={submissionId!}
-              articleId={submission.articles.id}
+              articleId={submission.article.id}
               isAuthor={user?.id === submission.submitter_id}
-              vettingFee={submission.articles.vetting_fee}
-              processingFee={submission.articles.Processing_fee}
+              vettingFee={submission.article.vetting_fee}
+              processingFee={submission.article.processing_fee}
             />
 
             {/* Editor File Management */}
             {isEditor && (
               <EditorFileManager
                 submissionId={submissionId!}
-                articleId={submission.articles.id}
+                articleId={submission.article.id}
               />
             )}
           </div>
@@ -434,10 +390,10 @@ export const SubmissionDetail = () => {
                   <div>
                     <p className="text-sm font-medium">Submitter</p>
                     <p className="text-sm text-muted-foreground">
-                      {submission.profiles.full_name}
+                      {submission.submitter.full_name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {submission.profiles.email}
+                      {submission.submitter.email}
                     </p>
                   </div>
                 </div>

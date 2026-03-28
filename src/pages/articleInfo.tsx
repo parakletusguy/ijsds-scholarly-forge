@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getArticle } from '@/lib/articleService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,18 +42,9 @@ export const ArticleInfo = () => {
   }, [ArticleId, navigate]);
 
   const fetchSubmissionDetails = async () => {
-    console.log(ArticleId)
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(`
-            *
-        `)
-        .eq('id', ArticleId)
-        .single();
-      if (error) throw error;
+      const data = await getArticle(ArticleId!);
       setArticle(data);
-      setLoadingData(false)
     } catch (error: any) {
       toast({
         title: 'Error',

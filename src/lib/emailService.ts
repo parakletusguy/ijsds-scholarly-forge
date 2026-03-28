@@ -1,37 +1,31 @@
+import { sendNotification } from './notificationApiService';
+import { getProfiles } from './profileService';
 
-import { supabase } from '@/integrations/supabase/client';
-
-export interface EmailNotificationData {
+// ---------------------------------------------------------------------------
+// Low-level send helper — wraps POST /api/notifications/send
+// ---------------------------------------------------------------------------
+export const sendEmailNotification = async (data: {
   to: string;
   subject: string;
   htmlContent: string;
   type?: string;
   userId?: string;
   submissionId?: string;
-  reviewId?: string;
-}
-
-export const sendEmailNotification = async (data: EmailNotificationData) => {
+}) => {
   try {
-    const { error } = await supabase.functions.invoke('send-email-notification', {
-      body: data
+    await sendNotification({
+      template: data.type || 'user_welcome',
+      to: data.to,
+      recipient_id: data.userId || '',
+      submission_id: data.submissionId,
+      data: {
+        subject: data.subject,
+        htmlContent: data.htmlContent,
+      },
+      in_app: !!data.userId,
+      in_app_title: data.subject,
+      in_app_message: data.htmlContent.replace(/<[^>]*>/g, '').substring(0, 200),
     });
-
-    if (error) {
-      console.error('Error sending email:', error);
-      throw error;
-    }
-
-    // If userId is provided, also create an in-app notification
-    if (data.userId) {
-      await supabase.from('notifications').insert({
-        user_id: data.userId,
-        title: data.subject,
-        message: data.htmlContent ? data.htmlContent.replace(/<[^>]*>/g, '').substring(0, 200) + '...' : 'You have a new email notification',
-        type: 'info'
-      });
-    }
-
     return { success: true };
   } catch (error) {
     console.error('Failed to send email notification:', error);
@@ -39,29 +33,20 @@ export const sendEmailNotification = async (data: EmailNotificationData) => {
   }
 };
 
-// Welcome email for new users
+// ---------------------------------------------------------------------------
+// Welcome emails
+// ---------------------------------------------------------------------------
 export const sendWelcomeEmail = async (userId: string, authorName: string, email: string) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Welcome to IJSDS',
-        message: 'Welcome to the International Journal of Social Work and Development Studies platform!',
-        type: 'info',
-        emailNotification: true,
-        emailTemplate: 'user_welcome',
-        emailData: {
-          authorName,
-          platformUrl: window.location.origin
-        }
-      }
+    await sendNotification({
+      template: 'user_welcome',
+      to: email,
+      recipient_id: userId,
+      data: { authorName, platformUrl: window.location.origin },
+      in_app: true,
+      in_app_title: 'Welcome to IJSDS',
+      in_app_message: 'Welcome to the International Journal of Social Work and Development Studies platform!',
     });
-
-    if (error) {
-      console.error('Error sending welcome email:', error);
-      throw error;
-    }
-
     return { success: true };
   } catch (error) {
     console.error('Failed to send welcome email:', error);
@@ -69,29 +54,17 @@ export const sendWelcomeEmail = async (userId: string, authorName: string, email
   }
 };
 
-// Author-specific welcome email
 export const sendAuthorWelcomeEmail = async (userId: string, authorName: string, email: string) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'payment receipt',
-        message: 'Your complete guide to publishing with IJSDS',
-        type: 'info',
-        emailNotification: true,
-        emailTemplate: 'author_welcome',
-        emailData: {
-          authorName,
-          platformUrl: window.location.origin
-        }
-      }
+    await sendNotification({
+      template: 'author_welcome',
+      to: email,
+      recipient_id: userId,
+      data: { authorName, platformUrl: window.location.origin },
+      in_app: true,
+      in_app_title: 'Welcome to IJSDS',
+      in_app_message: 'Your complete guide to publishing with IJSDS',
     });
-
-    if (error) {
-      console.error('Error sending author welcome email:', error);
-      throw error;
-    }
-
     return { success: true };
   } catch (error) {
     console.error('Failed to send author welcome email:', error);
@@ -99,30 +72,20 @@ export const sendAuthorWelcomeEmail = async (userId: string, authorName: string,
   }
 };
 
-// Fee information email
+// ---------------------------------------------------------------------------
+// Submission notifications
+// ---------------------------------------------------------------------------
 export const sendFeeInformationEmail = async (userId: string, authorName: string, title: string) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Publication Fees Information',
-        message: 'Information about publication fees for your submission',
-        type: 'info',
-        emailNotification: true,
-        emailTemplate: 'fee_information',
-        emailData: {
-          authorName,
-          title,
-          platformUrl: window.location.origin
-        }
-      }
+    await sendNotification({
+      template: 'fee_information',
+      to: '',
+      recipient_id: userId,
+      data: { authorName, title, platformUrl: window.location.origin },
+      in_app: true,
+      in_app_title: 'Publication Fees Information',
+      in_app_message: 'Information about publication fees for your submission',
     });
-
-    if (error) {
-      console.error('Error sending fee information email:', error);
-      throw error;
-    }
-
     return { success: true };
   } catch (error) {
     console.error('Failed to send fee information email:', error);
@@ -130,211 +93,41 @@ export const sendFeeInformationEmail = async (userId: string, authorName: string
   }
 };
 
-export const SendRecieptMail = async (userId: string, authorName: string, title: string, receiptLink :string, type:string) => {
+export const SendRecieptMail = async (
+  userId: string,
+  authorName: string,
+  title: string,
+  receiptLink: string,
+  type: string,
+) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Receipt',
-        message: 'Information about publication fees for your submission',
-        // type: 'info',
-        emailNotification: true,
-        emailTemplate: 'sendReceipt',
-        emailData: {
-          authorName,
-          title,
-          platformUrl: window.location.origin,
-          receiptLink,
-          type
-        }
-      }
+    await sendNotification({
+      template: 'send_receipt',
+      to: '',
+      recipient_id: userId,
+      data: { authorName, title, platformUrl: window.location.origin, receiptLink, type },
+      in_app: true,
+      in_app_title: 'Receipt',
+      in_app_message: 'Information about publication fees for your submission',
     });
-
-    if (error) {
-      console.error('Error sending fee information email:', error);
-      throw error;
-    }
-
     return { success: true };
   } catch (error) {
-    console.error('Failed to send fee information email:', error);
+    console.error('Failed to send receipt email:', error);
     throw error;
   }
 };
 
-export const generateReviewInvitationEmail = (reviewerName: string, submissionTitle: string, deadline: string) => {
-  return `
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2>Review Invitation</h2>
-        <p>Dear ${reviewerName},</p>
-        
-        <p>You have been invited to review a manuscript submission:</p>
-        
-        <div style="background-color: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #007cba;">
-          <strong>Title:</strong> ${submissionTitle}
-        </div>
-        
-        <p><strong>Review Deadline:</strong> ${deadline}</p>
-        
-        <p>Please log into the system to accept or decline this review invitation and access the manuscript.</p>
-        <a href='https://ijsds.org/auth/:signin' >Login</a>
-        
-        <p>Thank you for your contribution to the peer review process.</p>
-        
-        <p>Best regards,<br>
-        Editorial Team</p>
-      </body>
-    </html>
-  `;
-};
-
-export const generateStatusChangeEmail = (authorName: string, submissionTitle: string, newStatus: string, message?: string) => {
-  const statusMessages = {
-    'under_review': 'Your submission is now under peer review.',
-    'revision_requested': 'Revisions have been requested for your submission.',
-    'accepted': 'Congratulations! Your submission has been accepted for publication.',
-    'rejected': 'We regret to inform you that your submission has been declined.',
-  };
-
-  return `
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2>Submission Status Update</h2>
-        <p>Dear ${authorName},</p>
-        
-        <p>The status of your manuscript submission has been updated:</p>
-        
-        <div style="background-color: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #007cba;">
-          <strong>Title:</strong> ${submissionTitle}<br>
-          <strong>New Status:</strong> ${newStatus.replace('_', ' ').toUpperCase()}
-        </div>
-        
-        <p>${statusMessages[newStatus as keyof typeof statusMessages] || 'Your submission status has been updated.'}</p>
-        
-        ${message ? `<div style="background-color: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ffc107;">
-          <strong>Additional Information:</strong><br>
-          ${message}
-        </div>` : ''}
-        
-        <p>You can view the full details by logging into your account.</p>
-        
-        <p>Best regards,<br>
-        Editorial Team</p>
-      </body>
-    </html>
-  `;
-};
-
-export const generateDeadlineReminderEmail = (reviewerName: string, submissionTitle: string, deadline: string, daysRemaining: number) => {
-  return `
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2>Review Deadline Reminder</h2>
-        <p>Dear ${reviewerName},</p>
-        
-        <p>This is a reminder that you have a pending review with an upcoming deadline:</p>
-        
-        <div style="background-color: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ffc107;">
-          <strong>Title:</strong> ${submissionTitle}<br>
-          <strong>Deadline:</strong> ${deadline}<br>
-          <strong>Days Remaining:</strong> ${daysRemaining}
-        </div>
-        
-        <p>Please complete your review as soon as possible. If you need an extension, please contact the editorial team immediately.</p>
-        
-        <p>Thank you for your contribution to the peer review process.</p>
-        
-        <p>Best regards,<br>
-        Editorial Team</p>
-      </body>
-    </html>
-  `;
-};
-
-// Function to notify all admins about main actions
-export const notifyAdmins = async (title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
-  try {
-    // Get all admin users
-    const { data: admins, error } = await supabase
-      .from('profiles')
-      .select('id, email, full_name')
-      .eq('is_admin', true);
-
-    if (error) throw error;
-
-    if (!admins || admins.length === 0) {
-      console.log('No admin users found');
-      return;
-    }
-
-    // Send email and in-app notifications to all admins
-    for (const admin of admins) {
-      // Send email notification
-      await sendEmailNotification({
-        to: admin.email,
-        subject: title,
-        htmlContent: `
-          <h2>${title}</h2>
-          <p>Dear ${admin.full_name || 'Admin'},</p>
-          <p>${message}</p>
-          <br>
-          <p>Best regards,<br>IJSDS Editorial System</p>
-        `,
-        userId: admin.id
-      });
-
-      // In-app notification is already handled by sendEmailNotification function
-    }
-  } catch (error) {
-    console.error('Error notifying admins:', error);
-  }
-};
-
-export const notifyAdminsSubmission = async (submissionTitle: string, authorName: string) => {
-  await notifyAdmins(
-    'New Article Submission',
-    `A new article "${submissionTitle}" has been submitted by ${authorName}. Please review and assign reviewers.`,
-    'info'
-  );
-};
-
-export const notifyAdminsRevisionComplete = async (submissionTitle: string, authorName: string) => {
-  await notifyAdmins(
-    'Revision Submitted',
-    `${authorName} has submitted revised version of "${submissionTitle}". Please review the revision.`,
-    'info'
-  );
-};
-
-export const notifyAdminsAcceptance = async (submissionTitle: string, authorName: string) => {
-  await notifyAdmins(
-    'Article Accepted',
-    `The article "${submissionTitle}" by ${authorName} has been accepted and is ready for production workflow.`,
-    'success'
-  );
-};
-
-// User notification functions
 export const notifyUserSubmissionReceived = async (userId: string, authorName: string, submissionTitle: string) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Submission Received',
-        message: `Your article "${submissionTitle}" has been successfully submitted for review.`,
-        type: 'success',
-        emailNotification: true,
-        emailTemplate: 'submission_received',
-        emailData: {
-          authorName,
-          submissionTitle,
-          platformUrl: window.location.origin
-        }
-      }
+    await sendNotification({
+      template: 'submission_received',
+      to: '',
+      recipient_id: userId,
+      data: { authorName, submissionTitle, platformUrl: window.location.origin },
+      in_app: true,
+      in_app_title: 'Submission Received',
+      in_app_message: `Your article "${submissionTitle}" has been successfully submitted for review.`,
     });
-
-    if (error) throw error;
   } catch (error) {
     console.error('Error notifying user of submission:', error);
   }
@@ -342,124 +135,123 @@ export const notifyUserSubmissionReceived = async (userId: string, authorName: s
 
 export const notifyUserApprovalForProcessing = async (userId: string, authorName: string, submissionTitle: string) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Article Approved for Processing',
-        message: `Great news! Your article "${submissionTitle}" has been approved and is now moving to the production stage.`,
-        type: 'success',
-        emailNotification: true,
-        emailTemplate: 'approval_processing',
-        emailData: {
-          authorName,
-          submissionTitle,
-          platformUrl: window.location.origin
-        }
-      }
+    await sendNotification({
+      template: 'decision_made',
+      to: '',
+      recipient_id: userId,
+      data: { authorName, submissionTitle, platformUrl: window.location.origin },
+      in_app: true,
+      in_app_title: 'Article Approved for Processing',
+      in_app_message: `Your article "${submissionTitle}" has been approved and is moving to production.`,
     });
-
-    if (error) throw error;
   } catch (error) {
     console.error('Error notifying user of approval:', error);
   }
 };
 
-export const notifyUserArticleProcessed = async (userId: string, authorName: string, submissionTitle: string) => {
-  try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Article Processed',
-        message: `Your article "${submissionTitle}" has been processed and is ready for publication.`,
-        type: 'success',
-        emailNotification: true,
-        emailTemplate: 'article_processed',
-        emailData: {
-          authorName,
-          submissionTitle,
-          platformUrl: window.location.origin
-        }
-      }
-    });
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error notifying user of processing:', error);
-  }
-};
-
 export const notifyUserArticlePublished = async (userId: string, authorName: string, submissionTitle: string) => {
   try {
-    const { error } = await supabase.functions.invoke('notification-service', {
-      body: {
-        userId,
-        title: 'Article Published!',
-        message: `Congratulations! Your article "${submissionTitle}" has been published and is now available online.`,
-        type: 'success',
-        emailNotification: true,
-        emailTemplate: 'article_published',
-        emailData: {
-          authorName,
-          submissionTitle,
-          platformUrl: window.location.origin
-        }
-      }
+    await sendNotification({
+      template: 'article_published',
+      to: '',
+      recipient_id: userId,
+      data: { authorName, submissionTitle, platformUrl: window.location.origin },
+      in_app: true,
+      in_app_title: 'Article Published!',
+      in_app_message: `Congratulations! Your article "${submissionTitle}" has been published.`,
     });
-
-    if (error) throw error;
   } catch (error) {
     console.error('Error notifying user of publication:', error);
   }
 };
 
-// Enhanced admin notification for submissions
-export const notifyAdminsNewSubmission = async (submissionTitle: string, authorName: string, authorEmail: string, totalSubmissions: number) => {
+// ---------------------------------------------------------------------------
+// Admin notifications
+// ---------------------------------------------------------------------------
+export const notifyAdmins = async (title: string, message: string) => {
   try {
-    // Get all admin users
-    const { data: admins, error } = await supabase
-      .from('profiles')
-      .select('id, email, full_name')
-      .eq('is_admin', true);
-
-    if (error) throw error;
-
-    if (!admins || admins.length === 0) {
-      console.log('No admin users found');
-      return;
-    }
-
-    // Send email and in-app notifications to all admins
+    const admins = await getProfiles({ role: 'admin' });
     for (const admin of admins) {
-      // Send email notification with detailed submission info
-      await sendEmailNotification({
+      await sendNotification({
+        template: 'user_welcome',
         to: admin.email,
-        subject: 'New Article Submission - Action Required',
-        htmlContent: `
-          <h2>New Article Submission</h2>
-          <p>Dear ${admin.full_name || 'Admin'},</p>
-          
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #007cba;">Submission Details</h3>
-            <p><strong>Article Title:</strong> ${submissionTitle}</p>
-            <p><strong>Author Name:</strong> ${authorName}</p>
-            <p><strong>Author Email:</strong> ${authorEmail}</p>
-            <p><strong>Submission Time:</strong> ${new Date().toLocaleString()}</p>
-            <p><strong>Total Submissions Today:</strong> ${totalSubmissions}</p>
-          </div>
-          
-          <p>Please review this submission and assign reviewers as appropriate.</p>
-          <p>Access the editorial dashboard to process this submission. <a href="https://ijsds.org/editorial">Editorial Dashboard</a> </p>
-          
-          <br>
-          <p>Best regards,<br>IJSDS Editorial System</p>
-        `,
-        userId: admin.id,
-        type: 'submission'
+        recipient_id: admin.id,
+        data: { title, message },
+        in_app: true,
+        in_app_title: title,
+        in_app_message: message,
       });
-
-      // In-app notification is already handled by sendEmailNotification function
     }
   } catch (error) {
-    console.error('Error notifying admins of new submission:', error);
+    console.error('Error notifying admins:', error);
   }
 };
+
+export const notifyAdminsSubmission = async (submissionTitle: string, authorName: string) =>
+  notifyAdmins('New Article Submission', `A new article "${submissionTitle}" has been submitted by ${authorName}.`);
+
+export const notifyAdminsRevisionComplete = async (submissionTitle: string, authorName: string) =>
+  notifyAdmins('Revision Submitted', `${authorName} has submitted a revised version of "${submissionTitle}".`);
+
+export const notifyAdminsAcceptance = async (submissionTitle: string, authorName: string) =>
+  notifyAdmins('Article Accepted', `The article "${submissionTitle}" by ${authorName} has been accepted.`);
+
+export const notifyAdminsNewSubmission = async (
+  submissionTitle: string,
+  authorName: string,
+  authorEmail: string,
+  totalSubmissions: number,
+) =>
+  notifyAdmins(
+    'New Article Submission - Action Required',
+    `Title: "${submissionTitle}" | Author: ${authorName} (${authorEmail}) | Total submissions: ${totalSubmissions}`,
+  );
+
+// ---------------------------------------------------------------------------
+// Email body generators (kept as-is — used by dialog components)
+// ---------------------------------------------------------------------------
+export const generateReviewInvitationEmail = (reviewerName: string, submissionTitle: string, deadline: string) => `
+<html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#333">
+<h2>Review Invitation</h2>
+<p>Dear ${reviewerName},</p>
+<p>You have been invited to review a manuscript submission:</p>
+<div style="background:#f5f5f5;padding:15px;margin:15px 0;border-left:4px solid #007cba"><strong>Title:</strong> ${submissionTitle}</div>
+<p><strong>Review Deadline:</strong> ${deadline}</p>
+<p>Please log in to accept or decline this invitation.</p>
+<a href="https://ijsds.org/auth">Login</a>
+<p>Best regards,<br>Editorial Team</p>
+</body></html>`;
+
+export const generateStatusChangeEmail = (authorName: string, submissionTitle: string, newStatus: string, message?: string) => {
+  const statusMessages: Record<string, string> = {
+    under_review: 'Your submission is now under peer review.',
+    revision_requested: 'Revisions have been requested for your submission.',
+    accepted: 'Congratulations! Your submission has been accepted for publication.',
+    rejected: 'We regret to inform you that your submission has been declined.',
+  };
+  return `
+<html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#333">
+<h2>Submission Status Update</h2>
+<p>Dear ${authorName},</p>
+<div style="background:#f5f5f5;padding:15px;margin:15px 0;border-left:4px solid #007cba">
+<strong>Title:</strong> ${submissionTitle}<br>
+<strong>New Status:</strong> ${newStatus.replace('_', ' ').toUpperCase()}
+</div>
+<p>${statusMessages[newStatus] || 'Your submission status has been updated.'}</p>
+${message ? `<div style="background:#fff3cd;padding:15px;margin:15px 0;border-left:4px solid #ffc107"><strong>Additional Info:</strong><br>${message}</div>` : ''}
+<p>Best regards,<br>Editorial Team</p>
+</body></html>`;
+};
+
+export const generateDeadlineReminderEmail = (reviewerName: string, submissionTitle: string, deadline: string, daysRemaining: number) => `
+<html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#333">
+<h2>Review Deadline Reminder</h2>
+<p>Dear ${reviewerName},</p>
+<div style="background:#fff3cd;padding:15px;margin:15px 0;border-left:4px solid #ffc107">
+<strong>Title:</strong> ${submissionTitle}<br>
+<strong>Deadline:</strong> ${deadline}<br>
+<strong>Days Remaining:</strong> ${daysRemaining}
+</div>
+<p>Please complete your review as soon as possible.</p>
+<p>Best regards,<br>Editorial Team</p>
+</body></html>`;

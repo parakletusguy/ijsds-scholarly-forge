@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getSubmission } from '@/lib/submissionService';
+import { getProfiles } from '@/lib/profileService';
+import { createReview } from '@/lib/reviewService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,13 +17,13 @@ interface Reviewer {
   id: string;
   full_name: string;
   email: string;
-  affiliation: string;
-  bio: string;
+  affiliation?: string | null;
+  bio?: string | null;
 }
 
 interface Submission {
   id: string;
-  articles: {
+  article: {
     title: string;
     abstract: string;
     subject_area: string;
@@ -51,31 +53,12 @@ export const ReviewAssignment = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch submission details
-      const { data: submissionData, error: submissionError } = await supabase
-        .from('submissions')
-        .select(`
-          id,
-          articles (
-            title,
-            abstract,
-            subject_area
-          )
-        `)
-        .eq('id', submissionId)
-        .single();
-
-      if (submissionError) throw submissionError;
-      setSubmission(submissionData);
-
-      // Fetch available reviewers
-      const { data: reviewersData, error: reviewersError } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, affiliation, bio')
-        .eq('is_reviewer', true);
-
-      if (reviewersError) throw reviewersError;
-      setReviewers(reviewersData || []);
+      const [submissionData, reviewersData] = await Promise.all([
+        getSubmission(submissionId!),
+        getProfiles({ is_reviewer: true }),
+      ]);
+      setSubmission(submissionData as unknown as Submission);
+      setReviewers(reviewersData);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -107,17 +90,15 @@ export const ReviewAssignment = () => {
 
     setAssigning(true);
     try {
-      // Create review records for each selected reviewer
-      const reviewInserts = selectedReviewers.map(reviewerId => ({
-        submission_id: submissionId,
-        reviewer_id: reviewerId,
-      }));
+      const defaultDeadline = new Date();
+      defaultDeadline.setDate(defaultDeadline.getDate() + 21);
+      const deadlineDate = defaultDeadline.toISOString().split('T')[0];
 
-      const { error } = await supabase
-        .from('reviews')
-        .insert(reviewInserts);
-
-      if (error) throw error;
+      await Promise.all(
+        selectedReviewers.map(reviewerId =>
+          createReview({ submission_id: submissionId!, reviewer_id: reviewerId, deadline_date: deadlineDate })
+        )
+      );
 
       toast({
         title: 'Success',
@@ -202,16 +183,16 @@ export const ReviewAssignment = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-lg">{submission.articles.title}</h3>
-                  {submission.articles.subject_area && (
+                  <h3 className="font-semibold text-lg">{submission.article.title}</h3>
+                  {submission.article.subject_area && (
                     <Badge variant="secondary" className="mt-2">
-                      {submission.articles.subject_area}
+                      {submission.article.subject_area}
                     </Badge>
                   )}
                 </div>
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">Abstract</h4>
-                  <p className="text-sm">{submission.articles.abstract}</p>
+                  <p className="text-sm">{submission.article.abstract}</p>
                 </div>
               </CardContent>
             </Card>

@@ -1,33 +1,19 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getNotifications, markNotificationRead, markAllNotificationsRead, type AppNotification } from '@/lib/notificationApiService';
 import { useAuth } from './useAuth';
 
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-  created_at: string;
-}
+export type { AppNotification as Notification };
 
 export const useNotifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   const fetchNotifications = async () => {
     if (!user) return;
-    
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNotifications((data || []) as Notification[]);
+      const data = await getNotifications();
+      setNotifications(data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -37,14 +23,8 @@ export const useNotifications = () => {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
-
-      if (error) throw error;
-      
-      setNotifications(prev => 
+      await markNotificationRead(notificationId);
+      setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       );
     } catch (error) {
@@ -54,16 +34,8 @@ export const useNotifications = () => {
 
   const markAllAsRead = async () => {
     if (!user) return;
-    
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user.id)
-        .eq('read', false);
-
-      if (error) throw error;
-      
+      await markAllNotificationsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -79,6 +51,6 @@ export const useNotifications = () => {
     loading,
     markAsRead,
     markAllAsRead,
-    refetch: fetchNotifications
+    refetch: fetchNotifications,
   };
 };

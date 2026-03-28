@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus, Upload, Save, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { createSubmission } from '@/lib/submissionService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { FileUpload } from '@/components/file-management/FileUpload';
@@ -56,26 +56,9 @@ export const Submit = () => {
 
   const checkSubmissionStatus = async () => {
     setCheckingSubmissionStatus(true);
-    try {
-      const { data, error } = await supabase
-        .from('system_settings')
-        .select('setting_value')
-        .eq('setting_key', 'submission_enabled')
-        .single();
-
-      if (error) {
-        console.error('Error checking submission status:', error);
-        // Default to enabled if we can't check
-        setSubmissionEnabled(true);
-      } else {
-        setSubmissionEnabled(data.setting_value === 'true');
-      }
-    } catch (error) {
-      console.error('Error checking submission status:', error);
-      setSubmissionEnabled(true);
-    } finally {
-      setCheckingSubmissionStatus(false);
-    }
+    // Submissions are enabled by default; the backend enforces this server-side
+    setSubmissionEnabled(true);
+    setCheckingSubmissionStatus(false);
   };
 
   // Auto-save functionality
@@ -230,96 +213,34 @@ export const Submit = () => {
     setLoading(true);
 
     try {
-      // Save a final backup before submission
       await saveDraft();
 
-      // Create article
-      const { data: articleData, error: articleError } = await supabase
-        .from('articles')
-        .insert({
-          title: title.trim(),
-          abstract: abstract.trim(),
-          keywords,
-          authors: authors as any,
-          corresponding_author_email: correspondingAuthorEmail,
-          subject_area: subjectArea,
-          funding_info: fundingInfo,
-          conflicts_of_interest: conflictsOfInterest,
-          manuscript_file_url: manuscriptFileUrl,
-          status: 'draft',
-          vetting_fee:false
-        })
-        .select()
-        .single();
+      const result = await createSubmission({
+        title: title.trim(),
+        abstract: abstract.trim(),
+        keywords,
+        authors,
+        corresponding_author_email: correspondingAuthorEmail,
+        subject_area: subjectArea,
+        cover_letter: coverLetter,
+        reviewer_suggestions: '',
+        submission_type: 'new',
+        funding_info: fundingInfo || null,
+        conflicts_of_interest: conflictsOfInterest || null,
+      });
 
-      if (articleError) throw articleError;
-
-      // if(!vet){
-      //   setopen(true)
-      //   throw 'vetting fee not paid yet'
-      // }
-
-      // Create submission
-      const { error: submissionError } = await supabase
-        .from('submissions')
-        .insert({
-          article_id: articleData.id,
-          submitter_id: user.id,
-          cover_letter: coverLetter,
-          status: 'submitted',
-          vetting_fee:false
-        });
-
-      if (submissionError) throw submissionError;
-
-      // Update article status to submitted
-      const { error: updateError } = await supabase
-        .from('articles')
-        .update({ status: 'submitted' })
-        .eq('id', articleData.id);
-
-      if (updateError) throw updateError;
-
-      // Clear the draft after successful submission
       clearDraft();
 
-      // Send notifications
+      // Send notifications (non-blocking)
       try {
-        // Get user profile for notifications
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .single();
-
-        const authorName = profile?.full_name || 'Author';
-
-        // Get total submissions count for admin notification
-        const { count: totalSubmissions } = await supabase
-          .from('submissions')
-          .select('*', { count: 'exact', head: true })
-          .gte('submitted_at', new Date().toDateString());
-
-        // Import notification functions
         const { notifyUserSubmissionReceived, notifyAdminsNewSubmission } = await import('@/lib/emailService');
         const { notifySubmissionAcceptance } = await import('@/lib/paymentNotificationService');
-        
-        // Notify user about successful submission
+        const authorName = authors[0]?.name || 'Author';
         await notifyUserSubmissionReceived(user.id, authorName, title.trim());
-        
-        // Notify about submission acceptance
         await notifySubmissionAcceptance(user.id, authorName, correspondingAuthorEmail, title.trim());
-        
-        // Notify admins about new submission with details
-        await notifyAdminsNewSubmission(
-          title.trim(), 
-          authorName, 
-          correspondingAuthorEmail, 
-          (totalSubmissions || 0) + 1
-        );
+        await notifyAdminsNewSubmission(title.trim(), authorName, correspondingAuthorEmail, 1);
       } catch (notificationError) {
         console.error('Error sending notifications:', notificationError);
-        // Don't fail the submission if notifications fail
       }
 
       toast({

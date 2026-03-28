@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { XCircle } from 'lucide-react';
+import { updateSubmission, getSubmission } from '@/lib/submissionService';
+import { updateArticle } from '@/lib/articleService';
+import { createRejectionMessage } from '@/lib/editorialService';
 
 interface RejectSubmissionDialogProps {
   submissionId: string;
@@ -30,47 +32,19 @@ export const RejectSubmissionDialog = ({ submissionId, onReject }: RejectSubmiss
 
     setLoading(true);
     try {
-      // Get submission to find article_id
-      const { data: submission, error: fetchError } = await supabase
-        .from('submissions')
-        .select('article_id')
-        .eq('id', submissionId)
-        .single();
+      const submission = await getSubmission(submissionId);
 
-      if (fetchError) throw fetchError;
+      await updateSubmission(submissionId, { status: 'rejected' });
 
-      // Update submission status to rejected
-      const { error: submissionError } = await supabase
-        .from('submissions')
-        .update({ status: 'rejected' })
-        .eq('id', submissionId);
-
-      if (submissionError) throw submissionError;
-
-      // Update article status
       if (submission?.article_id) {
-        const { error: articleError } = await supabase
-          .from('articles')
-          .update({ status: 'rejected' })
-          .eq('id', submission.article_id);
-
-        if (articleError) throw articleError;
+        await updateArticle(submission.article_id, { status: 'rejected' });
       }
 
-      // Create rejection message
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error: messageError } = await supabase
-        .from('rejection_messages')
-        .insert({
-          submission_id: submissionId,
-          message: message.trim(),
-          suggested_corrections: suggestedCorrections.trim() || null,
-          created_by: user.id,
-        });
-
-      if (messageError) throw messageError;
+      await createRejectionMessage({
+        submission_id: submissionId,
+        message: message.trim(),
+        suggested_corrections: suggestedCorrections.trim() || undefined,
+      });
 
       toast({
         title: 'Submission Rejected',

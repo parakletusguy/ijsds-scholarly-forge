@@ -6,7 +6,7 @@ import { EnhancedSearch, SearchFilters } from '@/components/search/EnhancedSearc
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { getArticles } from '@/lib/articleService';
 import { useNavigate } from 'react-router-dom';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { ArticleStructuredData } from '@/components/seo/ArticleStructuredData';
@@ -39,14 +39,7 @@ export const Articles = () => {
 
   const fetchArticles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('status', 'published')
-        .order('publication_date', { ascending: false });
-
-      if (error) throw error;
-      const articlesData = data || [];
+      const articlesData = await getArticles({ status: 'published' });
       setArticles(articlesData);
       setFilteredArticles(articlesData);
     } catch (error) {
@@ -59,48 +52,31 @@ export const Articles = () => {
   const handleSearch = async (filters: SearchFilters) => {
     setSearching(true);
     try {
-      let query = supabase
-        .from('articles')
-        .select('*')
-        .eq('status', 'published');
+      // Fetch all published articles then filter client-side
+      // (the backend supports status/subject_area/volume/issue params)
+      let results = await getArticles({ status: 'published' });
 
-      // Apply filters
       if (filters.query) {
-        query = query.or(`title.ilike.%${filters.query}%,abstract.ilike.%${filters.query}%`);
+        const q = filters.query.toLowerCase();
+        results = results.filter(a =>
+          a.title?.toLowerCase().includes(q) || a.abstract?.toLowerCase().includes(q)
+        );
       }
-
       if (filters.subjectArea && filters.subjectArea.length > 0) {
-        query = query.in('subject_area', filters.subjectArea);
+        results = results.filter(a => filters.subjectArea.includes(a.subject_area || ''));
       }
-
-      if (filters.status && filters.status.length > 0 && !filters.status.includes('published')) {
-        query = query.in('status', filters.status);
-      }
-
       if (filters.dateFrom) {
-        query = query.gte('publication_date', filters.dateFrom);
+        results = results.filter(a => a.publication_date && a.publication_date >= filters.dateFrom);
       }
-
       if (filters.dateTo) {
-        query = query.lte('publication_date', filters.dateTo);
+        results = results.filter(a => a.publication_date && a.publication_date <= filters.dateTo);
       }
-
-      const { data, error } = await query.order('publication_date', { ascending: false });
-
-      if (error) throw error;
-
-      let results = data || [];
-
-      // Filter by author if specified (client-side filtering for JSON field)
       if (filters.author) {
-        results = results.filter(article => {
-          if (Array.isArray(article.authors)) {
-            return article.authors.some((author: any) => 
-              author.name?.toLowerCase().includes(filters.author.toLowerCase())
-            );
-          }
-          return false;
-        });
+        const auth = filters.author.toLowerCase();
+        results = results.filter(a =>
+          Array.isArray(a.authors) &&
+          a.authors.some((au: any) => au.name?.toLowerCase().includes(auth))
+        );
       }
 
       setFilteredArticles(results);

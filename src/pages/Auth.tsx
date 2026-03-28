@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { signIn, signUp, signInWithOrcid, resetPassword } from '@/lib/auth';
+import { signIn, signUp, resetPassword } from '@/lib/auth';
 import { sendWelcomeEmail, sendAuthorWelcomeEmail } from '@/lib/emailService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -39,7 +39,7 @@ export const Auth = () => {
   })
   
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshAuth } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -75,11 +75,7 @@ export const Auth = () => {
           setMode('signin');
         }
       } else if (mode === 'signup') {
-        const roleConfig = {
-          is_editor: role === 'editor',
-          is_reviewer: role === 'reviewer' || role === 'editor'
-        };
-        const { data, error } = await signUp(email, password, fullName, roleConfig);
+        const { data, error } = await signUp(email, password, fullName);
         if (error) {
           toast({
             title: 'Error',
@@ -87,45 +83,33 @@ export const Auth = () => {
             variant: 'destructive',
           });
         } else {
-          // Send welcome email based on role
-          if (data.user) {
-            try {
-              if (role === 'author') {
-                await sendAuthorWelcomeEmail(data.user.id, fullName, email);
-              } else {
-                await sendWelcomeEmail(data.user.id, fullName, email);
-              }
-            } catch (emailError) {
-              console.error('Failed to send welcome email:', emailError);
-              // Don't block signup if email fails
+          refreshAuth(data.profile);
+          try {
+            if (role === 'author') {
+              await sendAuthorWelcomeEmail(data.profile.id, fullName, email);
+            } else {
+              await sendWelcomeEmail(data.profile.id, fullName, email);
             }
+          } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
           }
           toast({
             title: 'Account created successfully',
-            description: 'Please check your email to confirm your account before signing in.',
+            description: 'You are now signed in.',
           });
-          setMode('signin');
+          navigate('/');
         }
       } else {
-        const { error } = await signIn(email, password);
+        const { data, error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Email not confirmed')) {
-            toast({
-              title: 'Email not confirmed',
-              description: 'Please check your email and click the confirmation link before signing in.',
-              variant: 'destructive',
-            });
-          } else {
-            toast({
-              title: 'Error',
-              description: error.message,
-              variant: 'destructive',
-            });
-          }
-        } else {
           toast({
-            title: 'Signed in successfully',
+            title: 'Error',
+            description: error.message,
+            variant: 'destructive',
           });
+        } else {
+          refreshAuth(data.profile);
+          toast({ title: 'Signed in successfully' });
           navigate('/');
         }
       }

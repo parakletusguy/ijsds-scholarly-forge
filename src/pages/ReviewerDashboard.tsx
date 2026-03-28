@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getReviews } from '@/lib/reviewService';
+import { getSubmission } from '@/lib/submissionService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,57 +14,41 @@ import { PaperDownload } from '@/components/papers/PaperDownload';
 import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { useNavigate } from 'react-router-dom';
 
-interface Review {
+interface ReviewWithSubmission {
   id: string;
   submission_id: string;
   submitted_at: string | null;
   recommendation: string | null;
-  comments_to_author: string | null;
-  comments_to_editor: string | null;
-  submissions: {
+  invitation_status: string;
+  deadline_date: string | null;
+  submission: {
     id: string;
     submitted_at: string;
-    articles: {
+    article: {
       title: string;
       abstract: string;
       subject_area: string;
       corresponding_author_email: string;
       manuscript_file_url: string;
       vetting_fee: boolean;
-      Processing_fee: boolean;
+      processing_fee: boolean;
     };
   };
 }
 
 export const ReviewerDashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<ReviewWithSubmission[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
-  const [isReviewer, setIsReviewer] = useState(false);
+  const isReviewer = !!profile?.is_reviewer;
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
       return;
     }
-
-    if (user) {
-      checkReviewerStatus();
-      fetchReviews();
-    }
-  }, [user, loading, navigate]);
-
-  const checkReviewerStatus = async () => {
-    if (!user) return;
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_reviewer')
-      .eq('id', user.id)
-      .single();
-    
-    if (!profile?.is_reviewer) {
+    if (!loading && user && !isReviewer) {
       toast({
         title: 'Access Denied',
         description: 'You do not have reviewer privileges.',
@@ -72,37 +57,22 @@ export const ReviewerDashboard = () => {
       navigate('/dashboard');
       return;
     }
-    
-    setIsReviewer(true);
-  };
+    if (user && isReviewer) {
+      fetchReviews();
+    }
+  }, [user, profile, loading, navigate]);
 
   const fetchReviews = async () => {
-    if (!user) return;
-    
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          submissions (
-            id,
-            submitted_at,
-            articles (
-              title,
-              abstract,
-              subject_area,
-              corresponding_author_email,
-              manuscript_file_url,
-              vetting_fee,
-              Processing_fee
-            )
-          )
-        `)
-        .eq('reviewer_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setReviews(data || []);
+      const reviewList = await getReviews();
+      // Fetch full submission for each review (to get article details)
+      const withSubmissions = await Promise.all(
+        reviewList.map(async (review) => {
+          const submission = await getSubmission(review.submission_id);
+          return { ...review, submission } as unknown as ReviewWithSubmission;
+        })
+      );
+      setReviews(withSubmissions);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -114,7 +84,7 @@ export const ReviewerDashboard = () => {
     }
   };
 
-  const getReviewStatus = (review: Review) => {
+  const getReviewStatus = (review: ReviewWithSubmission) => {
     if (review.submitted_at) {
       return { status: 'completed', label: 'Completed', color: 'bg-green-100 text-green-800' };
     }
@@ -212,9 +182,9 @@ export const ReviewerDashboard = () => {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-xl">{review.submissions.articles.title}</CardTitle>
+                          <CardTitle className="text-xl">{review.submission.article.title}</CardTitle>
                           <CardDescription>
-                            Assigned for review • Submitted {new Date(review.submissions.submitted_at).toLocaleDateString()}
+                            Assigned for review • Submitted {new Date(review.submission.submitted_at).toLocaleDateString()}
                           </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
@@ -222,9 +192,9 @@ export const ReviewerDashboard = () => {
                             {getReviewIcon(reviewStatus.status)}
                             <span className="ml-1">{reviewStatus.label}</span>
                           </Badge>
-                          {review.submissions.articles.subject_area && (
+                          {review.submission.article.subject_area && (
                             <Badge variant="outline">
-                              {review.submissions.articles.subject_area}
+                              {review.submission.article.subject_area}
                             </Badge>
                           )}
                         </div>
@@ -232,18 +202,18 @@ export const ReviewerDashboard = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                        {review.submissions.articles.abstract}
+                        {review.submission.article.abstract}
                       </p>
                       <div className="mb-4">
                         <PaymentStatusBadge 
-                          vettingFee={review.submissions.articles.vetting_fee}
-                          processingFee={review.submissions.articles.Processing_fee}
+                          vettingFee={review.submission.article.vetting_fee}
+                          processingFee={review.submission.article.processing_fee}
                         />
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         <PaperDownload 
-                          manuscriptFileUrl={review.submissions.articles.manuscript_file_url}
-                          title={review.submissions.articles.title}
+                          manuscriptFileUrl={review.submission.article.manuscript_file_url}
+                          title={review.submission.article.title}
                         />
                         <Button 
                           onClick={() => navigate(`/review/${review.id}`)}
@@ -277,7 +247,7 @@ export const ReviewerDashboard = () => {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-xl">{review.submissions.articles.title}</CardTitle>
+                          <CardTitle className="text-xl">{review.submission.article.title}</CardTitle>
                           <CardDescription>
                             Review completed {review.submitted_at ? new Date(review.submitted_at).toLocaleDateString() : ''}
                             {review.recommendation && (

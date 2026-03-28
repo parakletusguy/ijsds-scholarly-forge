@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { FileText, Plus, Calendar, User } from 'lucide-react';
 import { RejectionMessages } from '@/components/messages/RejectionMessages';
-import { supabase } from '@/integrations/supabase/client';
+import { getSubmissions, updateSubmission } from '@/lib/submissionService';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -50,29 +50,7 @@ export const Dashboard = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select(`
-          id,
-          article_id,
-          status,
-          submitted_at,
-          articles (
-            title,
-            abstract,
-            corresponding_author_email,
-            status,
-            authors,
-            vetting_fee,
-            Processing_fee
-          ),
-          vetting_fee,
-          processing_fee
-        `)
-        .eq('submitter_id', user.id)
-        .order('submitted_at', { ascending: false });
-            console.log(data)
-      if (error) throw error;
+      const data = await getSubmissions({ submitter_id: user.id });
       setSubmissions(data || []);
     } catch (error) {
       console.error('Error fetching submissions:', error);
@@ -125,19 +103,16 @@ export const Dashboard = () => {
           method:"POST",
           headers:{ 'Content-Type':'application/json'},
           body:JSON.stringify({reference:transactionReference,amount:2000000})
-        }) 
+        })
         const {success,message,data} = await confirm.json()
         console.log({success,message,data})
         if(!success) throw "server error"
         if(!data.status) throw "payment not verified"
         if(data.amount != 2000000) throw 'amount not equal'
 
-        const {data : submisionData,error} = await supabase
-        .from('submissions')
-        .update({processing_fee:true})
-        .eq('submitter_id', user.id)
-        if(error){
-          throw "couldn't process payment, try again later"
+        const submissions = await getSubmissions({ submitter_id: user.id });
+        for (const sub of submissions) {
+          await updateSubmission(sub.id, { processing_fee: true });
         }
   
         toast({
@@ -271,34 +246,20 @@ export const Dashboard = () => {
             </Card>
           ) : (
             submissions.map((submission) => {
-                      const userData = {
-                      email:submission.articles.corresponding_author_email,
-                      amount:2000000,
-                      metadata:{
-                        name:name
-                      },
-                      onSuccess: (response) => onSuccess(response),
-                      onClose:() => {    
-                      toast({
-                        title: 'payment cancelled',
-                        description: `you cancelled payment for the vet fee`,
-                        variant: 'destructive',
-                      });
-                        }
-                      } 
+              const art = submission.article || (submission as any).articles || {};
               return <Card key={submission.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <CardTitle className="text-lg leading-tight">
-                        {submission.articles.title}
+                        {art.title}
                       </CardTitle>
                       <CardDescription>
                         Submitted on {new Date(submission.submitted_at).toLocaleDateString()}
                       </CardDescription>
                     </div>
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className={getStatusColor(submission.status)}
                     >
                       {formatStatus(submission.status)}
@@ -308,48 +269,36 @@ export const Dashboard = () => {
                 <CardContent>
                   <div className='flex items-center justify-between'>
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {submission.articles.abstract}
+                    {art.abstract}
                     </p>
                     <div className='flex flex-col items-center justify-between h-16'>
                           <Badge
                             variant='secondary'
-                            className={getPaymentColor(submission.articles.vetting_fee) }
+                            className={getPaymentColor(art.vetting_fee) }
                           >
-                            <p>vetting fee: {submission.articles.vetting_fee ? "paid" : "not paid"}</p>
+                            <p>vetting fee: {art.vetting_fee ? "paid" : "not paid"}</p>
                           </Badge>
-
-                            <Badge
+                          <Badge
                             variant='secondary'
-                            className={getPaymentColor(submission.articles.Processing_fee)}
-                            >
-                            <p>processing fee: {submission.articles.Processing_fee ? "paid" : "not paid"}</p>
+                            className={getPaymentColor(art.processing_fee || art.Processing_fee)}
+                          >
+                            <p>processing fee: {(art.processing_fee || art.Processing_fee) ? "paid" : "not paid"}</p>
                           </Badge>
-                          {/* {
-                            submission.processing_fee? <div>
-                                <Badge
-                            variant='secondary'
-                            className={getPaymentColor(submission.processing_fee)}
-                            >processing fee: paid</Badge>
-                            </div>:
-                            <button className='bg-black p-1 rounded-sm m-3' onClick={() => {handleSubmit(userData)}}>
-                              <p className='text-[9px] text-white'>click to pay for processing fee</p>
-                            </button>
-                          } */}
                     </div>
                   </div>
-                  
+
                   {submission.status === 'rejected' && (
                     <div className="mb-4">
                       <RejectionMessages submissionId={submission.id} />
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
-                      Article Status: {formatStatus(submission.articles.status)}
+                      Article Status: {formatStatus(art.status)}
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => navigate(`/submission/${submission.id}/details`)}
                       className='m-4'

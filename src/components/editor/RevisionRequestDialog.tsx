@@ -6,10 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FileEdit } from 'lucide-react';
 import { sendEmailNotification, generateStatusChangeEmail } from '@/lib/emailService';
+import { updateSubmission } from '@/lib/submissionService';
+import { createRevisionRequest, createEditorialDecision } from '@/lib/editorialService';
 
 interface RevisionRequestDialogProps {
   submissionId: string;
@@ -47,41 +48,20 @@ export const RevisionRequestDialog = ({ submissionId, submissionTitle, authorEma
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      await updateSubmission(submissionId, { status: 'revision_requested' });
 
-      // Update submission status
-      const { error: submissionError } = await supabase
-        .from('submissions')
-        .update({ status: 'revision_requested' })
-        .eq('id', submissionId);
+      await createRevisionRequest({
+        submission_id: submissionId,
+        revision_type: revisionType,
+        request_details: requestDetails,
+        deadline_date: deadlineDate,
+      });
 
-      if (submissionError) throw submissionError;
-
-      // Create revision request
-      const { error: revisionError } = await supabase
-        .from('revision_requests')
-        .insert({
-          submission_id: submissionId,
-          requested_by: user.id,
-          revision_type: revisionType,
-          request_details: requestDetails,
-          deadline_date: deadlineDate,
-        });
-
-      if (revisionError) throw revisionError;
-
-      // Create editorial decision
-      const { error: decisionError } = await supabase
-        .from('editorial_decisions')
-        .insert({
-          submission_id: submissionId,
-          editor_id: user.id,
-          decision_type: 'revision_requested',
-          decision_rationale: `${revisionType} revision requested`,
-        });
-
-      if (decisionError) throw decisionError;
+      await createEditorialDecision({
+        submission_id: submissionId,
+        decision_type: 'revision_requested',
+        decision_rationale: `${revisionType} revision requested`,
+      });
 
       // Send email notification to author
       const emailContent = generateStatusChangeEmail(

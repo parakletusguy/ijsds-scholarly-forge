@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getProfile, updateProfile } from '@/lib/profileService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,43 +61,20 @@ export const Profile = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        setProfile(data);
-        setFormData({
-          fullName: data.full_name || '',
-          email: data.email || '',
-          bio: data.bio || '',
-          affiliation: data.affiliation || '',
-          orcidId: data.orcid_id || '',
-          isEditor: data.is_editor || false,
-          isReviewer: data.is_reviewer || false,
-          request_reviewer:data.request_reviewer || false,
-          request_editor:data.request_editor || false,
-          isAdmin:data.is_admin || false
-        });
-      } else {
-        // Create new profile
-        setFormData({
-          fullName: user.user_metadata?.full_name || '',
-          email: user.email || '',
-          bio: '',
-          affiliation: '',
-          orcidId: '',
-          isEditor: false,
-          isReviewer: false,
-          request_reviewer:false,
-          request_editor:false,
-          isAdmin:false
-        });
-      }
+      const data = await getProfile(user.id);
+      setProfile(data);
+      setFormData({
+        fullName: data.full_name || '',
+        email: data.email || '',
+        bio: data.bio || '',
+        affiliation: data.affiliation || '',
+        orcidId: data.orcid_id || '',
+        isEditor: data.is_editor || false,
+        isReviewer: data.is_reviewer || false,
+        request_reviewer: data.request_reviewer || false,
+        request_editor: data.request_editor || false,
+        isAdmin: data.is_admin || false
+      });
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
@@ -115,39 +92,18 @@ export const Profile = () => {
 
     setSaving(true);
     try {
-      const profileData = {
-        id: user.id,
+      await updateProfile(user.id, {
         full_name: formData.fullName,
-        email: formData.email,
-        bio: formData.bio,
         affiliation: formData.affiliation,
+        bio: formData.bio,
         orcid_id: formData.orcidId,
-        is_editor: formData.isEditor,
-        is_reviewer: formData.isReviewer,
-        request_reviewer:formData.request_reviewer,
-        request_editor:formData.request_editor,
-        is_admin:formData.isAdmin
-      };
-
-      const { error } = await supabase
-        .from('profiles')
-        .upsert(profileData);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
       });
 
+      toast({ title: "Success", description: "Profile updated successfully" });
       fetchProfile();
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save profile",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -158,18 +114,11 @@ export const Profile = () => {
     return orcidRegex.test(orcid) || orcid === '';
   };
 
-  const request =  async(type) => {
+  const request = async (type: string) => {
     try {
-      console.log(type)
-      if(type == 'editor'){
-        setLoadingE(true)
-        const { error } = await supabase
-          .from('profiles')
-          .update({request_editor:true,request_reviewer:true})
-          .eq('id',user.id)
-        if(error) throw error
-
-        // Notify admins of role request
+      if (type === 'editor') {
+        setLoadingE(true);
+        await updateProfile(user.id, { request_editor: true, request_reviewer: true });
         try {
           const { notifyAdminsOfRoleRequest } = await import('@/lib/roleNotificationService');
           await notifyAdminsOfRoleRequest({
@@ -181,23 +130,11 @@ export const Profile = () => {
         } catch (e) {
           console.warn('Failed to notify admins of editor request:', e);
         }
-
-        toast({
-          title: "Success",
-          description: "Request sent successfully",
-        });
-
-      setLoadingE(false);
+        toast({ title: "Success", description: "Request sent successfully" });
       }
-      if(type == 'reviewer'){
-        setLoadingR(true)
-        const { error } = await supabase
-          .from('profiles')
-          .update({request_reviewer:true})
-          .eq('id',user.id)
-        if(error) throw error
-
-        // Notify admins of role request
+      if (type === 'reviewer') {
+        setLoadingR(true);
+        await updateProfile(user.id, { request_reviewer: true });
         try {
           const { notifyAdminsOfRoleRequest } = await import('@/lib/roleNotificationService');
           await notifyAdminsOfRoleRequest({
@@ -206,27 +143,14 @@ export const Profile = () => {
             requesterEmail: formData.email || profile?.email || '',
             role: 'reviewer'
           });
-
         } catch (e) {
           console.warn('Failed to notify admins of reviewer request:', e);
         }
-        
-        toast({
-          title: "Success",
-          description: "Request sent successfully",
-        });
-
-      setLoadingE(false);
+        toast({ title: "Success", description: "Request sent successfully" });
       }
     } catch (error) {
-      if(error){
-        console.log(error)
-        toast({
-          title: "Error",
-          description: "couldn't send request, try again later",
-          variant: "destructive",
-        });
-      }
+      console.error(error);
+      toast({ title: "Error", description: "Couldn't send request, try again later", variant: "destructive" });
     } finally {
       setLoadingE(false);
       setLoadingR(false);

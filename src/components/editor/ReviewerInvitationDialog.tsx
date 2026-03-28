@@ -6,10 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { UserPlus, AlertCircle } from 'lucide-react';
 import { sendEmailNotification, generateReviewInvitationEmail } from '@/lib/emailService';
+import { getProfiles } from '@/lib/profileService';
+import { createReview } from '@/lib/reviewService';
 import { ReviewStatusIndicator } from '@/components/review/ReviewStatusIndicator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AutomatedReviewerMatchingInterface } from '../workflow/AutomatedReviewerMatchingInterface';
@@ -50,13 +51,8 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
   const fetchReviewers = async () => {
     setLoadingReviewers(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, affiliation')
-        .eq('is_reviewer', true);
-
-      if (error) throw error;
-      setReviewers(data || []);
+      const data = await getProfiles({ is_reviewer: true });
+      setReviewers(data);
     } catch (error) {
       console.error('Error fetching reviewers:', error);
       toast({
@@ -84,21 +80,12 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
       const selectedReviewer = reviewers.find(r => r.id === selectedReviewerId);
       if (!selectedReviewer) throw new Error('Reviewer not found');
 
-      // Create review record
-      const { error: reviewError } = await supabase
-        .from('reviews')
-        .insert({
-          submission_id: submissionId,
-          reviewer_id: selectedReviewerId,
-          deadline_date: deadlineDate,
-          invitation_status: 'pending',
-          invitation_sent_at: new Date().toISOString(),
-        });
+      await createReview({
+        submission_id: submissionId,
+        reviewer_id: selectedReviewerId,
+        deadline_date: deadlineDate,
+      });
 
-      if (reviewError) throw reviewError;
-
-    
-      
       // Send email invitation
       const emailContent = generateReviewInvitationEmail(
         selectedReviewer.full_name,

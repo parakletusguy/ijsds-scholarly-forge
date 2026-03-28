@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getSubmissions, updateSubmission } from '@/lib/submissionService';
+import { api } from '@/lib/apiClient';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,34 +46,18 @@ interface Submission {
 }
 
 export const Editorial = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
-  const [isEditor, setIsEditor] = useState(false);
+  const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
       return;
     }
-
-    if (user) {
-      checkEditorStatus();
-      fetchSubmissions();
-    }
-  }, [user, loading, navigate]);
-
-  const checkEditorStatus = async () => {
-    if (!user) return;
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_editor')
-      .eq('id', user.id)
-      .single();
-    
-    if (!profile?.is_editor) {
+    if (!loading && user && !isEditor) {
       toast({
         title: 'Access Denied',
         description: 'You do not have editor privileges.',
@@ -81,41 +66,17 @@ export const Editorial = () => {
       navigate('/dashboard');
       return;
     }
-    
-    setIsEditor(true);
-  };
+    if (user && isEditor) {
+      fetchSubmissions();
+    }
+  }, [user, profile, loading, navigate]);
 
   const fetchSubmissions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select(`
-          *,
-          articles (
-            title,
-            abstract,
-            corresponding_author_email,
-            authors,
-            manuscript_file_url,
-            vetting_fee,
-            Processing_fee,
-            doi
-          ),
-          profiles (
-            full_name,
-            email
-          )
-        `)
-        .order('submitted_at', { ascending: false });
-
-      if (error) throw error;
-      setSubmissions(data || []);
+      const data = await getSubmissions();
+      setSubmissions(data as any || []);
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch submissions',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to fetch submissions', variant: 'destructive' });
     } finally {
       setLoadingSubmissions(false);
     }
@@ -123,76 +84,26 @@ export const Editorial = () => {
 
   const updateDOIVersion = async (submissionId: string, articleDoi: string) => {
     try {
-      toast({
-        title: 'Updating DOI',
-        description: 'Creating new version on Zenodo...',
-      });
-
-      const { data, error } = await supabase.functions.invoke('generate-zenodo-doi', {
-        body: { submissionId, existingDoi: articleDoi }
-      });
-
-      if (error) throw error;
-
+      toast({ title: 'Updating DOI', description: 'Creating new version on Zenodo...' });
+      const data = await api.post<any>('/api/doi/generate', { article_id: submissionId, existingDoi: articleDoi });
       if (data.success) {
-        toast({
-          title: 'Success',
-          description: `DOI updated to new version: ${data.doi}`,
-        });
+        toast({ title: 'Success', description: `DOI updated: ${data.data?.doi}` });
         fetchSubmissions();
       } else {
-        throw new Error(data.error || 'Failed to update DOI');
+        throw new Error('Failed to update DOI');
       }
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update DOI version',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message || 'Failed to update DOI version', variant: 'destructive' });
     }
   };
 
   const updateSubmissionStatus = async (submissionId: string, newStatus: string) => {
     try {
-      // Get submission to find article_id
-      const { data: submission, error: fetchError } = await supabase
-        .from('submissions')
-        .select('article_id')
-        .eq('id', submissionId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Update submission status
-      const { error } = await supabase
-        .from('submissions')
-        .update({ status: newStatus })
-        .eq('id', submissionId);
-
-      if (error) throw error;
-
-      // Update article status
-      if (submission?.article_id) {
-        const { error: articleError } = await supabase
-          .from('articles')
-          .update({ status: newStatus })
-          .eq('id', submission.article_id);
-
-        if (articleError) throw articleError;
-      }
-
-      toast({
-        title: 'Success',
-        description: 'Submission status updated',
-      });
-      
+      await updateSubmission(submissionId, { status: newStatus });
+      toast({ title: 'Success', description: 'Submission status updated' });
       fetchSubmissions();
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update submission status',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to update submission status', variant: 'destructive' });
     }
   };
 
@@ -319,7 +230,7 @@ export const Editorial = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-xl">{submission.articles.title}</CardTitle>
+                        <CardTitle className="text-xl">{(submission.article || (submission as any).articles || {}).title}</CardTitle>
                         <CardDescription>
                           Submitted by {submission.profiles.full_name} • {new Date(submission.submitted_at).toLocaleDateString()}
                         </CardDescription>
@@ -332,18 +243,18 @@ export const Editorial = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                      {submission.articles.abstract}
+                      {(submission.article || (submission as any).articles || {}).abstract}
                     </p>
                     <div className="mb-4">
                       <PaymentStatusBadge 
-                        vettingFee={submission.articles.vetting_fee}
-                        processingFee={submission.articles.Processing_fee}
+                        vettingFee={(submission.article || (submission as any).articles || {}).vetting_fee}
+                        processingFee={(submission.article || (submission as any).articles || {}).Processing_fee}
                       />
                     </div>
                     <div className="flex gap-2 flex-wrap">
                       <PaperDownload 
-                        manuscriptFileUrl={submission.articles.manuscript_file_url}
-                        title={submission.articles.title}
+                        manuscriptFileUrl={(submission.article || (submission as any).articles || {}).manuscript_file_url}
+                        title={(submission.article || (submission as any).articles || {}).title}
                       />
                       <Button 
                         size="sm" 
@@ -353,7 +264,7 @@ export const Editorial = () => {
                       </Button>
                       <ReviewerInvitationDialog
                         submissionId={submission.id}
-                        submissionTitle={submission.articles.title}
+                        submissionTitle={(submission.article || (submission as any).articles || {}).title}
                         onInvite={fetchSubmissions}
                         submission={submission}
                       />
@@ -366,7 +277,7 @@ export const Editorial = () => {
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Manage Files - {submission.articles.title}</DialogTitle>
+                            <DialogTitle>Manage Files - {(submission.article || (submission as any).articles || {}).title}</DialogTitle>
                           </DialogHeader>
                           <EditorFileManager
                             submissionId={submission.id}
@@ -390,7 +301,7 @@ export const Editorial = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-xl">{submission.articles.title}</CardTitle>
+                        <CardTitle className="text-xl">{(submission.article || (submission as any).articles || {}).title}</CardTitle>
                         <CardDescription>
                           Submitted by {submission.profiles.full_name} • {new Date(submission.submitted_at).toLocaleDateString()}
                         </CardDescription>
@@ -403,18 +314,18 @@ export const Editorial = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {submission.articles.abstract}
+                      {(submission.article || (submission as any).articles || {}).abstract}
                     </p>
                     <div className="mb-4">
                       <PaymentStatusBadge 
-                        vettingFee={submission.articles.vetting_fee}
-                        processingFee={submission.articles.Processing_fee}
+                        vettingFee={(submission.article || (submission as any).articles || {}).vetting_fee}
+                        processingFee={(submission.article || (submission as any).articles || {}).Processing_fee}
                       />
                     </div>
                     <div className="flex gap-2 flex-wrap">
                       <PaperDownload 
-                        manuscriptFileUrl={submission.articles.manuscript_file_url}
-                        title={submission.articles.title}
+                        manuscriptFileUrl={(submission.article || (submission as any).articles || {}).manuscript_file_url}
+                        title={(submission.article || (submission as any).articles || {}).title}
                       />
                       <ApproveSubmissionDialog 
                         submissionId={submission.id}
@@ -423,8 +334,8 @@ export const Editorial = () => {
                       />
                       <RevisionRequestDialog
                         submissionId={submission.id}
-                        submissionTitle={submission.articles.title}
-                        authorEmail={submission.articles.corresponding_author_email}
+                        submissionTitle={(submission.article || (submission as any).articles || {}).title}
+                        authorEmail={(submission.article || (submission as any).articles || {}).corresponding_author_email}
                         authorName={submission.profiles.full_name}
                         onRequest={fetchSubmissions}
                       />
@@ -448,7 +359,7 @@ export const Editorial = () => {
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Manage Files - {submission.articles.title}</DialogTitle>
+                            <DialogTitle>Manage Files - {(submission.article || (submission as any).articles || {}).title}</DialogTitle>
                           </DialogHeader>
                           <EditorFileManager
                             submissionId={submission.id}
@@ -456,11 +367,11 @@ export const Editorial = () => {
                           />
                         </DialogContent>
                       </Dialog>
-                      {submission.articles.doi && (
+                      {(submission.article || (submission as any).articles || {}).doi && (
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => updateDOIVersion(submission.id, submission.articles.doi!)}
+                          onClick={() => updateDOIVersion(submission.id, (submission.article || (submission as any).articles || {}).doi!)}
                         >
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Update DOI
@@ -482,7 +393,7 @@ export const Editorial = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-xl">{submission.articles.title}</CardTitle>
+                        <CardTitle className="text-xl">{(submission.article || (submission as any).articles || {}).title}</CardTitle>
                         <CardDescription>
                           Submitted by {submission.profiles.full_name} • Revision requested
                         </CardDescription>
@@ -518,7 +429,7 @@ export const Editorial = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-xl">{submission.articles.title}</CardTitle>
+                        <CardTitle className="text-xl">{(submission.article || (submission as any).articles || {}).title}</CardTitle>
                         <CardDescription>
                           Submitted by {submission.profiles.full_name} • {new Date(submission.submitted_at).toLocaleDateString()}
                         </CardDescription>
@@ -528,11 +439,11 @@ export const Editorial = () => {
                         {getStatusIcon(submission.status)}
                         <span className="ml-1">{submission.status.replace('_', ' ')}</span>
                       </Badge>
-                      {submission.articles.doi && (
+                      {(submission.article || (submission as any).articles || {}).doi && (
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => updateDOIVersion(submission.id, submission.articles.doi!)}
+                          onClick={() => updateDOIVersion(submission.id, (submission.article || (submission as any).articles || {}).doi!)}
                         >
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Update DOI

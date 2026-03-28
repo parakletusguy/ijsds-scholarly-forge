@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getReview, updateReview } from '@/lib/reviewService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,39 +61,13 @@ export const ReviewForm = () => {
 
   const fetchReview = async () => {
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          submissions (
-            articles (
-              id,
-              title,
-              abstract,
-              subject_area,
-              authors,
-              manuscript_file_url,
-              vetting_fee,
-              Processing_fee
-            )
-          )
-        `)
-        .eq('id', reviewId)
-        .eq('reviewer_id', user?.id)
-        .single();
-
-      if (error) throw error;
-      
-      setReview(data);
+      const data = await getReview(reviewId!);
+      setReview(data as any);
       setRecommendation(data.recommendation || '');
       setCommentsToAuthor(data.comments_to_author || '');
       setCommentsToEditor(data.comments_to_editor || '');
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch review details',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to fetch review details', variant: 'destructive' });
       navigate('/reviewer-dashboard');
     } finally {
       setLoadingData(false);
@@ -109,21 +83,16 @@ export const ReviewForm = () => {
 
     try {
       const updateData: any = {
-        recommendation:recommendation,
+        recommendation,
         comments_to_author: commentsToAuthor,
         comments_to_editor: commentsToEditor,
       };
 
       if (isSubmission) {
-        updateData.submitted_at = new Date().toISOString() || null
+        updateData.submitted_at = new Date().toISOString();
       }
 
-      const { error } = await supabase
-        .from('reviews')
-        .update(updateData)
-        .eq('id', reviewId);
-
-      if (error) throw error;
+      await updateReview(reviewId!, updateData);
 
       toast({
         title: 'Success',
@@ -134,7 +103,7 @@ export const ReviewForm = () => {
         navigate('/reviewer-dashboard');
       }
     } catch (error: any) {
-      console.error("Supabase update error:", error.message, error.details, error.hint);
+      console.error('Review update error:', error.message);
       toast({
         title: 'Error',
         description: 'Failed to save review',

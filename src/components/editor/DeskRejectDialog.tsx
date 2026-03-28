@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { XCircle } from 'lucide-react';
 import { sendEmailNotification, generateStatusChangeEmail } from '@/lib/emailService';
+import { updateSubmission, getSubmission } from '@/lib/submissionService';
+import { updateArticle } from '@/lib/articleService';
+import { createEditorialDecision } from '@/lib/editorialService';
 
 interface DeskRejectDialogProps {
   submissionId: string;
@@ -34,47 +36,19 @@ export const DeskRejectDialog = ({ submissionId, submissionTitle, authorEmail, a
 
     setLoading(true);
     try {
-      // Get submission to find article_id
-      const { data: submission, error: fetchError } = await supabase
-        .from('submissions')
-        .select('article_id')
-        .eq('id', submissionId)
-        .single();
+      const submission = await getSubmission(submissionId);
 
-      if (fetchError) throw fetchError;
+      await updateSubmission(submissionId, { status: 'desk_rejected' });
 
-      // Update submission status
-      const { error: submissionError } = await supabase
-        .from('submissions')
-        .update({ status: 'desk_rejected' })
-        .eq('id', submissionId);
-
-      if (submissionError) throw submissionError;
-
-      // Update article status
       if (submission?.article_id) {
-        const { error: articleError } = await supabase
-          .from('articles')
-          .update({ status: 'rejected' })
-          .eq('id', submission.article_id);
-
-        if (articleError) throw articleError;
+        await updateArticle(submission.article_id, { status: 'rejected' });
       }
 
-      // Create editorial decision
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error: decisionError } = await supabase
-        .from('editorial_decisions')
-        .insert({
-          submission_id: submissionId,
-          editor_id: user.id,
-          decision_type: 'desk_rejection',
-          decision_rationale: reason,
-        });
-
-      if (decisionError) throw decisionError;
+      await createEditorialDecision({
+        submission_id: submissionId,
+        decision_type: 'desk_rejection',
+        decision_rationale: reason,
+      });
 
       // Send email notification to author
       const emailContent = generateStatusChangeEmail(

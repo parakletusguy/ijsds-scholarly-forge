@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getProfiles, updateProfile } from '@/lib/profileService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,39 +12,19 @@ import { useNavigate } from 'react-router-dom';
 import { ProfileCard } from '@/components/admins/approveRequest';
 
 export const ManageRequests = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
-  const [IsAdmin, setIsAdmin] = useState(false);
+  const IsAdmin = !!profile?.is_admin;
   const [editorRequests, seteditorRequests] = useState([])
   const [reviewerRequests, setreviewerRequests] = useState([])
-
-  const navigationElements = [
-
-  ]
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
       return;
     }
-
-    if (user) {
-        checkAdminStatus()
-        fetchRequests()
-    }
-  }, [user, loading, navigate]);
-
-  const checkAdminStatus = async () => {
-    if (!user) return;
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single();
-    
-    if (!profile?.is_admin) {
+    if (!loading && user && !IsAdmin) {
       toast({
         title: 'Access Denied',
         description: 'You do not have Admin privileges.',
@@ -53,165 +33,74 @@ export const ManageRequests = () => {
       navigate('/dashboard');
       return;
     }
-    
-    setIsAdmin(true);
-  }
+    if (user && IsAdmin) {
+      fetchRequests();
+    }
+  }, [user, profile, loading, navigate]);
 
   const fetchRequests = async () => {
     try {
-        const {data,error} = await supabase
-        .from('profiles')
-        .select('*')
-        .or('request_editor.eq.true,request_reviewer.eq.true')
-        if(error) throw error
-        const edi = []
-        const rev = []
-        data.forEach((requests) => {
-            if(requests.request_editor){
-                edi.push(requests)
-            }else if(requests.request_reviewer){
-                rev.push(requests)
-            }
-        })
-        seteditorRequests(edi)
-        setreviewerRequests(rev)
-        console.log(edi)
+      const data = await getProfiles();
+      const edi = []
+      const rev = []
+      data.forEach((p: any) => {
+        if (p.request_editor) edi.push(p)
+        else if (p.request_reviewer) rev.push(p)
+      })
+      seteditorRequests(edi)
+      setreviewerRequests(rev)
     } catch (error) {
-        if(error){
-            //toast
-        }
+      console.error('Error fetching requests:', error)
     }
   }
 
-  const handleApproveEditor = async (id,type) :Promise<void> => {
+  const handleApproveEditor = async (id, type) :Promise<void> => {
     try {
       const target = editorRequests.find((p:any) => p.id === id);
-      if(type == 'approve'){
-        const { error } = await supabase
-          .from('profiles')
-          .update({is_editor:true,request_editor:false})
-          .eq('id',id)
-        if(error) throw error
-
-        // Notify requester of approval
+      if (type == 'approve') {
+        await updateProfile(id, { is_editor: true, request_editor: false });
         try {
           const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({
-            userId: id,
-            email: target?.email || '',
-            name: target?.full_name || '',
-            role: 'editor',
-            decision: 'accepted'
-          });
-        } catch (e) {
-          console.warn('Failed to notify editor approval:', e);
-        }
-
-        toast({
-          title: 'Request Approved',
-          description: `you've accepted the request, user is now an editor`
-        });
+          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'editor', decision: 'accepted' });
+        } catch (e) { console.warn('Failed to notify editor approval:', e); }
+        toast({ title: 'Request Approved', description: `you've accepted the request, user is now an editor` });
       } else {
-        // Reject path: clear request flag and notify requester
-        const { error } = await supabase
-          .from('profiles')
-          .update({request_editor:false})
-          .eq('id',id)
-        if(error) throw error
-
+        await updateProfile(id, { request_editor: false });
         try {
           const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({
-            userId: id,
-            email: target?.email || '',
-            name: target?.full_name || '',
-            role: 'editor',
-            decision: 'rejected'
-          });
-        } catch (e) {
-          console.warn('Failed to notify editor rejection:', e);
-        }
-
-        toast({
-          title: 'Request Denied',
-          description: `you've rejected the request`
-        });
+          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'editor', decision: 'rejected' });
+        } catch (e) { console.warn('Failed to notify editor rejection:', e); }
+        toast({ title: 'Request Denied', description: `you've rejected the request` });
       }
+      fetchRequests();
     } catch (error) {
-      if(error){
-        console.error(error)
-        toast({
-          title: 'Request Error',
-          description: 'An error occured',
-          variant: 'destructive',
-        });
-      }
+      console.error(error);
+      toast({ title: 'Request Error', description: 'An error occured', variant: 'destructive' });
     }
   }
 
-  const handleApproveReviewer = async (id,type) : Promise<void> => {
+  const handleApproveReviewer = async (id, type) : Promise<void> => {
     try {
       const target = reviewerRequests.find((p:any) => p.id === id);
-      if(type == 'approve'){
-        const { error } = await supabase
-          .from('profiles')
-          .update({is_reviewer:true, request_reviewer:false})
-          .eq('id',id)
-        if(error) throw error
-
-        // Notify requester of approval
+      if (type == 'approve') {
+        await updateProfile(id, { is_reviewer: true, request_reviewer: false });
         try {
           const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({
-            userId: id,
-            email: target?.email || '',
-            name: target?.full_name || '',
-            role: 'reviewer',
-            decision: 'accepted'
-          });
-        } catch (e) {
-          console.warn('Failed to notify reviewer approval:', e);
-        }
-
-        toast({
-          title: 'Request Approved',
-          description: `you've accepted the request, user is now a reviewer`
-        });
+          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'reviewer', decision: 'accepted' });
+        } catch (e) { console.warn('Failed to notify reviewer approval:', e); }
+        toast({ title: 'Request Approved', description: `you've accepted the request, user is now a reviewer` });
       } else {
-        toast({
-          title: 'Request Denied',
-          description: `you've rejected the request`
-        });
-
-        const { error } = await supabase
-          .from('profiles')
-          .update({request_reviewer:false})
-          .eq('id',id)
-        if(error) throw error
-
-        // Notify requester of rejection
+        await updateProfile(id, { request_reviewer: false });
         try {
           const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({
-            userId: id,
-            email: target?.email || '',
-            name: target?.full_name || '',
-            role: 'reviewer',
-            decision: 'rejected'
-          });
-        } catch (e) {
-          console.warn('Failed to notify reviewer rejection:', e);
-        }
+          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'reviewer', decision: 'rejected' });
+        } catch (e) { console.warn('Failed to notify reviewer rejection:', e); }
+        toast({ title: 'Request Denied', description: `you've rejected the request` });
       }
+      fetchRequests();
     } catch (error) {
-      if(error){
-        console.error(error)
-        toast({
-          title: 'Request Error',
-          description: 'An error occured',
-          variant: 'destructive',
-        });
-      }
+      console.error(error);
+      toast({ title: 'Request Error', description: 'An error occured', variant: 'destructive' });
     }
   }
 

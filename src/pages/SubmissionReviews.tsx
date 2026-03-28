@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getSubmission } from '@/lib/submissionService';
+import { getReviews } from '@/lib/reviewService';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +20,7 @@ interface Review {
   comments_to_author: string | null;
   comments_to_editor: string | null;
   deadline_date: string | null;
-  profiles: {
+  reviewer?: {
     full_name: string;
     email: string;
   };
@@ -27,7 +28,7 @@ interface Review {
 
 interface Submission {
   id: string;
-  articles: {
+  article: {
     title: string;
     abstract: string;
   };
@@ -35,35 +36,19 @@ interface Submission {
 
 export const SubmissionReviews = () => {
   const { submissionId } = useParams();
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [isEditor, setIsEditor] = useState(false);
+  const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
       return;
     }
-
-    if (user && submissionId) {
-      checkEditorStatus();
-      fetchData();
-    }
-  }, [user, loading, submissionId, navigate]);
-
-  const checkEditorStatus = async () => {
-    if (!user) return;
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_editor')
-      .eq('id', user.id)
-      .single();
-    
-    if (!profile?.is_editor) {
+    if (!loading && user && !isEditor) {
       toast({
         title: 'Access Denied',
         description: 'You do not have editor privileges.',
@@ -72,49 +57,19 @@ export const SubmissionReviews = () => {
       navigate('/dashboard');
       return;
     }
-    
-    setIsEditor(true);
-  };
+    if (user && isEditor && submissionId) {
+      fetchData();
+    }
+  }, [user, profile, loading, submissionId, navigate]);
 
   const fetchData = async () => {
     try {
-      // Fetch submission details
-      const { data: submissionData, error: submissionError } = await supabase
-        .from('submissions')
-        .select(`
-          id,
-          articles (
-            title,
-            abstract
-          )
-        `)
-        .eq('id', submissionId)
-        .single();
-
-      if (submissionError) throw submissionError;
-      setSubmission(submissionData);
-
-      // Fetch reviews for this submission
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          reviewer_id,
-          invitation_status,
-          submitted_at,
-          recommendation,
-          comments_to_author,
-          comments_to_editor,
-          deadline_date,
-          profiles (
-            full_name,
-            email
-          )
-        `)
-        .eq('submission_id', submissionId);
-
-      if (reviewsError) throw reviewsError;
-      setReviews(reviewsData || []);
+      const [submissionData, reviewsData] = await Promise.all([
+        getSubmission(submissionId!),
+        getReviews({ submission_id: submissionId }),
+      ]);
+      setSubmission(submissionData as unknown as Submission);
+      setReviews(reviewsData as unknown as Review[]);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -206,7 +161,7 @@ export const SubmissionReviews = () => {
                 </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Review Status</h1>
           <p className="text-muted-foreground">
-            {submission.articles.title}
+            {submission.article.title}
           </p>
         </div>
 
@@ -218,8 +173,8 @@ export const SubmissionReviews = () => {
               </CardHeader>
               <CardContent>
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">{submission.articles.title}</h3>
-                  <p className="text-sm text-muted-foreground">{submission.articles.abstract}</p>
+                  <h3 className="font-semibold text-lg mb-2">{submission.article.title}</h3>
+                  <p className="text-sm text-muted-foreground">{submission.article.abstract}</p>
                 </div>
               </CardContent>
             </Card>
@@ -246,8 +201,8 @@ export const SubmissionReviews = () => {
                         <div key={review.id} className="border border-border rounded-lg p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h4 className="font-medium">{review.profiles.full_name}</h4>
-                              <p className="text-sm text-muted-foreground">{review.profiles.email}</p>
+                              <h4 className="font-medium">{review.reviewer?.full_name}</h4>
+                              <p className="text-sm text-muted-foreground">{review.reviewer?.email}</p>
                             </div>
                             <Badge className={reviewStatus.color}>
                               {getStatusIcon(reviewStatus.status)}

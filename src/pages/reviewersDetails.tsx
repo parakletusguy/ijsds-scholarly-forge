@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { getSubmission } from '@/lib/submissionService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,17 +14,18 @@ interface SubmissionDetails {
   status: string;
   submitted_at: string;
   submitter_id: string;
-  articles: {
-    id,
+  article_id: string;
+  article: {
+    id: string;
     title: string;
     abstract: string;
     subject_area: string;
     authors: any;
     manuscript_file_url: string | null;
-    vetting_fee : boolean,
-    Processing_fee : boolean
+    vetting_fee: boolean;
+    processing_fee: boolean;
   };
-  profiles: {
+  submitter: {
     full_name: string;
     email: string;
   };
@@ -51,33 +52,8 @@ export const ReviewerDetail = () => {
 
   const fetchSubmissionDetails = async () => {
     try {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select(`
-          id,
-          status,
-          submitted_at,
-          submitter_id,
-          articles (
-            id,
-            title,
-            abstract,
-            subject_area,
-            authors,
-            manuscript_file_url,
-            vetting_fee,
-            Processing_fee
-          ),
-          profiles (
-            full_name,
-            email
-          )
-        `)
-        .eq('id', submissionId)
-        .single();
-
-      if (error) throw error;
-      setSubmission(data);
+      const data = await getSubmission(submissionId!);
+      setSubmission(data as unknown as SubmissionDetails);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -175,10 +151,10 @@ export const ReviewerDetail = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-2xl font-semibold mb-2">{submission.articles.title}</h3>
-                  {submission.articles.subject_area && (
+                  <h3 className="text-2xl font-semibold mb-2">{submission.article.title}</h3>
+                  {submission.article.subject_area && (
                     <Badge variant="secondary" className="mb-4">
-                      {submission.articles.subject_area}
+                      {submission.article.subject_area}
                     </Badge>
                   )}
                 </div>
@@ -186,15 +162,15 @@ export const ReviewerDetail = () => {
                 <div>
                   <h4 className="font-medium text-lg mb-2">Abstract</h4>
                   <p className="text-muted-foreground leading-relaxed">
-                    {submission.articles.abstract}
+                    {submission.article.abstract}
                   </p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-lg mb-2">Authors</h4>
-                  {submission.articles.authors && Array.isArray(submission.articles.authors) ? (
+                  {submission.article.authors && Array.isArray(submission.article.authors) ? (
                     <div className="space-y-2">
-                      {submission.articles.authors.map((author: any, index: number) => (
+                      {submission.article.authors.map((author: any, index: number) => (
                         <div key={index} className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span>{author.name}</span>
@@ -211,12 +187,12 @@ export const ReviewerDetail = () => {
                   )}
                 </div>
 
-                {submission.articles.manuscript_file_url && (
+                {submission.article.manuscript_file_url && (
                   <div>
                     <h4 className="font-medium text-lg mb-2">Manuscript</h4>
                     <Button 
                       variant="outline"
-                      onClick={() => window.open(submission.articles.manuscript_file_url, '_blank')}
+                      onClick={() => window.open(submission.article.manuscript_file_url, '_blank')}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Manuscript
@@ -229,10 +205,10 @@ export const ReviewerDetail = () => {
             {/* Author File Management */}
             <SubmissionFileManager
               submissionId={submissionId!}
-              articleId={submission.articles.id}
+              articleId={submission.article.id}
               isAuthor={user?.id === submission.submitter_id}
-              vettingFee={submission.articles.vetting_fee}
-              processingFee={submission.articles.Processing_fee}
+              vettingFee={submission.article.vetting_fee}
+              processingFee={submission.article.processing_fee}
             />
           </div>
 
@@ -257,10 +233,10 @@ export const ReviewerDetail = () => {
                   <div>
                     <p className="text-sm font-medium">Submitter</p>
                     <p className="text-sm text-muted-foreground">
-                      {submission.profiles.full_name}
+                      {submission.submitter.full_name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {submission.profiles.email}
+                      {submission.submitter.email}
                     </p>
                   </div>
                 </div>

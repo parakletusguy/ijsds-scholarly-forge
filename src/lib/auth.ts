@@ -1,62 +1,107 @@
-import { supabase } from '@/integrations/supabase/client';
-import { User, Session } from '@supabase/supabase-js';
+import { api, setToken, clearToken, ApiError } from './apiClient';
 
-export interface AuthState {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
+export interface AuthProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  role: string;
+  is_editor: boolean;
+  is_reviewer: boolean;
+  is_admin: boolean;
+  affiliation?: string | null;
+  orcid_id?: string | null;
+  bio?: string | null;
+  email_notifications_enabled?: boolean;
+  deadline_reminder_days?: number;
+  request_reviewer?: boolean;
+  request_editor?: boolean;
 }
 
-export const signUp = async (email: string, password: string, fullName: string, roles: { is_editor?: boolean; is_reviewer?: boolean } = {}) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${window.location.origin}/auth?confirmed=true`,
-      data: {
-        full_name: fullName,
-        is_editor: roles.is_editor || false,
-        is_reviewer: roles.is_reviewer || false,
-      }
-    }
-  });
-  return { data, error };
+interface RegisterResponse {
+  success: true;
+  data: { token: string; profile: AuthProfile };
+}
+
+interface LoginResponse {
+  success: true;
+  token: string;
+  profile: AuthProfile;
+}
+
+interface MeResponse {
+  success: true;
+  data: AuthProfile;
+}
+
+export const signUp = async (
+  email: string,
+  password: string,
+  fullName: string,
+) => {
+  try {
+    const res = await api.post<RegisterResponse>('/auth/register', {
+      email,
+      password,
+      full_name: fullName,
+    });
+    setToken(res.data.token);
+    return { data: { token: res.data.token, profile: res.data.profile }, error: null };
+  } catch (err) {
+    return { data: null, error: err as ApiError };
+  }
 };
 
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { data, error };
-};
-
-export const signInWithOrcid = async () => {
-  const redirectUrl = `${window.location.origin}/`;
-  
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'orcid' as any,
-    options: {
-      redirectTo: redirectUrl,
-    },
-  });
-
-  return { data, error };
+  try {
+    const res = await api.post<LoginResponse>('/auth/login', { email, password });
+    setToken(res.token);
+    return { data: { token: res.token, profile: res.profile }, error: null };
+  } catch (err) {
+    return { data: null, error: err as ApiError };
+  }
 };
 
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  return { error };
+  try {
+    await api.post('/auth/logout');
+  } catch {
+    // ignore server errors on logout
+  }
+  clearToken();
+  return { error: null };
 };
 
 export const resetPassword = async (email: string) => {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth?mode=reset-password`,
-  });
-  return { data, error };
+  try {
+    await api.post('/auth/forgot-password', { email });
+    return { data: {}, error: null };
+  } catch (err) {
+    return { data: null, error: err as ApiError };
+  }
 };
 
-export const getCurrentUser = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+export const resetPasswordWithToken = async (token: string, password: string) => {
+  try {
+    await api.post('/auth/reset-password', { token, password });
+    return { data: {}, error: null };
+  } catch (err) {
+    return { data: null, error: err as ApiError };
+  }
+};
+
+export const getCurrentUser = async (): Promise<AuthProfile | null> => {
+  try {
+    const res = await api.get<MeResponse>('/auth/me');
+    return res.data;
+  } catch {
+    return null;
+  }
+};
+
+/** Called after ORCID redirect — reads ?token= from the URL and stores it */
+export const handleOrcidCallback = (): string | null => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (token) setToken(token);
+  return token;
 };
