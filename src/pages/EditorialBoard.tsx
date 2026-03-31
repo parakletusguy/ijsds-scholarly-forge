@@ -17,10 +17,10 @@ import daniel from "../images/editors/daniel.jpeg"
 const EditorialBoard = () => {
   const boardMembers = [
   { 
-    name: "Dr. Mina Ogbanga", 
+    name: "Professor Mina Magaret Ogbanga", 
     role: "Editor-in-Chief", 
     isChief: true,
-    Designation: "Editor-in-Chief, IJSDS & Associate Professor of Social Work",
+    Designation: "Editor-in-Chief, IJSDS & Professor of Social Work",
     Institution: "Department of Social Work, River State University",
     Contact: "mina.ogbanga@ust.edu.ng",
     Education: "",
@@ -185,7 +185,16 @@ const EditorialBoard = () => {
                       {member.image && <img src={member.image} alt="Editor Image" className="w-[100%]" />}
                     </div>
                     <CardTitle className="text-xl">{member.name}</CardTitle>
-                    <CardTitle className="text-sm"><a href="https://minaogbanga.com">www.minaogbanga.com </a></CardTitle>
+                    <CardTitle className="text-sm">
+                      <a 
+                        href="https://www.minaogbanga.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-primary hover:underline hover:text-blue-600 transition-colors"
+                      >
+                        www.minaogbanga.com
+                      </a>
+                    </CardTitle>
                     <Badge variant="default" className="mx-auto">{member.role}</Badge>
                   <CardContent className="gap-3">
 {member.Designation && <p className="text-[12px] py-1" >Designation: <span className="font-bold">{member.Designation}</span> </p>

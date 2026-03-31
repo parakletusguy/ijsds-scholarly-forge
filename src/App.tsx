@@ -50,6 +50,7 @@ import { PlagiarismPolicy } from "./pages/PlagiarismPolicy";
 import { PreservationPolicy } from "./pages/PreservationPolicy";
 import Archive from "./pages/Archive";
 import { Indexing } from "./pages/Indexing";
+import { Contact } from "./pages/Contact";
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
@@ -129,6 +130,7 @@ const App = () => (
               {/* §4.2 — Author Indexing Instructions Page */}
               {/* Source: IJSDS Master Implementation Guide §4.2 */}
               <Route path="/indexing" element={<PageLayout><Indexing /></PageLayout>} />
+              <Route path="/contact" element={<PageLayout><Contact /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>

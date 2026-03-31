@@ -2,6 +2,12 @@ import { BookOpen } from 'lucide-react';
 import logo from "../../../public/Logo Symbol.png"
 
 export const Footer = () => {
+  const today = new Date();
+  const getOrdinalNum = (n: number) => {
+    return n + (n > 0 ? ['th', 'st', 'nd', 'rd'][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : '');
+  };
+  const formattedDate = `${getOrdinalNum(today.getDate())} of ${today.toLocaleDateString('en-US', { month: 'long' })}, ${today.getFullYear()}`;
+
   return (
     <footer className="border-t border-border bg-[white] mt-auto">
       <div className="container mx-auto px-4 py-8">
@@ -44,14 +50,14 @@ export const Footer = () => {
               <li>Phone: +234 808 022 4405</li><div className='mb-2'>
             <li>ISSN: <span className='font-semibold'>3115-6940</span></li>
             <li>eISSN: <span className='font-semibold'>3115-6932</span></li>
-            <li>Date: <span className='font-semibold'>13th of October, 2025</span></li>
+            <li>Date: <span className='font-semibold'>{formattedDate}</span></li>
           </div>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 International Journal of Social Work and Development Studies. All rights reserved.</p>
+          <p>&copy; {today.getFullYear()} International Journal of Social Work and Development Studies. All rights reserved.</p>
         </div>
       </div>
     </footer>

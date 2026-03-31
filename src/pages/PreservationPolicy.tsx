@@ -242,7 +242,7 @@ export const PreservationPolicy = () => {
 
         {/* Last Updated */}
         <div className="text-sm text-muted-foreground text-center pt-4">
-          <p>Last Updated: January 2025</p>
+          <p>Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
         </div>
       </div>
     </div>

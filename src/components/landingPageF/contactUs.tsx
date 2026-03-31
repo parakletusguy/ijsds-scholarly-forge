@@ -52,7 +52,17 @@ export const Contact =  ({
             <Description>{description}</Description>
             <Form action={formAction} method={formMethod}>
               <Input type="email" name="email" placeholder="Your Email Address" />
-              <SubmitButton type="submit">{submitButtonText}</SubmitButton>
+              <div className="flex flex-col sm:flex-row gap-4 lg:ml-6 mt-6 lg:mt-0">
+                <SubmitButton type="submit" style={{ marginTop: 0, marginLeft: 0 }}>{submitButtonText}</SubmitButton>
+                <a 
+                  href="https://wa.me/2348080224405" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="inline-flex items-center justify-center px-8 py-3 font-bold rounded bg-[#25D366] text-white hover:bg-[#128C7E] transition duration-300"
+                >
+                  WhatsApp
+                </a>
+              </div>
             </Form>
           </TextContent>
         </TextColumn>
