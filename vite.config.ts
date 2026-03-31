@@ -11,6 +11,18 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   plugins: [
     // react({ // <--- REMOVE OLD CONFIG
     //   plugins: [
@@ -27,7 +39,8 @@ export default defineConfig(({ mode }) => ({
     VitePWA({ 
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'],
+        maximumFileSizeToCacheInBytes: 5000000
       }
     }),
     mode === 'development' &&
