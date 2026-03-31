@@ -49,6 +49,7 @@ import OpenAccessPage from "./pages/openAccessPage";
 import { PlagiarismPolicy } from "./pages/PlagiarismPolicy";
 import { PreservationPolicy } from "./pages/PreservationPolicy";
 import Archive from "./pages/Archive";
+import { Indexing } from "./pages/Indexing";
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
@@ -125,6 +126,9 @@ const App = () => (
               <Route path="/plagiarism-policy" element={<PageLayout><PlagiarismPolicy /></PageLayout>} />
               <Route path="/preservation-policy" element={<PageLayout><PreservationPolicy /></PageLayout>} />
               <Route path="/archive" element={<PageLayout><Archive /></PageLayout>} />
+              {/* §4.2 — Author Indexing Instructions Page */}
+              {/* Source: IJSDS Master Implementation Guide §4.2 */}
+              <Route path="/indexing" element={<PageLayout><Indexing /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>

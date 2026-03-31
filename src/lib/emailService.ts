@@ -149,8 +149,30 @@ export const notifyUserApprovalForProcessing = async (userId: string, authorName
   }
 };
 
-export const notifyUserArticlePublished = async (userId: string, authorName: string, submissionTitle: string) => {
+/**
+ * Notifies an author that their article has been published.
+ * Per Q2 decision: automatically fires the post-publication indexing email
+ * so authors receive their indexing instructions without a manual trigger.
+ *
+ * Source: IJSDS Master Implementation Guide §4.1 — Post-Publication Email
+ *
+ * @param userId       - Supabase user ID of the author
+ * @param authorName   - Full name for personalisation
+ * @param authorEmail  - Email address to send the indexing instructions to
+ * @param submissionTitle - Article title
+ * @param doi          - Zenodo DOI (e.g. "10.5281/zenodo.XXXXX")
+ * @param articleUrl   - Canonical public URL (e.g. "https://ijsds.org/article/uuid")
+ */
+export const notifyUserArticlePublished = async (
+  userId: string,
+  authorName: string,
+  submissionTitle: string,
+  authorEmail?: string,
+  doi?: string | null,
+  articleUrl?: string,
+) => {
   try {
+    // In-app notification (existing behaviour preserved)
     await sendNotification({
       template: 'article_published',
       to: '',
@@ -160,8 +182,148 @@ export const notifyUserArticlePublished = async (userId: string, authorName: str
       in_app_title: 'Article Published!',
       in_app_message: `Congratulations! Your article "${submissionTitle}" has been published.`,
     });
+
+    // Q2 decision: automatically fire post-publication indexing email
+    if (authorEmail) {
+      await sendPostPublicationIndexingEmail({
+        authorEmail,
+        authorName,
+        articleTitle: submissionTitle,
+        doi: doi ?? null,
+        articleUrl: articleUrl ?? window.location.origin,
+      });
+    }
   } catch (error) {
     console.error('Error notifying user of publication:', error);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// §4.1 — Post-Publication Indexing Email
+// Source: IJSDS Master Implementation Guide §4.1 — Author Communication Template
+//
+// Sent automatically when an article is published. Provides the author with
+// their direct links, metadata file instructions, and three-step indexing guide.
+// ---------------------------------------------------------------------------
+
+export interface PostPublicationEmailParams {
+  authorEmail: string;
+  authorName: string;
+  articleTitle: string;
+  doi: string | null;
+  articleUrl: string;
+}
+
+/**
+ * Generates the HTML body for the post-publication indexing email.
+ * Matches the exact template from IJSDS_Indexing_Implementation_Plan.md §4.1.
+ */
+export const generatePostPublicationIndexingEmailHtml = (params: PostPublicationEmailParams): string => {
+  const { authorName, articleTitle, doi, articleUrl } = params;
+  const doiLine = doi
+    ? `<strong>DOI:</strong> <a href="https://doi.org/${doi}" style="color:#007cba">${doi}</a>`
+    : `<strong>DOI:</strong> (will be assigned via Zenodo — check your dashboard)`;
+
+  return `
+<html>
+<body style="font-family:Arial,sans-serif;line-height:1.7;color:#333;max-width:640px;margin:0 auto;padding:24px">
+
+  <div style="background:#0a4d8c;padding:20px 24px;border-radius:8px 8px 0 0">
+    <h2 style="color:#fff;margin:0;font-size:18px">
+      International Journal of Social Work and Development Studies (IJSDS)
+    </h2>
+  </div>
+
+  <div style="border:1px solid #ddd;border-top:none;padding:24px;border-radius:0 0 8px 8px">
+
+    <p>Dear ${authorName},</p>
+
+    <p>
+      Congratulations! Your article, <strong>"${articleTitle}"</strong>, is now officially published
+      in the <strong>International Journal of Social Work and Development Studies (IJSDS)</strong>.
+    </p>
+
+    <div style="background:#f0f7ff;border-left:4px solid #0a4d8c;padding:14px 18px;margin:18px 0;border-radius:0 4px 4px 0">
+      <p style="margin:0 0 6px 0">${doiLine}</p>
+      <p style="margin:0">
+        <strong>Article URL:</strong>
+        <a href="${articleUrl}" style="color:#007cba">${articleUrl}</a>
+      </p>
+    </div>
+
+    <p>
+      To maximise the reach and citation impact of your work, please follow these
+      <strong>three steps</strong> to index your paper on major academic platforms:
+    </p>
+
+    <ol style="padding-left:20px">
+      <li style="margin-bottom:12px">
+        <strong>Add to ORCID (Automatic):</strong> If you have linked your ORCID to your
+        Zenodo account, your paper will appear automatically. If not, you can manually
+        add it using your DOI: <em>${doi ?? 'see your article page'}</em>.<br/>
+        <a href="https://ijsds.org/orcidGuide" style="color:#007cba">
+          → Step-by-step ORCID guide
+        </a>
+      </li>
+      <li style="margin-bottom:12px">
+        <strong>Upload to ResearchGate &amp; Academia.edu:</strong> Use the
+        <strong>BibTeX file</strong> available on your article page to "Bulk Upload"
+        your metadata. This ensures all citation data is 100% accurate.
+      </li>
+      <li style="margin-bottom:12px">
+        <strong>Share the Link:</strong> Please use the official article URL
+        (<a href="${articleUrl}" style="color:#007cba">${articleUrl}</a>) when sharing
+        your work on social media to ensure all traffic is tracked correctly.
+      </li>
+    </ol>
+
+    <p>
+      Download your official metadata (BibTeX) here:
+      <a href="${articleUrl}" style="color:#007cba">
+        ${articleUrl} &rarr; "Export Citation (BibTeX)" button
+      </a>
+    </p>
+
+    <p>
+      For full platform-by-platform instructions, visit our
+      <a href="https://ijsds.org/indexing" style="color:#007cba">
+        Author Indexing Guide
+      </a>.
+    </p>
+
+    <p>Thank you for contributing to IJSDS.</p>
+
+    <p>
+      Best regards,<br/>
+      <strong>The IJSDS Editorial Team</strong><br/>
+      <a href="https://ijsds.org" style="color:#007cba">ijsds.org</a>
+    </p>
+
+  </div>
+</body>
+</html>`;
+};
+
+/**
+ * Sends the post-publication indexing email to the author.
+ * Source: IJSDS Master Implementation Guide §4.1
+ */
+export const sendPostPublicationIndexingEmail = async (params: PostPublicationEmailParams): Promise<void> => {
+  const { authorEmail, articleTitle, doi } = params;
+
+  try {
+    const subject = `Action Required: Index your new IJSDS publication${doi ? ` (DOI: ${doi})` : ''}`;
+    const htmlContent = generatePostPublicationIndexingEmailHtml(params);
+
+    await sendEmailNotification({
+      to: authorEmail,
+      subject,
+      htmlContent,
+      type: 'article_published',
+    });
+  } catch (error) {
+    console.error('Failed to send post-publication indexing email:', error);
+    // Non-fatal: log and continue — do not block the publish workflow
   }
 };
 
