@@ -1,4 +1,5 @@
 import { BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import logo from "../../../public/Logo Symbol.png"
 
 export const Footer = () => {
@@ -26,25 +27,29 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">For Authors</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/submission-guidelines" className="hover:text-foreground transition-colors">Submission Guidelines</a></li>
-              <li><a href="/peer-review" className="hover:text-foreground transition-colors">Peer Review Process</a></li>
-              <li><a href="/plagiarism-policy" className="hover:text-foreground transition-colors">Plagiarism Policy</a></li>
-              <li><a href="/preservation-policy" className="hover:text-foreground transition-colors">Preservation & Archiving</a></li>
-              <li><a href="/copyright" className="hover:text-foreground transition-colors">Copyright Notice</a></li>
+              <li><Link to="/submission-guidelines" className="hover:text-foreground transition-colors">Submission Guidelines</Link></li>
+              <li><Link to="/peer-review" className="hover:text-foreground transition-colors">Peer Review Process</Link></li>
+              <li><Link to="/plagiarism-policy" className="hover:text-foreground transition-colors">Plagiarism Policy</Link></li>
+              <li><Link to="/preservation-policy" className="hover:text-foreground transition-colors">Preservation & Archiving</Link></li>
+              <li><Link to="/copyright" className="hover:text-foreground transition-colors">Copyright Notice</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Journal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
-              <li><a href="/editorial-board" className="hover:text-foreground transition-colors">Editorial Board</a></li>
-              {/* <li><a href="/archives" className="hover:text-foreground transition-colors">Archives</a></li> */}
+              <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
+              <li><Link to="/editorial-board" className="hover:text-foreground transition-colors">Editorial Board</Link></li>
+              {/* <li><Link to="/archives" className="hover:text-foreground transition-colors">Archives</Link></li> */}
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">Contact</h3>
+            <h3 className="font-semibold mb-4">
+              <Link to="/contact" className="hover:text-primary transition-colors cursor-pointer">
+                Contact
+              </Link>
+            </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>Email: editor.ijsds@gmail.com</li>
               <li>Phone: +234 808 022 4405</li><div className='mb-2'>

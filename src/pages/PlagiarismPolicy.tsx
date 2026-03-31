@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, AlertTriangle, Shield, Search, BookOpen, FileText, Ban } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export const PlagiarismPolicy = () => {
   const navigate = useNavigate();
@@ -253,9 +253,9 @@ export const PlagiarismPolicy = () => {
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• <a href="https://publicationethics.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Committee on Publication Ethics (COPE)</a></li>
-                <li>• <a href="/submission-guidelines" className="text-primary hover:underline">IJSDS Submission Guidelines</a></li>
-                <li>• <a href="/copyright" className="text-primary hover:underline">Copyright Notice</a></li>
-                <li>• <a href="/peer-review" className="text-primary hover:underline">Peer Review Process</a></li>
+                <li>• <Link to="/submission-guidelines" className="text-primary hover:underline">IJSDS Submission Guidelines</Link></li>
+                <li>• <Link to="/copyright" className="text-primary hover:underline">Copyright Notice</Link></li>
+                <li>• <Link to="/peer-review" className="text-primary hover:underline">Peer Review Process</Link></li>
               </ul>
             </CardContent>
           </Card>

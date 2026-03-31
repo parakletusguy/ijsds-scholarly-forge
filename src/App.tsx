@@ -1,3 +1,4 @@
+import React, { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,53 +9,62 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
-import Index from "./pages/Index";
-import { Auth } from "./pages/Auth";
-import { Articles } from "./pages/Articles";
-import { Submit } from "./pages/Submit";
-import { Dashboard } from "./pages/Dashboard";
-import { Editorial } from "./pages/Editorial";
-import { ReviewAssignment } from "./pages/ReviewAssignment";
-import { ReviewerDashboard } from "./pages/ReviewerDashboard";
-import { ReviewForm } from "./pages/ReviewForm";
-import { Publication } from "./pages/Publication";
-import { Production } from "./pages/Production";
-import { Analytics } from "./pages/Analytics";
-import { Profile } from "./pages/Profile";
-import { About } from "./pages/About";
-import Copyright from "./pages/Copyright";
-import EditorialBoard from "./pages/EditorialBoard";
-import { SubmissionGuidelines } from "./pages/SubmissionGuidelines";
-import { PeerReview } from "./pages/PeerReview";
-import { ExternalIntegrations } from "./pages/ExternalIntegrations";
-import { DataManagement } from "./pages/DataManagement";
-import { SubmissionDetail } from "./pages/SubmissionDetail";
-import { SubmissionReviews } from "./pages/SubmissionReviews";
-import { Reports } from "./pages/Reports";
-import { RevisionSubmissionPortal } from "./components/revisions/RevisionSubmissionPortal";
-import NotFound from "./pages/NotFound";
-import { SystemSettings } from "./pages/SystemSettings";
-import { ManageRequests } from "./pages/approveRequest";
-import { Landing } from "./pages/landingPage";
+const Index = lazy(() => import('./pages/Index'));
+const Auth = lazy(() => import('./pages/Auth').then(m => ({ default: m.Auth })));
+const Articles = lazy(() => import('./pages/Articles').then(m => ({ default: m.Articles })));
+const Submit = lazy(() => import('./pages/Submit').then(m => ({ default: m.Submit })));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const Editorial = lazy(() => import('./pages/Editorial').then(m => ({ default: m.Editorial })));
+const ReviewAssignment = lazy(() => import('./pages/ReviewAssignment').then(m => ({ default: m.ReviewAssignment })));
+const ReviewerDashboard = lazy(() => import('./pages/ReviewerDashboard').then(m => ({ default: m.ReviewerDashboard })));
+const ReviewForm = lazy(() => import('./pages/ReviewForm').then(m => ({ default: m.ReviewForm })));
+const Publication = lazy(() => import('./pages/Publication').then(m => ({ default: m.Publication })));
+const Production = lazy(() => import('./pages/Production').then(m => ({ default: m.Production })));
+const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const Copyright = lazy(() => import('./pages/Copyright'));
+const EditorialBoard = lazy(() => import('./pages/EditorialBoard'));
+const SubmissionGuidelines = lazy(() => import('./pages/SubmissionGuidelines').then(m => ({ default: m.SubmissionGuidelines })));
+const PeerReview = lazy(() => import('./pages/PeerReview').then(m => ({ default: m.PeerReview })));
+const ExternalIntegrations = lazy(() => import('./pages/ExternalIntegrations').then(m => ({ default: m.ExternalIntegrations })));
+const DataManagement = lazy(() => import('./pages/DataManagement').then(m => ({ default: m.DataManagement })));
+const SubmissionDetail = lazy(() => import('./pages/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })));
+const SubmissionReviews = lazy(() => import('./pages/SubmissionReviews').then(m => ({ default: m.SubmissionReviews })));
+const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
+const RevisionSubmissionPortal = lazy(() => import('./components/revisions/RevisionSubmissionPortal').then(m => ({ default: m.RevisionSubmissionPortal })));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const SystemSettings = lazy(() => import('./pages/SystemSettings').then(m => ({ default: m.SystemSettings })));
+const ManageRequests = lazy(() => import('./pages/approveRequest').then(m => ({ default: m.ManageRequests })));
+const Landing = lazy(() => import('./pages/landingPage').then(m => ({ default: m.Landing })));
 import logo_2 from "../public/riversstate-removebg-preview.png"
-import { ArticleInfo } from "./pages/articleInfo";
-import { Guide } from "./pages/guide";
-import { Blog } from "./pages/Blog";
-import { BlogPost } from "./pages/BlogPost";
-import { Partners } from "./pages/Partners";
-import { BlogAdmin } from "./components/blog/BlogAdmin";
-import { PartnersAdmin } from "./components/partners/PartnersAdmin";
-import { ReviewerDetail } from "./pages/reviewersDetails";
-import OpenAccessPage from "./pages/openAccessPage";
-import { PlagiarismPolicy } from "./pages/PlagiarismPolicy";
-import { PreservationPolicy } from "./pages/PreservationPolicy";
-import Archive from "./pages/Archive";
-import { Indexing } from "./pages/Indexing";
-import { Contact } from "./pages/Contact";
+const ArticleInfo = lazy(() => import('./pages/articleInfo').then(m => ({ default: m.ArticleInfo })));
+const Guide = lazy(() => import('./pages/guide').then(m => ({ default: m.Guide })));
+const Blog = lazy(() => import('./pages/Blog').then(m => ({ default: m.Blog })));
+const BlogPost = lazy(() => import('./pages/BlogPost').then(m => ({ default: m.BlogPost })));
+const Partners = lazy(() => import('./pages/Partners').then(m => ({ default: m.Partners })));
+const BlogAdmin = lazy(() => import('./components/blog/BlogAdmin').then(m => ({ default: m.BlogAdmin })));
+const PartnersAdmin = lazy(() => import('./components/partners/PartnersAdmin').then(m => ({ default: m.PartnersAdmin })));
+const ReviewerDetail = lazy(() => import('./pages/reviewersDetails').then(m => ({ default: m.ReviewerDetail })));
+const OpenAccessPage = lazy(() => import('./pages/openAccessPage'));
+const PlagiarismPolicy = lazy(() => import('./pages/PlagiarismPolicy').then(m => ({ default: m.PlagiarismPolicy })));
+const PreservationPolicy = lazy(() => import('./pages/PreservationPolicy').then(m => ({ default: m.PreservationPolicy })));
+const Archive = lazy(() => import('./pages/Archive'));
+const Indexing = lazy(() => import('./pages/Indexing').then(m => ({ default: m.Indexing })));
+const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes before data is considered stale
+      gcTime: 1000 * 60 * 60 * 24, // Keep unused data in cache for 24 hours
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const PageLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
@@ -87,7 +97,8 @@ const App = () => (
             <Sonner />
             <div className="font-Roboto bg-[#ffefcc]">
               <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+              <Routes>
               <Route path="/" element={<Index/>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
               <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
@@ -134,6 +145,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
+              </Suspense>
           </BrowserRouter>
           </div>
           </HelmetProvider>

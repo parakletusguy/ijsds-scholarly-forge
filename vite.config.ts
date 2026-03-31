@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
-// import react from "@vitejs/plugin-react-swc"; // <--- REMOVE
-import react from "@vitejs/plugin-react"; // <--- ADD
+import react from "@vitejs/plugin-react";
 import path from "path";
+import { VitePWA } from 'vite-plugin-pwa';
 import { componentTagger } from "lovable-tagger";
 // import macrosPlugin from "vite-plugin-babel-macros" // <-- 1. REMOVE THIS
 
@@ -24,8 +24,12 @@ export default defineConfig(({ mode }) => ({
         plugins: ["babel-plugin-macros"],
       },
     }),
-
-    // macrosPlugin(), // <-- 1. REMOVE THIS
+    VitePWA({ 
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}']
+      }
+    }),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
