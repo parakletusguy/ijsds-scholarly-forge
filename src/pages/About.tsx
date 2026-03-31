@@ -16,11 +16,10 @@ export const About = () => {
       {/* Hero Section */}
       <section className=" from-primary/5 to-background py-20">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center mb-6">
-            {/* <BookOpen className="h-16 w-16 text-primary mr-4" /> */}
-            {/* <img src={logo} alt="IJSDS logo" className="w-28 sm:w-56 text-primary " /> */}
+          <div className="flex flex-col sm:flex-row items-center justify-center mb-6">
+            <img src={logo} alt="IJSDS logo" className="w-32 sm:w-40 mb-4 sm:mb-0 sm:mr-8" />
 
-            <div className="text-left">
+            <div className="text-center sm:text-left">
               <h1 className="text-5xl font-bold text-foreground mb-2">About IJSDS</h1>
               <p className="text-xl text-muted-foreground">International Journal of Social Work and Development Studies</p>
             </div>
