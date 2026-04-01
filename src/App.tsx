@@ -37,6 +37,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const SystemSettings = lazy(() => import('./pages/SystemSettings').then(m => ({ default: m.SystemSettings })));
 const ManageRequests = lazy(() => import('./pages/approveRequest').then(m => ({ default: m.ManageRequests })));
 const Landing = lazy(() => import('./pages/landingPage').then(m => ({ default: m.Landing })));
+const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
 import logo_2 from "../public/riversstate-removebg-preview.png"
 const ArticleInfo = lazy(() => import('./pages/articleInfo').then(m => ({ default: m.ArticleInfo })));
 const Guide = lazy(() => import('./pages/guide').then(m => ({ default: m.Guide })));
@@ -104,6 +105,7 @@ const App = () => (
               <Routes>
               <Route path="/" element={<Index/>} />
               <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
               <Route path="/article/:slug" element={<PageLayout><ArticleInfo /></PageLayout>} />
               <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
