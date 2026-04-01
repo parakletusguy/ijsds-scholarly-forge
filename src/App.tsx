@@ -147,6 +147,8 @@ const App = () => (
               <Route path="/contact" element={<PageLayout><Contact /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="/admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
+              <Route path="/Admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
+              <Route path="/admin/" element={<PageLayout><AdminDashboard /></PageLayout>} />
               <Route path="/admin/blog" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
               <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
               <Route path="/admin/blog/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
