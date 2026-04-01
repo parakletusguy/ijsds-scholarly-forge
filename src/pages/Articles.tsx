@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildArticleSlug } from '@/lib/articleSlug';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,25 +7,10 @@ import { EnhancedSearch, SearchFilters } from '@/components/search/EnhancedSearc
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
-import { getArticles } from '@/lib/articleService';
+import { getArticles, Article } from '@/lib/articleService';
 import { useNavigate } from 'react-router-dom';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { ArticleStructuredData } from '@/components/seo/ArticleStructuredData';
-
-interface Article {
-  id: string;
-  title: string;
-  abstract: string;
-  keywords: string[] | null;
-  authors: any;
-  publication_date: string | null;
-  doi: string | null;
-  status: string;
-  volume: number | null;
-  issue: number | null;
-  subject_area: string | null;
-  manuscript_file_url: string | null
-}
 
 export const Articles = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -237,7 +223,7 @@ export const Articles = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/article/${article.id}`)}
+                        onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
                         className='mb-3 mx-3'
                       >
                         View Article details

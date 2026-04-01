@@ -4,20 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Users, Globe, ArrowRight, Calendar, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getArticles, Article } from '@/lib/articleService';
+import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
 import logo from "../../public/Logo Symbol.png"
-
-interface Article {
-  id: string;
-  title: string;
-  abstract: string;
-  keywords: string[] | null;
-  authors: any;
-  publication_date: string;
-  volume: number | null;
-  issue: number | null;
-}
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -31,15 +21,8 @@ export const Home = () => {
 
   const fetchRecentArticles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('status', 'published')
-        .order('publication_date', { ascending: false })
-        .limit(3);
-
-      if (error) throw error;
-      setRecentArticles(data || []);
+      const data = await getArticles({ status: 'published' });
+      setRecentArticles(data.slice(0, 3));
     } catch (error) {
       console.error('Error fetching recent articles:', error);
     } finally {
@@ -161,7 +144,7 @@ export const Home = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {recentArticles.map((article) => (
                 <Card key={article.id} className="hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/article/${article.id}`)}>
+                      onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}>
                   <CardHeader>
                     <CardTitle className="text-lg leading-tight line-clamp-2">
                       {article.title}

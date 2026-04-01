@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { getArticle } from '@/lib/articleService';
-import { downloadBibTeX } from '@/lib/bibtexService';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { getArticle, getArticles } from "@/lib/articleService";
+import { extractDoiFromSlug } from "@/lib/articleSlug";
+import { downloadBibTeX } from "@/lib/bibtexService";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
   FileText,
@@ -17,14 +18,15 @@ import {
   Share2,
   ExternalLink,
   BookOpen,
-} from 'lucide-react';
-import { PaperDownload } from '@/components/papers/PaperDownload';
+} from "lucide-react";
+import { PaperDownload } from "@/components/papers/PaperDownload";
 
 // ---------------------------------------------------------------------------
 // Static journal constant — never changes per implementation plan §1.2
 // ---------------------------------------------------------------------------
-const JOURNAL_TITLE = 'International Journal of Social Work and Development Studies';
-const JOURNAL_SHORT = 'IJSDS';
+const JOURNAL_TITLE =
+  "International Journal of Social Work and Development Studies";
+const JOURNAL_SHORT = "IJSDS";
 
 // ---------------------------------------------------------------------------
 // Helper — build the Academia.edu pre-filled upload URL (§3.3)
@@ -41,9 +43,12 @@ function buildAcademiaShareUrl(title: string, articleUrl: string): string {
 // ---------------------------------------------------------------------------
 // Helper — build the ResearchGate pre-filled URL (§3.3)
 // ---------------------------------------------------------------------------
-function buildResearchGateShareUrl(title: string, doi: string | null | undefined): string {
+function buildResearchGateShareUrl(
+  title: string,
+  doi: string | null | undefined,
+): string {
   const params = new URLSearchParams({ title });
-  if (doi) params.set('doi', doi);
+  if (doi) params.set("doi", doi);
   return `https://www.researchgate.net/publication/create?${params.toString()}`;
 }
 
@@ -51,28 +56,36 @@ function buildResearchGateShareUrl(title: string, doi: string | null | undefined
 // Component
 // ---------------------------------------------------------------------------
 export const ArticleInfo = () => {
-  const { ArticleId } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState<any | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    if (ArticleId) {
-      fetchArticleDetails();
+    if (slug) {
+      fetchArticle();
     }
-  }, [ArticleId]);
+  }, [slug]);
 
-  const fetchArticleDetails = async () => {
+  const fetchArticle = async () => {
     try {
-      const data = await getArticle(ArticleId!);
-      setArticle(data);
+      const doi = extractDoiFromSlug(slug!);
+      if (doi) {
+        const results = await getArticles({ doi });
+        if (results.length === 0) throw new Error("Article not found");
+        setArticle(results[0]);
+      } else {
+        // fallback: treat slug as UUID
+        const data = await getArticle(slug!);
+        setArticle(data);
+      }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: 'Failed to fetch article details',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to fetch article details",
+        variant: "destructive",
       });
-      navigate('/dashboard');
+      navigate("/articles");
     } finally {
       setLoadingData(false);
     }
@@ -82,13 +95,15 @@ export const ArticleInfo = () => {
   // Derived values used in meta tags and share links
   // -------------------------------------------------------------------------
   const articleUrl =
-    typeof window !== 'undefined'
+    typeof window !== "undefined"
       ? `${window.location.origin}/article/${ArticleId}`
       : `https://ijsds.org/article/${ArticleId}`;
 
   // Format publication date as YYYY/MM/DD for Highwire Press (§1.2)
   const formattedDate = article?.publication_date
-    ? new Date(article.publication_date).toLocaleDateString('en-CA').replace(/-/g, '/')
+    ? new Date(article.publication_date)
+        .toLocaleDateString("en-CA")
+        .replace(/-/g, "/")
     : null;
 
   // Authors array, safe-guarded
@@ -102,7 +117,7 @@ export const ArticleInfo = () => {
     if (!article) return;
     downloadBibTeX(article);
     toast({
-      title: 'BibTeX Downloaded',
+      title: "BibTeX Downloaded",
       description: `${article.title.slice(0, 60)}… — .bib file saved.`,
     });
   };
@@ -152,15 +167,24 @@ export const ArticleInfo = () => {
           Dynamic fields: all others sourced from Supabase `articles` table
       ==================================================================== */}
       <Helmet>
-        <title>{article.title} — {JOURNAL_SHORT}</title>
-        <meta name="description" content={article.abstract?.slice(0, 160) ?? ''} />
+        <title>
+          {article.title} — {JOURNAL_SHORT}
+        </title>
+        <meta
+          name="description"
+          content={article.abstract?.slice(0, 160) ?? ""}
+        />
 
         {/* Highwire Press citation meta tags (§1.2) */}
         <meta name="citation_title" content={article.title} />
 
         {/* Repeat citation_author once per author as required by the protocol */}
         {authors.map((author) => (
-          <meta key={author.name} name="citation_author" content={author.name} />
+          <meta
+            key={author.name}
+            name="citation_author"
+            content={author.name}
+          />
         ))}
 
         {formattedDate && (
@@ -171,9 +195,7 @@ export const ArticleInfo = () => {
         <meta name="citation_journal_title" content={JOURNAL_TITLE} />
 
         {/* Omitted if doi is null (Q3 decision) */}
-        {article.doi && (
-          <meta name="citation_doi" content={article.doi} />
-        )}
+        {article.doi && <meta name="citation_doi" content={article.doi} />}
 
         {/* Q1 decision: points to raw PDF URL (manuscript_file_url) */}
         {article.manuscript_file_url && (
@@ -188,7 +210,10 @@ export const ArticleInfo = () => {
           <meta name="citation_issue" content={String(article.issue)} />
         )}
         {article.page_start && (
-          <meta name="citation_firstpage" content={String(article.page_start)} />
+          <meta
+            name="citation_firstpage"
+            content={String(article.page_start)}
+          />
         )}
         {article.page_end && (
           <meta name="citation_lastpage" content={String(article.page_end)} />
@@ -212,7 +237,9 @@ export const ArticleInfo = () => {
 
         <main className="flex-1 container mx-auto px-4 py-8">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground">Article Details</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              Article Details
+            </h1>
           </div>
 
           <div className="grid grid-cols-1 gap-8">
@@ -229,7 +256,9 @@ export const ArticleInfo = () => {
               <CardContent className="space-y-6">
                 {/* Title + subject area */}
                 <div>
-                  <h2 className="text-2xl font-semibold mb-2">{article.title}</h2>
+                  <h2 className="text-2xl font-semibold mb-2">
+                    {article.title}
+                  </h2>
                   {article.subject_area && (
                     <Badge variant="secondary" className="mb-4">
                       {article.subject_area}
@@ -240,7 +269,9 @@ export const ArticleInfo = () => {
                 {/* Abstract */}
                 <div>
                   <h3 className="font-medium text-lg mb-2">Abstract</h3>
-                  <p className="text-muted-foreground leading-relaxed">{article.abstract}</p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {article.abstract}
+                  </p>
                 </div>
 
                 {/* Authors */}
@@ -272,17 +303,21 @@ export const ArticleInfo = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">No author information available</p>
+                    <p className="text-muted-foreground">
+                      No author information available
+                    </p>
                   )}
                 </div>
 
                 {/* Publication metadata */}
-                {(article.doi || article.volume || article.publication_date) && (
+                {(article.doi ||
+                  article.volume ||
+                  article.publication_date) && (
                   <div className="flex flex-wrap gap-3 text-sm text-muted-foreground border-t pt-4">
                     {article.doi && (
                       <span className="flex items-center gap-1">
                         <BookOpen className="h-4 w-4" />
-                        DOI:{' '}
+                        DOI:{" "}
                         <a
                           href={`https://doi.org/${article.doi}`}
                           target="_blank"
@@ -296,7 +331,9 @@ export const ArticleInfo = () => {
                     {article.volume && <span>Vol. {article.volume}</span>}
                     {article.issue && <span>Issue {article.issue}</span>}
                     {article.page_start && article.page_end && (
-                      <span>pp. {article.page_start}–{article.page_end}</span>
+                      <span>
+                        pp. {article.page_start}–{article.page_end}
+                      </span>
                     )}
                     {formattedDate && <span>Published: {formattedDate}</span>}
                   </div>
@@ -331,8 +368,8 @@ export const ArticleInfo = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Use the tools below to index this article on major academic platforms and
-                  maximise its citation impact.
+                  Use the tools below to index this article on major academic
+                  platforms and maximise its citation impact.
                 </p>
 
                 {/* Row 1 — BibTeX Export (§1.3) */}
@@ -342,8 +379,9 @@ export const ArticleInfo = () => {
                     Export Citation (BibTeX)
                   </h4>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Download a .bib file to bulk-upload your metadata to ORCID, ResearchGate,
-                    or any reference manager in seconds — no manual data entry needed.
+                    Download a .bib file to bulk-upload your metadata to ORCID,
+                    ResearchGate, or any reference manager in seconds — no
+                    manual data entry needed.
                   </p>
                   <Button
                     id="btn-export-bibtex"
@@ -363,8 +401,8 @@ export const ArticleInfo = () => {
                     Share to ResearchGate
                   </h4>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Opens ResearchGate's publication form with the title and DOI pre-filled
-                    via URL parameters.
+                    Opens ResearchGate's publication form with the title and DOI
+                    pre-filled via URL parameters.
                   </p>
                   <Button
                     id="btn-share-researchgate"
@@ -373,7 +411,10 @@ export const ArticleInfo = () => {
                     asChild
                   >
                     <a
-                      href={buildResearchGateShareUrl(article.title, article.doi)}
+                      href={buildResearchGateShareUrl(
+                        article.title,
+                        article.doi,
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -390,8 +431,8 @@ export const ArticleInfo = () => {
                     Share to Academia.edu
                   </h4>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Opens Academia.edu's upload page with the title and article URL pre-filled
-                    via URL parameters.
+                    Opens Academia.edu's upload page with the title and article
+                    URL pre-filled via URL parameters.
                   </p>
                   <Button
                     id="btn-share-academia"
@@ -412,8 +453,11 @@ export const ArticleInfo = () => {
 
                 {/* ORCID Guide link */}
                 <p className="text-xs text-muted-foreground pt-2">
-                  Want to add this article to your ORCID profile?{' '}
-                  <a href="/orcidGuide" className="underline hover:text-foreground">
+                  Want to add this article to your ORCID profile?{" "}
+                  <a
+                    href="/orcidGuide"
+                    className="underline hover:text-foreground"
+                  >
                     Follow the step-by-step ORCID guide →
                   </a>
                 </p>

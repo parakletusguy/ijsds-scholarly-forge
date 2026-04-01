@@ -36,6 +36,7 @@ export interface Article {
   submission_date?: string | null;
   vetting_fee?: boolean;
   processing_fee?: boolean;
+  manuscript_file_url?: string | null;
   submissions?: { id: string; status: string; submitted_at: string; submitter_id: string }[];
   file_versions?: FileVersion[];
 }
@@ -48,6 +49,7 @@ export const getArticles = async (params?: {
   subject_area?: string;
   volume?: number;
   issue?: number;
+  doi?: string;
 }): Promise<Article[]> => {
   const qs = params ? '?' + new URLSearchParams(
     Object.entries(params)
