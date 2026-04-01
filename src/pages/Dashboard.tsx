@@ -5,12 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { FileText, Plus, Calendar, User } from 'lucide-react';
 import { RejectionMessages } from '@/components/messages/RejectionMessages';
-import { getSubmissions, updateSubmission } from '@/lib/submissionService';
+import { getSubmissions } from '@/lib/submissionService';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProcessinFeeDialog } from '@/components/submission/paystackDialogBox';
-import { toast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 
 
@@ -35,8 +34,6 @@ export const Dashboard = () => {
   // const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [open,setopen] = useState(false)
-  const [userdat, setuserdat] = useState({})
 
   useEffect(() => {
     if (!user) {
@@ -95,48 +92,6 @@ export const Dashboard = () => {
     return null;
   }
 
-  const onSuccess = async (pReponse) => {
-      try {
-        console.log(pReponse.reference)
-        const transactionReference = pReponse.reference
-        const confirm = await fetch("http://localhost:4500/api/verify-payment",{
-          method:"POST",
-          headers:{ 'Content-Type':'application/json'},
-          body:JSON.stringify({reference:transactionReference,amount:2000000})
-        })
-        const {success,message,data} = await confirm.json()
-        console.log({success,message,data})
-        if(!success) throw "server error"
-        if(!data.status) throw "payment not verified"
-        if(data.amount != 2000000) throw 'amount not equal'
-
-        const submissions = await getSubmissions({ submitter_id: user.id });
-        for (const sub of submissions) {
-          await updateSubmission(sub.id, { processing_fee: true });
-        }
-  
-        toast({
-            title:'payment successful',
-            description:`your payment has been successfully verified, kindly proceed to submit your article`
-          })
-      } catch (error) {
-        if(error){
-          console.log(error)
-  
-          toast({
-            title:'payment failed',
-            description:`payment failed due to ${error}, please contact support or try again later`,
-            variant:'destructive'
-          })
-        }
-      }
-    }
-
-    const handleSubmit = (userData) => {
-        setuserdat(userData)
-        setopen(true)
-    }
-    
 
   if (loading) {
     return (

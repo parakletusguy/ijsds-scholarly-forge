@@ -13,10 +13,10 @@ import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
 import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
-import { notifyPaymentConfirmation } from '@/lib/paymentNotificationService';
 import ReceiptDown from '@/components/receiptGeneration/receiptDownload';
-import { sendEmailNotification, SendRecieptMail } from '@/lib/emailService';
+import { sendEmailNotification } from '@/lib/emailService';
 import { uploadPdf } from '@/lib/cloudinary';
+import { api } from '@/lib/apiClient';
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -135,18 +135,10 @@ export const SubmissionDetail = () => {
     const onSuccess = async (pReponse, type:string, amount:number) => {
       try {
         const transactionReference = pReponse.reference
-        // const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
-        //   method:"POST",
-        //   headers:{ 'Content-Type':'application/json'},
-        //   body:JSON.stringify({reference:transactionReference,amount:500000})
-        // }) 
-        const confirm = await fetch("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/api/verify-payment",{
-          method:"POST",
-          headers:{ 'Content-Type':'application/json'},
-          body:JSON.stringify({reference:transactionReference,amount:amount,articleId:submission.article.id,type:type})
-        }) 
-        const {success,message,data} = await confirm.json()
-        console.log({success,message,data})
+        const { success, data } = await api.post<{ success: boolean; data: { status: boolean } }>(
+          '/api/verify-payment',
+          { reference: transactionReference, amount, articleId: submission.article.id, type }
+        );
         if(!success) throw "server error"
         if(!data.status) throw "payment not verified"
 
@@ -199,21 +191,6 @@ export const SubmissionDetail = () => {
         }
         
         
-
-        // Notify user and admins/editors about confirmed payment
-        try {
-          const paymentTypeKey = type === 'vetting' ? 'vetting_fee' : 'processing_fee';
-          await notifyPaymentConfirmation(
-            submission.submitter_id,
-            submission.submitter.email,
-            submission.submitter.full_name,
-            submission.article.title,
-            paymentTypeKey as 'vetting_fee' | 'processing_fee',
-            amount
-          );
-        } catch (notifyErr) {
-          console.error('Error notifying payment confirmation:', notifyErr);
-        }
 
         toast({
             title:'payment successful',
