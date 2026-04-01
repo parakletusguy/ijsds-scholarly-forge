@@ -52,6 +52,8 @@ const PreservationPolicy = lazy(() => import('./pages/PreservationPolicy').then(
 const Archive = lazy(() => import('./pages/Archive'));
 const Indexing = lazy(() => import('./pages/Indexing').then(m => ({ default: m.Indexing })));
 const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
+const AdminBlogManagement = lazy(() => import('./pages/AdminBlogManagement').then(m => ({ default: m.AdminBlogManagement })));
+const EditBlogPost = lazy(() => import('./pages/EditBlogPost').then(m => ({ default: m.EditBlogPost })));
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
@@ -143,6 +145,9 @@ const App = () => (
               <Route path="/indexing" element={<PageLayout><Indexing /></PageLayout>} />
               <Route path="/contact" element={<PageLayout><Contact /></PageLayout>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
+              <Route path="/admin/blogs/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
+              <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
               <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
             </Routes>
               </Suspense>

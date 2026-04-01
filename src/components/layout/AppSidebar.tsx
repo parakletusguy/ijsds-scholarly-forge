@@ -130,6 +130,7 @@ export const AppSidebar = () => {
       { title: 'Data Management', url: '/data-management', icon: Database, roles: ['admin'] },
       { title: 'Analytics', url: '/analytics', icon: BarChart3, roles: ['admin'] },
       { title: 'Check Requests', url: '/requests', icon: CheckSquare, roles: ['admin'] },
+      { title: 'Manage Blogs', url: '/admin/blogs', icon: BookOpen, roles: ['admin', 'editor'] },
     ];
 
     const allItems = [...baseItems, ...roleSpecificItems];
