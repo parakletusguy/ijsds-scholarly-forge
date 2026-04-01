@@ -12,12 +12,33 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            return 'vendor';
+            if (id.includes('@react-pdf') || id.includes('react-pdf-html')) {
+              return 'vendor-pdf';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('jodit') || id.includes('jodit-react')) {
+              return 'vendor-editor';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('mammoth') || id.includes('html-docx-js')) {
+              return 'vendor-utils';
+            }
+            return 'vendor'; 
           }
         },
       },
@@ -40,7 +61,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'],
-        maximumFileSizeToCacheInBytes: 5000000
+        maximumFileSizeToCacheInBytes: 10000000 
       }
     }),
     mode === 'development' &&
