@@ -1,22 +1,5 @@
 import { useEffect } from 'react';
-
-interface Author {
-  name: string;
-  email?: string;
-  affiliation?: string;
-}
-
-interface Article {
-  id: string;
-  title: string;
-  abstract: string;
-  keywords: string[] | null;
-  authors: Author[];
-  publication_date: string | null;
-  doi: string | null;
-  volume: number | null;
-  issue: number | null;
-}
+import { Article } from '@/lib/articleService';
 
 interface ArticleStructuredDataProps {
   articles: Article[];

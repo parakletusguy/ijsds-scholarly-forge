@@ -6,11 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { EnhancedSearch, SearchFilters } from '@/components/search/EnhancedSearch';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
+import { Calendar, User, FileText, ArrowLeft, BookOpen } from 'lucide-react';
 import { getArticles, Article } from '@/lib/articleService';
 import { useNavigate } from 'react-router-dom';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { ArticleStructuredData } from '@/components/seo/ArticleStructuredData';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 export const Articles = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -133,15 +134,14 @@ export const Articles = () => {
                   Back
                 </Button>
                 </div>
-      <main className="flex-1 container mx-auto px-4 py-8 ">
+      <PageHeader 
+        title="Published" 
+        subtitle="Articles" 
+        accent="The Scholarly Registry"
+        description="Browse our collection of peer-reviewed articles in social and development sciences"
+      />
+      <ContentSection>
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Published Articles</h1>
-            <p className="text-muted-foreground">
-              Browse our collection of peer-reviewed articles in social and development sciences
-            </p>
-          </div>
-
           <EnhancedSearch 
             onSearch={(filters, sort, fuzzy) => handleSearch(filters)} 
             results={filteredArticles as any[]}
@@ -239,7 +239,7 @@ export const Articles = () => {
             </div>
           )}
         </div>
-      </main>
+      </ContentSection>
     </div>
   );
 };

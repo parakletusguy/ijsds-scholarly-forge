@@ -4,7 +4,7 @@ import { signOut } from '@/lib/auth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { HelpSystem } from '@/components/help/HelpSystem';
-import { User, LogOut, FileText, Search, Menu, X, ChevronDown, Zap, ShieldCheck, Globe } from 'lucide-react';
+import { User, LogOut, FileText, Search, Menu, X, ChevronDown, Zap, ShieldCheck, Globe, ArrowRight, Layers } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -161,7 +161,7 @@ export const Header = () => {
 
       {/* Mobile Registry Navigation Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-border/10 shadow-[0_50px_100px_rgba(0,0,0,0.2)] p-8 space-y-8 animate-in fade-in slide-in-from-top-4">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white border border-border/10 shadow-[0_50px_100px_rgba(0,0,0,0.2)] p-8 space-y-8 animate-in fade-in slide-in-from-top-4z-50 max-h-[80vh] overflow-y-auto">
            {navLinks.map((link) => (
              <button
                key={link.path}
@@ -184,4 +184,3 @@ export const Header = () => {
     </nav>
   );
 };
-import { ArrowRight, Layers } from 'lucide-react';
