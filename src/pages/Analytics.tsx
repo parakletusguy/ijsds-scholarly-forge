@@ -6,10 +6,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Calendar, Clock, FileText, Users, TrendingUp, Award, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, FileText, Users, TrendingUp, Award, ArrowLeft, BarChart3, Activity, GraduationCap, ChevronRight, Send, ShieldCheck, Zap } from 'lucide-react';
 import { PerformanceDashboard } from '@/components/analytics/PerformanceDashboard';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface AnalyticsData {
   editorialPerformance: {
@@ -37,18 +38,18 @@ interface AnalyticsData {
   };
 }
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
+// Initiative Afrique Scholarly Palette
+const COLORS = ['#1b4332', '#d97706', '#eab308', '#000000'];
 
 export const Analytics = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isEditor, setIsEditor] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
-    
     checkEditorStatus();
     fetchAnalytics();
   }, [user]);
@@ -56,56 +57,28 @@ export const Analytics = () => {
   const checkEditorStatus = async () => {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('is_editor')
+      .select('is_editor, is_admin')
       .eq('id', user?.id)
       .single();
     
-    setIsEditor(profile?.is_editor || false);
+    setIsEditor(profile?.is_editor || profile?.is_admin || false);
   };
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      
-      // Fetch editorial decisions
-      const { data: decisions } = await supabase
-        .from('editorial_decisions')
-        .select(`
-          *,
-          submissions(*)
-        `);
+      const [decisionsRes, reviewsRes, articlesRes] = await Promise.all([
+        supabase.from('editorial_decisions').select('*, submissions(*)'),
+        supabase.from('reviews').select('*, profiles(full_name)'),
+        supabase.from('articles').select('*')
+      ]);
 
-      // Fetch reviews
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          profiles(full_name)
-        `);
+      const editorialPerformance = processEditorialPerformance(decisionsRes.data || []);
+      const reviewMetrics = processReviewMetrics(reviewsRes.data || []);
+      const acceptanceRates = processAcceptanceRates(decisionsRes.data || []);
+      const publicationStats = processPublicationStats(articlesRes.data || []);
 
-      // Fetch articles
-      const { data: articles } = await supabase
-        .from('articles')
-        .select('*');
-
-      // Process editorial performance
-      const editorialPerformance = processEditorialPerformance(decisions || []);
-      
-      // Process review metrics
-      const reviewMetrics = processReviewMetrics(reviews || []);
-      
-      // Process acceptance rates
-      const acceptanceRates = processAcceptanceRates(decisions || []);
-      
-      // Process publication stats
-      const publicationStats = processPublicationStats(articles || []);
-
-      setAnalytics({
-        editorialPerformance,
-        reviewMetrics,
-        acceptanceRates,
-        publicationStats
-      });
+      setAnalytics({ editorialPerformance, reviewMetrics, acceptanceRates, publicationStats });
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
@@ -115,22 +88,14 @@ export const Analytics = () => {
 
   const processEditorialPerformance = (decisions: any[]) => {
     const totalDecisions = decisions.length;
-    const thisMonth = decisions.filter(d => 
-      new Date(d.created_at).getMonth() === new Date().getMonth()
-    ).length;
+    const thisMonth = decisions.filter(d => new Date(d.created_at).getMonth() === new Date().getMonth()).length;
+    const decisionTimes = decisions.filter(d => d.submissions).map(d => {
+      const dDate = new Date(d.created_at);
+      const sDate = new Date(d.submissions.submitted_at);
+      return Math.ceil((dDate.getTime() - sDate.getTime()) / (1000 * 60 * 60 * 24));
+    });
 
-    const decisionTimes = decisions
-      .filter(d => d.submissions)
-      .map(d => {
-        const decision = new Date(d.created_at);
-        const submission = new Date(d.submissions.submitted_at);
-        return Math.ceil((decision.getTime() - submission.getTime()) / (1000 * 60 * 60 * 24));
-      });
-
-    const avgDecisionTime = decisionTimes.length > 0 
-      ? Math.round(decisionTimes.reduce((a, b) => a + b, 0) / decisionTimes.length)
-      : 0;
-
+    const avgDecisionTime = decisionTimes.length > 0 ? Math.round(decisionTimes.reduce((a, b) => a + b, 0) / decisionTimes.length) : 0;
     const decisionsByType = [
       { type: 'Accepted', count: decisions.filter(d => d.decision_type === 'accept').length, color: COLORS[0] },
       { type: 'Rejected', count: decisions.filter(d => d.decision_type === 'reject').length, color: COLORS[1] },
@@ -138,53 +103,26 @@ export const Analytics = () => {
       { type: 'Desk Reject', count: decisions.filter(d => d.decision_type === 'desk_reject').length, color: COLORS[3] }
     ].filter(item => item.count > 0);
 
-    return {
-      totalDecisions,
-      avgDecisionTime,
-      decisionsThisMonth: thisMonth,
-      decisionsByType
-    };
+    return { totalDecisions, avgDecisionTime, decisionsThisMonth: thisMonth, decisionsByType };
   };
 
   const processReviewMetrics = (reviews: any[]) => {
     const completedReviews = reviews.filter(r => r.submitted_at);
     const pendingReviews = reviews.filter(r => !r.submitted_at && r.invitation_status === 'accepted').length;
+    const turnaroundTimes = completedReviews.map(r => Math.ceil((new Date(r.submitted_at).getTime() - new Date(r.invitation_sent_at).getTime()) / (1000 * 60 * 60 * 24)));
+    const avgTurnaroundTime = turnaroundTimes.length > 0 ? Math.round(turnaroundTimes.reduce((a, b) => a + b, 0) / turnaroundTimes.length) : 0;
+    const onTimeReviews = completedReviews.filter(r => !r.deadline_date || new Date(r.submitted_at) <= new Date(r.deadline_date));
+    const onTimeCompletionRate = completedReviews.length > 0 ? Math.round((onTimeReviews.length / completedReviews.length) * 100) : 0;
 
-    const turnaroundTimes = completedReviews.map(r => {
-      const submitted = new Date(r.submitted_at);
-      const invited = new Date(r.invitation_sent_at);
-      return Math.ceil((submitted.getTime() - invited.getTime()) / (1000 * 60 * 60 * 24));
-    });
-
-    const avgTurnaroundTime = turnaroundTimes.length > 0
-      ? Math.round(turnaroundTimes.reduce((a, b) => a + b, 0) / turnaroundTimes.length)
-      : 0;
-
-    const onTimeReviews = completedReviews.filter(r => {
-      if (!r.deadline_date) return true;
-      return new Date(r.submitted_at) <= new Date(r.deadline_date);
-    });
-
-    const onTimeCompletionRate = completedReviews.length > 0
-      ? Math.round((onTimeReviews.length / completedReviews.length) * 100)
-      : 0;
-
-    // Group by reviewer
     const reviewerStats = new Map();
     completedReviews.forEach(r => {
-      const reviewerName = r.profiles?.full_name || 'Unknown Reviewer';
-      if (!reviewerStats.has(reviewerName)) {
-        reviewerStats.set(reviewerName, { completed: 0, totalTime: 0, onTime: 0 });
-      }
-      const stats = reviewerStats.get(reviewerName);
-      stats.completed++;
-      
+      const name = r.profiles?.full_name || 'Anonymous Peer';
+      if (!reviewerStats.has(name)) reviewerStats.set(name, { completed: 0, totalTime: 0, onTime: 0 });
+      const s = reviewerStats.get(name);
+      s.completed++;
       const time = Math.ceil((new Date(r.submitted_at).getTime() - new Date(r.invitation_sent_at).getTime()) / (1000 * 60 * 60 * 24));
-      stats.totalTime += time;
-      
-      if (!r.deadline_date || new Date(r.submitted_at) <= new Date(r.deadline_date)) {
-        stats.onTime++;
-      }
+      s.totalTime += time;
+      if (!r.deadline_date || new Date(r.submitted_at) <= new Date(r.deadline_date)) s.onTime++;
     });
 
     const reviewerPerformance = Array.from(reviewerStats.entries()).map(([reviewer, stats]) => ({
@@ -194,477 +132,327 @@ export const Analytics = () => {
       onTimeRate: Math.round((stats.onTime / stats.completed) * 100)
     })).sort((a, b) => b.completed - a.completed).slice(0, 10);
 
-    return {
-      avgTurnaroundTime,
-      onTimeCompletionRate,
-      pendingReviews,
-      reviewerPerformance
-    };
+    return { avgTurnaroundTime, onTimeCompletionRate, pendingReviews, reviewerPerformance };
   };
 
   const processAcceptanceRates = (decisions: any[]) => {
     const accepted = decisions.filter(d => d.decision_type === 'accept').length;
     const total = decisions.length;
     const overall = total > 0 ? Math.round((accepted / total) * 100) : 0;
+    const thisYearRate = decisions.filter(d => new Date(d.created_at).getFullYear() === new Date().getFullYear()).length > 0 ? Math.round((decisions.filter(d => new Date(d.created_at).getFullYear() === new Date().getFullYear() && d.decision_type === 'accept').length / decisions.filter(d => new Date(d.created_at).getFullYear() === new Date().getFullYear()).length) * 100) : 0;
 
-    const thisYear = new Date().getFullYear();
-    const thisYearDecisions = decisions.filter(d => 
-      new Date(d.created_at).getFullYear() === thisYear
-    );
-    const thisYearAccepted = thisYearDecisions.filter(d => d.decision_type === 'accept').length;
-    const thisYearRate = thisYearDecisions.length > 0 
-      ? Math.round((thisYearAccepted / thisYearDecisions.length) * 100) 
-      : 0;
-
-    // Monthly trend for the last 12 months
     const monthlyTrend = [];
     for (let i = 11; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const monthDecisions = decisions.filter(d => {
-        const decisionDate = new Date(d.created_at);
-        return decisionDate.getMonth() === date.getMonth() && 
-               decisionDate.getFullYear() === date.getFullYear();
-      });
-      
-      const monthAccepted = monthDecisions.filter(d => d.decision_type === 'accept').length;
-      const monthRejected = monthDecisions.filter(d => ['reject', 'desk_reject'].includes(d.decision_type)).length;
-      const rate = monthDecisions.length > 0 ? Math.round((monthAccepted / monthDecisions.length) * 100) : 0;
-      
-      monthlyTrend.push({
-        month: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }),
-        accepted: monthAccepted,
-        rejected: monthRejected,
-        rate
-      });
+      const date = new Date(); date.setMonth(date.getMonth() - i);
+      const mDecisions = decisions.filter(d => { const dt = new Date(d.created_at); return dt.getMonth() === date.getMonth() && dt.getFullYear() === date.getFullYear(); });
+      const mAcc = mDecisions.filter(d => d.decision_type === 'accept').length;
+      const mRej = mDecisions.filter(d => ['reject', 'desk_reject'].includes(d.decision_type)).length;
+      monthlyTrend.push({ month: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }), accepted: mAcc, rejected: mRej, rate: mDecisions.length > 0 ? Math.round((mAcc / mDecisions.length) * 100) : 0 });
     }
-
-    return {
-      overall,
-      thisYear: thisYearRate,
-      monthlyTrend
-    };
+    return { overall, thisYear: thisYearRate, monthlyTrend };
   };
 
   const processPublicationStats = (articles: any[]) => {
     const published = articles.filter(a => a.status === 'published').length;
     const inProgress = articles.filter(a => ['under_review', 'accepted', 'in_production'].includes(a.status)).length;
-
-    // Publication trend for the last 12 months
     const publicationTrend = [];
     for (let i = 11; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const monthPublished = articles.filter(a => {
-        if (!a.publication_date) return false;
-        const pubDate = new Date(a.publication_date);
-        return pubDate.getMonth() === date.getMonth() && 
-               pubDate.getFullYear() === date.getFullYear();
-      }).length;
-      
-      publicationTrend.push({
-        month: date.toLocaleDateString('default', { month: 'short' }),
-        published: monthPublished
-      });
+      const date = new Date(); date.setMonth(date.getMonth() - i);
+      publicationTrend.push({ month: date.toLocaleDateString('default', { month: 'short' }), published: articles.filter(a => a.publication_date && new Date(a.publication_date).getMonth() === date.getMonth() && new Date(a.publication_date).getFullYear() === date.getFullYear()).length });
     }
-
-    // Volume metrics
     const volumeStats = new Map();
     articles.filter(a => a.volume).forEach(a => {
-      if (!volumeStats.has(a.volume)) {
-        volumeStats.set(a.volume, { articles: 0, pages: 0 });
-      }
-      const stats = volumeStats.get(a.volume);
-      stats.articles++;
-      if (a.page_start && a.page_end) {
-        stats.pages += (a.page_end - a.page_start + 1);
-      }
+      if (!volumeStats.has(a.volume)) volumeStats.set(a.volume, { articles: 0, pages: 0 });
+      const s = volumeStats.get(a.volume); s.articles++;
+      if (a.page_start && a.page_end) s.pages += (a.page_end - a.page_start + 1);
     });
-
-    const volumeMetrics = Array.from(volumeStats.entries()).map(([volume, stats]) => ({
-      volume,
-      articles: stats.articles,
-      pages: stats.pages
-    })).sort((a, b) => b.volume - a.volume);
-
-    return {
-      articlesPublished: published,
-      articlesInProgress: inProgress,
-      publicationTrend,
-      volumeMetrics
-    };
+    return { articlesPublished: published, articlesInProgress: inProgress, publicationTrend, volumeMetrics: Array.from(volumeStats.entries()).map(([volume, stats]) => ({ volume, articles: stats.articles, pages: stats.pages })).sort((a, b) => b.volume - a.volume) };
   };
 
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p>Please sign in to view analytics.</p>
-        </div>
-      </div>
-    );
-  }
+  const cardClasses = "bg-white p-8 border border-border/40 shadow-sm relative overflow-hidden group hover:shadow-xl hover:border-primary/20 transition-all";
+  const labelClasses = "font-headline font-black text-[9px] uppercase tracking-widest text-foreground/40 mb-2 block";
+  const chartCardClasses = "bg-white p-10 border border-border/10 shadow-sm relative overflow-hidden";
 
-  if (!isEditor) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Editor Access Required</h1>
-          <p>You need editor privileges to view analytics and reports.</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading || !isEditor) return (
+    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
+       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading analytics...</div>
-      </div>
-    );
-  }
-
-  if (!analytics) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">No Data Available</h1>
-          <p>Unable to load analytics data.</p>
-        </div>
-      </div>
-    );
-  }
+  if (!analytics) return (
+     <div className="min-h-screen flex items-center justify-center bg-secondary/5 font-headline font-black uppercase tracking-widest text-foreground/20">
+        Sync Protocol Failed
+     </div>
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-         <Button 
-                  variant="outline" 
-                  onClick={() => navigate(-1)}
-                  className="mb-4"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Analytics & Reports</h1>
-        <p className="text-muted-foreground">Comprehensive insights into journal performance and editorial metrics</p>
-      </div>
+    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+      <PageHeader 
+        title="Intelligence" 
+        subtitle="Nexus" 
+        accent="Metric Monitoring"
+        description="Monitor the institutional efficacy and scholarly trajectory of the journal. Analyze peer-review velocity, acceptance throughput, and departmental publication trends."
+      />
 
-      <Tabs defaultValue="editorial" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="editorial">Editorial Performance</TabsTrigger>
-          <TabsTrigger value="reviews">Review Metrics</TabsTrigger>
-          <TabsTrigger value="acceptance">Acceptance Rates</TabsTrigger>
-          <TabsTrigger value="publication">Publication Stats</TabsTrigger>
-          <TabsTrigger value="dashboard">Performance Dashboard</TabsTrigger>
-        </TabsList>
+      <ContentSection>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+           <Button onClick={() => navigate('/admin')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
+              <ArrowLeft className="h-4 w-4" /> Return to Command Hub
+           </Button>
+           
+           <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
+              <ShieldCheck size={16} className="text-secondary" />
+              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Authorized Intelligence Audit Stream</span>
+           </div>
+        </div>
 
-        <TabsContent value="editorial" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Decisions</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.editorialPerformance.totalDecisions}</div>
-                <p className="text-xs text-muted-foreground">
-                  {analytics.editorialPerformance.decisionsThisMonth} this month
-                </p>
-              </CardContent>
-            </Card>
+        <Tabs defaultValue="editorial" className="space-y-12">
+          <TabsList className="bg-white border border-border/20 p-2 rounded-none h-auto flex flex-wrap shadow-sm">
+            {[
+              { val: "editorial", label: "Editorial Census", icon: <FileText size={14} /> },
+              { val: "reviews", label: "Assessment Velocity", icon: <Clock size={14} /> },
+              { val: "acceptance", label: "Acceptance Throughput", icon: <TrendingUp size={14} /> },
+              { val: "publication", label: "Scholarly Archives", icon: <GraduationCap size={14} /> },
+              { val: "dashboard", label: "Performance Nexus", icon: <Zap size={14} /> }
+            ].map(tab => (
+              <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-6 px-10 data-[state=active]:bg-foreground data-[state=active]:text-white font-headline font-black uppercase text-[10px] tracking-widest transition-all gap-4 grow border-r border-border/10 last:border-0">
+                {tab.icon} {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Decision Time</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.editorialPerformance.avgDecisionTime} days</div>
-                <p className="text-xs text-muted-foreground">From submission to decision</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="editorial" className="space-y-12 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className={cardClasses + " border-t-8 border-primary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-primary/5 text-primary"><FileText size={18} /></div>
+                    <span className="font-headline font-black text-3xl text-foreground tracking-tighter">{analytics.editorialPerformance.totalDecisions}</span>
+                  </div>
+                  <p className={labelClasses}>Global Decisions Ledger</p>
+                  <p className="font-headline font-bold text-[8px] uppercase tracking-widest text-secondary">{analytics.editorialPerformance.decisionsThisMonth} Cycle Intake</p>
+               </div>
+               <div className={cardClasses + " border-t-8 border-secondary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-secondary/5 text-secondary"><Clock size={18} /></div>
+                    <span className="font-headline font-black text-3xl text-foreground tracking-tighter">{analytics.editorialPerformance.avgDecisionTime}d</span>
+                  </div>
+                  <p className={labelClasses}>Decision Latency Tier</p>
+                  <p className="text-[10px] text-foreground/20 italic">Submission to Final Clause</p>
+               </div>
+               <div className={cardClasses + " border-t-8 border-foreground"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-muted text-foreground/30"><TrendingUp size={18} /></div>
+                    <span className="font-headline font-black text-3xl text-foreground tracking-tighter">{analytics.editorialPerformance.decisionsThisMonth}</span>
+                  </div>
+                  <p className={labelClasses}>Monthly Throughput</p>
+                  <p className="text-[10px] text-foreground/20 italic">Validated Editorial Consensus</p>
+               </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">This Month</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.editorialPerformance.decisionsThisMonth}</div>
-                <p className="text-xs text-muted-foreground">Editorial decisions made</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* <Card>
-            <CardHeader>
-              <CardTitle>Decision Distribution</CardTitle>
-              <CardDescription>Breakdown of editorial decisions by type</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  count: {
-                    label: "Count",
-                    color: "hsl(var(--chart-1))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <PieChart>
-                  <Pie
-                    data={analytics.editorialPerformance.decisionsByType}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ type, count }) => `${type}: ${count}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="count"
-                  >
-                    {analytics.editorialPerformance.decisionsByType.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ChartContainer>
-            </CardContent>
-          </Card> */}
-        </TabsContent>
-
-        <TabsContent value="reviews" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Review Time</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.reviewMetrics.avgTurnaroundTime} days</div>
-                <p className="text-xs text-muted-foreground">Average turnaround time</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">On-Time Rate</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.reviewMetrics.onTimeCompletionRate}%</div>
-                <p className="text-xs text-muted-foreground">Reviews completed on time</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.reviewMetrics.pendingReviews}</div>
-                <p className="text-xs text-muted-foreground">Currently pending</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Reviewer Performance</CardTitle>
-              <CardDescription>Top reviewers by completion rate and efficiency</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {analytics.reviewMetrics.reviewerPerformance.map((reviewer, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">{reviewer.reviewer}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {reviewer.completed} reviews completed
-                      </p>
+            <div className={chartCardClasses}>
+               <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-primary pl-4">Decision Distribution Protocol</h3>
+               <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analytics.editorialPerformance.decisionsByType}
+                        cx="50%" cy="50%" innerRadius={100} outerRadius={140} paddingAngle={5}
+                        dataKey="count" nameKey="type"
+                      >
+                        {analytics.editorialPerformance.decisionsByType.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+               </div>
+               <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+                  {analytics.editorialPerformance.decisionsByType.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                       <div className="w-3 h-3" style={{ backgroundColor: item.color }}></div>
+                       <div>
+                          <p className="text-[9px] font-headline font-black uppercase tracking-widest text-foreground/30">{item.type}</p>
+                          <p className="font-headline font-bold text-xs">{item.count} Dossiers</p>
+                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">{reviewer.avgTime} days avg</Badge>
-                        <Badge variant="outline">{reviewer.onTimeRate}% on-time</Badge>
+                  ))}
+               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="space-y-12 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className={cardClasses + " border-t-8 border-secondary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-secondary/5 text-secondary"><Clock size={18} /></div>
+                    <span className="font-headline font-black text-3xl text-foreground tracking-tighter">{analytics.reviewMetrics.avgTurnaroundTime}d</span>
+                  </div>
+                  <p className={labelClasses}>Mean Assessment Velocity</p>
+                  <p className="text-[10px] text-foreground/20 italic">Peer Engagement Latency</p>
+               </div>
+               <div className={cardClasses + " border-t-8 border-primary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-primary/5 text-primary"><Award size={18} /></div>
+                    <span className="font-headline font-black text-3xl text-foreground tracking-tighter">{analytics.reviewMetrics.onTimeCompletionRate}%</span>
+                  </div>
+                  <p className={labelClasses}>Institutional Punctuality</p>
+                  <p className="font-headline font-bold text-[8px] uppercase tracking-widest text-secondary">Compliance Baseline 70%</p>
+               </div>
+               <div className={cardClasses + " border-t-8 border-foreground"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-muted text-foreground/30"><Users size={18} /></div>
+                    <span className="font-headline font-black text-3xl text-foreground tracking-tighter">{analytics.reviewMetrics.pendingReviews}</span>
+                  </div>
+                  <p className={labelClasses}>Active Assessments</p>
+                  <p className="text-[10px] text-foreground/20 italic">Dossiers in Peer-Discovery</p>
+               </div>
+            </div>
+
+            <div className={chartCardClasses}>
+               <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-secondary pl-4">Reviewer Peer Performance Ledger</h3>
+               <div className="space-y-4">
+                  {analytics.reviewMetrics.reviewerPerformance.map((reviewer, index) => (
+                    <div key={index} className="flex items-center justify-between p-8 border border-border/10 hover:border-secondary/20 hover:bg-secondary/5 transition-all group">
+                      <div>
+                        <h4 className="font-headline font-black uppercase text-xs tracking-tight group-hover:text-secondary transition-colors">{reviewer.reviewer}</h4>
+                        <p className="font-body text-[10px] text-foreground/40 italic">
+                          {reviewer.completed} Peer Assessments Authenticated
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="font-headline font-black text-xs text-foreground">{reviewer.avgTime}d</p>
+                          <p className="text-[8px] font-headline uppercase tracking-widest text-foreground/20">Duration</p>
+                        </div>
+                        <div className="text-right border-l border-border/10 pl-6">
+                          <p className={`font-headline font-black text-xs ${reviewer.onTimeRate > 80 ? 'text-secondary' : 'text-foreground'}`}>{reviewer.onTimeRate}%</p>
+                          <p className="text-[8px] font-headline uppercase tracking-widest text-foreground/20">Compliance</p>
+                        </div>
                       </div>
                     </div>
+                  ))}
+               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="acceptance" className="space-y-12 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className={cardClasses + " border-t-8 border-foreground"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-muted text-foreground/30"><TrendingUp size={18} /></div>
+                    <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{analytics.acceptanceRates.overall}%</span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="acceptance" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Overall Acceptance Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.acceptanceRates.overall}%</div>
-                <p className="text-xs text-muted-foreground">All-time average</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">This Year</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.acceptanceRates.thisYear}%</div>
-                <p className="text-xs text-muted-foreground">Current year acceptance rate</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Acceptance Trend</CardTitle>
-              <CardDescription>Acceptance rates over the last 12 months</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  rate: {
-                    label: "Acceptance Rate (%)",
-                    color: "hsl(var(--chart-1))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <LineChart data={analytics.acceptanceRates.monthlyTrend}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="rate" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
-                    name="Acceptance Rate (%)"
-                  />
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Decision Volume</CardTitle>
-              <CardDescription>Accepted vs rejected submissions by month</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  accepted: {
-                    label: "Accepted",
-                    color: "hsl(var(--chart-1))",
-                  },
-                  rejected: {
-                    label: "Rejected",
-                    color: "hsl(var(--chart-2))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <BarChart data={analytics.acceptanceRates.monthlyTrend}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="accepted" fill="hsl(var(--primary))" name="Accepted" />
-                  <Bar dataKey="rejected" fill="hsl(var(--secondary))" name="Rejected" />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="publication" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Articles Published</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.publicationStats.articlesPublished}</div>
-                <p className="text-xs text-muted-foreground">Total published articles</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.publicationStats.articlesInProgress}</div>
-                <p className="text-xs text-muted-foreground">Articles in pipeline</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Publication Trend</CardTitle>
-              <CardDescription>Articles published over the last 12 months</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  published: {
-                    label: "Published Articles",
-                    color: "hsl(var(--chart-1))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <BarChart data={analytics.publicationStats.publicationTrend}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="published" fill="hsl(var(--primary))" name="Published Articles" />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Volume Metrics</CardTitle>
-              <CardDescription>Articles and pages by volume</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {analytics.publicationStats.volumeMetrics.map((volume, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Volume {volume.volume}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {volume.articles} articles, {volume.pages} pages
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline">{volume.articles} articles</Badge>
-                    </div>
+                  <p className={labelClasses}>Aggregate Acceptance Protocol</p>
+                  <p className="text-[10px] text-foreground/20 italic">Institutional Throughput Baseline</p>
+               </div>
+               <div className={cardClasses + " border-t-8 border-secondary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-secondary/5 text-secondary"><Calendar size={18} /></div>
+                    <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{analytics.acceptanceRates.thisYear}%</span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <p className={labelClasses}>Current Temporal Cycle Rate</p>
+                  <p className="font-headline font-bold text-[8px] uppercase tracking-widest text-secondary">Annual Policy Adherence</p>
+               </div>
+            </div>
 
-        <TabsContent value="dashboard">
-          <PerformanceDashboard />
-        </TabsContent>
-      </Tabs>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+               <div className={chartCardClasses}>
+                  <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-primary pl-4">Acceptance Velocity Trend</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={analytics.acceptanceRates.monthlyTrend}>
+                        <XAxis dataKey="month" stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
+                        <YAxis stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line 
+                          type="monotone" 
+                          dataKey="rate" 
+                          stroke={COLORS[0]} 
+                          strokeWidth={4} dot={{ fill: COLORS[0], r: 4 }}
+                          name="Throughput %"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+               </div>
+               <div className={chartCardClasses}>
+                  <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-secondary pl-4">Decision Volume Matrix</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics.acceptanceRates.monthlyTrend}>
+                        <XAxis dataKey="month" stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
+                        <YAxis stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="accepted" fill={COLORS[0]} radius={[4, 4, 0, 0]} name="Validated" />
+                        <Bar dataKey="rejected" fill={COLORS[1]} radius={[4, 4, 0, 0]} name="Nullified" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="publication" className="space-y-12 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className={cardClasses + " border-t-8 border-primary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-primary/5 text-primary"><FileText size={18} /></div>
+                    <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{analytics.publicationStats.articlesPublished}</span>
+                  </div>
+                  <p className={labelClasses}>Archival Record Count</p>
+                  <p className="text-[10px] text-foreground/20 italic">Scholarly Entries Finalized</p>
+               </div>
+               <div className={cardClasses + " border-t-8 border-secondary"}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-secondary/5 text-secondary"><Clock size={18} /></div>
+                    <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{analytics.publicationStats.articlesInProgress}</span>
+                  </div>
+                  <p className={labelClasses}>Production Pipeline Density</p>
+                  <p className="font-headline font-bold text-[8px] uppercase tracking-widest text-secondary">In-Process Scholarly Streams</p>
+               </div>
+            </div>
+
+            <div className={chartCardClasses}>
+               <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-foreground pl-4">Scholarly Publication Trajectory</h3>
+               <div className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analytics.publicationStats.publicationTrend}>
+                      <XAxis dataKey="month" stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
+                      <YAxis stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="published" fill={COLORS[2]} radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+               </div>
+            </div>
+
+            <div className={chartCardClasses}>
+               <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-primary pl-4">Volume Structural Metrics</h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 {analytics.publicationStats.volumeMetrics.map((volume, index) => (
+                   <div key={index} className="flex items-center justify-between p-8 border-l-2 border-primary/20 bg-muted/5 group hover:bg-white hover:shadow-lg transition-all">
+                     <div>
+                       <h4 className="font-headline font-black uppercase text-sm tracking-tight group-hover:text-primary transition-colors">Vol. {volume.volume}</h4>
+                       <p className="font-body text-[10px] text-foreground/40 italic">
+                         Registry Structure Finalized
+                       </p>
+                     </div>
+                     <div className="text-right">
+                       <p className="font-headline font-black text-xs text-foreground">{volume.articles} Entries</p>
+                       <p className="text-[8px] font-headline uppercase tracking-widest text-foreground/20">{volume.pages} Scholarly Paginations</p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="dashboard" className="animate-fade-in-up">
+            <PerformanceDashboard />
+          </TabsContent>
+        </Tabs>
+      </ContentSection>
     </div>
   );
 };

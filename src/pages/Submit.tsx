@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus, Upload, Save, ArrowLeft } from 'lucide-react';
+import { X, Plus, Save, ArrowLeft, ArrowRight, FileText, Users, Info, ShieldCheck, CloudUpload, Zap, Layers, MapPin, Database } from 'lucide-react';
 import { createSubmission } from '@/lib/submissionService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { FileUpload } from '@/components/file-management/FileUpload';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { DialogHeader } from '@/components/ui/dialog';
-// import {PayDialog} from '@/components/submission/paystackDialogBox';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface Author {
   name: string;
@@ -46,28 +44,15 @@ export const Submit = () => {
   const [submissionEnabled, setSubmissionEnabled] = useState(true)
   const [checkingSubmissionStatus, setCheckingSubmissionStatus] = useState(true)
 
-  // Load saved draft and check submission status on mount
   useEffect(() => {
-    if (user) {
-      loadDraft();
-    }
-    checkSubmissionStatus();
-  }, [user]);
-
-  const checkSubmissionStatus = async () => {
-    setCheckingSubmissionStatus(true);
-    // Submissions are enabled by default; the backend enforces this server-side
+    if (user) loadDraft();
     setSubmissionEnabled(true);
     setCheckingSubmissionStatus(false);
-  };
+  }, [user]);
 
-  // Auto-save functionality
   useEffect(() => {
     if (user && (title || abstract || keywords.length > 0)) {
-      const timeoutId = setTimeout(() => {
-        saveDraft();
-      }, 2000); // Auto-save after 2 seconds of inactivity
-
+      const timeoutId = setTimeout(() => saveDraft(), 2000);
       return () => clearTimeout(timeoutId);
     }
   }, [title, abstract, keywords, authors, correspondingAuthorEmail, subjectArea, fundingInfo, conflictsOfInterest, coverLetter, manuscriptFileUrl, user]);
@@ -90,40 +75,21 @@ export const Submit = () => {
         setDraftId(draft.draftId || null);
         setLastSaved(new Date(draft.lastSaved));
       }
-    } catch (error) {
-      console.error('Error loading draft:', error);
-    }
+    } catch (error) { console.error('Error loading draft:', error); }
   };
 
   const saveDraft = async () => {
     if (!user || autoSaving) return;
-    
     setAutoSaving(true);
     try {
       const draftData = {
-        title,
-        abstract,
-        keywords,
-        authors,
-        correspondingAuthorEmail,
-        subjectArea,
-        fundingInfo,
-        conflictsOfInterest,
-        coverLetter,
-        manuscriptFileUrl,
-        draftId,
-        lastSaved: new Date().toISOString(),
-        userId: user.id
+        title, abstract, keywords, authors, correspondingAuthorEmail, subjectArea,
+        fundingInfo, conflictsOfInterest, coverLetter, manuscriptFileUrl, draftId,
+        lastSaved: new Date().toISOString(), userId: user.id
       };
-
-      // Save to localStorage first (immediate backup)
       localStorage.setItem(`article_draft_${user.id}`, JSON.stringify(draftData));
       setLastSaved(new Date());
-    } catch (error) {
-      console.error('Error saving draft:', error);
-    } finally {
-      setAutoSaving(false);
-    }
+    } catch (error) { console.error('Error saving draft:', error); } finally { setAutoSaving(false); }
   };
 
   const clearDraft = () => {
@@ -139,444 +105,343 @@ export const Submit = () => {
     }
   };
 
-  const removeKeyword = (index: number) => {
-    setKeywords(keywords.filter((_, i) => i !== index));
-  };
-
-  const addAuthor = () => {
-    setAuthors([...authors, { name: '', email: '', affiliation: '', orcid: '' }]);
-  };
-
+  const removeKeyword = (index: number) => setKeywords(keywords.filter((_, i) => i !== index));
+  const addAuthor = () => setAuthors([...authors, { name: '', email: '', affiliation: '', orcid: '' }]);
   const updateAuthor = (index: number, field: keyof Author, value: string) => {
-    const updatedAuthors = authors.map((author, i) => 
-      i === index ? { ...author, [field]: value } : author
-    );
-    setAuthors(updatedAuthors);
+    setAuthors(authors.map((author, i) => i === index ? { ...author, [field]: value } : author));
   };
-
-  const removeAuthor = (index: number) => {
-    if (authors.length > 1) {
-      setAuthors(authors.filter((_, i) => i !== index));
-    }
-  };
+  const removeAuthor = (index: number) => { if (authors.length > 1) setAuthors(authors.filter((_, i) => i !== index)); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    
-    if (!user) {
-      toast({
-        title: 'Authentication required',
-        description: 'Please sign in to submit an article.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Validate required fields
-    if (!title.trim()) {
-      toast({
-        title: 'Title required',
-        description: 'Please enter a title for your article.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!abstract.trim()) {
-      toast({
-        title: 'Abstract required',
-        description: 'Please enter an abstract for your article.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!manuscriptFileUrl) {
-      toast({
-        title: 'Manuscript file required',
-        description: 'Please upload your manuscript file before submitting.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (authors.some(author => !author.name.trim() || !author.email.trim())) {
-      toast({
-        title: 'Author information incomplete',
-        description: 'Please ensure all authors have names and email addresses.',
-        variant: 'destructive',
-      });
+    if (!user) { toast({ title: 'Auth Required', variant: 'destructive' }); return; }
+    if (!title.trim() || !abstract.trim() || !manuscriptFileUrl) {
+      toast({ title: 'Validation Failed', description: 'Title, Abstract, and Manuscript are required.', variant: 'destructive' });
       return;
     }
 
     setLoading(true);
-
     try {
       await saveDraft();
-
-      const result = await createSubmission({
-        title: title.trim(),
-        abstract: abstract.trim(),
-        keywords,
-        authors,
-        corresponding_author_email: correspondingAuthorEmail,
-        subject_area: subjectArea,
-        cover_letter: coverLetter,
-        reviewer_suggestions: '',
-        submission_type: 'new',
-        funding_info: fundingInfo || null,
-        conflicts_of_interest: conflictsOfInterest || null,
+      await createSubmission({
+        title: title.trim(), abstract: abstract.trim(), keywords, authors,
+        corresponding_author_email: correspondingAuthorEmail, subject_area: subjectArea,
+        cover_letter: coverLetter, reviewer_suggestions: '', submission_type: 'new',
+        funding_info: fundingInfo || null, conflicts_of_interest: conflictsOfInterest || null,
       });
-
       clearDraft();
-
-      // Send notifications (non-blocking)
-      try {
-        const { notifyUserSubmissionReceived, notifyAdminsNewSubmission } = await import('@/lib/emailService');
-        const { notifySubmissionAcceptance } = await import('@/lib/paymentNotificationService');
-        const authorName = authors[0]?.name || 'Author';
-        await notifyUserSubmissionReceived(user.id, authorName, title.trim());
-        await notifySubmissionAcceptance(user.id, authorName, correspondingAuthorEmail, title.trim());
-        await notifyAdminsNewSubmission(title.trim(), authorName, correspondingAuthorEmail, 1);
-      } catch (notificationError) {
-        console.error('Error sending notifications:', notificationError);
-      }
-
-      toast({
-        title: 'Article submitted successfully',
-        description: 'Your article has been submitted for review. You will receive updates via email.',
-      });
-
+      toast({ title: 'Success', description: 'Manuscript submitted for evaluation.' });
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error submitting article:', error);
-      
-      // Provide more specific error information
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      
-      toast({
-        title: 'Submission failed',
-        description: `Failed to submit article: ${errorMessage}. Your work has been saved automatically.`,
-        variant: 'destructive',
-      });
-
-      // Don't navigate away on error - keep the form data
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: 'Submission failed', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
+    } finally { setLoading(false); }
   };
 
+  const inputClasses = "bg-white border-border/40 rounded-none focus:border-primary transition-all font-body h-14 text-lg";
+  const labelClasses = "font-headline font-black text-xs uppercase tracking-[0.3em] text-foreground/40 mb-4 block italic";
+  const cardClasses = "bg-white p-12 md:p-16 border border-border/10 shadow-sm relative overflow-hidden group";
 
-
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="py-8 text-center">
-            <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
-            <p className="text-muted-foreground mb-4">
-              Please sign in to submit an article to the journal.
-            </p>
-            <Button onClick={() => navigate('/auth')}>
-              Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-        
-  
+  if (!user) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-                < div className="relative py-6">
-                      <Button 
-                      variant="outline" 
-                      onClick={() => navigate(-1)}
-                      className="mb-4 absolute top-1 left-3"
-                        >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back
-                      </Button>
-                      </div>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Submit Article</h1>
-              <p className="text-muted-foreground">
-                Submit your research article for peer review and publication in IJSDS
-              </p>
-            </div>
-            {/* Auto-save status indicator */}
-            <div className="text-sm text-muted-foreground flex items-center gap-2">
+    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+      <Helmet>
+        <title>Submit Manuscript IJSDS — Submission Registry</title>
+        <meta name="description" content="Submit your multidisciplinary research manuscript to the IJSDS editorial office for peer-review." />
+      </Helmet>
+
+      <PageHeader 
+        title="Manuscript" 
+        subtitle="Registry" 
+        accent="Technical Protocol Portal"
+        description="Initiate the formal peer-review process and contribute to the global discourse on social development. Your intellectual property is protected through our double-blind protocols."
+      />
+
+      <ContentSection>
+        {/* Portal Controls — High Fidelity Action Bar */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-24 gap-12 relative">
+           <div className="absolute top-1/2 left-0 w-full h-px bg-border/20 -z-0"></div>
+           
+           <button 
+             onClick={() => navigate('/dashboard')} 
+             className="relative z-10 flex items-center gap-4 font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 hover:text-primary transition-colors bg-secondary/5 px-8 py-6 border border-border/10"
+           >
+              <ArrowLeft size={16} /> Exit to Archive Hub
+           </button>
+           
+           <div className="relative z-10 flex items-center gap-6 bg-white p-6 shadow-2xl border-t-4 border-secondary">
               {autoSaving ? (
-                <>
-                  <Save className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
-                </>
+                <div className="flex items-center gap-4">
+                   <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                   <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/40 italic">Vaulting Meta-Data...</span>
+                </div>
               ) : lastSaved ? (
-                <>
-                  <Save className="h-4 w-4 text-green-600" />
-                  <span>Last saved: {lastSaved.toLocaleTimeString()}</span>
-                </>
+                <div className="flex items-center gap-4">
+                   <ShieldCheck className="h-6 w-6 text-secondary animate-pulse" />
+                   <div className="flex flex-col">
+                      <span className="font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30">Registry State</span>
+                      <span className="font-headline font-black text-xs uppercase tracking-widest text-secondary">Secured: {lastSaved.toLocaleTimeString()}</span>
+                   </div>
+                </div>
               ) : null}
-            </div>
-          </div>
+           </div>
         </div>
 
         {checkingSubmissionStatus ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="py-48 text-center">
+             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-8"></div>
+             <p className="font-headline font-black uppercase text-xs tracking-[0.5em] text-foreground/20 italic">Authorizing Submission Grid...</p>
           </div>
         ) : !submissionEnabled ? (
-          <Card>
-            <CardContent className="py-8 text-center">
-              <div className="max-w-md mx-auto">
-                <h2 className="text-xl font-semibold mb-2 text-destructive">Submissions Currently Closed</h2>
-                <p className="text-muted-foreground mb-4">
-                  New submissions are temporarily disabled. Please check back later or contact the editorial office for more information.
+          <div className="bg-foreground text-white p-24 text-center relative overflow-hidden group shadow-2xl border border-white/5">
+             <div className="absolute inset-0 bg-white opacity-5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+             <div className="relative z-10 max-w-2xl mx-auto">
+                <ShieldCheck className="h-16 w-16 text-secondary mx-auto mb-10" />
+                <h2 className="text-5xl md:text-7xl font-black font-headline uppercase tracking-tighter text-white mb-8 leading-none">Registry <br/><span className="text-secondary italic">Restricted</span></h2>
+                <p className="font-body text-xl md:text-2xl italic text-white/30 mb-16 leading-relaxed border-l-4 border-primary/40 pl-8">
+                  The submission window is currently under internal editorial audit. Please check the master calendar for upcoming cycles.
                 </p>
-                <Button variant="outline" onClick={() => navigate('/dashboard')}>
-                  Back to Dashboard
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Article Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Article Information</CardTitle>
-              <CardDescription>Provide the basic information about your article</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title">Article Title *(article title should Specifically initial capital letters)</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  placeholder="Enter the full title of your article"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="abstract">Abstract *</Label>
-                <Textarea
-                  id="abstract"
-                  value={abstract}
-                  onChange={(e) => setAbstract(e.target.value)}
-                  required
-                  rows={6}
-                  placeholder="Provide a comprehensive abstract of your research (250-300 words)"
-                />
-              </div>
-
-              <div>
-                <Label>Keywords</Label>
-                <div className="flex gap-2 mb-2">
-                  <Input
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    placeholder="Enter a keyword"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword())}
-                  />
-                  <Button type="button" onClick={addKeyword} variant="outline">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {keywords.map((keyword, index) => (
-                    <Badge key={index} variant="secondary" className="gap-1">
-                      {keyword}
-                      <button
-                        type="button"
-                        onClick={() => removeKeyword(index)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="subjectArea">Subject Area</Label>
-                <Input
-                  id="subjectArea"
-                  value={subjectArea}
-                  onChange={(e) => setSubjectArea(e.target.value)}
-                  placeholder="e.g., Development Economics, Social Policy, etc."
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Manuscript Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Manuscript File</CardTitle>
-              <CardDescription>Upload your manuscript file (DOC or DOCX only)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FileUpload
-                bucketName="journal-website-db1"
-                folder="manuscripts"
-                onFileUploaded={(url) => setManuscriptFileUrl(url)}
-                acceptedTypes=".doc,.docx"
-                maxSizeMB={10}
-              />
-              {manuscriptFileUrl && (
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-700">
-                    ✓ Manuscript file uploaded successfully
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Authors Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Authors Information</CardTitle>
-              <CardDescription>Add all authors and their details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {authors.map((author, index) => (
-                <div key={index} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Author {index + 1}</h4>
-                    {authors.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeAuthor(index)}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <Label>Name *</Label>
-                      <Input
-                        value={author.name}
-                        onChange={(e) => updateAuthor(index, 'name', e.target.value)}
-                        required
-                        placeholder="Full name"
-                      />
-                    </div>
-                    <div>
-                      <Label>Email *</Label>
-                      <Input
-                        type="email"
-                        value={author.email}
-                        onChange={(e) => updateAuthor(index, 'email', e.target.value)}
-                        required
-                        placeholder="Email address"
-                      />
-                    </div>
-                    <div>
-                      <Label>Affiliation</Label>
-                      <Input
-                        value={author.affiliation}
-                        onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)}
-                        placeholder="Institution/University"
-                      />
-                    </div>
-                    <div>
-                      <Label>ORCID ID</Label>
-                      <Input
-                        value={author.orcid}
-                        onChange={(e) => updateAuthor(index, 'orcid', e.target.value)}
-                        placeholder="0000-0000-0000-0000"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              <Button type="button" variant="outline" onClick={addAuthor}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Another Author
-              </Button>
-
-              <div>
-                <Label htmlFor="correspondingEmail">Corresponding Author Email *</Label>
-                <Input
-                  id="correspondingEmail"
-                  type="email"
-                  value={correspondingAuthorEmail}
-                  onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
-                  required
-                  placeholder="Email of the corresponding author"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Additional Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Additional Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="funding">Funding Information</Label>
-                <Textarea
-                  id="funding"
-                  value={fundingInfo}
-                  onChange={(e) => setFundingInfo(e.target.value)}
-                  rows={3}
-                  placeholder="Provide details about funding sources, grant numbers, etc."
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="conflicts">Conflicts of Interest</Label>
-                <Textarea
-                  id="conflicts"
-                  value={conflictsOfInterest}
-                  onChange={(e) => setConflictsOfInterest(e.target.value)}
-                  rows={3}
-                  placeholder="Declare any conflicts of interest or state 'None'"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="coverLetter">Cover Letter</Label>
-                <Textarea
-                  id="coverLetter"
-                  value={coverLetter}
-                  onChange={(e) => setCoverLetter(e.target.value)}
-                  rows={4}
-                  placeholder="Brief cover letter explaining the significance of your work"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Submitting...' : 'Submit Article'}
-            </Button>
+                <button 
+                  onClick={() => navigate('/dashboard')} 
+                  className="bg-white text-foreground px-16 py-8 font-headline font-black text-xs uppercase tracking-[0.4em] hover:bg-secondary hover:text-white transition-all shadow-2xl"
+                >
+                  Return to Dashboard
+                </button>
+             </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-24">
+            
+            {/* Phase 1: Conceptual Matrix */}
+            <div className="space-y-12">
+               <div className="flex items-center gap-8 border-b border-primary/20 pb-8">
+                  <div className="w-16 h-16 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
+                     <FileText size={32} />
+                  </div>
+                  <div className="flex flex-col">
+                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 01</span>
+                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Conceptual Matrix</h2>
+                  </div>
+               </div>
+               
+               <div className={cardClasses}>
+                  {/* Decorative Motif */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                  
+                  <div className="grid gap-12 relative z-10">
+                    <div>
+                      <Label htmlFor="title" className={labelClasses}>Article Architectural Title *</Label>
+                      <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Full academic designation..." className={inputClasses} />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="abstract" className={labelClasses}>Scholarly Abstract * (250-300 Words)</Label>
+                      <Textarea id="abstract" value={abstract} onChange={(e) => setAbstract(e.target.value)} required rows={10} className={inputClasses + " h-auto py-8 lg:text-xl leading-relaxed italic text-foreground/70"} placeholder="Summarize your methodology, findings, and developmental impact..." />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      <div>
+                        <Label className={labelClasses}>Theoretical Keywords</Label>
+                        <div className="flex gap-4 mb-6">
+                          <Input value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} placeholder="Core concepts" className={inputClasses} onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword())} />
+                          <button type="button" onClick={addKeyword} className="bg-primary hover:bg-secondary text-white h-14 px-8 flex items-center justify-center transition-all shadow-xl group/plus">
+                             <Plus size={24} className="group-hover/plus:rotate-90 transition-transform" />
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-4">
+                          {keywords.map((kw, i) => (
+                            <Badge key={i} className="bg-secondary/10 text-secondary border border-secondary/20 rounded-none font-headline font-black uppercase text-[10px] tracking-widest px-6 py-3 flex items-center gap-3">
+                              {kw} <X size={14} className="cursor-pointer hover:text-primary transition-colors" onClick={() => removeKeyword(i)} />
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="subjectArea" className={labelClasses}>Multidisciplinary Domain</Label>
+                        <Input id="subjectArea" value={subjectArea} onChange={(e) => setSubjectArea(e.target.value)} placeholder="e.g., Development Economics..." className={inputClasses} />
+                      </div>
+                    </div>
+                  </div>
+               </div>
+            </div>
+
+            {/* Phase 2: Assets & Payload */}
+            <div className="space-y-12">
+               <div className="flex items-center gap-8 border-b border-secondary/20 pb-8">
+                  <div className="w-16 h-16 bg-secondary flex items-center justify-center text-white border border-secondary/10 shadow-xl">
+                     <CloudUpload size={32} />
+                  </div>
+                  <div className="flex flex-col">
+                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 02</span>
+                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Digital Assets Ledger</h2>
+                  </div>
+               </div>
+               
+               <div className={cardClasses}>
+                  <div className="p-12 md:p-20 border-4 border-dashed border-border/20 hover:border-primary/40 transition-all bg-secondary/5 text-center group/uploader relative overflow-hidden">
+                     <div className="absolute top-0 left-0 w-24 h-24 bg-primary/5 -z-0 opacity-0 group-hover/uploader:opacity-100 transition-opacity" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+                     <FileUpload
+                        bucketName="journal-website-db1"
+                        folder="manuscripts"
+                        onFileUploaded={(url) => setManuscriptFileUrl(url)}
+                        acceptedTypes=".doc,.docx"
+                        maxSizeMB={25}
+                      />
+                  </div>
+                  {manuscriptFileUrl && (
+                    <div className="mt-12 p-8 bg-secondary/10 border-l-8 border-secondary flex items-center gap-8 animate-fade-in">
+                       <div className="w-12 h-12 bg-secondary flex items-center justify-center text-white shadow-xl">
+                          <ShieldCheck size={24} />
+                       </div>
+                       <div className="flex flex-col">
+                          <span className="font-headline font-black text-xs uppercase tracking-[0.4em] text-secondary">Payload Secured</span>
+                          <p className="font-body italic text-foreground/40 text-sm mt-1">Institutional manuscript file has been successfully vaulted in the registry.</p>
+                       </div>
+                    </div>
+                  )}
+               </div>
+            </div>
+
+            {/* Phase 3: Author Registry Integration */}
+            <div className="space-y-12">
+               <div className="flex items-center gap-8 border-b border-foreground/20 pb-8">
+                  <div className="w-16 h-16 bg-foreground flex items-center justify-center text-white border border-white/10 shadow-xl">
+                     <Users size={32} />
+                  </div>
+                  <div className="flex flex-col">
+                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 03</span>
+                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Contributor Registry</h2>
+                  </div>
+               </div>
+               
+               <div className="grid grid-cols-1 gap-12">
+                 {authors.map((author, index) => (
+                   <div key={index} className={cardClasses}>
+                     <div className="flex items-center justify-between mb-12 border-b border-border/10 pb-8">
+                        <div className="flex items-center gap-4">
+                           <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center text-secondary font-headline font-black">0{index + 1}</div>
+                           <span className="font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 italic">Collaborator Profile</span>
+                        </div>
+                        {authors.length > 1 && (
+                           <button type="button" onClick={() => removeAuthor(index)} className="group/del flex items-center gap-3 font-headline font-black text-[10px] uppercase tracking-widest text-primary hover:text-red-600 transition-all">
+                              <X size={14} className="group-hover/del:rotate-90 transition-transform" /> Discard Profile
+                           </button>
+                        )}
+                     </div>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                          <Label className={labelClasses}>Full Scholarly Name *</Label>
+                          <Input value={author.name} onChange={(e) => updateAuthor(index, 'name', e.target.value)} required placeholder="Format: Surname Firstname" className={inputClasses} />
+                        </div>
+                        <div>
+                          <Label className={labelClasses}>Institutional Email *</Label>
+                          <Input type="email" value={author.email} onChange={(e) => updateAuthor(index, 'email', e.target.value)} required placeholder="Official .edu or institutional mail" className={inputClasses} />
+                        </div>
+                        <div>
+                          <Label className={labelClasses}>Academic Affiliation</Label>
+                          <Input value={author.affiliation} onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)} placeholder="University / Centre / Institution" className={inputClasses} />
+                        </div>
+                        <div>
+                          <Label className={labelClasses}>ORCID Digital iD</Label>
+                          <div className="relative">
+                             <Input value={author.orcid} onChange={(e) => updateAuthor(index, 'orcid', e.target.value)} placeholder="0000-0000-0000-0000" className={inputClasses + " pl-12"} />
+                             <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/20" />
+                          </div>
+                        </div>
+                     </div>
+                   </div>
+                 ))}
+                 
+                 <button 
+                   type="button" 
+                   onClick={addAuthor} 
+                   className="w-full py-12 border-2 border-dashed border-border/20 hover:border-secondary/40 transition-all flex flex-col items-center gap-4 group/add bg-white/50"
+                 >
+                    <div className="w-12 h-12 bg-secondary/10 flex items-center justify-center text-secondary group-hover/add:bg-secondary group-hover/add:text-white transition-all shadow-inner">
+                       <Plus size={24} className="group-hover/add:rotate-90 transition-transform" />
+                    </div>
+                    <span className="font-headline font-black text-[11px] uppercase tracking-[0.5em] text-foreground/30">Registry Integration</span>
+                 </button>
+
+                 <div className="bg-foreground text-white p-12 md:p-16 shadow-2xl relative overflow-hidden group/correspondence">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 opacity-0 group-hover/correspondence:opacity-100 transition-opacity" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                    <Label htmlFor="correspondingEmail" className={labelClasses + " text-white/50"}>Corresponding Identity *</Label>
+                    <div className="relative">
+                       <Input id="correspondingEmail" type="email" value={correspondingAuthorEmail} onChange={(e) => setCorrespondingAuthorEmail(e.target.value)} required className={inputClasses + " bg-white/5 border-white/10 text-white focus:border-secondary h-16 text-2xl"} />
+                       <ShieldCheck className="absolute right-6 top-1/2 -translate-y-1/2 text-secondary opacity-40" />
+                    </div>
+                    <p className="mt-8 font-body italic text-white/20 text-sm leading-relaxed max-w-xl">
+                      All official editorial decisions, assessment reports, and production protocols will be routed to this specific digital architecture.
+                    </p>
+                 </div>
+               </div>
+            </div>
+
+            {/* Phase 4: Scholarly Declarations */}
+            <div className="space-y-12">
+               <div className="flex items-center gap-8 border-b border-primary/20 pb-8">
+                  <div className="w-16 h-16 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
+                     <Info size={32} />
+                  </div>
+                  <div className="flex flex-col">
+                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 04</span>
+                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Technical Protocol Ledger</h2>
+                  </div>
+               </div>
+               
+               <div className={cardClasses}>
+                  <div className="grid gap-16 relative z-10">
+                    <div>
+                      <Label htmlFor="funding" className={labelClasses}>Funding Infrastructure</Label>
+                      <Textarea id="funding" value={fundingInfo} onChange={(e) => setFundingInfo(e.target.value)} rows={4} className={inputClasses + " h-auto py-6 italic text-foreground/70"} placeholder="Grant identifiers, institutional sponsoring bodies, or developmental foundations..." />
+                    </div>
+                    <div>
+                      <Label htmlFor="conflicts" className={labelClasses}>Internal Conflicts Registry</Label>
+                      <Textarea id="conflicts" value={conflictsOfInterest} onChange={(e) => setConflictsOfInterest(e.target.value)} rows={4} className={inputClasses + " h-auto py-6 italic text-foreground/70"} placeholder="State 'None' if professional interests are neutral..." />
+                    </div>
+                    <div>
+                      <Label htmlFor="coverLetter" className={labelClasses}>Editorial Cover Dossier</Label>
+                      <Textarea id="coverLetter" value={coverLetter} onChange={(e) => setCoverLetter(e.target.value)} rows={8} className={inputClasses + " h-auto py-8 text-xl leading-relaxed italic text-foreground/80"} placeholder="Specifically justify the significance, novelty, and multicisciplinary impact of this research for the African commons..." />
+                    </div>
+                  </div>
+               </div>
+            </div>
+
+            {/* Final Transmission Control */}
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-12 pt-24 border-t border-border/20">
+               <div className="flex items-center gap-6">
+                  <Zap size={24} className="text-secondary animate-pulse" />
+                  <p className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/20 italic">Ensuring Scientific Continuity</p>
+               </div>
+
+               <div className="flex flex-col sm:flex-row items-center gap-8 w-full lg:w-auto">
+                  <button 
+                    type="button" 
+                    onClick={() => navigate('/dashboard')} 
+                    className="font-headline font-black text-xs uppercase tracking-[0.4em] text-primary hover:text-foreground transition-all order-2 sm:order-1"
+                  >
+                    Discard Record Draft
+                  </button>
+                  
+                  <button 
+                    type="submit" 
+                    disabled={loading} 
+                    className="w-full sm:w-auto bg-primary text-white py-10 px-24 font-headline font-black text-sm uppercase tracking-[0.5em] shadow-[0_30px_60px_-10px_rgba(27,67,50,0.4)] hover:bg-foreground transition-all group relative overflow-hidden order-1 sm:order-2"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-6">
+                       {loading ? 'Transmitting Data Registry...' : 'Finalize Transmission'}
+                       <ArrowRight size={20} className="group-hover:translate-x-3 transition-transform" />
+                    </span>
+                    <div className="absolute inset-0 bg-white translate-x-full group-hover:translate-x-0 transition-transform duration-700 opacity-10"></div>
+                  </button>
+               </div>
+            </div>
+          </form>
         )}
-      </div>
+      </ContentSection>
     </div>
   );
 };
+
+export default Submit;

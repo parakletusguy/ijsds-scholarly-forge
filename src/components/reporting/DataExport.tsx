@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Download, FileText, Table, Calendar } from 'lucide-react';
+import { Download, FileText, Table, Calendar, Database, ShieldCheck, Activity, GraduationCap, ChevronRight, Hash, Send } from 'lucide-react';
 
 interface ExportOptions {
   format: 'csv' | 'excel' | 'pdf';
@@ -43,7 +42,6 @@ export const DataExport = () => {
 
       const { downloadUrl, filename } = response.data;
       
-      // Create download link
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = filename;
@@ -51,20 +49,10 @@ export const DataExport = () => {
       link.click();
       document.body.removeChild(link);
 
-      toast({
-        title: "Success",
-        description: "Data exported successfully",
-      });
+      toast({ title: "Archive Extracted", description: "Scholarly data has been successfully exported to the local repository." });
     } catch (error) {
-      console.error('Export error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to export data",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
+      toast({ title: "Export Refused", description: "Failed to synchronize data for archival extraction.", variant: "destructive" });
+    } finally { setExporting(false); }
   };
 
   const generateReport = async (reportType: 'editorial' | 'review-summary' | 'compliance') => {
@@ -85,171 +73,133 @@ export const DataExport = () => {
       link.click();
       document.body.removeChild(link);
 
-      toast({
-        title: "Success",
-        description: "Report generated successfully",
-      });
+      toast({ title: "Intelligence Finalized", description: "Automated scholarly report has been generated and archived." });
     } catch (error) {
-      console.error('Report generation error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate report",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
+       toast({ title: "Audit Error", description: "Failed to generate the requested institutional report.", variant: "destructive" });
+    } finally { setExporting(false); }
   };
 
+  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
+  const labelClasses = "font-headline font-black text-[10px] uppercase tracking-widest text-foreground/40 mb-4 block";
+  const inputClasses = "bg-muted/10 border-border/60 rounded-none focus:border-primary transition-all font-body text-sm h-14";
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5" />
-            Data Export
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="format">Export Format</Label>
-              <Select
-                value={options.format}
-                onValueChange={(value: 'csv' | 'excel' | 'pdf') =>
-                  setOptions(prev => ({ ...prev, format: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="csv">CSV</SelectItem>
-                  <SelectItem value="excel">Excel</SelectItem>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="space-y-12">
+      <div className={cardClasses + " border-t-8 border-foreground"}>
+        <div className="absolute top-0 right-0 w-24 h-24 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+        <div className="flex items-center gap-4 mb-10 pb-6 border-b border-border/20 relative z-10">
+           <div className="p-3 bg-foreground text-white shadow-lg"><Database size={18} /></div>
+           <h3 className="text-2xl font-headline font-black uppercase tracking-tighter">Archival Extraction Protocol</h3>
+        </div>
 
-            <div>
-              <Label htmlFor="dataType">Data Type</Label>
-              <Select
-                value={options.dataType}
-                onValueChange={(value: 'submissions' | 'reviews' | 'articles' | 'users') =>
-                  setOptions(prev => ({ ...prev, dataType: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="submissions">Submissions</SelectItem>
-                  <SelectItem value="reviews">Reviews</SelectItem>
-                  <SelectItem value="articles">Published Articles</SelectItem>
-                  <SelectItem value="users">Users</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="dateFrom">Date From</Label>
-              <Input
-                type="date"
-                value={options.dateFrom}
-                onChange={(e) => setOptions(prev => ({ ...prev, dateFrom: e.target.value }))}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="dateTo">Date To</Label>
-              <Input
-                type="date"
-                value={options.dateTo}
-                onChange={(e) => setOptions(prev => ({ ...prev, dateTo: e.target.value }))}
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <div className="space-y-2">
+            <Label htmlFor="format" className={labelClasses}>Registry Format</Label>
+            <Select
+              value={options.format}
+              onValueChange={(value: 'csv' | 'excel' | 'pdf') => setOptions(prev => ({ ...prev, format: value }))}
+            >
+              <SelectTrigger className={inputClasses + " font-headline font-black uppercase text-[10px] tracking-widest px-6"}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest">
+                <SelectItem value="csv" className="py-4">CSV (Raw Analytics)</SelectItem>
+                <SelectItem value="excel" className="py-4">Excel (Tabulated Dataset)</SelectItem>
+                <SelectItem value="pdf" className="py-4">PDF (Archival Document)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="metadata"
-                checked={options.includeMetadata}
-                onCheckedChange={(checked) =>
-                  setOptions(prev => ({ ...prev, includeMetadata: !!checked }))
-                }
-              />
-              <Label htmlFor="metadata">Include metadata</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="comments"
-                checked={options.includeComments}
-                onCheckedChange={(checked) =>
-                  setOptions(prev => ({ ...prev, includeComments: !!checked }))
-                }
-              />
-              <Label htmlFor="comments">Include comments and notes</Label>
-            </div>
+            <Label htmlFor="dataType" className={labelClasses}>Intelligence Stream</Label>
+            <Select
+              value={options.dataType}
+              onValueChange={(value: 'submissions' | 'reviews' | 'articles' | 'users') => setOptions(prev => ({ ...prev, dataType: value }))}
+            >
+              <SelectTrigger className={inputClasses + " font-headline font-black uppercase text-[10px] tracking-widest px-6"}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest">
+                <SelectItem value="submissions" className="py-4">Submission Registry</SelectItem>
+                <SelectItem value="reviews" className="py-4">Peer-Review Audit</SelectItem>
+                <SelectItem value="articles" className="py-4">Published Archives</SelectItem>
+                <SelectItem value="users" className="py-4">Scholar Identity Index</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <Button onClick={handleExport} disabled={exporting} className="w-full">
-            <Download className="h-4 w-4 mr-2" />
-            {exporting ? 'Exporting...' : 'Export Data'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Automated Reports
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              variant="outline"
-              onClick={() => generateReport('editorial')}
-              disabled={exporting}
-              className="h-auto flex-col p-4"
-            >
-              <Table className="h-8 w-8 mb-2" />
-              <span className="font-medium">Editorial Board Report</span>
-              <span className="text-xs text-muted-foreground">
-                Submission metrics and review status
-              </span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => generateReport('review-summary')}
-              disabled={exporting}
-              className="h-auto flex-col p-4"
-            >
-              <Calendar className="h-8 w-8 mb-2" />
-              <span className="font-medium">Review Summary</span>
-              <span className="text-xs text-muted-foreground">
-                Reviewer performance and timelines
-              </span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => generateReport('compliance')}
-              disabled={exporting}
-              className="h-auto flex-col p-4"
-            >
-              <FileText className="h-8 w-8 mb-2" />
-              <span className="font-medium">Compliance Report</span>
-              <span className="text-xs text-muted-foreground">
-                Audit trail and policy adherence
-              </span>
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="dateFrom" className={labelClasses}>Temporal Horizon (From)</Label>
+            <Input
+              type="date"
+              value={options.dateFrom}
+              onChange={(e) => setOptions(prev => ({ ...prev, dateFrom: e.target.value }))}
+              className={inputClasses}
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <Label htmlFor="dateTo" className={labelClasses}>Temporal Horizon (To)</Label>
+            <Input
+              type="date"
+              value={options.dateTo}
+              onChange={(e) => setOptions(prev => ({ ...prev, dateTo: e.target.value }))}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 border-y border-border/10 mb-10">
+          <div className="flex items-center space-x-4 group/box cursor-pointer">
+            <Checkbox
+              id="metadata"
+              checked={options.includeMetadata}
+              onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeMetadata: !!checked }))}
+              className="border-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            />
+            <Label htmlFor="metadata" className="font-headline font-black uppercase text-[10px] tracking-widest cursor-pointer group-hover/box:text-primary transition-colors">Synchronize Metadata Tags</Label>
+          </div>
+          <div className="flex items-center space-x-4 group/box cursor-pointer">
+            <Checkbox
+              id="comments"
+              checked={options.includeComments}
+              onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeComments: !!checked }))}
+              className="border-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            />
+            <Label htmlFor="comments" className="font-headline font-black uppercase text-[10px] tracking-widest cursor-pointer group-hover/box:text-primary transition-colors">Include Narrative Directives</Label>
+          </div>
+        </div>
+
+        <Button onClick={handleExport} disabled={exporting} className="w-full bg-foreground hover:bg-primary text-white py-10 rounded-none font-headline font-black uppercase text-xs tracking-[0.3em] shadow-xl group transition-all">
+          {exporting ? 'Processing Registry...' : <><Download className="h-5 w-5 mr-4 group-hover:-translate-y-1 transition-transform" /> Authorize Export</>}
+        </Button>
+      </div>
+
+      <div className={cardClasses}>
+        <div className="flex items-center gap-4 mb-10 pb-6 border-b border-border/20">
+           <div className="p-3 bg-secondary text-white shadow-lg"><FileText size={18} /></div>
+           <h3 className="text-2xl font-headline font-black uppercase tracking-tighter">Automated Intelligence Reports</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { id: 'editorial', label: 'Editorial Census', desc: 'Submission metrics and review velocity registry.', icon: <Table size={24} /> },
+            { id: 'review-summary', label: 'Peer Assessment Audit', desc: 'Reviewer responsiveness and temporal performance.', icon: <Calendar size={24} /> },
+            { id: 'compliance', label: 'Compliance Protocol', desc: 'Policy adherence and institutional audit trail.', icon: <ShieldCheck size={24} /> }
+          ].map((report) => (
+            <div key={report.id} className="group/report relative border border-border/10 p-8 hover:border-primary/20 hover:bg-secondary/5 transition-all cursor-pointer" onClick={() => generateReport(report.id as any)}>
+               <div className="p-4 bg-muted text-foreground/30 mb-8 inline-block group-hover/report:bg-primary group-hover/report:text-white transition-all transform group-hover/report:rotate-6 shadow-sm">
+                  {report.icon}
+               </div>
+               <h4 className="font-headline font-black uppercase text-xs tracking-tight mb-4 group-hover/report:text-primary transition-colors">{report.label}</h4>
+               <p className="font-body text-[10px] text-foreground/40 italic leading-relaxed mb-8">{report.desc}</p>
+               <div className="flex items-center gap-2 font-headline font-bold text-[8px] uppercase tracking-[0.2em] text-foreground/20 group-hover/report:text-secondary group-hover/report:translate-x-2 transition-all">
+                  Generate Ledger <ChevronRight size={10} />
+               </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

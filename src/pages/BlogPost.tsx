@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, User, ArrowLeft, Share2, Copy } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Share2, Copy, BookOpen, Clock, Tag, UserCheck, Layers, Zap, ArrowRight, Quote } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface BlogPost {
   id: string;
@@ -33,6 +35,7 @@ export const BlogPost = () => {
     if (id) {
       fetchPost();
     }
+    window.scrollTo(0, 0);
   }, [id]);
 
   const fetchPost = async () => {
@@ -49,7 +52,6 @@ export const BlogPost = () => {
 
       if (error) throw error;
 
-      // Fetch author profile separately
       let authorProfile = { full_name: 'Unknown', bio: null };
       if (data.author_id) {
         const { data: profile } = await supabase
@@ -71,7 +73,6 @@ export const BlogPost = () => {
         author_profile: authorProfile
       } as BlogPost);
       
-      // Fetch related posts
       if (data.category) {
         const { data: related } = await supabase
           .from('blog_posts')
@@ -82,7 +83,6 @@ export const BlogPost = () => {
           .order('published_at', { ascending: false })
           .limit(3);
 
-        // Get author profiles for related posts
         const relatedAuthorIds = [...new Set(related?.map(post => post.author_id).filter(Boolean))];
         const { data: relatedProfiles } = await supabase
           .from('profiles')
@@ -104,7 +104,7 @@ export const BlogPost = () => {
       console.error('Error fetching post:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load blog post',
+        description: 'Failed to load discourse artifact',
         variant: 'destructive',
       });
       navigate('/blog');
@@ -115,7 +115,6 @@ export const BlogPost = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
-    
     if (navigator.share) {
       try {
         await navigator.share({
@@ -124,7 +123,6 @@ export const BlogPost = () => {
           url: url,
         });
       } catch (error) {
-        // Fallback to clipboard
         copyToClipboard(url);
       }
     } else {
@@ -136,8 +134,8 @@ export const BlogPost = () => {
     try {
       await navigator.clipboard.writeText(text);
       toast({
-        title: 'Link copied!',
-        description: 'Post URL copied to clipboard',
+        title: 'Registry Link Copied',
+        description: 'Discourse URL has been vaulted to your clipboard.',
       });
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
@@ -154,161 +152,200 @@ export const BlogPost = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="h-8 bg-muted animate-pulse rounded mb-8" />
-            <div className="aspect-video bg-muted animate-pulse rounded-lg mb-8" />
-            <div className="space-y-4">
-              <div className="h-12 bg-muted animate-pulse rounded" />
-              <div className="h-6 bg-muted animate-pulse rounded w-1/3" />
-              <div className="space-y-2">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-4 bg-muted animate-pulse rounded" />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-secondary/5 flex items-center justify-center font-body">
+         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!post) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl font-bold mb-4">Post not found</h1>
-            <Button onClick={() => navigate('/blog')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Blog
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!post) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Back button */}
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/blog')}
-          className="mb-8"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Blog
-        </Button>
+    <div className="pb-32 bg-secondary/5 min-h-screen font-body relative overflow-hidden">
+      <Helmet>
+        <title>{post.title} — IJSDS Discourse</title>
+        <meta name="description" content={post.excerpt} />
+      </Helmet>
 
-        <article className="max-w-4xl mx-auto">
-          {/* Featured Image */}
-          {post.featured_image_url && (
-            <div className="aspect-video overflow-hidden rounded-lg mb-8">
-              <img 
-                src={post.featured_image_url} 
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
+      {/* Decorative Brand Accents */}
+      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-primary/5 rounded-full -mr-32 -mt-32 blur-[100px] opacity-40"></div>
+      <div className="absolute top-[20%] left-0 w-64 h-64 bg-secondary/5 opacity-40" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        {/* Navigation Layer — High Fidelity */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-10 relative">
+           <div className="absolute top-1/2 left-0 w-full h-px bg-border/20 -z-0"></div>
+           
+           <button 
+             onClick={() => navigate('/blog')} 
+             className="relative z-10 flex items-center gap-6 font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 hover:text-primary transition-colors bg-secondary/5 px-8 py-6 border border-border/10"
+           >
+              <ArrowLeft size={16} /> Return to Discourse Hub
+           </button>
+           
+           <div className="relative z-10 flex items-center gap-6">
+              <button 
+                onClick={handleShare}
+                className="h-16 w-16 bg-white border border-border/10 flex items-center justify-center text-foreground hover:text-primary hover:border-primary transition-all shadow-xl group/share"
+              >
+                 <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
+              </button>
+              <div className="bg-white p-6 md:px-10 border border-border/10 shadow-2xl flex items-center gap-6">
+                 <Clock size={16} className="text-secondary opacity-40" />
+                 <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">{formatDate(post.published_at)}</span>
+              </div>
+           </div>
+        </div>
+
+        <article className="max-w-5xl mx-auto">
+          {/* Phase-A: Title & Context */}
+          <header className="mb-20 text-center md:text-left">
+            <div className="flex items-center gap-4 mb-10 justify-center md:justify-start">
+               <div className="h-0.5 w-12 bg-primary"></div>
+               {post.category && (
+                 <span className="font-headline font-black text-[11px] uppercase tracking-[0.5em] text-secondary italic">{post.category}</span>
+               )}
             </div>
-          )}
-
-          {/* Article Header */}
-          <header className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              {post.category && (
-                <Badge variant="secondary">{post.category}</Badge>
-              )}
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-            </div>
-
-            <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
             
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{post.author_profile?.full_name || 'Anonymous'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(post.published_at)}</span>
-              </div>
-            </div>
+            <h1 className="text-5xl md:text-8xl font-headline font-black uppercase tracking-tighter leading-[0.85] mb-12 text-foreground">
+               {post.title}
+            </h1>
 
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {post.tags.map(tag => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-col md:flex-row items-center gap-10 border-t border-border/10 pt-10 justify-center md:justify-start">
+               <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
+                     <User size={24} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                     <span className="font-headline font-black text-[9px] uppercase tracking-[0.5em] text-foreground/20 italic">Curated By</span>
+                     <span className="font-headline font-black text-sm uppercase tracking-widest text-foreground">{post.author_profile?.full_name || 'Anonymous Scholar'}</span>
+                  </div>
+               </div>
+
+               <div className="flex items-center gap-4 text-foreground/10 hidden md:flex">
+                  <div className="w-2 h-2 rounded-full bg-border"></div>
+                  <div className="w-2 h-2 rounded-full bg-border"></div>
+                  <div className="w-2 h-2 rounded-full bg-border"></div>
+               </div>
+
+               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                  {post.tags?.map(tag => (
+                    <Badge key={tag} className="bg-white border border-border/10 text-foreground/40 rounded-none font-headline font-black text-[9px] uppercase tracking-[0.3em] px-5 py-2">
+                       #{tag}
+                    </Badge>
+                  ))}
+               </div>
+            </div>
           </header>
 
-          {/* Article Content */}
-          <div className="prose prose-lg max-w-none mb-12">
-            <div 
-              dangerouslySetInnerHTML={{ __html: post.content }}
-              className="text-foreground"
-            />
-          </div>
-
-          {/* Author Bio */}
-          {post.author_profile?.bio && (
-            <Card className="mb-8">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">About the Author</h3>
-                <div className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{post.author_profile.full_name}</h4>
-                    <p className="text-muted-foreground mt-1">{post.author_profile.bio}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Featured Visual Payload */}
+          {post.featured_image_url && (
+            <div className="aspect-video overflow-hidden relative mb-24 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.2)] border border-border/10 group">
+               <div className="absolute inset-0 bg-primary/5 -z-0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <img 
+                 src={post.featured_image_url} 
+                 alt={post.title}
+                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+               />
+               <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/10" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }}></div>
+            </div>
           )}
 
-          {/* Related Posts */}
+          {/* Phase-B: Intellectual Content */}
+          <div className="relative mb-32">
+             {/* Large Motif Background */}
+             <div className="absolute top-0 right-0 -mr-24 opacity-5 pointer-events-none">
+                <Quote size={200} className="text-primary" />
+             </div>
+
+             <div 
+               className="prose prose-xl max-w-none prose-headings:font-headline prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter prose-p:font-body prose-p:text-foreground/70 prose-p:leading-[1.8] prose-blockquote:border-l-8 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:p-10 prose-blockquote:italic prose-blockquote:text-2xl lg:prose-blockquote:text-3xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+             >
+                <div 
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                  className="text-foreground lg:text-2xl"
+                />
+             </div>
+          </div>
+
+          {/* Phase-C: Scholar Dossier (Bio) */}
+          {post.author_profile?.bio && (
+            <div className="mb-32 p-12 md:p-16 bg-foreground text-white relative overflow-hidden group/bio shadow-2xl border-l-[16px] border-secondary">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+               <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left">
+                  <div className="w-24 h-24 bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-xl shrink-0">
+                     <User size={48} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 mb-4 justify-center md:justify-start">
+                       <UserCheck size={16} className="text-secondary" />
+                       <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-white/30 italic">Validated Scholar</span>
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-headline font-black uppercase tracking-tighter mb-4">{post.author_profile.full_name}</h3>
+                    <p className="font-body text-lg italic text-white/40 leading-relaxed max-w-2xl">{post.author_profile.bio}</p>
+                  </div>
+               </div>
+            </div>
+          )}
+
+          {/* Phase-D: Continued Dialogue (Related) */}
           {relatedPosts.length > 0 && (
-            <section>
-              <h3 className="text-2xl font-bold mb-6">Related Posts</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section className="pt-24 border-t border-border/10">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8">
+                 <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-white border border-border/10 flex items-center justify-center text-secondary shadow-xl">
+                       <Layers size={21} />
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/20 italic">Global Archive</span>
+                       <h3 className="text-3xl md:text-5xl font-headline font-black uppercase tracking-tighter">Continued Dialogue</h3>
+                    </div>
+                 </div>
+                 <button 
+                   onClick={() => navigate('/blog')}
+                   className="font-headline font-black text-xs uppercase tracking-[0.4em] text-primary hover:text-foreground transition-all group/all"
+                 >
+                    View Registry Full <ArrowRight size={14} className="inline ml-2 group-hover/all:translate-x-2 transition-transform" />
+                 </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                 {relatedPosts.map((relatedPost) => (
-                  <Card 
+                  <div 
                     key={relatedPost.id} 
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    className="bg-white border border-border/10 group/rel cursor-pointer hover:shadow-2xl transition-all h-full flex flex-col"
                     onClick={() => navigate(`/blog/${relatedPost.id}`)}
                   >
                     {relatedPost.featured_image_url && (
-                      <div className="aspect-video overflow-hidden rounded-t-lg">
+                      <div className="aspect-video overflow-hidden relative">
                         <img 
                           src={relatedPost.featured_image_url} 
                           alt={relatedPost.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover/rel:scale-110 transition-transform duration-[1.5s]"
                         />
                       </div>
                     )}
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold line-clamp-2 mb-2">{relatedPost.title}</h4>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{relatedPost.author_profile?.full_name || 'Anonymous'}</span>
-                        <span>{formatDate(relatedPost.published_at)}</span>
+                    <div className="p-8 flex flex-col flex-grow">
+                      <h4 className="font-headline font-black text-xl uppercase tracking-tight line-clamp-2 mb-6 group-hover/rel:text-primary transition-colors">{relatedPost.title}</h4>
+                      <div className="mt-auto pt-6 border-t border-border/5 flex items-center justify-between">
+                        <span className="font-headline font-black text-[9px] uppercase tracking-widest text-foreground/30 truncate max-w-[150px]">{relatedPost.author_profile?.full_name || 'Anonymous'}</span>
+                        <span className="font-headline font-black text-[9px] uppercase tracking-[0.3em] text-secondary">{formatDate(relatedPost.published_at)}</span>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>
           )}
         </article>
       </div>
+      
+      {/* Final Registry Note */}
+      <div className="container mx-auto px-4 mt-32 text-center opacity-10 font-headline font-black text-[9px] uppercase tracking-[0.8em]">
+         Scholarly Protocol Integrated — V.04 ARCHIVE
+      </div>
     </div>
   );
 };
+
+export default BlogPost;

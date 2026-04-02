@@ -1,193 +1,184 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { BookOpen, Target, Eye, Users, TrendingUp, Globe, Award, Network, ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-// import logo from "/public/Logo_Black_Edited-removebg-preview.png"
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
+import { Target, Eye, TrendingUp, Globe, Award, Network, BookOpen, ShieldCheck, Zap, Layers, MapPin, Search } from 'lucide-react';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 import logo from "../../public/Logo Symbol.png"
 
-
 export const About = () => {
-  const navigate = useNavigate()
   return (
-    <div className="min-h-screen ">
-      {/* Hero Section */}
-      <section className=" from-primary/5 to-background py-20">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center mb-6">
-            <img src={logo} alt="IJSDS logo" className="w-32 sm:w-40 mb-4 sm:mb-0 sm:mr-8" />
+    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+      <Helmet>
+        <title>About IJSDS — Institutional Identity</title>
+        <meta name="description" content="Discover the mission, vision, and strategic objectives of the International Journal of Social Work and Development Studies." />
+      </Helmet>
 
-            <div className="text-center sm:text-left">
-              <h1 className="text-5xl font-bold text-foreground mb-2">About IJSDS</h1>
-              <p className="text-xl text-muted-foreground">International Journal of Social Work and Development Studies</p>
+      <PageHeader 
+        title="Institutional" 
+        subtitle="Identity" 
+        accent="Scholarly Foundation & Vision"
+        description="The International Journal of Social Work and Development Studies (IJSDS) is a premier peer-reviewed platform dedicated to advancing discourse and practice across the African continent and globally."
+      />
+
+      {/* Identity Artifact — Premium Branding Section */}
+      <ContentSection>
+        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative group">
+          {/* Background Decorative Motif */}
+          <div className="absolute top-1/2 left-0 w-full h-[1px] bg-border/20 -z-0 group-hover:bg-primary/20 transition-colors duration-1000"></div>
+          
+          <div className="w-full lg:w-2/5 relative">
+            <div className="absolute inset-0 bg-primary/5 -translate-x-10 translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-1000 -z-10"></div>
+            <div className="bg-white p-16 md:p-24 shadow-2xl border border-border/20 text-center relative z-10 overflow-hidden group/logo">
+               {/* Abstract Corner Accent */}
+               <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/5 transition-transform group-hover/logo:scale-110" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+               <img src={logo} alt="IJSDS Official Seal" className="w-48 md:w-64 mx-auto -rotate-3 transition-all duration-1000 group-hover/logo:rotate-0 group-hover/logo:scale-110 relative z-10" />
+            </div>
+            {/* Semantic Label */}
+            <div className="mt-8 flex items-center gap-4 justify-center">
+               <div className="h-px w-12 bg-primary"></div>
+               <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/30">Official Registry Seal</span>
+               <div className="h-px w-12 bg-primary"></div>
             </div>
           </div>
-             {/* <Button 
-                      variant="outline" 
-                      onClick={() => navigate(-1)}
-                      className="mb-4"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back
-                    </Button> */}
-          
-          <div className="max-w-4xl mx-auto">
-            <p className="text-lg text-muted-foreground mb-6">
-              The International Journal On Social Work and Development Studies (IJSDS) is a peer-reviewed journal dedicated to advancing knowledge and practice in social work and development studies. Our aim is to provide a platform for researchers, practitioners, and policymakers to share their experiences, insights, and research findings.
+
+          <div className="w-full lg:w-3/5">
+            <div className="bg-foreground text-white p-10 md:p-16 relative overflow-hidden shadow-2xl mb-12 border border-white/5">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary opacity-10 pointer-events-none" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+                <p className="text-2xl md:text-4xl font-headline font-black uppercase tracking-tighter italic leading-tight text-white mb-6">
+                   "Empowerment through <span className="text-secondary">Transformative Knowledge</span>"
+                </p>
+                <div className="h-1 w-24 bg-primary mb-6"></div>
+                <p className="text-xl font-body text-white/50 italic leading-relaxed">
+                   Bridging the gap between theory and transformative social practice within the African developmental landscape.
+                </p>
+            </div>
+            
+            <p className="text-xl md:text-2xl font-body text-foreground/60 leading-relaxed max-w-2xl border-l-4 border-secondary/20 pl-8 italic">
+               We provide a robust forum for researchers, practitioners, and policymakers to exchange transformative insights and evidence-based solutions to collective challenges.
             </p>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
-              "Empowering Communities through Research and Practice"
-            </Badge>
           </div>
         </div>
-      </section>
+      </ContentSection>
 
-      {/* Vision & Mission Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <Eye className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle className="text-2xl">Vision</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-lg">
-                  Our vision is to become a leading international journal that showcases innovative and impactful research in social work and development studies, fostering a more equitable and just society.
-                </p>
-              </CardContent>
-            </Card>
+      {/* Strategic Pillars — Mission & Vision High-Fidelity Blocks */}
+      <ContentSection dark title="Foundational Pillars">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="bg-white p-12 md:p-20 relative overflow-hidden group shadow-2xl flex flex-col h-full border border-border/10">
+            {/* Dramatic Shape Accent */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 transition-transform group-hover:scale-125 duration-1000" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+            
+            <div className="relative z-10">
+               <div className="w-20 h-20 bg-primary/10 flex items-center justify-center text-primary mb-12 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
+                  <Eye size={40} className="group-hover:rotate-12 transition-transform" />
+               </div>
+               <div className="flex items-center gap-4 mb-8">
+                  <div className="h-px w-20 bg-primary"></div>
+                  <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/30 italic">Long-Term Trajectory</span>
+               </div>
+               <h3 className="text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-10 leading-none">Our <br/><span className="text-primary italic">Vision</span></h3>
+               <p className="font-body text-2xl md:text-3xl text-foreground/40 leading-relaxed italic border-l-8 border-secondary/20 pl-8 py-4">
+                 "To become the leading international journal documenting innovative and impactful research that fosters a more equitable, just, and self-reliant society across Africa and the global south."
+               </p>
+            </div>
+          </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <Target className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle className="text-2xl">Mission</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-lg">
-                  Our mission is to publish high-quality, relevant, and rigorous research that contributes to the understanding and advancement of social work and development studies. We strive to provide a forum for critical discussion, debate, and reflection on the complex issues facing individuals, communities, and societies.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="bg-foreground text-white p-12 md:p-20 relative overflow-hidden group shadow-2xl flex flex-col h-full border border-white/5">
+            {/* Dramatic Shape Accent */}
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 opacity-20 -translate-x-1/2 translate-y-1/2 pointer-events-none" style={{ clipPath: 'circle(50% at 50% 50%)' }}></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 opacity-20 pointer-events-none" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}></div>
+            
+            <div className="relative z-10">
+               <div className="w-20 h-20 bg-secondary/20 flex items-center justify-center text-secondary mb-12 border border-secondary/20 group-hover:bg-secondary group-hover:text-white transition-all shadow-inner">
+                  <Target size={40} className="group-hover:-rotate-12 transition-transform" />
+               </div>
+               <div className="flex items-center gap-4 mb-8">
+                  <div className="h-px w-20 bg-secondary"></div>
+                  <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-white/30 italic">Strategic Mandate</span>
+               </div>
+               <h3 className="text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-10 leading-none">Our <br/><span className="text-secondary italic">Mission</span></h3>
+               <p className="font-body text-2xl md:text-3xl text-white/40 leading-relaxed italic border-l-8 border-primary/20 pl-8 py-4">
+                 "To publish rigorous research contributing to the advancement of social work and development studies, providing a critical forum for debate and reflection on the multifaceted issues facing our societies."
+               </p>
+            </div>
           </div>
         </div>
-      </section>
+      </ContentSection>
 
-      {/* Objectives Section */}
-      <section className="py-16 b">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Objectives</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="text-center">
-              <CardHeader>
-                <Award className="h-10 w-10 text-primary mx-auto mb-3" />
-                <CardTitle className="text-lg">Promote Research Excellence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  Foster high-quality research in social work and development studies
+      {/* Strategic Impact Ledger — Dynamic Objective Grid */}
+      <ContentSection title="Strategic Impact Matrix">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {[
+            { 
+               icon: <Award className="h-10 w-10" />, 
+               title: "Promote Excellence", 
+               desc: "Fostering the highest standards of multidisciplinary research quality and ethical scholarship across continental archives.",
+               accent: "primary"
+            },
+            { 
+               icon: <Globe className="h-10 w-10" />, 
+               title: "Global Impact", 
+               desc: "Disseminating transformative findings to a diverse global academic audience through optimized digital discovery nodes.",
+               accent: "secondary"
+            },
+            { 
+               icon: <TrendingUp className="h-10 w-10" />, 
+               title: "Inform Policy", 
+               desc: "Empowering continental decision-makers with evidence-based developmental strategies and rigorous scholarly data.",
+               accent: "primary"
+            },
+            { 
+               icon: <Network className="h-10 w-10" />, 
+               title: "Dynamic Synergy", 
+               desc: "Building a vibrant professional network across disciplines, sectors, and international institutional borders.",
+               accent: "secondary"
+            }
+          ].map((item, idx) => (
+            <div key={idx} className="group flex flex-col bg-white border border-border/10 shadow-sm hover:shadow-2xl transition-all duration-700 relative overflow-hidden h-full">
+              {/* Abstract Motif in Card */}
+              <div className={`absolute top-0 right-0 w-16 h-16 bg-${item.accent}/5 group-hover:scale-150 transition-transform duration-1000`} style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+              
+              <div className="p-12 flex flex-col h-full">
+                <div className={`w-16 h-16 bg-${item.accent}/10 flex items-center justify-center text-${item.accent} mb-12 border border-${item.accent}/10 group-hover:bg-foreground group-hover:text-white transition-all shadow-inner`}>
+                   {item.icon}
+                </div>
+                
+                <div className="flex items-center gap-4 mb-6">
+                   <div className="h-px w-12 bg-primary group-hover:w-full transition-all duration-700"></div>
+                   <span className="font-headline font-black text-[9px] uppercase tracking-widest text-foreground/30">Vector 0{idx+1}</span>
+                </div>
+                
+                <h4 className="text-2xl font-black font-headline uppercase tracking-tighter mb-4 leading-tight group-hover:text-primary transition-colors">{item.title}</h4>
+                <p className="font-body text-foreground/40 italic text-md leading-relaxed mb-auto bg-secondary/5 p-6 border-l-2 border-secondary/10 group-hover:text-foreground/70 group-hover:bg-transparent transition-all">
+                   {item.desc}
                 </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Globe className="h-10 w-10 text-primary mx-auto mb-3" />
-                <CardTitle className="text-lg">Disseminate Knowledge</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  Share research findings and insights with a global audience
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <TrendingUp className="h-10 w-10 text-primary mx-auto mb-3" />
-                <CardTitle className="text-lg">Inform Policy and Practice</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  Provide evidence-based research to inform policy and practice in social work and development studies
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Network className="h-10 w-10 text-primary mx-auto mb-3" />
-                <CardTitle className="text-lg">Encourage Collaboration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  Facilitate collaboration among researchers, practitioners, and policymakers
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </section>
+      </ContentSection>
 
-      {/* Expected Outcomes Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Expected Outcomes and Outputs</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader>
-                <BookOpen className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>High-Impact Research</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Publish research that contributes to the advancement of social work and development studies
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Eye className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Increased Visibility</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Increase the visibility and reach of research in social work and development studies
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <TrendingUp className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Improved Policy and Practice</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Inform policy and practice with evidence-based research
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Users className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Global Network</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Establish a global network of researchers, practitioners, and policymakers in social work and development studies
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+      {/* Continuity Note — High Fidelity Seal */}
+      <ContentSection>
+        <div className="max-w-5xl mx-auto py-32 text-center border-y border-border/20 relative overflow-hidden group">
+            <div className="absolute top-1/2 left-0 w-full h-px bg-border -z-10 group-hover:bg-primary/20 transition-colors duration-1000"></div>
+            <div className="bg-secondary/5 inline-block px-12 py-6 relative z-10 mb-12 border border-border/10 animate-bounce">
+               <ShieldCheck className="h-8 w-8 text-secondary mx-auto" />
+            </div>
+            
+            <p className="font-headline text-3xl md:text-7xl font-black text-foreground uppercase tracking-tighter italic leading-none max-w-5xl mx-auto relative z-10 mb-16">
+              "Ensuring the <span className="text-primary italic">Intellectual Continuity</span> of the African Commons."
+            </p>
+            
+            <div className="flex flex-col items-center gap-12 relative z-10">
+               <div className="flex flex-wrap justify-center gap-12 font-headline font-black text-xs uppercase tracking-[0.6em] text-foreground/10 italic">
+                  <span>Scholarly Rigor</span>
+                  <span className="text-foreground/5 shrink-0 hidden sm:block">•</span>
+                  <span>Institutional Integrity</span>
+                  <span className="text-foreground/5 shrink-0 hidden sm:block">•</span>
+                  <span>Continental Impact</span>
+               </div>
+            </div>
         </div>
-      </section>
+      </ContentSection>
     </div>
   );
 };

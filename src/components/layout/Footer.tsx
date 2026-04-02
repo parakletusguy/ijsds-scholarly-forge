@@ -1,70 +1,148 @@
-import { BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import logo from "../../../public/Logo Symbol.png"
+import { Globe, Mail, MapPin, ExternalLink, ShieldCheck, Zap, Layers, Award, Target, BookOpen, Clock } from "lucide-react";
 
 export const Footer = () => {
   const today = new Date();
-  const getOrdinalNum = (n: number) => {
-    return n + (n > 0 ? ['th', 'st', 'nd', 'rd'][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : '');
-  };
-  const formattedDate = `${getOrdinalNum(today.getDate())} of ${today.toLocaleDateString('en-US', { month: 'long' })}, ${today.getFullYear()}`;
+  
+  const footerSectionClasses = "space-y-10 group/section";
+  const headerClasses = "font-headline text-primary font-black uppercase tracking-[0.5em] text-[10px] mb-10 pb-4 border-b border-white/5 inline-block italic";
+  const linkClasses = "font-body text-stone-500 text-lg hover:text-white transition-all hover:translate-x-3 flex items-center gap-4 group/link";
 
   return (
-    <footer className="border-t border-border bg-[white] mt-auto">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              {/* <BookOpen className="h-6 w-6 text-primary" /> */}
-            <img src={logo} alt="IJSDS logo" className="w-16 m-[-15px] text-primary " />
-              <span className="text-lg font-semibold">IJSDS</span>
+    <footer className="bg-[#0c0c0c] text-white mt-32 pt-32 pb-16 relative overflow-hidden font-headline border-t-[20px] border-secondary">
+      {/* Visual Depth Accents — Institutional Grandeur */}
+      <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-primary/5 rounded-full -mr-32 -mt-32 blur-[150px] opacity-40"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 opacity-30 -z-0" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+      <div className="absolute top-[40%] left-[5%] w-32 h-32 text-white opacity-[0.02] pointer-events-none">
+         <Globe size={180} />
+      </div>
+
+      <div className="container mx-auto px-6 md:px-12 max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20">
+          
+          {/* Section: Institutional Core */}
+          <div className={footerSectionClasses}>
+            <div className="flex flex-col gap-4">
+              <span className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase group cursor-pointer transition-colors hover:text-primary">
+                IJSDS
+              </span>
+              <div className="flex items-center gap-6">
+                 <div className="h-0.5 w-10 bg-secondary"></div>
+                 <span className="font-headline font-black text-[9px] uppercase tracking-[0.4em] text-white/30 italic">Initiative Afrique Master Registry</span>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              International Journal of Social Work and Development Studies
+            <p className="font-body text-stone-500 text-xl italic leading-relaxed max-w-xs border-l-2 border-primary/20 pl-6">
+              "Advancing African-centered scholarship and developmental practice through technical precision and intellectual vanguardism."
             </p>
+            <div className="flex gap-4">
+              <a href="mailto:editor.ijsds@gmail.com" className="w-14 h-14 bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary transition-all shadow-xl group/soc">
+                <Mail className="h-6 w-6 text-white/40 group-hover/soc:text-white group-hover/soc:rotate-12 transition-all" />
+              </a>
+              <a href="#" className="w-14 h-14 bg-white/5 border border-white/10 flex items-center justify-center hover:bg-secondary transition-all shadow-xl group/soc">
+                <Globe className="h-6 w-6 text-white/40 group-hover/soc:text-white group-hover/soc:scale-110 transition-all" />
+              </a>
+            </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">For Authors</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/submission-guidelines" className="hover:text-foreground transition-colors">Submission Guidelines</Link></li>
-              <li><Link to="/peer-review" className="hover:text-foreground transition-colors">Peer Review Process</Link></li>
-              <li><Link to="/plagiarism-policy" className="hover:text-foreground transition-colors">Plagiarism Policy</Link></li>
-              <li><Link to="/preservation-policy" className="hover:text-foreground transition-colors">Preservation & Archiving</Link></li>
-              <li><Link to="/copyright" className="hover:text-foreground transition-colors">Copyright Notice</Link></li>
+          {/* Section: Author Protocols */}
+          <div className={footerSectionClasses}>
+            <h4 className={headerClasses}>Investigator Protocols</h4>
+            <ul className="space-y-6">
+              {[
+                { name: 'Technical Guidelines', path: '/submission-guidelines' },
+                { name: 'Peer Review Integrity', path: '/peer-review' },
+                { name: 'Plagiarism Audit', path: '/plagiarism-policy' },
+                { name: 'Copyright Sovereignty', path: '/copyright' },
+              ].map((link) => (
+                <li key={link.path}>
+                   <Link to={link.path} className={linkClasses}>
+                      <ArrowRight size={14} className="text-primary/40 opacity-0 group-hover/link:opacity-100 transition-all" />
+                      {link.name}
+                   </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Journal</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
-              <li><Link to="/editorial-board" className="hover:text-foreground transition-colors">Editorial Board</Link></li>
-              {/* <li><Link to="/archives" className="hover:text-foreground transition-colors">Archives</Link></li> */}
+          {/* Section: Academic Ledger */}
+          <div className={footerSectionClasses}>
+            <h4 className={headerClasses}>Academic Ledger</h4>
+            <ul className="space-y-6">
+              {[
+                { name: 'Institutional Identity', path: '/about' },
+                { name: 'Editorial Council', path: '/editorial-board' },
+                { name: 'The Global Archive', path: '/articles' },
+                { name: 'Technical Support', path: '/contact' },
+              ].map((link) => (
+                <li key={link.path}>
+                   <Link to={link.path} className={linkClasses}>
+                      <Layers size={14} className="text-secondary/40 opacity-0 group-hover/link:opacity-100 transition-all" />
+                      {link.name}
+                   </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">
-              <Link to="/contact" className="hover:text-primary transition-colors cursor-pointer">
-                Contact
-              </Link>
-            </h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Email: editor.ijsds@gmail.com</li>
-              <li>Phone: +234 808 022 4405</li><div className='mb-2'>
-            <li>ISSN: <span className='font-semibold'>3115-6940</span></li>
-            <li>eISSN: <span className='font-semibold'>3115-6932</span></li>
-            <li>Date: <span className='font-semibold'>{formattedDate}</span></li>
-          </div>
-            </ul>
+          {/* Section: Global Correspondence */}
+          <div className={footerSectionClasses}>
+            <h4 className={headerClasses}>Registry Correspondence</h4>
+            <div className="space-y-10">
+              <div className="group/item">
+                 <p className="text-white/20 font-black text-[9px] uppercase tracking-[0.6em] mb-4 italic">Corporate Node</p>
+                 <div className="flex gap-4">
+                    <MapPin className="h-5 w-5 text-secondary shrink-0" />
+                    <p className="font-body text-stone-500 text-sm leading-relaxed italic">
+                       Dept. of Social Work, Faculty of Social Sciences, Rivers State University, Emohua.
+                    </p>
+                 </div>
+              </div>
+              
+              <div className="group/item">
+                 <p className="text-white/20 font-black text-[9px] uppercase tracking-[0.6em] mb-4 italic">Technical Identifiers</p>
+                 <div className="flex gap-4 items-center">
+                    <ShieldCheck className="h-5 w-5 text-primary shrink-0 transition-transform group-hover/item:rotate-12" />
+                    <p className="font-body text-stone-500 text-sm italic">
+                       ISSN: 3115-6940 (Print) <br/>
+                       ISSN: 3115-6932 (Online)
+                    </p>
+                 </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/5">
+                 <Link to="/contact" className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-white hover:text-primary transition-all flex items-center gap-4 group/desk">
+                    Access Support Desk <Target size={14} className="group-hover/desk:scale-110 transition-transform" />
+                 </Link>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {today.getFullYear()} International Journal of Social Work and Development Studies. All rights reserved.</p>
+        {/* Global Footer Navigation Pillar */}
+        <div className="mt-32 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="flex items-center gap-10">
+             <div className="flex items-center gap-4">
+                <Clock size={16} className="text-stone-700" />
+                <p className="font-headline text-stone-600 text-[9px] uppercase tracking-[0.5em] italic">Last Registry Sync: {today.toLocaleDateString()}</p>
+             </div>
+             <p className="font-headline text-stone-500 text-[10px] uppercase tracking-[0.2em] hidden md:block">
+                © {today.getFullYear()} IJSDS. Permanent Institutional Record.
+             </p>
+          </div>
+          
+          <div className="flex items-center gap-6 opacity-20 hover:opacity-100 transition-opacity">
+             <Award size={24} className="text-white" />
+             <ShieldCheck size={24} className="text-white" />
+             <Globe size={24} className="text-white" />
+          </div>
         </div>
+      </div>
+      
+      {/* Background Microtexture Motif */}
+      <div className="absolute bottom-0 right-0 w-full h-1 text-center font-headline font-black text-[8px] uppercase tracking-[2em] text-white opacity-5 mb-4 select-none">
+         SCHOLARLY FORGE ARCHIVE V.04
       </div>
     </footer>
   );
 };
+import { ArrowRight } from 'lucide-react';

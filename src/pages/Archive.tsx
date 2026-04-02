@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { BookOpen, Download, ExternalLink } from 'lucide-react';
+import { Calendar, Download, ExternalLink, BookOpen, Plus, Layers, Database, History, Search, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface Author {
   name: string;
@@ -57,7 +56,6 @@ export default function Archive() {
 
       if (error) throw error;
 
-      // Group articles by volume and issue
       const grouped = (data as any[]).reduce((acc: Record<string, VolumeIssue>, article: any) => {
         const key = `${article.volume}-${article.issue}`;
         if (!acc[key]) {
@@ -94,138 +92,159 @@ export default function Archive() {
     return authors.map(a => a.name).join(', ');
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto py-12 px-4">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <BookOpen className="w-12 h-12 animate-pulse mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Loading archive...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
+    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
       <Helmet>
-        <title>Archive - IJSDS Journal</title>
-        <meta name="description" content="Browse the complete archive of published articles in the International Journal On Social Work and Development Studies (IJSDS), organized by volume and issue." />
-        <meta name="keywords" content="IJSDS archive, journal archive, social work publications, development studies articles, academic archive" />
+        <title>Archive IJSDS — Digital Scientific Record</title>
+        <meta name="description" content="Browse the complete digital archive of the International Journal of Social Work and Development Studies (IJSDS)." />
       </Helmet>
 
-      <div className="container mx-auto py-12 px-4 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-foreground">Journal Archive</h1>
-          <p className="text-xl text-muted-foreground">
-            International Journal On Social Work and Development Studies (IJSDS)
-          </p>
-          <Separator className="mt-4" />
-        </div>
+      <PageHeader 
+        title="Digital" 
+        subtitle="Archives" 
+        accent="The Scientific Record Ledger"
+        description="The complete collection of IJSDS publications, documenting the evolution of multicisciplinary social work and development scholarship across continental borders."
+      />
 
-        {archiveData.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No published articles found in the archive.</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Accordion type="single" collapsible className="space-y-4">
-            {archiveData.map((volumeIssue, index) => (
-              <AccordionItem 
-                key={`${volumeIssue.volume}-${volumeIssue.issue}`} 
-                value={`${volumeIssue.volume}-${volumeIssue.issue}`}
-                className="border rounded-lg"
-              >
-                <AccordionTrigger className="px-6 hover:no-underline hover:bg-accent/50">
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-semibold">
-                        Volume {volumeIssue.volume}, Issue {volumeIssue.issue}
-                      </h2>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {volumeIssue.year} • {volumeIssue.articles.length} {volumeIssue.articles.length === 1 ? 'Article' : 'Articles'}
-                      </p>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6">
-                  <div className="space-y-4 mt-4">
-                    {volumeIssue.articles.map((article, articleIndex) => (
-                      <Card key={article.id} className="border-l-4 border-l-primary">
-                        <CardHeader>
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg mb-2">{article.title}</CardTitle>
-                              <CardDescription className="text-sm">
-                                {formatAuthors(article.authors)}
-                              </CardDescription>
-                            </div>
-                            {article.doi && (
-                              <Badge variant="secondary" className="shrink-0">
-                                DOI: {article.doi}
-                              </Badge>
-                            )}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                            {article.abstract}
-                          </p>
-                          
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {article.keywords?.map((keyword, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {keyword}
-                              </Badge>
-                            ))}
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            {article.page_start && article.page_end && (
-                              <span>Pages {article.page_start}-{article.page_end}</span>
-                            )}
-                            {article.publication_date && (
-                              <span>
-                                Published: {new Date(article.publication_date).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
+      {/* Archive Chronology — High Fidelity Ledger */}
+      <ContentSection>
+        <div className="max-w-6xl mx-auto">
+          {loading ? (
+            <div className="space-y-12 animate-pulse">
+               {[1, 2, 3].map(i => (
+                 <div key={i} className="h-32 bg-white border border-border/10 shadow-sm" />
+               ))}
+            </div>
+          ) : archiveData.length === 0 ? (
+            <div className="text-center py-48 bg-white border-2 border-dashed border-border/20 group relative overflow-hidden">
+               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <Database size={64} className="mx-auto text-foreground/10 mb-8 group-hover:rotate-12 transition-transform" />
+               <h3 className="text-3xl font-headline font-black text-foreground/20 uppercase tracking-[0.3em] relative z-10">Archive Node Synchronizing</h3>
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="space-y-12">
+              {archiveData.map((volumeIssue) => (
+                <AccordionItem 
+                  key={`${volumeIssue.volume}-${volumeIssue.issue}`} 
+                  value={`${volumeIssue.volume}-${volumeIssue.issue}`}
+                  className="border-none bg-white shadow-sm hover:shadow-2xl transition-all duration-700 group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-full bg-secondary/5 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                  
+                  <AccordionTrigger className="px-12 py-10 md:py-16 hover:no-underline border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-secondary/5">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-12 text-left relative z-10 font-headline">
+                      <div>
+                        <div className="flex items-center gap-4 mb-4">
+                           <div className="h-0.5 w-12 bg-primary group-hover:w-20 transition-all duration-700"></div>
+                           <span className="text-[10px] uppercase tracking-[0.5em] text-foreground/30 font-black italic">Archival Record</span>
+                        </div>
+                        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-foreground leading-[0.85] group-hover:text-primary transition-colors">
+                          Vol. <span className="text-secondary">{volumeIssue.volume}</span> / Issue {volumeIssue.issue}
+                        </h2>
+                        <div className="flex items-center gap-6 mt-6">
+                           <Badge className="bg-foreground text-white px-4 py-1.5 font-headline text-[10px] font-black uppercase tracking-widest rounded-none">
+                              Released: {volumeIssue.year}
+                           </Badge>
+                           <div className="flex items-center gap-2">
+                              <Layers size={14} className="text-secondary" />
+                              <span className="text-foreground/40 text-[11px] font-bold uppercase tracking-widest">
+                                 {volumeIssue.articles.length} Manuscripts
                               </span>
-                            )}
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+
+                  <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-secondary/5">
+                    <div className="grid grid-cols-1 gap-16">
+                      {volumeIssue.articles.map((article, idx) => (
+                        <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-12 bg-white p-12 shadow-sm border border-border/10 hover:shadow-2xl transition-all duration-700">
+                          {/* Article index motif */}
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 flex items-center justify-center font-headline font-black text-foreground/10 text-xl group-hover/article:bg-secondary group-hover/article:text-white transition-all">
+                             0{idx+1}
                           </div>
 
-                          <div className="flex gap-2 mt-4">
-                            {article.manuscript_file_url && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={article.manuscript_file_url} target="_blank" rel="noopener noreferrer">
-                                  <Download className="w-4 h-4 mr-2" />
-                                  Download PDF
-                                </a>
-                              </Button>
-                            )}
-                            {article.doi && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={`https://doi.org/${article.doi}`} target="_blank" rel="noopener noreferrer">
-                                  <ExternalLink className="w-4 h-4 mr-2" />
-                                  View DOI
-                                </a>
-                              </Button>
-                            )}
+                          <div className="flex-grow space-y-6">
+                             <div className="flex items-center gap-4 font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30 italic">
+                                <History size={12} className="text-primary" />
+                                <span>Article Segment</span>
+                             </div>
+
+                             <h3 className="text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors">
+                               {article.title}
+                             </h3>
+
+                             <p className="font-body text-xl text-foreground/40 leading-snug border-l-4 border-secondary/20 pl-8 italic group-hover/article:border-secondary transition-colors">
+                               {formatAuthors(article.authors)}
+                             </p>
+
+                             <p className="font-body text-lg text-foreground/50 leading-relaxed max-w-4xl line-clamp-2">
+                               {article.abstract}
+                             </p>
+
+                             <div className="flex flex-wrap items-center gap-8 pt-8 border-t border-border/10 font-headline font-black text-[10px] uppercase tracking-widest">
+                                {article.doi && (
+                                   <div className="flex items-center gap-2 text-foreground/40 hover:text-primary transition-colors cursor-default">
+                                      <ExternalLink size={14} className="text-secondary" /> DOI: {article.doi}
+                                   </div>
+                                )}
+                                {article.page_start && article.page_end && (
+                                   <div className="bg-foreground text-white px-3 py-1 scale-90">
+                                      Pages {article.page_start}—{article.page_end}
+                                   </div>
+                                )}
+                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        )}
-      </div>
-    </>
+
+                          <div className="flex lg:flex-col gap-4 shrink-0 justify-end lg:justify-start pt-8 lg:pt-0">
+                             {article.manuscript_file_url && (
+                               <button 
+                                 className="group/dl relative bg-primary text-white p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground transition-all shadow-xl overflow-hidden flex items-center gap-4"
+                                 onClick={() => window.open(article.manuscript_file_url!, '_blank')}
+                               >
+                                 <Download size={18} className="relative z-10 group-hover/dl:-translate-y-1 transition-transform" />
+                                 <span className="relative z-10 hidden sm:inline">Download PDF</span>
+                                 <div className="absolute inset-0 bg-white translate-x-full group-hover/dl:translate-x-0 transition-transform duration-500 opacity-10"></div>
+                               </button>
+                             )}
+                             <button 
+                               className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4"
+                               onClick={() => window.location.href = `/article/${article.id}`}
+                             >
+                               <Search size={18} />
+                               <span className="hidden sm:inline">View Details</span>
+                             </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </div>
+      </ContentSection>
+
+      {/* Continuity Note — High Fidelity Seal */}
+      <ContentSection>
+        <div className="max-w-5xl mx-auto py-32 text-center border-t border-border/20 relative group">
+            <Layers size={32} className="mx-auto text-foreground/5 mb-12 group-hover:text-primary transition-colors" />
+           <h3 className="text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-8 max-w-4xl mx-auto leading-none italic">Preserving the <span className="text-primary not-italic">Scientific Legacy</span></h3>
+           <p className="text-2xl font-body text-foreground/40 italic mb-16 max-w-3xl mx-auto">Access the high-impact Multidisciplinary discoveries that define African developmental transformation.</p>
+           
+           <div className="flex flex-col items-center gap-12">
+              <div className="flex flex-wrap justify-center gap-12 font-headline font-black text-[10px] uppercase tracking-[0.6em] text-foreground/10 italic">
+                 <span>Permanent Record</span>
+                 <span className="text-foreground/5 shrink-0 hidden sm:block">•</span>
+                 <span>Scholarly Continuity</span>
+                 <span className="text-foreground/5 shrink-0 hidden sm:block">•</span>
+                 <span>Global Archive</span>
+              </div>
+           </div>
+        </div>
+      </ContentSection>
+    </div>
   );
 }
