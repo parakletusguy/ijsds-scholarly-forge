@@ -3,14 +3,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
+import { Auth } from './pages/Auth';
 const Index = lazy(() => import('./pages/Index'));
-const Auth = lazy(() => import('./pages/Auth').then(m => ({ default: m.Auth })));
 const Articles = lazy(() => import('./pages/Articles').then(m => ({ default: m.Articles })));
 const Submit = lazy(() => import('./pages/Submit').then(m => ({ default: m.Submit })));
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -37,6 +37,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const SystemSettings = lazy(() => import('./pages/SystemSettings').then(m => ({ default: m.SystemSettings })));
 const ManageRequests = lazy(() => import('./pages/approveRequest').then(m => ({ default: m.ManageRequests })));
 const Landing = lazy(() => import('./pages/landingPage').then(m => ({ default: m.Landing })));
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
 import logo_2 from "../public/riversstate-removebg-preview.png"
 const ArticleInfo = lazy(() => import('./pages/articleInfo').then(m => ({ default: m.ArticleInfo })));
@@ -91,6 +92,8 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
   </SidebarProvider>
 );
 
+import { PublicLayout } from "@/components/layout/PublicLayout";
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -99,69 +102,69 @@ const App = () => (
           <HelmetProvider>
             <Toaster />
             <Sonner />
-            <div className="font-Roboto bg-[#ffefcc]">
+            <div className="font-Roboto bg-[#fffdfa]">
               <BrowserRouter>
-            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
-              <Routes>
-              <Route path="/" element={<Index/>} />
-              <Route path="/auth" element={<PageLayout><Auth /></PageLayout>} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/articles" element={<PageLayout><Articles /></PageLayout>} />
-              <Route path="/article/:slug" element={<PageLayout><ArticleInfo /></PageLayout>} />
-              <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
-              <Route path="/dashboard" element={<PageLayout><Dashboard /></PageLayout>} />
-              <Route path="/editorial" element={<PageLayout><Editorial /></PageLayout>} />
-              <Route path="/review-assignment/:submissionId" element={<PageLayout><ReviewAssignment /></PageLayout>} />
-              <Route path="/reviewer-dashboard" element={<PageLayout><ReviewerDashboard /></PageLayout>} />
-              <Route path="/reviewerSubmission/:submissionId/details" element={<PageLayout><ReviewerDetail/></PageLayout>} />
-              <Route path="/review/:reviewId" element={<PageLayout><ReviewForm /></PageLayout>} />
-              <Route path="/publication" element={<PageLayout><Publication /></PageLayout>} />
-              <Route path="/production" element={<PageLayout><Production /></PageLayout>} />
-              <Route path="/analytics" element={<PageLayout><Analytics /></PageLayout>} />
-              <Route path="/data-management" element={<PageLayout><DataManagement /></PageLayout>} />
-              <Route path="/profile" element={<PageLayout><Profile /></PageLayout>} />
-              <Route path="/about" element={<PageLayout><About /></PageLayout>} />
-              <Route path="/copyright" element={<PageLayout><Copyright /></PageLayout>} />
-              <Route path="/editorial-board" element={<PageLayout><EditorialBoard /></PageLayout>} />
-              <Route path="/submission-guidelines" element={<PageLayout><SubmissionGuidelines /></PageLayout>} />
-              <Route path="/peer-review" element={<PageLayout><PeerReview /></PageLayout>} />
-              <Route path="/external-integrations" element={<PageLayout><ExternalIntegrations /></PageLayout>} />
-              <Route path="/reports" element={<PageLayout><Reports /></PageLayout>} />
-              <Route path="/submission/:submissionId/details" element={<PageLayout><SubmissionDetail /></PageLayout>} />
-              <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
-              <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
-              <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
-              <Route path="/system-settings" element={<PageLayout><SystemSettings /></PageLayout>} />
-              <Route path="/landing" element={<Landing/>} />
-              <Route path="/orcidGuide" element={<PageLayout><Guide/></PageLayout>}/>
-              <Route path="/blog" element={<PageLayout><Blog /></PageLayout>} />
-              <Route path="/blog/:id" element={<PageLayout><BlogPost /></PageLayout>} />
-              <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
-              <Route path="/partners" element={<PageLayout><Partners /></PageLayout>} />
-              <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
-              <Route path="/openAccess" element={<PageLayout><OpenAccessPage /></PageLayout>} />
-              <Route path="/plagiarism-policy" element={<PageLayout><PlagiarismPolicy /></PageLayout>} />
-              <Route path="/preservation-policy" element={<PageLayout><PreservationPolicy /></PageLayout>} />
-              <Route path="/archive" element={<PageLayout><Archive /></PageLayout>} />
-              {/* §4.2 — Author Indexing Instructions Page */}
-              {/* Source: IJSDS Master Implementation Guide §4.2 */}
-              <Route path="/indexing" element={<PageLayout><Indexing /></PageLayout>} />
-              <Route path="/contact" element={<PageLayout><Contact /></PageLayout>} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="/admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
-              <Route path="/Admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
-              <Route path="/admin/" element={<PageLayout><AdminDashboard /></PageLayout>} />
-              <Route path="/admin/blog" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
-              <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
-              <Route path="/admin/blog/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
-              <Route path="/admin/blogs/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
-              <Route path="/admin/blog/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
-              <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
-              <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
-            </Routes>
-              </Suspense>
-          </BrowserRouter>
-          </div>
+                <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                  <Routes>
+                    {/* ── Public Routes (Sidebar-Free) ────────────────────────────────── */}
+                    <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+                    <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+                    <Route path="/articles" element={<PublicLayout><Articles /></PublicLayout>} />
+                    <Route path="/article/:slug" element={<PublicLayout><ArticleInfo /></PublicLayout>} />
+                    <Route path="/archive" element={<PublicLayout><Archive /></PublicLayout>} />
+                    <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
+                    <Route path="/blog/:id" element={<PublicLayout><BlogPost /></PublicLayout>} />
+                    <Route path="/partners" element={<PublicLayout><Partners /></PublicLayout>} />
+                    <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+                    <Route path="/openAccess" element={<PublicLayout><OpenAccessPage /></PublicLayout>} />
+                    <Route path="/plagiarism-policy" element={<PublicLayout><PlagiarismPolicy /></PublicLayout>} />
+                    <Route path="/preservation-policy" element={<PublicLayout><PreservationPolicy /></PublicLayout>} />
+                    <Route path="/indexing" element={<PublicLayout><Indexing /></PublicLayout>} />
+                    <Route path="/copyright" element={<PublicLayout><Copyright /></PublicLayout>} />
+                    <Route path="/orcidGuide" element={<PublicLayout><Guide /></PublicLayout>} />
+                    <Route path="/auth" element={<PublicLayout><Auth /></PublicLayout>} />
+                    <Route path="/reset-password" element={<PublicLayout><ResetPassword /></PublicLayout>} />
+
+                    {/* ── Protected Routes (With Sidebar) ──────────────────────────────── */}
+                    <Route path="/submit" element={<PageLayout><Submit /></PageLayout>} />
+                    <Route path="/dashboard" element={<PageLayout><Dashboard /></PageLayout>} />
+                    <Route path="/editorial" element={<PageLayout><Editorial /></PageLayout>} />
+                    <Route path="/review-assignment/:submissionId" element={<PageLayout><ReviewAssignment /></PageLayout>} />
+                    <Route path="/reviewer-dashboard" element={<PageLayout><ReviewerDashboard /></PageLayout>} />
+                    <Route path="/reviewerSubmission/:submissionId/details" element={<PageLayout><ReviewerDetail /></PageLayout>} />
+                    <Route path="/review/:reviewId" element={<PageLayout><ReviewForm /></PageLayout>} />
+                    <Route path="/publication" element={<PageLayout><Publication /></PageLayout>} />
+                    <Route path="/production" element={<PageLayout><Production /></PageLayout>} />
+                    <Route path="/analytics" element={<PageLayout><Analytics /></PageLayout>} />
+                    <Route path="/data-management" element={<PageLayout><DataManagement /></PageLayout>} />
+                    <Route path="/profile" element={<PageLayout><Profile /></PageLayout>} />
+                    <Route path="/reports" element={<PageLayout><Reports /></PageLayout>} />
+                    <Route path="/submission/:submissionId/details" element={<PageLayout><SubmissionDetail /></PageLayout>} />
+                    <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
+                    <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
+                    <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
+                    <Route path="/system-settings" element={<PageLayout><SystemSettings /></PageLayout>} />
+                    <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
+                    <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
+                    <Route path="/admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
+                    <Route path="/Admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
+                    <Route path="/admin/" element={<PageLayout><AdminDashboard /></PageLayout>} />
+                    <Route path="/admin/blog" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
+                    <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
+                    <Route path="/admin/blog/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
+                    <Route path="/admin/blogs/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
+                    <Route path="/admin/blog/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
+                    <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
+
+                    <Route path="/editorial-board" element={<Navigate to="/about" replace />} />
+                    <Route path="/submission-guidelines" element={<Navigate to="/about" replace />} />
+                    <Route path="/peer-review" element={<Navigate to="/about#editorial" replace />} />
+
+                    <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </div>
           </HelmetProvider>
         </TooltipProvider>
       </AuthProvider>

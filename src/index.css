@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 38 33% 97%;
+    --background: 38 33% 98%;
     --foreground: 60 5% 10%;
 
     --card: 0 0% 100%;
@@ -17,38 +17,39 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 60 5% 10%;
 
-    --primary: 20 100% 32.2%;
+    --primary: 15 76% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 122 43% 29%;
+    --secondary: 44 100% 24%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 38 20% 90%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 42 100% 24%;
+    --accent: 15 76% 32%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 38 20% 85%;
-    --input: 38 20% 85%;
-    --ring: 20 100% 32.2%;
+    --border: 15 20% 85%;
+    --input: 15 20% 85%;
+    --ring: 15 76% 32%;
 
-    --radius: 0.25rem;
+    --radius: 0px;
 
     --sidebar-background: 38 33% 95%;
     --sidebar-foreground: 60 5% 10%;
-    --sidebar-primary: 20 100% 32.2%;
+    --sidebar-primary: 15 76% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 42 100% 24%;
+    --sidebar-accent: 44 100% 24%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 38 20% 80%;
-    --sidebar-ring: 20 100% 32.2%;
+    --sidebar-border: 15 20% 80%;
+    --sidebar-ring: 15 76% 32%;
   }
 
   .dark {
+    /* Keeping dark mode vars as is for now, but focus is on light mode as per request */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
@@ -76,20 +77,6 @@ All colors MUST be HSL.
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    /* Enhanced gradients and effects */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--muted)));
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
-    --shadow-soft: 0 4px 12px -2px hsl(0 0% 0% / 0.1);
   }
 }
 
@@ -99,6 +86,43 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-on-surface font-body;
+    background-color: #fdf9f5;
+  }
+
+  h1, h2, h3, h4, .serif-brand {
+    @apply font-headline;
+  }
+}
+
+@layer utilities {
+  .geometric-accent {
+    background-image: radial-gradient(#8f3514 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+    opacity: 0.1;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  }
+
+  .kente-pattern {
+    background-color: #fdf9f5;
+    background-image: linear-gradient(45deg, #8f3514 25%, transparent 25%), linear-gradient(-45deg, #8f3514 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #8f3514 75%), linear-gradient(-45deg, transparent 75%, #8f3514 75%);
+    background-size: 40px 40px;
+    background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+    opacity: 0.03;
+  }
+
+  .textile-pattern {
+    background-color: #fdf9f5;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30L15 30z' fill='%238f3514' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
+  }
+
+  .scholar-bg-pattern {
+    background-color: #fdf9f5;
+    background-image: radial-gradient(#af4c2a 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+    opacity: 0.05;
   }
 }

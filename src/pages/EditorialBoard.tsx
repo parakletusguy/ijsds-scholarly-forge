@@ -133,7 +133,7 @@ const EditorialBoard = () => {
                   <div className="aspect-[4/5] bg-muted overflow-hidden border border-border/20 shadow-2xl relative">
                     <img src={chief.image} alt={chief.name} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
                     <div className="absolute bottom-0 left-0 right-0 bg-foreground/90 backdrop-blur-md p-6 text-white translate-y-full group-hover:translate-y-0 transition-transform duration-700">
-                        <p className="font-headline font-black text-[10px] uppercase tracking-[0.3em] mb-1">Established 2024</p>
+                        <p className="font-headline font-black text-[10px] uppercase tracking-[0.3em] mb-1">Established 2025</p>
                         <p className="font-body text-xs italic text-white/50">"Leading the Charge for Scholarly Transformation in Africa."</p>
                     </div>
                   </div>

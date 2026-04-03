@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { HelpSystem } from '@/components/help/HelpSystem';
 import { User, LogOut, FileText, Search, Menu, X, ChevronDown, Zap, ShieldCheck, Globe } from 'lucide-react';
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import logo from "/public/Logo_Black_Edited-removebg-preview.png"
 
 export const Header = () => {
   const { user, loading } = useAuth();
@@ -38,150 +39,133 @@ export const Header = () => {
   };
 
   const navLinks = [
-    { name: 'Portal', path: '/' },
-    { name: 'Archives', path: '/articles' },
-    { name: 'Discourse', path: '/blog' },
+    { name: 'Home', path: '/' },
+    { name: 'Archive', path: '/articles' },
     { name: 'About', path: '/about' },
+    { name: 'Partners', path: '/partners' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 font-headline ${isScrolled ? 'bg-white/90 backdrop-blur-xl py-4 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.1)] border-b border-border/10' : 'bg-transparent py-8'}`}>
-      <div className="container mx-auto px-6 md:px-10 flex justify-between items-center max-w-screen-2xl">
-        
-        {/* Brand Identity — Premium Scholarly Logo */}
-        <div 
-          className="flex items-center gap-4 cursor-pointer group" 
-          onClick={() => navigate('/')}
-        >
-           <div className="relative">
-              <span className={`text-3xl md:text-4xl font-black tracking-tighter uppercase transition-colors duration-500 ${isScrolled ? 'text-foreground' : 'text-foreground'}`}>
-                IJSDS
-              </span>
-              <div className="absolute -bottom-1 left-0 w-0 h-1 bg-primary group-hover:w-full transition-all duration-500"></div>
-           </div>
-           <div className="hidden lg:flex flex-col border-l border-border/20 pl-4 py-1">
-              <span className="text-[9px] font-black uppercase tracking-[0.4em] text-foreground/30 italic leading-none mb-1">Scholarly Forge</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary leading-none">Initiative Afrique</span>
-           </div>
+    <header className="sticky top-0 z-50 w-full">
+      {/* ── ISSN Top Bar ────────────────────────────────────────────────── */}
+      <div className="bg-stone-900 text-stone-400 py-1.5 px-8 text-[10px] font-bold tracking-[0.2em] uppercase flex justify-between items-center">
+        <div className="flex gap-6">
+          <span>ISSN: 3115-6940</span>
+          <span>eISSN: 3115-6932</span>
         </div>
-
-        {/* Desktop Navigation Ledgers */}
-        <div className="hidden md:flex items-center gap-10">
-           {navLinks.map((link) => (
-             <button
-               key={link.path}
-               onClick={() => navigate(link.path)}
-               className={`relative h-10 px-2 font-black text-[11px] uppercase tracking-[0.4em] transition-all duration-300 group ${isActive(link.path) ? 'text-primary' : 'text-foreground/40 hover:text-foreground'}`}
-             >
-                {link.name}
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-500 ${isActive(link.path) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-             </button>
-           ))}
-           {user && (
-             <button
-               onClick={() => navigate('/submit')}
-               className={`relative h-10 px-2 font-black text-[11px] uppercase tracking-[0.4em] transition-all duration-300 group ${isActive('/submit') ? 'text-secondary' : 'text-foreground/40 hover:text-secondary'}`}
-             >
-                Registry
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-secondary transition-all duration-500 ${isActive('/submit') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-             </button>
-           )}
-        </div>
-
-        {/* Protocol Control Center */}
-        <div className="flex items-center gap-4 md:gap-8">
-           {/* Global Search Node */}
-           <div className="hidden lg:flex items-center bg-secondary/5 border border-border/10 px-6 py-2 group focus-within:border-primary/40 transition-all shadow-sm">
-              <Search size={16} className="text-foreground/20 group-hover:text-primary transition-colors" />
-              <input 
-                className="bg-transparent border-none focus:ring-0 text-[11px] font-headline font-black uppercase tracking-widest w-24 xl:w-40 placeholder:text-foreground/10 ml-3" 
-                placeholder="Search Archive" 
-                type="text"
-              />
-           </div>
-
-           <div className="flex items-center gap-4">
-              <HelpSystem />
-              {loading ? (
-                <div className="h-12 w-12 rounded-none bg-muted animate-pulse" />
-              ) : user ? (
-                <div className="flex items-center gap-4">
-                   <NotificationBell />
-                   <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                         <button className="h-12 px-6 bg-foreground text-white flex items-center justify-center gap-4 font-headline font-black text-[10px] uppercase tracking-[0.4em] hover:bg-primary transition-all shadow-xl group/acc">
-                            <span className="hidden sm:inline">Dossier</span>
-                            <User size={16} className="group-hover/acc:rotate-12 transition-transform" />
-                            <ChevronDown size={14} className="opacity-40" />
-                         </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-64 p-2 bg-white/95 backdrop-blur-xl border border-border/10 rounded-none shadow-[0_30px_60px_-10px_rgba(0,0,0,0.2)]">
-                         <div className="p-4 border-b border-border/5 mb-2">
-                            <p className="text-[9px] font-headline font-black uppercase tracking-[0.5em] text-foreground/20 italic mb-1">Authenticated Node</p>
-                            <p className="text-xs font-headline font-black uppercase tracking-tight truncate text-primary">{user.email}</p>
-                         </div>
-                         {[
-                           { name: 'Dashboard', path: '/dashboard', icon: Layers },
-                           { name: 'Editorial Office', path: '/editorial', icon: ShieldCheck },
-                           { name: 'Reviewer Node', path: '/reviewer-dashboard', icon: Zap },
-                           { name: 'Profile Dossier', path: '/profile', icon: User },
-                         ].map((item) => (
-                           <DropdownMenuItem key={item.path} className="cursor-pointer p-4 hover:bg-secondary/5 rounded-none font-headline font-black uppercase text-[10px] tracking-widest group" onClick={() => navigate(item.path)}>
-                              <item.icon size={14} className="mr-4 text-foreground/20 group-hover:text-primary transition-colors" /> {item.name}
-                           </DropdownMenuItem>
-                         ))}
-                         <div className="h-px bg-border/5 my-2" />
-                         <DropdownMenuItem className="cursor-pointer p-4 hover:bg-red-50 text-red-600 rounded-none font-headline font-black uppercase text-[10px] tracking-widest group" onClick={handleSignOut}>
-                            <LogOut size={14} className="mr-4 group-hover:rotate-12 transition-transform" /> Revoke Access
-                         </DropdownMenuItem>
-                      </DropdownMenuContent>
-                   </DropdownMenu>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => navigate('/auth')}
-                  className="h-12 px-8 bg-primary text-white font-headline font-black text-[10px] uppercase tracking-[0.5em] hover:bg-foreground transition-all shadow-xl flex items-center justify-center group"
-                >
-                   Registry Access <ArrowRight size={14} className="ml-4 group-hover:translate-x-2 transition-transform" />
-                </button>
-              )}
-           </div>
-
-           {/* Mobile Menu Trigger */}
-           <button 
-             className="md:hidden h-12 w-12 bg-white border border-border/10 flex items-center justify-center text-foreground shadow-xl"
-             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-           >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-           </button>
+        <div className="hidden sm:flex items-center gap-4">
+          <span className="flex items-center gap-1.5"><Globe size={10} className="text-primary" /> Global Open Access</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck size={10} className="text-primary" /> Peer Reviewed</span>
         </div>
       </div>
 
-      {/* Mobile Registry Navigation Overlay */}
-      {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-border/10 shadow-[0_50px_100px_rgba(0,0,0,0.2)] p-8 space-y-8 animate-in fade-in slide-in-from-top-4">
-           {navLinks.map((link) => (
-             <button
-               key={link.path}
-               onClick={() => {navigate(link.path); setMobileMenuOpen(false);}}
-               className="w-full text-left font-black text-xs uppercase tracking-[0.5em] text-foreground/40 hover:text-primary transition-colors py-4 border-b border-border/5"
-             >
-                {link.name}
-             </button>
-           ))}
-           {!user && (
-             <button 
-               onClick={() => navigate('/auth')}
-               className="w-full h-16 bg-primary text-white font-headline font-black text-xs uppercase tracking-[0.5em] shadow-2xl"
-             >
-                Registry Access
-             </button>
-           )}
+      {/* ── Main Navigation ──────────────────────────────────────────────── */}
+      <nav className={`bg-white/80 backdrop-blur-xl border-b border-outline-variant/10 transition-all duration-500 ${isScrolled ? 'py-3 shadow-lg' : 'py-5'}`}>
+        <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
+          <div className="flex items-center gap-12">
+            <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
+              <img src={logo} alt="IJSDS Logo" className="h-9 w-auto group-hover:scale-105 transition-transform duration-500" />
+            </button>
+            
+            <div className="hidden md:flex gap-8 items-center pt-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                    isActive(link.path) 
+                      ? 'text-primary border-b-2 border-primary pb-1' 
+                      : 'text-stone-500 hover:text-primary'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <Search className="w-5 h-5 text-stone-400 cursor-pointer hover:text-primary transition-colors hidden sm:block" />
+            
+            {loading ? (
+              <div className="h-10 w-24 bg-stone-100 animate-pulse rounded" />
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-stone-50 border border-stone-200 hover:border-primary transition-all group font-headline">
+                    <User size={16} className="text-stone-400 group-hover:text-primary" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-stone-600">Dossier</span>
+                    <ChevronDown size={14} className="text-stone-300" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 p-3 bg-white border border-stone-200 shadow-2xl rounded-none">
+                  <div className="mb-3 px-1">
+                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Authenticated Account</p>
+                    <p className="text-xs font-medium text-stone-900 truncate">{user.email}</p>
+                  </div>
+                  <div className="h-px bg-stone-100 my-2" />
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')} className="flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest cursor-pointer hover:bg-stone-50 text-stone-600 focus:text-primary">
+                    <Zap size={14} /> Main Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile')} className="flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest cursor-pointer hover:bg-stone-50 text-stone-600 focus:text-primary">
+                    <User size={14} /> My Profile
+                  </DropdownMenuItem>
+                  <div className="h-px bg-stone-100 my-2" />
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest cursor-pointer hover:bg-red-50 text-red-600">
+                    <LogOut size={14} /> Terminate Session
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors px-4 py-2"
+                >
+                  Log In
+                </button>
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] hover:bg-primary-container transition-all shadow-lg shadow-primary/10"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+
+            <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X size={24} className="text-stone-900" /> : <Menu size={24} className="text-stone-900" />}
+            </button>
+          </div>
         </div>
-      )}
-    </nav>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-stone-100 p-8 space-y-6 animate-in slide-in-from-top-10 duration-500">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block w-full text-left text-sm font-bold uppercase tracking-widest py-3 border-b border-stone-50 ${isActive(link.path) ? 'text-primary' : 'text-stone-500'}`}
+              >
+                {link.name}
+              </Link>
+            ))}
+            {!user && (
+              <div className="pt-6 space-y-4">
+                <button onClick={() => navigate('/auth')} className="w-full text-center text-sm font-bold uppercase tracking-widest text-stone-500 py-4 border border-stone-200">Log In</button>
+                <button onClick={() => navigate('/auth')} className="w-full bg-primary text-white py-4 text-sm font-bold uppercase tracking-widest">Sign Up</button>
+              </div>
+            )}
+          </div>
+        )}
+      </nav>
+    </header>
   );
 };
+
 import { ArrowRight, Layers } from 'lucide-react';

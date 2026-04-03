@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Mail, Users, HandHeart, Share2, Globe, Building2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ArrowRight, Users, Globe, ShieldCheck, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface Partner {
   id: string;
@@ -53,138 +53,168 @@ export const Partners = () => {
   };
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
-      <PageHeader 
-        title="Scholarly" 
-        subtitle="Partners" 
-        accent="Global Collaboration"
-        description="IJSDS collaborates with leading academic institutions, NGOs, and professional bodies to bridge the gap between social research and African development. Our partnerships foster multidisciplinary synergy and archival excellence."
-      />
+    <div className="min-h-screen bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+      <Helmet>
+        <title>Scholarly Partners | IJSDS</title>
+        <meta name="description" content="IJSDS collaborates with leading academic institutions, NGOs, and professional bodies to bridge the gap between social research and African development." />
+      </Helmet>
 
-      <ContentSection>
-        {userRole.is_admin && (
-          <div className="flex justify-end mb-16">
-            <Button onClick={() => navigate('/partners/admin')} className="bg-foreground hover:bg-primary text-white font-headline font-black uppercase text-[10px] tracking-widest px-10 py-8 h-auto shadow-2xl rounded-none transition-all group">
-               <ShieldCheck className="mr-3 group-hover:rotate-12 transition-transform" size={16} /> Manage Institutional Network
-            </Button>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-80 bg-muted/20 animate-pulse border border-border/10"></div>
-            ))}
-          </div>
-        ) : partners.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {partners.map((partner) => (
-              <div 
-                key={partner.id} 
-                className="group relative bg-white p-12 border border-border/20 hover:border-primary/40 transition-all hover:shadow-2xl overflow-hidden cursor-pointer flex flex-col h-full"
-                onClick={() => partner.website_url && window.open(partner.website_url, '_blank')}
-              >
-                {/* Afrocentric Corner Accent */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 transition-transform group-hover:scale-110 group-hover:bg-primary/10" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }}></div>
-                
-                <div className="mb-10 flex items-center justify-center h-40 relative">
-                   <div className="absolute inset-0 bg-secondary/5 rounded-full scale-75 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                  {partner.logo_url ? (
-                    <img src={partner.logo_url} alt={partner.name} className="max-w-[70%] max-h-full object-contain relative z-10 filter group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <Building2 className="h-16 w-16 text-foreground/10 group-hover:text-primary/30 transition-colors" />
-                  )}
+      <main className="pt-32 pb-24">
+        {/* Hero Section */}
+        <header className="max-w-screen-2xl mx-auto px-8 md:px-12 mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
+            <div className="lg:col-span-7">
+              <p className="font-label text-primary font-semibold tracking-[0.2em] uppercase mb-4">Global Collaboration</p>
+              <h1 className="font-headline text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9] text-on-surface mb-8">
+                Scholarly <br/><span className="italic text-primary-container">Partners</span>
+              </h1>
+              <div className="max-w-xl">
+                <p className="text-lg md:text-xl text-on-surface-variant leading-relaxed">
+                  IJSDS collaborates with leading academic institutions, NGOs, and professional bodies to bridge the gap between social research and African development. Our partnerships foster multidisciplinary synergy and archival excellence.
+                </p>
+              </div>
+              {userRole.is_admin && (
+                <div className="mt-12">
+                  <Button onClick={() => navigate('/partners/admin')} className="bg-foreground hover:bg-primary text-white font-headline font-black uppercase text-[10px] tracking-widest px-10 py-8 h-auto shadow-2xl rounded-none transition-all group">
+                    <ShieldCheck className="mr-3 group-hover:rotate-12 transition-transform" size={16} /> Manage Institutional Network
+                  </Button>
                 </div>
+              )}
+            </div>
+            <div className="lg:col-span-5 relative group">
+              <div className="absolute -top-12 -left-12 scholar-bg-pattern w-full h-full z-0 opacity-20"></div>
+              <div className="relative z-10 w-full aspect-[4/5] bg-surface-container-high border border-outline-variant/20 overflow-hidden shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1523240715181-e2049e39268f?auto=format&fit=crop&q=80&w=1200" 
+                  alt="Academic Collaboration" 
+                  className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-primary/10 mix-blend-multiply opacity-30"></div>
+              </div>
+            </div>
+          </div>
+        </header>
 
-                <div className="mt-auto">
-                    <div className="h-0.5 w-12 bg-secondary mb-8 transition-all group-hover:w-full duration-700"></div>
-                    <span className="font-headline font-black text-[9px] uppercase tracking-widest text-primary mb-2 block">Institutional Partner</span>
-                    <h3 className="font-headline font-black text-2xl uppercase tracking-tighter mb-4 leading-tight group-hover:text-primary transition-colors">{partner.name}</h3>
-                    <p className="font-body text-foreground/40 text-sm italic mb-8 leading-relaxed line-clamp-3">
-                      {partner.description || "Partner dedicated to the advancement of social research and regional development in the African context."}
-                    </p>
-                    
-                    {partner.website_url && (
-                      <div className="flex items-center gap-3 font-headline font-black text-[10px] uppercase tracking-widest text-foreground group-hover:text-secondary transition-colors">
-                        Visit Institution Portal <ArrowRight className="h-3 w-3 group-hover:translate-x-2 transition-transform" />
+        {/* Institutional Partner Section */}
+        <section className="bg-surface-container-low py-32 overflow-hidden">
+          <div className="max-w-screen-2xl mx-auto px-8 md:px-12">
+            <div className="flex flex-col md:flex-row items-start gap-16">
+              <div className="md:w-1/3">
+                <h2 className="font-headline text-3xl font-bold mb-6">Institutional <br/>Network</h2>
+                <div className="h-px w-24 bg-primary mb-6"></div>
+                <p className="font-label text-sm uppercase tracking-widest text-on-surface-variant">Active Collaborations {new Date().getFullYear()}</p>
+              </div>
+              
+              <div className="md:w-2/3 grid grid-cols-1 gap-12">
+                {loading ? (
+                  <div className="h-80 bg-surface animate-pulse border-t-4 border-primary"></div>
+                ) : partners.length > 0 ? (
+                  partners.map((partner) => (
+                    <div 
+                      key={partner.id} 
+                      className="bg-surface p-12 md:p-20 shadow-[0px_12px_24px_-4px_rgba(28,28,25,0.06)] relative border-t-4 border-primary group cursor-pointer"
+                      onClick={() => partner.website_url && window.open(partner.website_url, '_blank')}
+                    >
+                      <Building2 className="absolute top-8 right-8 text-6xl text-primary-fixed-dim opacity-20 group-hover:opacity-40 transition-opacity" size={64} />
+                      <h3 className="font-headline text-4xl mb-2 text-primary">{partner.name}</h3>
+                      <p className="font-body text-xl text-on-surface-variant italic mb-12">
+                        {partner.description || "Partner dedicated to the advancement of social research and regional development."}
+                      </p>
+                      <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-surface-container-highest flex items-center justify-center">
+                          {partner.logo_url ? (
+                            <img src={partner.logo_url} alt={partner.name} className="max-w-[70%] max-h-[70%] object-contain" />
+                          ) : (
+                            <Globe className="text-primary text-3xl" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-bold text-on-surface uppercase tracking-widest text-xs">Scholarly Node</p>
+                          <p className="text-on-surface-variant text-sm uppercase tracking-wider">Active Partner</p>
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="bg-surface p-12 md:p-20 shadow-[0px_12px_24px_-4px_rgba(28,28,25,0.06)] relative border-t-4 border-primary">
+                    <Building2 className="absolute top-8 right-8 text-6xl text-primary-fixed-dim opacity-20" size={64} />
+                    <h3 className="font-headline text-4xl mb-2 text-primary">Establishing Networks</h3>
+                    <p className="font-body text-xl text-on-surface-variant italic mb-12">We are currently formalizing our global institutional partnerships to enhance academic exchange and regional impact.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Partnership Pillars */}
+        <section className="py-32">
+          <div className="max-w-screen-2xl mx-auto px-8 md:px-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-outline-variant/30">
+              <div className="py-16 md:pr-12 md:border-r border-outline-variant/30 group">
+                <Users className="text-primary mb-6 text-4xl w-10 h-10" />
+                <h4 className="font-headline text-2xl font-bold mb-4 group-hover:text-primary transition-colors">Institutional Synergy</h4>
+                <p className="text-on-surface-variant leading-relaxed">Co-host high-impact conferences and collaborative research symposiums that set the agenda for social development.</p>
+              </div>
+              <div className="py-16 md:px-12 md:border-r border-outline-variant/30 group">
+                <Globe className="text-primary mb-6 text-4xl w-10 h-10" />
+                <h4 className="font-headline text-2xl font-bold mb-4 group-hover:text-primary transition-colors">Knowledge Exchange</h4>
+                <p className="text-on-surface-variant leading-relaxed">Share specialized academic resources and maintain prestigious scholarly digital archives for future generations.</p>
+              </div>
+              <div className="py-16 md:pl-12 group">
+                <ShieldCheck className="text-primary mb-6 text-4xl w-10 h-10" />
+                <h4 className="font-headline text-2xl font-bold mb-4 group-hover:text-primary transition-colors">Development Impact</h4>
+                <p className="text-on-surface-variant leading-relaxed">Bridge academic excellence with field-level societal implementation to create measurable sustainable change.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="max-w-screen-xl mx-auto px-8 mb-24">
+          <div className="relative bg-on-surface p-12 md:p-24 text-surface overflow-hidden group">
+            <div className="absolute inset-0 scholar-bg-pattern opacity-10"></div>
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <p className="font-label text-primary-fixed-dim font-bold tracking-[0.3em] uppercase mb-6">Collaborative Advancement</p>
+                <h2 className="font-headline text-5xl md:text-6xl font-bold tracking-tight mb-8">Become a Scholarly Partner</h2>
+                <p className="text-xl text-surface-container-highest opacity-90 leading-relaxed mb-12">
+                  Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
+                </p>
+                <button 
+                  onClick={() => navigate('/contact')}
+                  className="bg-primary-container px-10 py-5 text-on-primary font-bold text-sm uppercase tracking-widest hover:brightness-110 transition-all"
+                >
+                  Initiate Collaboration Protocol
+                </button>
+              </div>
+              <div className="hidden lg:block">
+                <div className="w-full aspect-square bg-surface-container-highest/20 border border-white/10 flex items-center justify-center overflow-hidden relative">
+                   <div className="absolute inset-0 scholar-bg-pattern opacity-10"></div>
+                   <Globe className="w-40 h-40 text-white/5" />
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-32 border border-dashed border-border/20 max-w-4xl mx-auto bg-white/50">
-            <Users className="h-20 w-20 mx-auto text-foreground/5 mb-8" />
-            <h3 className="font-headline font-black text-3xl uppercase tracking-tighter mb-4">Establishing Scholarly Networks</h3>
-            <p className="font-body text-foreground/30 italic max-w-md mx-auto">We are currently formalizing our global institutional partnerships to enhance academic exchange and regional impact.</p>
-          </div>
-        )}
-      </ContentSection>
-
-      {/* Become a Partner CTA — High Fidelity Afrocentric Motif */}
-      <ContentSection dark>
-        <div className="bg-foreground text-white p-16 md:p-32 relative overflow-hidden group shadow-2xl border border-white/5">
-          {/* Complex Geometric Accents */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white opacity-[0.02] -rotate-12 translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 opacity-20 pointer-events-none" style={{ clipPath: 'circle(50% at 0 100%)' }}></div>
-          <div className="absolute top-1/2 left-1/4 w-32 h-32 border-4 border-primary/20 rounded-full opacity-10 pointer-events-none"></div>
-
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-24">
-               <div className="w-full lg:w-3/5 text-center lg:text-left">
-                  <div className="inline-flex items-center gap-3 px-6 py-2 bg-white/10 border border-white/10 mb-8">
-                     <Share2 size={14} className="text-secondary" />
-                     <span className="font-headline font-black text-[10px] uppercase tracking-widest text-white/60">Collaborative Advancement</span>
-                  </div>
-                  <h2 className="text-5xl md:text-8xl font-black font-headline uppercase tracking-tighter leading-[0.85] mb-10">
-                    Become a <br/><span className="text-secondary italic">Scholarly Partner</span>
-                  </h2>
-                  <p className="text-xl md:text-2xl font-body italic text-white/50 leading-relaxed mb-16 max-w-2xl">
-                    Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
-                  </p>
-                  <Button onClick={() => navigate('/contact')} size="lg" className="bg-primary hover:bg-secondary text-white font-headline font-black uppercase text-xs tracking-[0.3em] px-16 py-10 h-auto rounded-none shadow-2xl transition-all group overflow-hidden relative">
-                    <span className="relative z-10">Initiate Collaboration Protocol</span>
-                    <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-10"></div>
-                  </Button>
-               </div>
-
-               <div className="w-full lg:w-2/5 grid grid-cols-1 gap-12">
-                  {[
-                    { icon: <Users className="text-primary" />, title: "Institutional Synergy", desc: "Co-host high-impact conferences and collaborative research symposiums." },
-                    { icon: <Share2 className="text-secondary" />, title: "Knowledge Exchange", desc: "Share specialized academic resources and scholarly digital archives." },
-                    { icon: <HandHeart className="text-primary" />, title: "Development Impact", desc: "Bridge academic excellence with field-level societal implementation." }
-                  ].map((feat, idx) => (
-                    <div key={idx} className="flex gap-8 items-start p-8 bg-white/5 border border-white/10 hover:bg-white/10 transition-all group/feat shadow-lg">
-                       <div className="w-16 h-16 bg-white/10 flex items-center justify-center shrink-0 rounded-none border border-white/20 group-hover/feat:bg-foreground group-hover/feat:border-primary transition-all shadow-inner">
-                          {feat.icon}
-                       </div>
-                       <div>
-                          <h4 className="font-headline font-black text-lg uppercase tracking-tight mb-2 group-hover/feat:text-secondary transition-colors">{feat.title}</h4>
-                          <p className="font-body text-white/30 text-sm italic leading-relaxed">{feat.desc}</p>
-                       </div>
-                    </div>
-                  ))}
-               </div>
             </div>
           </div>
-        </div>
-      </ContentSection>
+        </section>
 
-      {/* Digital Heritage Branding */}
-      <ContentSection>
-        <div className="max-w-4xl mx-auto py-24 text-center">
-            <div className="flex items-center justify-center gap-4 mb-8">
-               <div className="h-px w-12 bg-border"></div>
-               <Globe className="text-foreground/20" size={20} />
-               <div className="h-px w-12 bg-border"></div>
-            </div>
-           <p className="font-headline text-[10px] font-bold uppercase tracking-[0.5em] text-foreground/20 leading-loose">
-             IJSDS — Partnering for a Resilient and Scholarly Africa. <br/>
-             Established 2024 — Continental Research Network.
-           </p>
-        </div>
-      </ContentSection>
+        {/* Pull-Quote Scholarly Accent */}
+        <section className="max-w-screen-md mx-auto px-8 py-24 text-center">
+          <div className="flex justify-center items-center gap-4 mb-8">
+            <div className="h-px bg-primary w-1/5"></div>
+            <div className="h-px bg-primary w-1/5 opacity-30"></div>
+          </div>
+          <p className="font-headline text-3xl font-semibold italic text-on-surface leading-snug">
+            "Partnership is the vessel through which academic theory transforms into African sovereignty."
+          </p>
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <div className="h-px bg-primary w-1/5 opacity-30"></div>
+            <div className="h-px bg-primary w-1/5"></div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
+
+export default Partners;

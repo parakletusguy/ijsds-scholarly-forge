@@ -59,11 +59,12 @@ interface ContentSectionProps {
   children: React.ReactNode;
   className?: string;
   dark?: boolean;
+  id?: string;
 }
 
-export const ContentSection = ({ title, children, className = "", dark = false }: ContentSectionProps) => {
+export const ContentSection = ({ title, children, className = "", dark = false, id }: ContentSectionProps) => {
   return (
-    <section className={`py-16 md:py-24 px-4 md:px-8 ${dark ? 'bg-muted/30' : 'bg-background'} ${className}`}>
+    <section id={id} className={`py-16 md:py-24 px-4 md:px-8 ${dark ? 'bg-muted/30' : 'bg-background'} ${className}`}>
       <div className="max-w-7xl mx-auto">
         {title && (
           <div className="mb-12 md:mb-16">

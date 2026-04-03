@@ -1,184 +1,344 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Target, Eye, TrendingUp, Globe, Award, Network, BookOpen, ShieldCheck, Zap, Layers, MapPin, Search } from 'lucide-react';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
-import logo from "../../public/Logo Symbol.png"
+import { useNavigate } from 'react-router-dom';
+import { Search, ArrowRight, Menu, X, CheckCircle, Info, Send, Share2, Globe } from 'lucide-react';
+
+// Editorial Board Images
+import mina from "../images/editors/Mina.jpeg"
+import ariel from "../images/editors/Ariel.jpeg"
+import ukamaka from "../images/editors/Ukamaka.jpeg"
+import adesope from "../images/editors/Adesope.jpeg"
+import khadija from "../images/editors/Khadija.jpeg"
+import adolphus from "../images/editors/Adolphus.jpeg"
+import irikana from "../images/editors/irkana.jpeg"
+import sharma from "../images/editors/Sharma.jpeg"
+import daniel from "../images/editors/daniel.jpeg"
 
 export const About = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const element = document.querySelector(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
+
+  const chiefEditor = { 
+    name: "Prof. Mina Magaret Ogbanga", 
+    role: "Editor-in-Chief", 
+    designation: "Professor of Social Work",
+    institution: "Rivers State University, Nigeria",
+    contact: "mina.ogbanga@ust.edu.ng",
+    website: "www.minaogbanga.com",
+    image: mina
+  };
+
+  const boardMembers = [
+    { 
+      name: "Prof. Roberto Ariel Zuñiga", 
+      role: "Editorial Board Member", 
+      institution: "University of Sierra Sur (Mexico)",
+      image: ariel
+    },
+    { 
+      name: "Prof. Ukamaka M. Oruche", 
+      role: "Editorial Board Member", 
+      institution: "USF Health College of Nursing, USA",
+      image: ukamaka
+    },
+    { 
+      name: "Prof. Olufemi Martins Adesope", 
+      role: "Editorial Board Member", 
+      institution: "University of Port Harcourt, Nigeria",
+      image: adesope
+    },
+    { 
+      name: "Dr. Khadija Khaja", 
+      role: "Editorial Board Member", 
+      institution: "Indiana University, Indianapolis",
+      image: khadija
+    },
+    { 
+      name: "Prof. T. Adolphus", 
+      role: "Editorial Board Member", 
+      institution: "Rivers State University, Nigeria",
+      image: adolphus
+    },
+    { 
+      name: "Prof. Daniel Uranta", 
+      role: "Editorial Board Member", 
+      institution: "University of Port-Harcourt, Nigeria",
+      image: daniel
+    },
+    { 
+      name: "Prof. Godspower Jackson Irikana", 
+      role: "Editorial Board Member", 
+      institution: "Ignatius Ajuru University, Nigeria",
+      image: irikana
+    },
+    { 
+      name: "Shashikant Nishant Sharma", 
+      role: "Editorial Board Member", 
+      institution: "MANIT (Bhopal), India",
+      image: sharma
+    }
+  ];
+
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+    <div className="bg-[#fcf9f8] text-[#1c1b1b] font-body selection:bg-primary/10">
       <Helmet>
-        <title>About IJSDS — Institutional Identity</title>
-        <meta name="description" content="Discover the mission, vision, and strategic objectives of the International Journal of Social Work and Development Studies." />
+        <title>About & Submissions | IJSDS</title>
+        <meta name="description" content="Discover the mission, editorial leadership, and submission guidelines of the International Journal of Social Work and Development Studies." />
       </Helmet>
 
-      <PageHeader 
-        title="Institutional" 
-        subtitle="Identity" 
-        accent="Scholarly Foundation & Vision"
-        description="The International Journal of Social Work and Development Studies (IJSDS) is a premier peer-reviewed platform dedicated to advancing discourse and practice across the African continent and globally."
-      />
 
-      {/* Identity Artifact — Premium Branding Section */}
-      <ContentSection>
-        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative group">
-          {/* Background Decorative Motif */}
-          <div className="absolute top-1/2 left-0 w-full h-[1px] bg-border/20 -z-0 group-hover:bg-primary/20 transition-colors duration-1000"></div>
-          
-          <div className="w-full lg:w-2/5 relative">
-            <div className="absolute inset-0 bg-primary/5 -translate-x-10 translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-1000 -z-10"></div>
-            <div className="bg-white p-16 md:p-24 shadow-2xl border border-border/20 text-center relative z-10 overflow-hidden group/logo">
-               {/* Abstract Corner Accent */}
-               <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/5 transition-transform group-hover/logo:scale-110" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-               <img src={logo} alt="IJSDS Official Seal" className="w-48 md:w-64 mx-auto -rotate-3 transition-all duration-1000 group-hover/logo:rotate-0 group-hover/logo:scale-110 relative z-10" />
-            </div>
-            {/* Semantic Label */}
-            <div className="mt-8 flex items-center gap-4 justify-center">
-               <div className="h-px w-12 bg-primary"></div>
-               <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/30">Official Registry Seal</span>
-               <div className="h-px w-12 bg-primary"></div>
-            </div>
-          </div>
 
-          <div className="w-full lg:w-3/5">
-            <div className="bg-foreground text-white p-10 md:p-16 relative overflow-hidden shadow-2xl mb-12 border border-white/5">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary opacity-10 pointer-events-none" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-                <p className="text-2xl md:text-4xl font-headline font-black uppercase tracking-tighter italic leading-tight text-white mb-6">
-                   "Empowerment through <span className="text-secondary">Transformative Knowledge</span>"
-                </p>
-                <div className="h-1 w-24 bg-primary mb-6"></div>
-                <p className="text-xl font-body text-white/50 italic leading-relaxed">
-                   Bridging the gap between theory and transformative social practice within the African developmental landscape.
-                </p>
-            </div>
-            
-            <p className="text-xl md:text-2xl font-body text-foreground/60 leading-relaxed max-w-2xl border-l-4 border-secondary/20 pl-8 italic">
-               We provide a robust forum for researchers, practitioners, and policymakers to exchange transformative insights and evidence-based solutions to collective challenges.
-            </p>
-          </div>
-        </div>
-      </ContentSection>
-
-      {/* Strategic Pillars — Mission & Vision High-Fidelity Blocks */}
-      <ContentSection dark title="Foundational Pillars">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          <div className="bg-white p-12 md:p-20 relative overflow-hidden group shadow-2xl flex flex-col h-full border border-border/10">
-            {/* Dramatic Shape Accent */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 transition-transform group-hover:scale-125 duration-1000" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-            
-            <div className="relative z-10">
-               <div className="w-20 h-20 bg-primary/10 flex items-center justify-center text-primary mb-12 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
-                  <Eye size={40} className="group-hover:rotate-12 transition-transform" />
-               </div>
-               <div className="flex items-center gap-4 mb-8">
-                  <div className="h-px w-20 bg-primary"></div>
-                  <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/30 italic">Long-Term Trajectory</span>
-               </div>
-               <h3 className="text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-10 leading-none">Our <br/><span className="text-primary italic">Vision</span></h3>
-               <p className="font-body text-2xl md:text-3xl text-foreground/40 leading-relaxed italic border-l-8 border-secondary/20 pl-8 py-4">
-                 "To become the leading international journal documenting innovative and impactful research that fosters a more equitable, just, and self-reliant society across Africa and the global south."
-               </p>
-            </div>
-          </div>
-
-          <div className="bg-foreground text-white p-12 md:p-20 relative overflow-hidden group shadow-2xl flex flex-col h-full border border-white/5">
-            {/* Dramatic Shape Accent */}
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 opacity-20 -translate-x-1/2 translate-y-1/2 pointer-events-none" style={{ clipPath: 'circle(50% at 50% 50%)' }}></div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 opacity-20 pointer-events-none" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}></div>
-            
-            <div className="relative z-10">
-               <div className="w-20 h-20 bg-secondary/20 flex items-center justify-center text-secondary mb-12 border border-secondary/20 group-hover:bg-secondary group-hover:text-white transition-all shadow-inner">
-                  <Target size={40} className="group-hover:-rotate-12 transition-transform" />
-               </div>
-               <div className="flex items-center gap-4 mb-8">
-                  <div className="h-px w-20 bg-secondary"></div>
-                  <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-white/30 italic">Strategic Mandate</span>
-               </div>
-               <h3 className="text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-10 leading-none">Our <br/><span className="text-secondary italic">Mission</span></h3>
-               <p className="font-body text-2xl md:text-3xl text-white/40 leading-relaxed italic border-l-8 border-primary/20 pl-8 py-4">
-                 "To publish rigorous research contributing to the advancement of social work and development studies, providing a critical forum for debate and reflection on the multifaceted issues facing our societies."
-               </p>
-            </div>
-          </div>
-        </div>
-      </ContentSection>
-
-      {/* Strategic Impact Ledger — Dynamic Objective Grid */}
-      <ContentSection title="Strategic Impact Matrix">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {[
-            { 
-               icon: <Award className="h-10 w-10" />, 
-               title: "Promote Excellence", 
-               desc: "Fostering the highest standards of multidisciplinary research quality and ethical scholarship across continental archives.",
-               accent: "primary"
-            },
-            { 
-               icon: <Globe className="h-10 w-10" />, 
-               title: "Global Impact", 
-               desc: "Disseminating transformative findings to a diverse global academic audience through optimized digital discovery nodes.",
-               accent: "secondary"
-            },
-            { 
-               icon: <TrendingUp className="h-10 w-10" />, 
-               title: "Inform Policy", 
-               desc: "Empowering continental decision-makers with evidence-based developmental strategies and rigorous scholarly data.",
-               accent: "primary"
-            },
-            { 
-               icon: <Network className="h-10 w-10" />, 
-               title: "Dynamic Synergy", 
-               desc: "Building a vibrant professional network across disciplines, sectors, and international institutional borders.",
-               accent: "secondary"
-            }
-          ].map((item, idx) => (
-            <div key={idx} className="group flex flex-col bg-white border border-border/10 shadow-sm hover:shadow-2xl transition-all duration-700 relative overflow-hidden h-full">
-              {/* Abstract Motif in Card */}
-              <div className={`absolute top-0 right-0 w-16 h-16 bg-${item.accent}/5 group-hover:scale-150 transition-transform duration-1000`} style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-              
-              <div className="p-12 flex flex-col h-full">
-                <div className={`w-16 h-16 bg-${item.accent}/10 flex items-center justify-center text-${item.accent} mb-12 border border-${item.accent}/10 group-hover:bg-foreground group-hover:text-white transition-all shadow-inner`}>
-                   {item.icon}
+      <main className="max-w-7xl mx-auto px-8 py-20 overflow-hidden">
+        {/* ── Hero / About Section ────────────────────────────────────────── */}
+        <section id="about" className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-40 items-center">
+          <div className="lg:col-span-7">
+            <span className="text-primary font-bold tracking-[0.4em] text-[10px] uppercase mb-6 block">
+              International Scholarly Forum
+            </span>
+            <h1 className="text-7xl md:text-8xl font-headline leading-none tracking-tighter mb-10 text-on-background">
+              About the <br/><span className="italic text-primary">Journal</span>
+            </h1>
+            <div className="space-y-8 text-lg leading-relaxed text-secondary/80 pr-12 max-w-2xl">
+              <p className="first-letter:text-6xl first-letter:font-headline first-letter:mr-4 first-letter:float-left first-letter:text-primary first-letter:leading-none font-medium text-on-background/80">
+                The International Journal of Social Work and Development Studies (IJSDS) serves as a prestigious global forum for critical inquiry into the intersections of social welfare and sustainable development.
+              </p>
+              <p className="italic">
+                Our mission is to bridge the gap between rigorous academic theory and transformative frontline practice, prioritizing research that addresses systemic inequalities and innovative community-led strategies.
+              </p>
+              <div className="flex gap-10 pt-4">
+                <div>
+                  <div className="text-3xl font-headline text-primary mb-1">Established</div>
+                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40">2025 · Heritage</div>
                 </div>
-                
-                <div className="flex items-center gap-4 mb-6">
-                   <div className="h-px w-12 bg-primary group-hover:w-full transition-all duration-700"></div>
-                   <span className="font-headline font-black text-[9px] uppercase tracking-widest text-foreground/30">Vector 0{idx+1}</span>
+                <div>
+                  <div className="text-3xl font-headline text-primary mb-1">Impact</div>
+                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40">Global South · Focus</div>
                 </div>
-                
-                <h4 className="text-2xl font-black font-headline uppercase tracking-tighter mb-4 leading-tight group-hover:text-primary transition-colors">{item.title}</h4>
-                <p className="font-body text-foreground/40 italic text-md leading-relaxed mb-auto bg-secondary/5 p-6 border-l-2 border-secondary/10 group-hover:text-foreground/70 group-hover:bg-transparent transition-all">
-                   {item.desc}
-                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </ContentSection>
-
-      {/* Continuity Note — High Fidelity Seal */}
-      <ContentSection>
-        <div className="max-w-5xl mx-auto py-32 text-center border-y border-border/20 relative overflow-hidden group">
-            <div className="absolute top-1/2 left-0 w-full h-px bg-border -z-10 group-hover:bg-primary/20 transition-colors duration-1000"></div>
-            <div className="bg-secondary/5 inline-block px-12 py-6 relative z-10 mb-12 border border-border/10 animate-bounce">
-               <ShieldCheck className="h-8 w-8 text-secondary mx-auto" />
+          </div>
+          <div className="lg:col-span-5 relative">
+            <div className="aspect-[4/5] bg-surface-container-low overflow-hidden shadow-2xl relative z-10 skew-y-1">
+              <img 
+                className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 hover:scale-105 transition-all duration-1000" 
+                alt="IJSDS scholarly heritage"
+                src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=900" 
+              />
             </div>
-            
-            <p className="font-headline text-3xl md:text-7xl font-black text-foreground uppercase tracking-tighter italic leading-none max-w-5xl mx-auto relative z-10 mb-16">
-              "Ensuring the <span className="text-primary italic">Intellectual Continuity</span> of the African Commons."
-            </p>
-            
-            <div className="flex flex-col items-center gap-12 relative z-10">
-               <div className="flex flex-wrap justify-center gap-12 font-headline font-black text-xs uppercase tracking-[0.6em] text-foreground/10 italic">
-                  <span>Scholarly Rigor</span>
-                  <span className="text-foreground/5 shrink-0 hidden sm:block">•</span>
-                  <span>Institutional Integrity</span>
-                  <span className="text-foreground/5 shrink-0 hidden sm:block">•</span>
-                  <span>Continental Impact</span>
+            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+            <div className="absolute top-1/2 -right-20 w-40 h-40 bg-secondary/5 rotate-45 -z-10 border border-primary/10"></div>
+          </div>
+        </section>
+
+        {/* ── Editorial Board Section ─────────────────────────────────────── */}
+        <section id="editorial" className="mb-40">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+            <div className="max-w-2xl">
+              <span className="font-bold text-[10px] text-primary uppercase tracking-[0.4em] mb-4 block">Scholarly Directorate</span>
+              <h2 className="text-5xl md:text-6xl font-headline tracking-tighter mb-6 underline decoration-primary/10 decoration-8 underline-offset-[12px]">Editorial Board</h2>
+              <p className="text-secondary/60 text-lg leading-relaxed italic">Guided by a distinguished collective of global experts ensuring the highest standards of intellectual integrity and social discourse.</p>
+            </div>
+            <div className="flex items-center gap-1 border border-outline-variant/10 p-1 bg-white/50 backdrop-blur">
+              {['Executive', 'Reviewers', 'Advisory'].map((cat, i) => (
+                <button key={cat} className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${i===0 ? 'bg-primary text-white shadow-lg' : 'hover:bg-primary/5 text-secondary'}`}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chief Leadership Spotlight */}
+          <div className="mb-32 group">
+            <div className="bg-white border border-outline-variant/10 p-10 md:p-16 flex flex-col lg:flex-row gap-16 items-center shadow-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -z-0" style={{ clipPath: 'polygon(18% 0, 100% 0, 100% 82%)' }}></div>
+               
+               <div className="w-full lg:w-1/3 relative">
+                  <div className="aspect-[4/5] bg-stone-100 overflow-hidden relative grayscale-[100%] group-hover:grayscale-0 transition-all duration-1000 shadow-xl">
+                    <img src={chiefEditor.image} alt={chiefEditor.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl -z-10 accent-pulse"></div>
+               </div>
+
+               <div className="flex-grow space-y-8 relative z-10">
+                  <div>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="h-px w-10 bg-primary"></div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">{chiefEditor.role}</span>
+                    </div>
+                    <h3 className="text-4xl md:text-6xl font-headline tracking-tighter mb-4 leading-none italic">
+                      {chiefEditor.name}
+                    </h3>
+                    <p className="text-xl font-medium text-secondary/60 italic">{chiefEditor.designation}</p>
+                    <p className="text-sm font-black uppercase tracking-widest opacity-40 mt-2">{chiefEditor.institution}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-outline-variant/10">
+                    <div className="flex items-center gap-4 group/link cursor-pointer">
+                       <div className="w-10 h-10 bg-primary/5 flex items-center justify-center rounded-full group-hover/link:bg-primary group-hover/link:text-white transition-all">
+                          <Globe size={16} />
+                       </div>
+                       <div>
+                          <p className="text-[9px] font-black uppercase tracking-widest opacity-30">Platform</p>
+                          <a href={`https://${chiefEditor.website}`} target="_blank" rel="noreferrer" className="text-sm border-b border-primary/20 hover:border-primary transition-all">{chiefEditor.website}</a>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-4 group/link cursor-pointer">
+                       <div className="w-10 h-10 bg-primary/5 flex items-center justify-center rounded-full group-hover/link:bg-primary group-hover/link:text-white transition-all">
+                          <Info size={16} />
+                       </div>
+                       <div>
+                          <p className="text-[9px] font-black uppercase tracking-widest opacity-30">Contact</p>
+                          <a href={`mailto:${chiefEditor.contact}`} className="text-sm border-b border-primary/20 hover:border-primary transition-all">{chiefEditor.contact}</a>
+                       </div>
+                    </div>
+                  </div>
                </div>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {boardMembers.map((member, idx) => (
+              <div key={idx} className="group bg-white p-8 border border-outline-variant/10 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-700">
+                <div className="aspect-square mb-8 overflow-hidden bg-stone-100 grayscale-[100%] group-hover:grayscale-0 transition-all duration-1000 relative">
+                  <img 
+                    className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000" 
+                    src={member.image} 
+                    alt={member.name}
+                  />
+                  <div className="absolute inset-0 border-[1.5rem] border-white group-hover:border-0 transition-all duration-700"></div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex gap-2 items-center">
+                    <div className="h-0.5 w-6 bg-primary/20 group-hover:w-full transition-all duration-700"></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary whitespace-nowrap">{member.role}</span>
+                  </div>
+                  <h3 className="text-2xl font-headline tracking-tight group-hover:text-primary transition-colors">{member.name}</h3>
+                  <p className="text-xs text-secondary/60 leading-relaxed font-label uppercase tracking-wider">{member.institution}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Submission Guidelines Section ───────────────────────────────── */}
+        <section id="submissions" className="bg-[#1c1b1b] text-white p-12 lg:p-24 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity duration-1000">
+            <span className="material-symbols-outlined text-[40rem] rotate-12 text-primary translate-x-20">description</span>
+          </div>
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-20">
+            <div className="lg:col-span-5 flex flex-col justify-center">
+              <span className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-8 block">Author Protocols</span>
+              <h2 className="text-6xl md:text-8xl font-headline leading-[0.9] tracking-tighter mb-10">Submit <br/><span className="italic text-primary">Your Work</span></h2>
+              <p className="text-white/40 text-xl mb-12 leading-relaxed italic pr-10">We invite original research, case studies, and critical reviews aligning with our focus on social work and development.</p>
+              
+              <div className="space-y-6 mb-16">
+                {[
+                  { icon: CheckCircle, label: "Peer-Reviewed Publication" },
+                  { icon: Info, label: "DOAJ & Scopus Indexed" },
+                  { icon: Globe, label: "Open Access Options" }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-5 text-white/80 group/li cursor-default">
+                    <item.icon className="text-primary w-5 h-5 transition-transform group-hover/li:scale-125" />
+                    <span className="text-sm font-bold uppercase tracking-widest font-label">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => navigate('/submit')}
+                className="bg-primary text-white px-10 py-5 font-bold text-sm uppercase tracking-widest hover:bg-primary/90 shadow-2xl shadow-primary/30 transition-all flex items-center justify-between group/btn w-full sm:w-80 active:scale-95"
+              >
+                Start Submission
+                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+              </button>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {[
+                  { step: "01", title: "Format Manuscript", desc: "Follow APA 7th edition formatting and our journal-specific style guide criteria." },
+                  { step: "02", title: "Anonymize File", desc: "Remove all identifying metadata to ensure a fair double-blind editorial review." },
+                  { step: "03", title: "Upload Files", desc: "Submit the anonymized manuscript, title page, and supplementary data sets." },
+                  { step: "04", title: "Track Progress", desc: "Monitor the real-time status of your peer review and editorial decisions." }
+                ].map((s, idx) => (
+                  <div key={idx} className="space-y-6 p-8 border border-white/10 hover:bg-white/[0.03] transition-colors relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-white/[0.02] rotate-45 translate-x-8 -translate-y-8"></div>
+                    <span className="text-5xl font-headline text-primary/30 group-hover:text-primary transition-colors block leading-none">{s.step}</span>
+                    <h4 className="font-headline text-xl tracking-tight text-white/90">{s.title}</h4>
+                    <p className="text-sm text-white/30 leading-relaxed italic">{s.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-16 p-8 bg-white/[0.02] border border-white/5 backdrop-blur-sm flex gap-6 items-start">
+                <Info className="text-primary w-6 h-6 shrink-0 mt-1" />
+                <div>
+                  <h5 className="font-black text-[10px] uppercase tracking-[0.2em] mb-2 text-white/80">Pre-Submission Inquiry</h5>
+                  <p className="text-sm text-white/40 leading-relaxed italic">
+                    Not sure if your work fits our scope? Send an abstract to <a href="mailto:editorial@ijsds.org" className="text-primary hover:underline underline-offset-4">editor.ijsds@gmail.com</a> for an informal assessment.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      <footer className="bg-stone-100 py-24 mt-20 border-t border-outline-variant/10">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
+            <div className="space-y-8">
+              <div className="font-headline italic text-3xl font-black text-primary">IJSDS</div>
+              <p className="text-secondary/60 text-sm leading-relaxed max-w-xs italic font-medium">
+                Advancing global discourse in social work and sustainable development through rigorous research and continental heritage.
+              </p>
+              <div className="flex gap-4">
+                <button className="w-10 h-10 border border-outline-variant/20 flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all"><Share2 size={16} /></button>
+                <button className="w-10 h-10 border border-outline-variant/20 flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all"><Globe size={16} /></button>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-10">Journal</h5>
+              <ul className="space-y-4">
+                {['Ethics & Policy', 'Editorial Board', 'Open Access', 'Archive'].map(link => (
+                  <li key={link}><button className="text-secondary/60 hover:text-primary transition-colors text-sm font-medium">{link}</button></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h5 className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-10">Support</h5>
+              <ul className="space-y-4">
+                {['Contact', 'Institutional Login', 'Help Center', 'Guidelines'].map(link => (
+                  <li key={link}><button className="text-secondary/60 hover:text-primary transition-colors text-sm font-medium">{link}</button></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h5 className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-10">Contact</h5>
+              <p className="text-secondary/60 text-sm italic leading-relaxed mb-6">Rivers State University, Nkpolu-Oroworukwo, Port Harcourt, Nigeria.</p>
+              <p className="text-sm font-bold text-primary">editor.ijsds@gmail.com</p>
+            </div>
+          </div>
+          <div className="pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-secondary/30 text-[10px] font-black uppercase tracking-[0.2em]">© 2025 International Journal of Social Work and Development Studies. All Rights Reserved.</p>
+            <div className="flex gap-10 text-[10px] font-black uppercase tracking-widest text-secondary/40">
+              <button className="hover:text-primary transition-colors">Privacy</button>
+              <button className="hover:text-primary transition-colors">Terms</button>
+              <button className="hover:text-primary transition-colors">Cookies</button>
+            </div>
+          </div>
         </div>
-      </ContentSection>
+      </footer>
     </div>
   );
 };
