@@ -390,7 +390,7 @@ export const Articles = () => {
             )}
           </div>
         </div>
-      </main>
+      </ContentSection>
     </div>
   );
 };
