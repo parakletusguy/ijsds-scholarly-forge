@@ -1,13 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { HelpSystem } from "@/components/help/HelpSystem";
 import {
   User,
   LogOut,
-  FileText,
   Search,
   Menu,
   X,
@@ -15,8 +11,6 @@ import {
   Zap,
   ShieldCheck,
   Globe,
-  ArrowRight,
-  Layers,
 } from "lucide-react";
 import {
   DropdownMenu,

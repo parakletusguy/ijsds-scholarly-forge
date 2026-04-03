@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import {
-  Search,
   ArrowRight,
   Menu,
   X,
   CheckCircle,
   Info,
-  Send,
   Share2,
   Globe,
 } from "lucide-react";
