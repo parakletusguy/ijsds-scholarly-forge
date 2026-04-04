@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { getProcessedArticles, getPublishedArticles, updateArticleStatus } from '@/lib/publicationService';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ export const Publication = () => {
 
       if (error) throw error;
 
-      if (!profile?.is_editor) {
+      if (!profile?.is_editor && !profile?.is_admin) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to access this page",
@@ -94,47 +95,48 @@ export const Publication = () => {
     }
   };
 
+  const formatAuthors = (authors: any) => {
+    if (!authors) return 'Unknown Author';
+    if (typeof authors === 'string') return authors;
+    if (Array.isArray(authors)) {
+      return authors.map(author => {
+        if (typeof author === 'string') return author;
+        if (author.name) return author.name;
+        const name = `${author.firstName || ''} ${author.lastName || ''}`.trim();
+        return name || 'Unknown Author';
+      }).join(', ');
+    }
+    return 'Unknown Author';
+  };
+
   const fetchAcceptedArticles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .in('status', ['processed', 'published'])
-        .order('submission_date', { ascending: false });
+      setLoading(true);
+      const [processedData, publishedData] = await Promise.all([
+        getProcessedArticles(),
+        getPublishedArticles()
+      ]);
 
-      if (error) throw error;
+      // Fetch submission IDs for each article (using supabase directly for this metadata lookup for now)
+      const enrichWithSubmission = async (article: Article) => {
+        const { data: submission } = await supabase
+          .from('submissions')
+          .select('id')
+          .eq('article_id', article.id)
+          .single();
+        
+        return {
+          ...article,
+          submission_id: submission?.id
+        };
+      };
 
-      // Fetch submission IDs for each article
-      const articlesWithSubmissions = await Promise.all(
-        (data || []).map(async (article) => {
-          const { data: submission } = await supabase
-            .from('submissions')
-            .select('id')
-            .eq('article_id', article.id)
-            .single();
-          
-          return {
-            ...article,
-            submission_id: submission?.id
-          };
-        })
-      );
+      const enrichedProcessed = await Promise.all(processedData.map(enrichWithSubmission));
+      const enrichedPublished = await Promise.all(publishedData.map(enrichWithSubmission));
 
-      const proccessedArray = []
-      const publishedArray = []
-      articlesWithSubmissions.forEach((item,index) => {
-        if(item.status == 'processed'){
-          proccessedArray.push(item);
-        }
-        else if(item.status == 'published'){
-          publishedArray.push(item)
-        }
-      }
-    )
-
-      setProcessed(proccessedArray)
-      setPublished(publishedArray)
-      setArticles(articlesWithSubmissions || []);
+      setProcessed(enrichedProcessed);
+      setPublished(enrichedPublished);
+      setArticles([...enrichedProcessed, ...enrichedPublished]);
     } catch (error) {
       console.error('Error fetching articles:', error);
       toast({
@@ -181,19 +183,15 @@ export const Publication = () => {
 
     setUpdating(true);
     try {
-      const updateData = {
-        status: 'published',
-        publication_date: new Date().toISOString(),
-      };
+      // Loop through and update each article individually since the backend doesn't support bulk-publish
+      const results = await Promise.allSettled(
+        matchingArticles.map(article => updateArticleStatus(article.id, 'published'))
+      );
 
-      const { error } = await supabase
-        .from('articles')
-        .update(updateData)
-        .eq('volume', parseInt(bulkVolume))
-        .eq('issue', parseInt(bulkIssue))
-        .eq('status', 'processed');
-
-      if (error) throw error;
+      const failedCount = results.filter(r => r.status === 'rejected').length;
+      if (failedCount === matchingArticles.length) {
+        throw new Error("All articles failed to publish");
+      }
 
       // Create notifications for all published article authors
       try {
@@ -222,7 +220,9 @@ export const Publication = () => {
 
       toast({
         title: "Success",
-        description: `Published ${matchingArticles.length} articles from Volume ${bulkVolume}, Issue ${bulkIssue}`,
+        description: failedCount > 0 
+          ? `Published ${matchingArticles.length - failedCount} articles. (${failedCount} failed)` 
+          : `Published all ${matchingArticles.length} articles from Volume ${bulkVolume}, Issue ${bulkIssue}`,
       });
 
       fetchAcceptedArticles();
@@ -365,10 +365,7 @@ export const Publication = () => {
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">
-                          Authors: {Array.isArray(article.authors) 
-                            ? article.authors.map((a: any) => a.name).join(', ')
-                            : 'Unknown'
-                          }
+                          Authors: {formatAuthors(article.authors)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
@@ -451,10 +448,7 @@ export const Publication = () => {
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
-                        Authors: {Array.isArray(article.authors) 
-                          ? article.authors.map((a: any) => a.name).join(', ')
-                          : 'Unknown'
-                        }
+                        Authors: {formatAuthors(article.authors)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}

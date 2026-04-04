@@ -39,7 +39,6 @@ const ManageRequests = lazy(() => import('./pages/approveRequest').then(m => ({ 
 const Landing = lazy(() => import('./pages/landingPage').then(m => ({ default: m.Landing })));
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
-import logo_2 from "../public/riversstate-removebg-preview.png"
 const ArticleInfo = lazy(() => import('./pages/articleInfo').then(m => ({ default: m.ArticleInfo })));
 const Guide = lazy(() => import('./pages/guide').then(m => ({ default: m.Guide })));
 const Blog = lazy(() => import('./pages/Blog').then(m => ({ default: m.Blog })));
@@ -94,7 +93,7 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
               </button>
             </div>
             <div className="w-12 md:w-16">
-              <img src={logo_2} alt="Rivers State University Logo" className="w-full h-auto" />
+              <img src="/riversstate-removebg-preview.png" alt="Rivers State University Logo" className="w-full h-auto" />
             </div>
           </div>
         </header>

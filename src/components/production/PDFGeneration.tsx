@@ -111,7 +111,7 @@ export const PDFGeneration = ({ article, onUpdate }: PDFGenerationProps) => {
           <div>
             <h3 className="font-semibold mb-2">{article.title}</h3>
             <div className="flex items-center gap-4">
-              <Badge variant={article.status === 'ready_for_publication' ? 'default' : 'secondary'}>
+              <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
                 {article.status.replace('_', ' ')}
               </Badge>
               {article.manuscript_file_url && (

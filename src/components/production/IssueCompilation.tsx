@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { approveForProcessing, updateArticle } from '@/lib/productionService';
+import type { Article } from '@/lib/articleService';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,18 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { BookOpen, Save, FileText, Calendar, Plus, Trash2, ExternalLink } from 'lucide-react';
 
-interface Article {
-  id: string;
-  title: string;
-  authors: any;
-  status: string;
-  abstract: string;
-  manuscript_file_url: string;
-  volume?: number;
-  issue?: number;
-  page_start?: number;
-  page_end?: number;
-}
+
 
 interface IssueCompilationProps {
   article: Article;
@@ -87,18 +78,12 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
   const saveIssue = async () => {
     setLoading(true);
     try {
-      // Update article with issue information
-      const { error } = await supabase
-        .from('articles')
-        .update({
-          volume: issueInfo.volume,
-          issue: issueInfo.issue,
-          page_start: issueArticles.find(a => a.id === article.id)?.pageStart,
-          page_end: issueArticles.find(a => a.id === article.id)?.pageEnd,
-        })
-        .eq('id', article.id);
-
-      if (error) throw error;
+      await updateArticle(article.id, {
+        volume: issueInfo.volume,
+        issue: issueInfo.issue,
+        page_start: issueArticles.find(a => a.id === article.id)?.pageStart,
+        page_end: issueArticles.find(a => a.id === article.id)?.pageEnd,
+      });
 
       toast({
         title: "Issue Saved",
@@ -137,9 +122,12 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
     if (!authors) return 'Unknown Author';
     if (typeof authors === 'string') return authors;
     if (Array.isArray(authors)) {
-      return authors.map(author => 
-        typeof author === 'string' ? author : `${author.firstName} ${author.lastName}`
-      ).join(', ');
+      return authors.map(author => {
+        if (typeof author === 'string') return author;
+        if (author.name) return author.name;
+        const name = `${author.firstName || ''} ${author.lastName || ''}`.trim();
+        return name || 'Unknown Author';
+      }).join(', ');
     }
     return 'Unknown Author';
   };
@@ -147,36 +135,27 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
   const approveProcessing = async () => {
     setProcessLoad(true)
     try {
-            const { error } = await supabase
-        .from('articles')
-        .update({
-          volume: issueInfo.volume,
-          issue: issueInfo.issue,
-          page_start: issueArticles.find(a => a.id === article.id)?.pageStart,
-          page_end: issueArticles.find(a => a.id === article.id)?.pageEnd,
-        })
-        .eq('id', article.id);
-
-          const {error: updateError} = await supabase
-        .from("articles")
-        .update({status:"processed"}).
-        eq('id',article.id)
-
-     toast({
-        title: "processed",
-        description: "article approved for processing",
+      await approveForProcessing(article.id, {
+        volume: issueInfo.volume,
+        issue: issueInfo.issue,
+        page_start: issueArticles.find(a => a.id === article.id)?.pageStart,
+        page_end: issueArticles.find(a => a.id === article.id)?.pageEnd,
       });
 
-    if (updateError) throw updateError
+      toast({
+        title: "Success",
+        description: "Article approved for processing",
+      });
+      
+      onUpdate();
     } catch (error) {
       console.error('Error processing:', error);
-    setProcessLoad(false)
       toast({
         title: "Error",
         description: "Failed to process article",
         variant: "destructive",
       });
-    }finally{
+    } finally {
       setProcessLoad(false)
     }
   }

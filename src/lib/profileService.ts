@@ -34,6 +34,7 @@ export const updateProfile = async (id: string, updates: Partial<{
   deadline_reminder_days: number;
   request_reviewer: boolean;
   request_editor: boolean;
+  request_admin: boolean;
   // admin-only fields
   is_editor: boolean;
   is_reviewer: boolean;

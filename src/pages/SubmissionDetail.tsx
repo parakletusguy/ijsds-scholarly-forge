@@ -40,6 +40,10 @@ interface SubmissionDetails {
   };
 }
 
+// Fee amounts in kobo (100 kobo = ₦1)
+const VETTING_FEE_KOBO = 512500; // ₦5,125
+const PROCESSING_FEE_KOBO = 2050000; // ₦20,500
+
 export const SubmissionDetail = () => {
   const { submissionId } = useParams();
   const { user, profile, loading } = useAuth();
@@ -100,8 +104,7 @@ export const SubmissionDetail = () => {
     submission
       ? (userData = {
           email: submission.submitter.email,
-          // amount: 512500, // ₦5,125 in kobo
-          amount: 1000, // ₦5,125 in kobo
+          amount: VETTING_FEE_KOBO,
           metadata: {
             custom_fields: [
               {
@@ -113,7 +116,7 @@ export const SubmissionDetail = () => {
           },
           onSuccess: (response: { reference: string }) => {
             setvet(false);
-            onSuccess(response, "vetting", 512500);
+            onSuccess(response, "vetting", VETTING_FEE_KOBO);
           },
           onClose: () =>
             toast({
@@ -129,7 +132,7 @@ export const SubmissionDetail = () => {
     submission
       ? (userDataPro = {
           email: submission.submitter.email,
-          amount: 2050000, // ₦20,500 in kobo
+          amount: PROCESSING_FEE_KOBO,
           metadata: {
             custom_fields: [
               {
@@ -141,7 +144,7 @@ export const SubmissionDetail = () => {
           },
           onSuccess: (response: { reference: string }) => {
             setprocessing(false);
-            onSuccess(response, "processing", 2050000);
+            onSuccess(response, "processing", PROCESSING_FEE_KOBO);
           },
           onClose: () =>
             toast({

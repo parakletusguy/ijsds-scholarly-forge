@@ -20,7 +20,7 @@ export const VettingDialog = ({ userData, vet, setvet }) => {
             Cancel
           </button>
           {/* Do NOT close dialog here — let onSuccess/onClose callbacks handle it */}
-          <Paystackbtn info={userData} />
+          <Paystackbtn info={userData} onClick={() => setvet(false)} />
         </div>
       </DialogContent>
     </Dialog>
@@ -45,8 +45,8 @@ export const ProcessinFeeDialog = ({ processing, setprocessing, userData }) => {
           >
             Cancel
           </button>
-          {/* Do NOT close dialog here — let onSuccess/onClose callbacks handle it */}
-          <Paystackbtn info={userData} />
+          <Paystackbtn info={userData} onClick={() => setprocessing(false)} />
+
         </div>
       </DialogContent>
     </Dialog>

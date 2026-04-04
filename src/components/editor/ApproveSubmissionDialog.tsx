@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle } from 'lucide-react';
-import { updateSubmission } from '@/lib/submissionService';
+import { createEditorialDecision } from '@/lib/editorialService';
 import { updateArticle } from '@/lib/articleService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ApproveSubmissionDialogProps {
   submissionId: string;
@@ -14,31 +15,38 @@ interface ApproveSubmissionDialogProps {
 }
 
 export const ApproveSubmissionDialog = ({ submissionId, articleId, onApprove, disabled }: ApproveSubmissionDialogProps) => {
+  const { profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleApprove = async () => {
     setLoading(true);
     try {
-      await updateSubmission(submissionId, {
-        status: 'accepted',
-        approved_by_editor: true,
+      // Creates editorial decision, updates submission status to 'accepted',
+      // writes audit log, and sends decision email — all in one backend transaction.
+      await createEditorialDecision({
+        submission_id: submissionId,
+        decision_type: 'accept',
+        role: profile?.role || 'editor'
       });
 
-      await updateArticle(articleId, { status: 'accepted' });
+      // Sync article status separately (editorial-decisions only updates submission status)
+      await updateArticle(articleId, { 
+        status: 'accepted',
+        role: profile?.role || 'editor'
+      });
 
       toast({
         title: 'Submission Approved',
-        description: 'Submission approved and is moving to production.',
+        description: 'Manuscript accepted and author notified.',
       });
 
       setOpen(false);
       onApprove();
-    } catch (error) {
-      console.error('Error approving submission:', error);
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to approve submission. Please try again.',
+        description: error?.message || 'Failed to approve submission.',
         variant: 'destructive',
       });
     } finally {
@@ -58,16 +66,13 @@ export const ApproveSubmissionDialog = ({ submissionId, articleId, onApprove, di
         <DialogHeader>
           <DialogTitle>Approve Submission</DialogTitle>
           <DialogDescription>
-            Are you sure you want to approve this submission for publication? This action will mark the submission as accepted and ready for publication.
+            This will accept the submission, update its status, record the editorial decision, and notify the author.
           </DialogDescription>
         </DialogHeader>
-
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={handleApprove} disabled={loading}>
-            {loading ? 'Approving...' : 'Approve for Publication'}
+            {loading ? 'Approving…' : 'Approve for Publication'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -8,15 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Link, RefreshCw, Save, ExternalLink, AlertCircle, CheckCircle } from 'lucide-react';
 
-interface Article {
-  id: string;
-  title: string;
-  authors: any;
-  status: string;
-  doi?: string;
-  abstract: string;
-  manuscript_file_url?: string;
-}
+import type { Article } from '@/lib/articleService';
 
 interface DOIManagerProps {
   article: Article;
@@ -127,9 +119,12 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
     if (!authors) return 'Unknown Author';
     if (typeof authors === 'string') return authors;
     if (Array.isArray(authors)) {
-      return authors.map(author => 
-        typeof author === 'string' ? author : `${author.firstName} ${author.lastName}`
-      ).join(', ');
+      return authors.map(author => {
+        if (typeof author === 'string') return author;
+        if (author.name) return author.name;
+        const name = `${author.firstName || ''} ${author.lastName || ''}`.trim();
+        return name || 'Unknown Author';
+      }).join(', ');
     }
     return 'Unknown Author';
   };

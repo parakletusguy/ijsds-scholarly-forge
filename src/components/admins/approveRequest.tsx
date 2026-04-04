@@ -3,12 +3,12 @@ import { User, Mail, ShieldCheck, CheckCircle2, ShieldAlert } from "lucide-react
 
 interface ProfileCardProps {
   profile: {
-    id: number;
+    id: string;
     full_name: string;
     email: string;
   };
-  onApprove: (id: number, type: string) => void;
-  onReject: (id: number, type: string) => void;
+  onApprove: (id: string, type: string) => void;
+  onReject: (id: string, type: string) => void;
 }
 
 export function ProfileCard({ profile, onApprove, onReject }: ProfileCardProps) {

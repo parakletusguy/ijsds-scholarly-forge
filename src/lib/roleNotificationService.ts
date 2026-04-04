@@ -1,7 +1,7 @@
 import { notifyAdmins, sendEmailNotification } from '@/lib/emailService';
 import { supabase } from '@/integrations/supabase/client';
 
-export type RoleType = 'editor' | 'reviewer';
+export type RoleType = 'editor' | 'reviewer' | 'admin';
 
 export const notifyAdminsOfRoleRequest = async (params: {
   requesterId: string;
@@ -10,13 +10,13 @@ export const notifyAdminsOfRoleRequest = async (params: {
   role: RoleType;
 }) => {
   const { requesterId, requesterName, requesterEmail, role } = params;
-  const title = role === 'editor' ? 'New Editor Role Request' : 'New Reviewer Role Request';
+  const title = role === 'admin' ? 'New Administrative Role Request' : role === 'editor' ? 'New Editor Role Request' : 'New Reviewer Role Request';
   const message = `A user has requested ${role} privileges.<br/><br/>
   <strong>Name:</strong> ${requesterName || 'N/A'}<br/>
   <strong>Email:</strong> ${requesterEmail || 'N/A'}<br/>
   <strong>User ID:</strong> ${requesterId}`;
 
-  await notifyAdmins(title, message, 'info');
+  await notifyAdmins(title, message);
 };
 
 export const notifyRequesterOfRoleDecision = async (params: {
@@ -27,7 +27,7 @@ export const notifyRequesterOfRoleDecision = async (params: {
   decision: 'accepted' | 'rejected';
 }) => {
   const { userId, email, name, role, decision } = params;
-  const roleLabel = role === 'editor' ? 'Editor' : 'Reviewer';
+  const roleLabel = role === 'admin' ? 'Administrator' : role === 'editor' ? 'Editor' : 'Reviewer';
   const subject = decision === 'accepted'
     ? `Your ${roleLabel} request has been approved`
     : `Your ${roleLabel} request has been declined`;

@@ -1,7 +1,14 @@
-import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
-import { getCurrentUser } from '@/lib/auth';
-import { Profile } from '@/types/profile';
-import { getToken, clearToken } from '@/lib/apiClient';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  type ReactNode,
+} from "react";
+import { getCurrentUser } from "@/lib/auth";
+import { Profile } from "@/types/profile";
+import { getToken, clearToken, setActingRole } from "@/lib/apiClient";
+import { getActingRoleFromProfile } from "@/lib/roleUtils";
 
 /** Minimal user object — keeps backward-compat for code that uses user.id / user.email */
 export interface AuthUser {
@@ -31,6 +38,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const applyProfile = (p: Profile | null) => {
     setProfile(p);
+    if (p) {
+      const actingRole = getActingRoleFromProfile(p);
+      console.log(
+        "[useAuth] Computed actingRole:",
+        actingRole,
+        "from profile:",
+        p,
+      );
+      if (actingRole) setActingRole(actingRole);
+    }
   };
 
   useEffect(() => {
@@ -40,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     getCurrentUser()
-      .then(p => applyProfile(p))
+      .then((p) => applyProfile(p))
       .finally(() => setLoading(false));
   }, []);
 
@@ -54,7 +71,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const user = profile;
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, refreshAuth, clearAuth }}>
+    <AuthContext.Provider
+      value={{ user, profile, loading, refreshAuth, clearAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -63,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

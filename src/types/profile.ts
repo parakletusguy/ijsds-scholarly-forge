@@ -13,4 +13,7 @@ export interface Profile {
   deadline_reminder_days?: number;
   request_reviewer?: boolean;
   request_editor?: boolean;
+  request_admin?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

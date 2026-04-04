@@ -17,6 +17,7 @@ export const ManageRequests = () => {
   const IsAdmin = !!profile?.is_admin;
   const [editorRequests, seteditorRequests] = useState<any[]>([])
   const [reviewerRequests, setreviewerRequests] = useState<any[]>([])
+  const [adminRequests, setadminRequests] = useState<any[]>([])
 
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }
@@ -32,12 +33,15 @@ export const ManageRequests = () => {
       const data = await getProfiles();
       const edi: any[] = []
       const rev: any[] = []
+      const adm: any[] = []
       data.forEach((p: any) => {
-        if (p.request_editor) edi.push(p)
+        if (p.request_admin) adm.push(p)
+        else if (p.request_editor) edi.push(p)
         else if (p.request_reviewer) rev.push(p)
       })
       seteditorRequests(edi)
       setreviewerRequests(rev)
+      setadminRequests(adm)
     } catch (error) { toast({ title: 'Sync Error', description: 'Failed to access recruitment registry.', variant: 'destructive' }); }
     finally { setLoadingData(false); }
   }
@@ -81,6 +85,28 @@ export const ManageRequests = () => {
           await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'reviewer', decision: 'rejected' });
         } catch (e) { console.warn('Notification failed', e); }
         toast({ title: 'Authorization Refused', description: `Peer-review request for ${target?.full_name} has been declined.` });
+      }
+      fetchRequests();
+    } catch (error) { toast({ title: 'Command Refused', description: 'Failed to finalize decision registry.', variant: 'destructive' }); }
+  }
+  
+  const handleApproveAdmin = async (id: any, type: string) : Promise<void> => {
+    try {
+      const target = adminRequests.find((p:any) => p.id === id);
+      if (type == 'approve') {
+        await updateProfile(id, { is_admin: true, request_admin: false, role: 'admin' });
+        try {
+          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
+          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'admin', decision: 'accepted' });
+        } catch (e) { console.warn('Notification failed', e); }
+        toast({ title: 'Authorization Success', description: `User ${target?.full_name} has been synchronized as a System Administrator.` });
+      } else {
+        await updateProfile(id, { request_admin: false });
+        try {
+          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
+          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'admin', decision: 'rejected' });
+        } catch (e) { console.warn('Notification failed', e); }
+        toast({ title: 'Authorization Refused', description: `Administrative request for ${target?.full_name} has been declined.` });
       }
       fetchRequests();
     } catch (error) { toast({ title: 'Command Refused', description: 'Failed to finalize decision registry.', variant: 'destructive' }); }
@@ -139,7 +165,8 @@ export const ManageRequests = () => {
           <TabsList className="bg-white border border-border/20 p-2 rounded-none h-auto flex flex-wrap shadow-sm">
             {[
               { val: "reviewers", label: "Peer Evaluation Panel", count: reviewerRequests.length },
-              { val: "editors", label: "Editorial Governance", count: editorRequests.length }
+              { val: "editors", label: "Editorial Governance", count: editorRequests.length },
+              { val: "admins", label: "Administrative Control", count: adminRequests.length }
             ].map(tab => (
               <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-4 px-8 data-[state=active]:bg-foreground data-[state=active]:text-white font-headline font-black uppercase text-[10px] tracking-widest transition-all gap-4 grow border-r border-border/10 last:border-0 h-16">
                 {tab.label} <Badge className="bg-primary/20 text-primary hover:bg-primary/20 border-none rounded-none text-[8px] font-bold px-2">{tab.count}</Badge>
@@ -172,6 +199,20 @@ export const ManageRequests = () => {
                    profile={profile}
                    onApprove={() => handleApproveEditor(profile.id,'approve')}
                    onReject={() => handleApproveEditor(profile.id,'reject')}
+                 />
+               ))
+            )}
+          </TabsContent>
+          <TabsContent value="admins" className="space-y-4 mt-0">
+            {adminRequests.length === 0 ? (
+               <div className={cardClasses + " py-24 text-center opacity-40 italic font-body"}>No administrative applications pending.</div>
+            ) : (
+               adminRequests.map(profile => (
+                 <ProfileCard
+                   key={profile.id}
+                   profile={profile}
+                   onApprove={() => handleApproveAdmin(profile.id,'approve')}
+                   onReject={() => handleApproveAdmin(profile.id,'reject')}
                  />
                ))
             )}

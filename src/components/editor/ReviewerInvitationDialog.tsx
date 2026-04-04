@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { UserPlus, AlertCircle } from 'lucide-react';
-import { sendEmailNotification, generateReviewInvitationEmail } from '@/lib/emailService';
 import { getProfiles } from '@/lib/profileService';
 import { createReview } from '@/lib/reviewService';
+import { useAuth } from '@/hooks/useAuth';
 import { type Submission } from '@/lib/submissionService';
 import { ReviewStatusIndicator } from '@/components/review/ReviewStatusIndicator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,6 +31,7 @@ interface Reviewer {
 }
 
 export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvite,submission }: ReviewerInvitationDialogProps) => {
+  const { profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
   const [selectedReviewerId, setSelectedReviewerId] = useState('');
@@ -81,26 +82,12 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
       const selectedReviewer = reviewers.find(r => r.id === selectedReviewerId);
       if (!selectedReviewer) throw new Error('Reviewer not found');
 
+      // Backend automatically sends invitation email via sendReviewAssignedEmail
       await createReview({
         submission_id: submissionId,
         reviewer_id: selectedReviewerId,
         deadline_date: deadlineDate,
-      });
-
-      // Send email invitation
-      const emailContent = generateReviewInvitationEmail(
-        selectedReviewer.full_name,
-        submissionTitle,
-        new Date(deadlineDate).toLocaleDateString()
-      );
-
-      await sendEmailNotification({
-        to: selectedReviewer.email,
-        subject: `Review Invitation: ${submissionTitle}`,
-        htmlContent: emailContent,
-        type: 'review_invitation',
-        userId: selectedReviewerId,
-        submissionId: submissionId,
+        role: profile?.role || 'editor'
       });
 
       toast({

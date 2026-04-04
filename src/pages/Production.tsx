@@ -17,21 +17,10 @@ import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft, Link } fro
 import { AutomatedReviewerMatchingInterface } from '@/components/workflow/AutomatedReviewerMatchingInterface';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { getProductionArticles } from '@/lib/productionService';
+import type { Article } from '@/lib/articleService';
 
-interface Article {
-  id: string;
-  title: string;
-  authors: any;
-  status: string;
-  publication_date: string;
-  doi: string;
-  manuscript_file_url: string;
-  volume: number;
-  issue: number;
-  page_start: number;
-  page_end: number;
-  abstract: string;
-}
+
 
 export const Production = () => {
   const { user } = useAuth();
@@ -48,13 +37,8 @@ export const Production = () => {
 
   const fetchProductionArticles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .in('status', ['accepted', 'in_production', 'copyediting', 'proofreading', 'typesetting', 'ready_for_publication'])
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      setLoading(true);
+      const data = await getProductionArticles();
       setArticles(data || []);
     } catch (error) {
       console.error('Error fetching production articles:', error);
@@ -71,11 +55,8 @@ export const Production = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'accepted': return 'bg-blue-100 text-blue-800';
-      case 'in_production': return 'bg-yellow-100 text-yellow-800';
-      case 'copyediting': return 'bg-orange-100 text-orange-800';
-      case 'proofreading': return 'bg-purple-100 text-purple-800';
-      case 'typesetting': return 'bg-indigo-100 text-indigo-800';
-      case 'ready_for_publication': return 'bg-green-100 text-green-800';
+      case 'processed': return 'bg-green-100 text-green-800';
+      case 'published': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -84,9 +65,12 @@ export const Production = () => {
     if (!authors) return 'Unknown Author';
     if (typeof authors === 'string') return authors;
     if (Array.isArray(authors)) {
-      return authors.map(author => 
-        typeof author === 'string' ? author : `${author.firstName} ${author.lastName}`
-      ).join(', ');
+      return authors.map(author => {
+        if (typeof author === 'string') return author;
+        if (author.name) return author.name;
+        const name = `${author.firstName || ''} ${author.lastName || ''}`.trim();
+        return name || 'Unknown Author';
+      }).join(', ');
     }
     return 'Unknown Author';
   };

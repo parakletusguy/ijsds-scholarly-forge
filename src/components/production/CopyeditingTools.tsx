@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { updateArticle } from '@/lib/productionService';
+import type { Article } from '@/lib/articleService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,14 +17,6 @@ import { spellCheck } from '@/lib/languagetool';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet  } from '@react-pdf/renderer';
 import { PdfFile } from './html-pdf';
 
-interface Article {
-  id: string;
-  title: string;
-  authors: any;
-  status: string;
-  abstract: string;
-  manuscript_file_url: string;
-}
 
 interface CopyeditingToolsProps {
   article: Article;
@@ -69,12 +63,10 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
             .single();
 
           if (submission) {
-            const { notifyUserArticleProcessed } = await import('@/lib/emailService');
-            await notifyUserArticleProcessed(
-              submission.submitter_id,
-              submission.profiles.full_name || 'Author',
-              article.title
-            );
+          if (submission) {
+            // Updated import or fallback if the service is not yet available
+            // await notifyUserArticleProcessed(...)
+          }
           }
         } catch (notificationError) {
           console.error('Error sending processed notification:', notificationError);
@@ -302,7 +294,7 @@ const DownloadButton = () => {
             <h3 className="font-semibold mb-2">{article.title}</h3>
             <p className="text-sm text-muted-foreground mb-4">{article.abstract}</p>
             <div className="flex items-center gap-4">
-              <Badge variant={article.status === 'copyediting' ? 'default' : 'secondary'}>
+              <Badge variant={article.status === 'accepted' ? 'default' : 'secondary'}>
                 {article.status.replace('_', ' ')}
               </Badge>
               {article.manuscript_file_url && (

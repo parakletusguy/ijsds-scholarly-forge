@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -8,9 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { FileEdit } from 'lucide-react';
-import { sendEmailNotification, generateStatusChangeEmail } from '@/lib/emailService';
-import { updateSubmission } from '@/lib/submissionService';
 import { createRevisionRequest, createEditorialDecision } from '@/lib/editorialService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RevisionRequestDialogProps {
   submissionId: string;
@@ -20,7 +18,12 @@ interface RevisionRequestDialogProps {
   onRequest: () => void;
 }
 
-export const RevisionRequestDialog = ({ submissionId, submissionTitle, authorEmail, authorName, onRequest }: RevisionRequestDialogProps) => {
+export const RevisionRequestDialog = ({
+  submissionId,
+  submissionTitle,
+  onRequest,
+}: RevisionRequestDialogProps) => {
+  const { profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [revisionType, setRevisionType] = useState<'minor' | 'major'>('minor');
   const [requestDetails, setRequestDetails] = useState('');
@@ -29,70 +32,46 @@ export const RevisionRequestDialog = ({ submissionId, submissionTitle, authorEma
 
   const handleRequestRevision = async () => {
     if (!requestDetails.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please provide revision details.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Please provide revision details.', variant: 'destructive' });
       return;
     }
-
     if (!deadlineDate) {
-      toast({
-        title: 'Error',
-        description: 'Please set a revision deadline.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Please set a revision deadline.', variant: 'destructive' });
       return;
     }
 
     setLoading(true);
     try {
-      await updateSubmission(submissionId, { status: 'revision_requested' });
-
+      // 1. Create revision request record → backend sets status to 'revision_requested' + audit log
       await createRevisionRequest({
         submission_id: submissionId,
         revision_type: revisionType,
         request_details: requestDetails,
         deadline_date: deadlineDate,
+        role: profile?.role || 'editor'
       });
 
+      // 2. Create editorial decision → backend sets status (idempotent) + audit log + sends decision email to author
       await createEditorialDecision({
         submission_id: submissionId,
-        decision_type: 'revision_requested',
-        decision_rationale: `${revisionType} revision requested`,
-      });
-
-      // Send email notification to author
-      const emailContent = generateStatusChangeEmail(
-        authorName,
-        submissionTitle,
-        'revision_requested',
-        `A ${revisionType} revision has been requested for your submission. Please address the following points:\n\n${requestDetails}\n\nRevision deadline: ${new Date(deadlineDate).toLocaleDateString()}`
-      );
-
-      await sendEmailNotification({
-        to: authorEmail,
-        subject: `Revision Requested: ${submissionTitle}`,
-        htmlContent: emailContent,
-        type: 'revision_request',
-        submissionId: submissionId,
+        decision_type: revisionType === 'minor' ? 'minor_revision' : 'major_revision',
+        decision_rationale: requestDetails,
+        role: profile?.role || 'editor'
       });
 
       toast({
         title: 'Revision Requested',
-        description: 'The author has been notified of the revision request.',
+        description: 'Revision details saved and author notified by email.',
       });
 
       setOpen(false);
       setRequestDetails('');
       setDeadlineDate('');
       onRequest();
-    } catch (error) {
-      console.error('Error requesting revision:', error);
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to request revision.',
+        description: error?.message || 'Failed to request revision.',
         variant: 'destructive',
       });
     } finally {
@@ -112,10 +91,10 @@ export const RevisionRequestDialog = ({ submissionId, submissionTitle, authorEma
         <DialogHeader>
           <DialogTitle>Request Revision</DialogTitle>
           <DialogDescription>
-            Request revisions from the author for: {submissionTitle}
+            Request revisions from the author for: <strong>{submissionTitle}</strong>
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Revision Type</Label>
@@ -134,7 +113,7 @@ export const RevisionRequestDialog = ({ submissionId, submissionTitle, authorEma
             <Label htmlFor="details">Revision Details *</Label>
             <Textarea
               id="details"
-              placeholder="Please provide detailed revision requirements..."
+              placeholder="Provide detailed revision requirements for the author…"
               value={requestDetails}
               onChange={(e) => setRequestDetails(e.target.value)}
               className="min-h-32"
@@ -153,11 +132,9 @@ export const RevisionRequestDialog = ({ submissionId, submissionTitle, authorEma
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={handleRequestRevision} disabled={loading}>
-            {loading ? 'Sending...' : 'Send Revision Request'}
+            {loading ? 'Sending…' : 'Send Revision Request'}
           </Button>
         </DialogFooter>
       </DialogContent>

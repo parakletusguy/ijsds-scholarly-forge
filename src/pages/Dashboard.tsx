@@ -22,7 +22,11 @@ export const Dashboard = () => {
 
     try {
       const data = await getSubmissions({ submitter_id: user.id });
-      setSubmissions(data || []);
+      // Apply strict client-side filtering as a secondary measure to ensure 
+      // the dashboard only shows the user's own submissions.
+      const personalSubmissions = (data || []).filter(s => s.submitter_id === user.id);
+      setSubmissions(personalSubmissions);
+      console.log(`[Dashboard] Scoped to user ${user.id}. Total: ${data?.length}, Scoped: ${personalSubmissions.length}`);
     } catch (error) {
       console.error('Error fetching submissions:', error);
     } finally {

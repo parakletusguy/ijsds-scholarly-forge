@@ -1,4 +1,4 @@
-import { api } from './apiClient';
+import { api } from "./apiClient";
 
 export interface EditorialDecision {
   id: string;
@@ -28,16 +28,38 @@ export interface RejectionMessage {
   created_at: string;
 }
 
-interface DecisionListResponse { success: true; data: EditorialDecision[] }
-interface DecisionCreateResponse { success: true; data: EditorialDecision }
-interface RevisionListResponse { success: true; data: RevisionRequest[] }
-interface RevisionCreateResponse { success: true; data: RevisionRequest }
-interface RejectionListResponse { success: true; data: RejectionMessage[] }
-interface RejectionCreateResponse { success: true; data: RejectionMessage }
+interface DecisionListResponse {
+  success: true;
+  data: EditorialDecision[];
+}
+interface DecisionCreateResponse {
+  success: true;
+  data: EditorialDecision;
+}
+interface RevisionListResponse {
+  success: true;
+  data: RevisionRequest[];
+}
+interface RevisionCreateResponse {
+  success: true;
+  data: RevisionRequest;
+}
+interface RejectionListResponse {
+  success: true;
+  data: RejectionMessage[];
+}
+interface RejectionCreateResponse {
+  success: true;
+  data: RejectionMessage;
+}
 
 // Editorial Decisions
-export const getEditorialDecisions = async (submissionId: string): Promise<EditorialDecision[]> => {
-  const res = await api.get<DecisionListResponse>(`/api/editorial-decisions/${submissionId}`);
+export const getEditorialDecisions = async (
+  submissionId: string,
+): Promise<EditorialDecision[]> => {
+  const res = await api.get<DecisionListResponse>(
+    `/api/editorial-decisions/${submissionId}`,
+  );
   return res.data;
 };
 
@@ -46,13 +68,20 @@ export const createEditorialDecision = async (body: {
   decision_type: string;
   decision_rationale?: string;
 }): Promise<EditorialDecision> => {
-  const res = await api.post<DecisionCreateResponse>('/api/editorial-decisions', body);
+  const res = await api.post<DecisionCreateResponse>(
+    "/api/editorial-decisions",
+    body,
+  );
   return res.data;
 };
 
 // Revision Requests
-export const getRevisionRequests = async (submissionId: string): Promise<RevisionRequest[]> => {
-  const res = await api.get<RevisionListResponse>(`/api/revision-requests/${submissionId}`);
+export const getRevisionRequests = async (
+  submissionId: string,
+): Promise<RevisionRequest[]> => {
+  const res = await api.get<RevisionListResponse>(
+    `/api/revision-requests/${submissionId}`,
+  );
   return res.data;
 };
 
@@ -62,13 +91,20 @@ export const createRevisionRequest = async (body: {
   request_details: string;
   deadline_date?: string;
 }): Promise<RevisionRequest> => {
-  const res = await api.post<RevisionCreateResponse>('/api/revision-requests', body);
+  const res = await api.post<RevisionCreateResponse>(
+    "/api/revision-requests",
+    body,
+  );
   return res.data;
 };
 
 // Rejection Messages
-export const getRejectionMessages = async (submissionId: string): Promise<RejectionMessage[]> => {
-  const res = await api.get<RejectionListResponse>(`/api/rejection-messages/${submissionId}`);
+export const getRejectionMessages = async (
+  submissionId: string,
+): Promise<RejectionMessage[]> => {
+  const res = await api.get<RejectionListResponse>(
+    `/api/rejection-messages/${submissionId}`,
+  );
   return res.data;
 };
 
@@ -77,6 +113,9 @@ export const createRejectionMessage = async (body: {
   message: string;
   suggested_corrections?: string;
 }): Promise<RejectionMessage> => {
-  const res = await api.post<RejectionCreateResponse>('/api/rejection-messages', body);
+  const res = await api.post<RejectionCreateResponse>(
+    "/api/rejection-messages",
+    body,
+  );
   return res.data;
 };
