@@ -1,255 +1,224 @@
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { signOut } from '@/lib/auth';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { HelpSystem } from '@/components/help/HelpSystem';
-import { 
-  BookOpen, 
-  User, 
-  LogOut, 
-  FileText, 
-  Settings, 
-  BarChart3, 
+import { useAuth } from "@/hooks/useAuth";
+import { signOut } from "@/lib/auth";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  BookOpen,
+  User,
+  LogOut,
+  FileText,
+  Settings,
+  BarChart3,
   Database,
-  Home,
   FileCheck,
-  Info,
   PenTool,
-  Users,
   Eye,
   Wrench,
   Globe,
   CheckSquare,
-  Archive
-} from 'lucide-react';
-import icon from "/public/Logo_Black_Edited-removebg-preview.png";
+  Archive,
+  Library,
+  Building2,
+  BookMarked,
+  ChevronRight,
+} from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { HelpSystem } from "@/components/help/HelpSystem";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarSeparator,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { toast } from '@/hooks/use-toast';
+} from "@/components/ui/sidebar";
+import { toast } from "@/hooks/use-toast";
 
 export const AppSidebar = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { open } = useSidebar();
-  const [userRole, setUserRole] = useState<{
-    is_admin: boolean;
-    is_editor: boolean;
-    is_reviewer: boolean;
-  }>({ is_admin: false, is_editor: false, is_reviewer: false });
 
-  useEffect(() => {
-    if (user) {
-      fetchUserRole();
-    }
-  }, [user]);
-
-  const fetchUserRole = async () => {
-    if (!user) return;
-    
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin, is_editor, is_reviewer')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      if (profile) {
-        setUserRole(profile);
-      }
-    } catch (error) {
-      console.error('Error fetching user role:', error);
-    }
+  const userRole = {
+    is_admin: profile?.is_admin ?? false,
+    is_editor: profile?.is_editor ?? false,
+    is_reviewer: profile?.is_reviewer ?? false,
   };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } else {
-      toast({
-        title: 'Signed out successfully',
-      });
-      navigate('/');
+      toast({ title: "Signed out successfully" });
+      navigate("/");
     }
   };
 
   const isActive = (path: string) => location.pathname === path;
 
-  const mainNavItems = [
-    { title: 'Home', url: '/', icon: Home },
-    { title: 'Articles', url: '/articles', icon: FileText },
-    { title: 'Archive', url: '/archive', icon: Archive },
-    { title: 'Blog', url: '/blog', icon: BookOpen },
-    { title: 'Partners', url: '/partners', icon: Users },
-    { title: 'About', url: '/about', icon: Info },
+  // ── Nav definitions ────────────────────────────────────────────────────────
+  const publicNav = [
+    { title: "Scholarly Archive", url: "/articles", icon: Library },
+    { title: "About the Journal", url: "/about", icon: BookMarked },
   ];
 
-  // Dynamic navigation based on user roles
-  const getNavItemsForRole = () => {
-    if (!user) return [];
+  const authorNav = [
+    { title: "Manuscript Management", url: "/dashboard", icon: FileText },
+    { title: "Submit Research", url: "/submit", icon: PenTool },
+    { title: "Edit Profile", url: "/profile", icon: User },
+  ];
 
-    const baseItems = [
-      { title: 'Submit Article', url: '/submit', icon: PenTool, roles: ['author', 'editor', 'reviewer', 'admin'] },
-      { title: 'Dashboard', url: '/dashboard', icon: FileText, roles: ['author', 'editor', 'reviewer', 'admin'] },
-      { title: 'Edit Profile', url: '/profile', icon: User, roles: ['author', 'editor', 'reviewer', 'admin'] },
-    ];
+  const reviewerNav = [
+    { title: "Peer Review Status", url: "/reviewer-dashboard", icon: Eye },
+  ];
 
-    const roleSpecificItems = [
-      // Reviewer items (visible to reviewers, editors, admins)
-      { title: 'Reviewer Dashboard', url: '/reviewer-dashboard', icon: Eye, roles: ['reviewer', 'editor', 'admin'] },
-      
-      // Editor items (visible to editors and admins)
-      { title: 'Editorial', url: '/editorial', icon: FileCheck, roles: ['editor', 'admin'] },
-      { title: 'Production', url: '/production', icon: Wrench, roles: ['editor', 'admin'] },
-      { title: 'Publication', url: '/publication', icon: Globe, roles: ['editor','admin'] },
-      
-      // Admin-only items
-      { title: 'System Settings', url: '/system-settings', icon: Settings, roles: ['admin'] },
-      { title: 'External Integrations', url: '/external-integrations', icon: Settings, roles: ['admin'] },
-      { title: 'Data Management', url: '/data-management', icon: Database, roles: ['admin'] },
-      { title: 'Analytics', url: '/analytics', icon: BarChart3, roles: ['admin'] },
-      { title: 'Check Requests', url: '/requests', icon: CheckSquare, roles: ['admin'] },
-      { title: 'Manage Blogs', url: '/admin', icon: BookOpen, roles: ['admin', 'editor'] },
-    ];
+  const editorNav = [
+    { title: "Editorial Desk", url: "/editorial", icon: FileCheck },
+    { title: "Production", url: "/production", icon: Wrench },
+    { title: "Publication", url: "/publication", icon: Globe },
+    { title: "Manage Blogs", url: "/admin", icon: BookOpen },
+  ];
 
-    const allItems = [...baseItems, ...roleSpecificItems];
-    
-    return allItems.filter(item => {
-      if (userRole.is_admin) return item.roles.includes('admin');
-      if (userRole.is_editor) return item.roles.includes('editor');
-      if (userRole.is_reviewer) return item.roles.includes('reviewer');
-      return item.roles.includes('author');
-    });
+  const adminNav = [
+    { title: "Institutional Registry", url: "/requests", icon: Building2 },
+    { title: "Analytics", url: "/analytics", icon: BarChart3 },
+    { title: "Data Management", url: "/data-management", icon: Database },
+    { title: "System Settings", url: "/system-settings", icon: Settings },
+    { title: "Integrations", url: "/external-integrations", icon: CheckSquare },
+    { title: "Scholarly Archive", url: "/archive", icon: Archive },
+  ];
+
+  const buildNav = () => {
+    if (!user) return publicNav;
+    if (userRole.is_admin)
+      return [...authorNav, ...reviewerNav, ...editorNav, ...adminNav];
+    if (userRole.is_editor) return [...authorNav, ...reviewerNav, ...editorNav];
+    if (userRole.is_reviewer) return [...authorNav, ...reviewerNav];
+    return [...authorNav, ...publicNav];
   };
 
-  const userNavItems = getNavItemsForRole();
+  const navItems = buildNav();
 
-  return (
-    <Sidebar className="border-r border-sidebar-border fixed z-30 rounded-sm ">
-      <SidebarHeader className="border-sidebar-border mt-[-35px] bg-[#FBE5B6] ">
-        <div 
-          className="flex items-center space-x-2 cursor-pointer" 
-          onClick={() => navigate('/')}
-        >
-          <img 
-            src={icon} 
-            alt="ijsds_icon" 
-            className={open ? 'w-50 h-auto' : 'w-8 h-8'} 
-          />
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent className='mt-[-45px] border-t bg-[#FBE5B6] '>
-        <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    isActive={isActive(item.url)}
-                    className="w-full justify-start"
-                  >
-                    <button onClick={() => navigate(item.url)}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span className="ml-2">{item.title}</span>}
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {user && (
+  // ── Item renderer ──────────────────────────────────────────────────────────
+  const NavItem = ({
+    item,
+  }: {
+    item: { title: string; url: string; icon: React.ElementType };
+  }) => {
+    const active = isActive(item.url);
+    return (
+      <button
+        onClick={() => navigate(item.url)}
+        className={`
+          group relative flex items-center gap-3 w-full py-3 pr-4 text-sm font-medium
+          transition-all duration-150 select-none
+          ${open ? "pl-6" : "pl-4 justify-center"}
+          ${
+            active
+              ? "text-primary bg-primary/5 border-l-2 border-primary"
+              : "text-stone-500 hover:text-stone-800 hover:bg-stone-50 border-l-2 border-transparent"
+          }
+        `}
+        title={!open ? item.title : undefined}
+      >
+        <item.icon
+          className={`shrink-0 transition-colors ${active ? "text-primary" : "text-stone-400 group-hover:text-stone-600"}`}
+          size={17}
+        />
+        {open && (
           <>
-            <SidebarSeparator />
-            <SidebarGroup >
-              <SidebarGroupLabel>User Dashboard</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {userNavItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        asChild
-                        isActive={isActive(item.url)}
-                        className="w-full justify-start"
-                      >
-                        <button onClick={() => navigate(item.url)}>
-                          <item.icon className="h-4 w-4" />
-                          {open && <span className="ml-2">{item.title}</span>}
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <span className="flex-1 text-left truncate">{item.title}</span>
+            {active && (
+              <ChevronRight size={13} className="text-primary/50 shrink-0" />
+            )}
           </>
         )}
+      </button>
+    );
+  };
+
+  return (
+    <Sidebar
+      className="border-r border-stone-100 bg-white shadow-[2px_0_8px_rgba(0,0,0,0.04)]"
+      style={{ borderLeft: "3px solid #1c1b1b" }}
+    >
+      {/* ── Brand ──────────────────────────────────────────────────────────── */}
+      <SidebarHeader className="bg-white px-0 py-0 border-b border-stone-100">
+        <button
+          onClick={() => navigate("/")}
+          className={`flex flex-col w-full text-left transition-colors hover:bg-stone-50 ${open ? "px-6 pt-8 pb-6" : "px-4 pt-6 pb-5 items-center"}`}
+        >
+          {open ? (
+            <>
+              <span className="font-headline text-2xl font-bold text-stone-900 tracking-tight leading-none">
+                IJSDS
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-stone-400 mt-2">
+                Sovereign Design Systems
+              </span>
+            </>
+          ) : (
+            <span className="font-headline text-lg font-bold text-stone-900">
+              IJ
+            </span>
+          )}
+        </button>
+      </SidebarHeader>
+
+      {/* ── Navigation ─────────────────────────────────────────────────────── */}
+      <SidebarContent className="bg-white px-0 py-4 overflow-x-hidden">
+        <nav className="flex flex-col gap-0.5">
+          {navItems.map((item) => (
+            <NavItem key={item.url} item={item} />
+          ))}
+        </nav>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4 bg-[#FBE5B6]">
-        <div className="flex items-center gap-2 mb-1">
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      <SidebarFooter className="bg-white border-t border-stone-100 px-0 py-0">
+        {/* Notification + Help row */}
+        <div
+          className={`flex items-center gap-2 px-5 py-3 border-b border-stone-50 ${open ? "" : "justify-center"}`}
+        >
           <HelpSystem />
           {user && <NotificationBell />}
         </div>
-          <div className='mb-2'>
-            <p>ISSN: <span className='font-semibold'>3115-6940</span></p>
-            <p>eISSN: <span className='font-semibold'>3115-6932</span></p>
+
+        {/* ISSN */}
+        {open && (
+          <div className="px-6 py-3 border-b border-stone-50">
+            <p className="text-[10px] text-stone-400 font-medium">
+              ISSN <span className="font-bold text-stone-600">3115-6940</span>
+            </p>
+            <p className="text-[10px] text-stone-400 font-medium">
+              eISSN <span className="font-bold text-stone-600">3115-6932</span>
+            </p>
           </div>
-        
+        )}
+
+        {/* Auth action */}
         {loading ? (
-          <div className="h-10 w-full bg-sidebar-accent animate-pulse rounded" />
+          <div className="m-4 h-9 bg-stone-100 animate-pulse rounded" />
         ) : user ? (
-          <Button 
-            variant="outline" 
+          <button
             onClick={handleSignOut}
-            className="w-full justify-start"
+            className={`flex items-center gap-3 w-full px-6 py-4 text-sm font-medium text-stone-400 hover:text-red-600 hover:bg-red-50 transition-all border-l-2 border-transparent ${!open ? "justify-center px-4" : ""}`}
           >
-            <LogOut className="h-4 w-4" />
-            {open && <span className="ml-2">Sign Out</span>}
-          </Button>
+            <LogOut size={16} className="shrink-0" />
+            {open && <span>Sign Out</span>}
+          </button>
         ) : (
-          <div className="space-y-2">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/auth')}
-              className="w-full justify-start"
-            >
-              <User className="h-4 w-4" />
-              {open && <span className="ml-2">Sign In</span>}
-            </Button>
-            <Button 
-              onClick={() => navigate('/auth?mode=signup')}
-              className="w-full justify-start"
-            >
-              <User className="h-4 w-4" />
-              {open && <span className="ml-2">Sign Up</span>}
-            </Button>
-          </div>
+          <button
+            onClick={() => navigate("/auth")}
+            className={`flex items-center gap-3 w-full px-6 py-4 text-sm font-medium text-primary hover:bg-primary/5 transition-all border-l-2 border-transparent ${!open ? "justify-center px-4" : ""}`}
+          >
+            <User size={16} className="shrink-0" />
+            {open && <span>Sign In</span>}
+          </button>
         )}
       </SidebarFooter>
     </Sidebar>

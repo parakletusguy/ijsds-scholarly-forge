@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { X, Plus, Save, ArrowLeft, ArrowRight, FileText, Users, Info, ShieldCheck, CloudUpload, Zap, Layers, MapPin, Database } from 'lucide-react';
+import { X, Plus, ShieldCheck, CloudUpload, ArrowRight, FileText, CheckCircle2 } from 'lucide-react';
 import { createSubmission } from '@/lib/submissionService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { FileUpload } from '@/components/file-management/FileUpload';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface Author {
   name: string;
@@ -32,22 +27,23 @@ export const Submit = () => {
     { name: '', email: user?.email || '', affiliation: '', orcid: '' }
   ]);
   const [correspondingAuthorEmail, setCorrespondingAuthorEmail] = useState(user?.email || '');
-  const [subjectArea, setSubjectArea] = useState('');
+  const [subjectArea, setSubjectArea] = useState('Sustainable Architecture');
   const [fundingInfo, setFundingInfo] = useState('');
   const [conflictsOfInterest, setConflictsOfInterest] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
   const [manuscriptFileUrl, setManuscriptFileUrl] = useState('');
+  const [manuscriptFile, setManuscriptFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [submissionEnabled, setSubmissionEnabled] = useState(true)
-  const [checkingSubmissionStatus, setCheckingSubmissionStatus] = useState(true)
+
+  // Checks for ethics/disclosure
+  const [ethicsAgree, setEthicsAgree] = useState(false);
+  const [feesAgree, setFeesAgree] = useState(false);
 
   useEffect(() => {
     if (user) loadDraft();
-    setSubmissionEnabled(true);
-    setCheckingSubmissionStatus(false);
   }, [user]);
 
   useEffect(() => {
@@ -67,13 +63,13 @@ export const Submit = () => {
         setKeywords(draft.keywords || []);
         setAuthors(draft.authors || [{ name: '', email: user?.email || '', affiliation: '', orcid: '' }]);
         setCorrespondingAuthorEmail(draft.correspondingAuthorEmail || user?.email || '');
-        setSubjectArea(draft.subjectArea || '');
+        setSubjectArea(draft.subjectArea || 'Sustainable Architecture');
         setFundingInfo(draft.fundingInfo || '');
         setConflictsOfInterest(draft.conflictsOfInterest || '');
         setCoverLetter(draft.coverLetter || '');
         setManuscriptFileUrl(draft.manuscriptFileUrl || '');
         setDraftId(draft.draftId || null);
-        setLastSaved(new Date(draft.lastSaved));
+        setLastSaved(draft.lastSaved ? new Date(draft.lastSaved) : null);
       }
     } catch (error) { console.error('Error loading draft:', error); }
   };
@@ -98,7 +94,8 @@ export const Submit = () => {
     setLastSaved(null);
   };
 
-  const addKeyword = () => {
+  const addKeyword = (e?: React.KeyboardEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (keywordInput.trim() && !keywords.includes(keywordInput.trim())) {
       setKeywords([...keywords, keywordInput.trim()]);
       setKeywordInput('');
@@ -115,6 +112,12 @@ export const Submit = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { toast({ title: 'Auth Required', variant: 'destructive' }); return; }
+    
+    if (!ethicsAgree || !feesAgree) {
+      toast({ title: 'Agreement Required', description: 'Please acknowledge the ethical guidelines and processing fees.', variant: 'destructive' });
+      return;
+    }
+
     if (!title.trim() || !abstract.trim() || !manuscriptFileUrl) {
       toast({ title: 'Validation Failed', description: 'Title, Abstract, and Manuscript are required.', variant: 'destructive' });
       return;
@@ -128,6 +131,7 @@ export const Submit = () => {
         corresponding_author_email: correspondingAuthorEmail, subject_area: subjectArea,
         cover_letter: coverLetter, reviewer_suggestions: '', submission_type: 'new',
         funding_info: fundingInfo || null, conflicts_of_interest: conflictsOfInterest || null,
+        file: manuscriptFile || undefined
       });
       clearDraft();
       toast({ title: 'Success', description: 'Manuscript submitted for evaluation.' });
@@ -137,309 +141,390 @@ export const Submit = () => {
     } finally { setLoading(false); }
   };
 
-  const inputClasses = "bg-white border-border/40 rounded-none focus:border-primary transition-all font-body h-14 text-lg";
-  const labelClasses = "font-headline font-black text-xs uppercase tracking-[0.3em] text-foreground/40 mb-4 block italic";
-  const cardClasses = "bg-white p-12 md:p-16 border border-border/10 shadow-sm relative overflow-hidden group";
+  const isStepComplete = (step: number) => {
+    switch(step) {
+      case 1: return title && abstract && keywords.length > 0;
+      case 2: return !!manuscriptFile || !!manuscriptFileUrl;
+      case 3: return authors.every(a => a.name && a.email && a.affiliation);
+      case 4: return ethicsAgree && feesAgree;
+      default: return false;
+    }
+  };
 
   if (!user) return null;
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+    <div className="bg-background text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen">
       <Helmet>
-        <title>Submit Manuscript IJSDS — Submission Registry</title>
-        <meta name="description" content="Submit your multidisciplinary research manuscript to the IJSDS editorial office for peer-review." />
+        <title>Manuscript Submission | The Curator IJSDS</title>
       </Helmet>
 
-      <PageHeader 
-        title="Manuscript" 
-        subtitle="Registry" 
-        accent="Technical Protocol Portal"
-        description="Initiate the formal peer-review process and contribute to the global discourse on social development. Your intellectual property is protected through our double-blind protocols."
-      />
-
-      <ContentSection>
-        {/* Portal Controls — High Fidelity Action Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-24 gap-12 relative">
-           <div className="absolute top-1/2 left-0 w-full h-px bg-border/20 -z-0"></div>
-           
-           <button 
-             onClick={() => navigate('/dashboard')} 
-             className="relative z-10 flex items-center gap-4 font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 hover:text-primary transition-colors bg-secondary/5 px-8 py-6 border border-border/10"
-           >
-              <ArrowLeft size={16} /> Exit to Archive Hub
-           </button>
-           
-           <div className="relative z-10 flex items-center gap-6 bg-white p-6 shadow-2xl border-t-4 border-secondary">
-              {autoSaving ? (
-                <div className="flex items-center gap-4">
-                   <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                   <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/40 italic">Vaulting Meta-Data...</span>
-                </div>
-              ) : lastSaved ? (
-                <div className="flex items-center gap-4">
-                   <ShieldCheck className="h-6 w-6 text-secondary animate-pulse" />
-                   <div className="flex flex-col">
-                      <span className="font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30">Registry State</span>
-                      <span className="font-headline font-black text-xs uppercase tracking-widest text-secondary">Secured: {lastSaved.toLocaleTimeString()}</span>
-                   </div>
-                </div>
-              ) : null}
-           </div>
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-6 py-12 lg:px-12 lg:py-16">
+        
+        {/* Header Section */}
+        <div className="mb-16 border-l-4 border-primary pl-8 animate-fade-in">
+          <span className="font-label uppercase tracking-[0.3em] text-[10px] text-secondary font-bold block mb-4">Submission Portal v4.2</span>
+          <h2 className="font-headline text-5xl font-bold tracking-tight text-on-surface mb-2">Submit Manuscript</h2>
+          <p className="text-on-surface-variant max-w-2xl leading-relaxed italic opacity-80 font-headline text-lg">
+            Contributing to the International Journal of Sovereign Design Systems. Ensure all files adhere to the Curator's editorial standards.
+          </p>
+          
+          <div className="mt-8 flex items-center gap-6">
+            {autoSaving && (
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-[9px] font-label uppercase tracking-widest text-on-surface/40 italic">Vaulting Meta-Data...</span>
+              </div>
+            )}
+            {lastSaved && !autoSaving && (
+              <span className="text-[9px] font-label uppercase tracking-widest text-secondary font-bold">Registry Secured: {lastSaved.toLocaleTimeString()}</span>
+            )}
+          </div>
         </div>
 
-        {checkingSubmissionStatus ? (
-          <div className="py-48 text-center">
-             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-8"></div>
-             <p className="font-headline font-black uppercase text-xs tracking-[0.5em] text-foreground/20 italic">Authorizing Submission Grid...</p>
-          </div>
-        ) : !submissionEnabled ? (
-          <div className="bg-foreground text-white p-24 text-center relative overflow-hidden group shadow-2xl border border-white/5">
-             <div className="absolute inset-0 bg-white opacity-5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-             <div className="relative z-10 max-w-2xl mx-auto">
-                <ShieldCheck className="h-16 w-16 text-secondary mx-auto mb-10" />
-                <h2 className="text-5xl md:text-7xl font-black font-headline uppercase tracking-tighter text-white mb-8 leading-none">Registry <br/><span className="text-secondary italic">Restricted</span></h2>
-                <p className="font-body text-xl md:text-2xl italic text-white/30 mb-16 leading-relaxed border-l-4 border-primary/40 pl-8">
-                  The submission window is currently under internal editorial audit. Please check the master calendar for upcoming cycles.
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard')} 
-                  className="bg-white text-foreground px-16 py-8 font-headline font-black text-xs uppercase tracking-[0.4em] hover:bg-secondary hover:text-white transition-all shadow-2xl"
-                >
-                  Return to Dashboard
-                </button>
-             </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-24">
+        <div className="max-w-4xl mx-auto space-y-24">
+          {/* Form Content */}
+          <div className="space-y-24">
             
-            {/* Phase 1: Conceptual Matrix */}
-            <div className="space-y-12">
-               <div className="flex items-center gap-8 border-b border-primary/20 pb-8">
-                  <div className="w-16 h-16 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
-                     <FileText size={32} />
+            {/* Step 1: Article Details */}
+            <div className="relative group section-fade-in">
+              <div className="absolute -left-16 top-0 opacity-[0.05] font-headline text-8xl font-bold italic select-none hidden lg:block">01</div>
+              <div className="space-y-8">
+                <h3 className="font-headline text-3xl font-bold border-b border-outline-variant/30 pb-4 tracking-tight">Article Details</h3>
+                <div className="space-y-12">
+                  <div className="space-y-3">
+                    <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Manuscript Title *</label>
+                    <input 
+                      className="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary px-4 py-6 text-2xl font-headline italic outline-none transition-all duration-300 placeholder:opacity-30" 
+                      placeholder="Enter the full scholarly title of your work" 
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                    />
                   </div>
-                  <div className="flex flex-col">
-                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 01</span>
-                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Conceptual Matrix</h2>
-                  </div>
-               </div>
-               
-               <div className={cardClasses}>
-                  {/* Decorative Motif */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
                   
-                  <div className="grid gap-12 relative z-10">
-                    <div>
-                      <Label htmlFor="title" className={labelClasses}>Article Architectural Title *</Label>
-                      <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Full academic designation..." className={inputClasses} />
-                    </div>
+                  <div className="space-y-3">
+                    <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Abstract *</label>
+                    <textarea 
+                      className="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary px-6 py-6 leading-relaxed outline-none transition-all duration-300 font-body text-lg italic placeholder:opacity-30 min-h-[300px]" 
+                      placeholder="A concise summary of the research (max 300 words)" 
+                      rows={10}
+                      value={abstract}
+                      onChange={(e) => setAbstract(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
 
-                    <div>
-                      <Label htmlFor="abstract" className={labelClasses}>Scholarly Abstract * (250-300 Words)</Label>
-                      <Textarea id="abstract" value={abstract} onChange={(e) => setAbstract(e.target.value)} required rows={10} className={inputClasses + " h-auto py-8 lg:text-xl leading-relaxed italic text-foreground/70"} placeholder="Summarize your methodology, findings, and developmental impact..." />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div className="space-y-3">
+                      <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Primary Topic</label>
+                      <select 
+                        className="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:border-primary px-6 py-4 outline-none font-headline text-xl italic"
+                        value={subjectArea}
+                        onChange={(e) => setSubjectArea(e.target.value)}
+                      >
+                        <option>Sustainable Architecture</option>
+                        <option>Digital Heritage</option>
+                        <option>Urban Ecology</option>
+                        <option>Economic Sovereignty</option>
+                        <option>Cultural Informatics</option>
+                      </select>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                      <div>
-                        <Label className={labelClasses}>Theoretical Keywords</Label>
-                        <div className="flex gap-4 mb-6">
-                          <Input value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} placeholder="Core concepts" className={inputClasses} onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword())} />
-                          <button type="button" onClick={addKeyword} className="bg-primary hover:bg-secondary text-white h-14 px-8 flex items-center justify-center transition-all shadow-xl group/plus">
-                             <Plus size={24} className="group-hover/plus:rotate-90 transition-transform" />
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-4">
-                          {keywords.map((kw, i) => (
-                            <Badge key={i} className="bg-secondary/10 text-secondary border border-secondary/20 rounded-none font-headline font-black uppercase text-[10px] tracking-widest px-6 py-3 flex items-center gap-3">
-                              {kw} <X size={14} className="cursor-pointer hover:text-primary transition-colors" onClick={() => removeKeyword(i)} />
-                            </Badge>
-                          ))}
-                        </div>
+                    <div className="space-y-3">
+                      <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Theoretical Keywords</label>
+                      <div className="flex gap-4 mb-4">
+                        <input 
+                          className="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary px-6 py-4 outline-none font-body" 
+                          placeholder="e.g. Resilience, Urbanism" 
+                          type="text"
+                          value={keywordInput}
+                          onChange={(e) => setKeywordInput(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && addKeyword(e)}
+                        />
+                        <button 
+                          type="button" 
+                          onClick={addKeyword}
+                          className="bg-primary hover:bg-on-surface text-white h-14 px-8 flex items-center justify-center transition-all shadow-xl group/plus"
+                        >
+                          <Plus size={24} className="group-hover/plus:rotate-90 transition-transform" />
+                        </button>
                       </div>
-                      <div>
-                        <Label htmlFor="subjectArea" className={labelClasses}>Multidisciplinary Domain</Label>
-                        <Input id="subjectArea" value={subjectArea} onChange={(e) => setSubjectArea(e.target.value)} placeholder="e.g., Development Economics..." className={inputClasses} />
+                      <div className="flex flex-wrap gap-3 mt-4">
+                        {keywords.map((kw, i) => (
+                          <span key={i} className="bg-surface-container-highest text-primary font-label font-bold uppercase text-[9px] tracking-widest px-4 py-2 flex items-center gap-2 group/chip">
+                            {kw}
+                            <X size={12} className="cursor-pointer hover:text-black transition-colors" onClick={() => removeKeyword(i)} />
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </div>
-               </div>
+                </div>
+              </div>
             </div>
 
-            {/* Phase 2: Assets & Payload */}
-            <div className="space-y-12">
-               <div className="flex items-center gap-8 border-b border-secondary/20 pb-8">
-                  <div className="w-16 h-16 bg-secondary flex items-center justify-center text-white border border-secondary/10 shadow-xl">
-                     <CloudUpload size={32} />
-                  </div>
-                  <div className="flex flex-col">
-                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 02</span>
-                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Digital Assets Ledger</h2>
-                  </div>
-               </div>
-               
-               <div className={cardClasses}>
-                  <div className="p-12 md:p-20 border-4 border-dashed border-border/20 hover:border-primary/40 transition-all bg-secondary/5 text-center group/uploader relative overflow-hidden">
-                     <div className="absolute top-0 left-0 w-24 h-24 bg-primary/5 -z-0 opacity-0 group-hover/uploader:opacity-100 transition-opacity" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-                     <FileUpload
+            {/* Step 2: File Upload */}
+            <div className="relative group section-fade-in">
+              <div className="absolute -left-16 top-0 opacity-[0.05] font-headline text-8xl font-bold italic select-none hidden lg:block">02</div>
+              <div className="space-y-8">
+                <h3 className="font-headline text-3xl font-bold border-b border-outline-variant/30 pb-4 tracking-tight">Manuscript Files</h3>
+                
+                <div className="bg-surface-container-low p-1 border-2 border-dashed border-outline-variant/40 hover:border-primary transition-all duration-500 overflow-hidden group/uploader">
+                   <div className="p-12 text-center relative">
+                      <FileUpload
                         bucketName="journal-website-db1"
                         folder="manuscripts"
-                        onFileUploaded={(url) => setManuscriptFileUrl(url)}
-                        acceptedTypes=".doc,.docx"
+                        autoUpload={false}
+                        onFileUploaded={(file) => {
+                          if (file instanceof File) {
+                            setManuscriptFile(file);
+                            setManuscriptFileUrl(file.name);
+                          } else {
+                            setManuscriptFileUrl(file);
+                          }
+                        }}
+                        acceptedTypes=".doc,.docx,.pdf"
                         maxSizeMB={25}
                       />
-                  </div>
-                  {manuscriptFileUrl && (
-                    <div className="mt-12 p-8 bg-secondary/10 border-l-8 border-secondary flex items-center gap-8 animate-fade-in">
-                       <div className="w-12 h-12 bg-secondary flex items-center justify-center text-white shadow-xl">
-                          <ShieldCheck size={24} />
-                       </div>
-                       <div className="flex flex-col">
-                          <span className="font-headline font-black text-xs uppercase tracking-[0.4em] text-secondary">Payload Secured</span>
-                          <p className="font-body italic text-foreground/40 text-sm mt-1">Institutional manuscript file has been successfully vaulted in the registry.</p>
-                       </div>
+                   </div>
+                </div>
+
+                {manuscriptFileUrl && (
+                  <div className="bg-surface-container-highest p-6 flex items-center justify-between animate-fade-in">
+                    <div className="flex items-center space-x-6">
+                      <div className="w-12 h-12 bg-primary flex items-center justify-center text-white">
+                        <FileText size={24} />
+                      </div>
+                      <div>
+                      <p className="text-sm font-bold truncate max-w-xs">{manuscriptFile ? manuscriptFile.name : manuscriptFileUrl.split('/').pop()}</p>
+                        <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Payload Secured in Registry Hub</p>
+                      </div>
                     </div>
-                  )}
-               </div>
+                    <button 
+                      onClick={() => { setManuscriptFileUrl(''); setManuscriptFile(null); }}
+                      className="material-symbols-outlined text-on-surface/30 cursor-pointer hover:text-error transition-colors"
+                    >
+                      close
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Phase 3: Author Registry Integration */}
-            <div className="space-y-12">
-               <div className="flex items-center gap-8 border-b border-foreground/20 pb-8">
-                  <div className="w-16 h-16 bg-foreground flex items-center justify-center text-white border border-white/10 shadow-xl">
-                     <Users size={32} />
-                  </div>
-                  <div className="flex flex-col">
-                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 03</span>
-                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Contributor Registry</h2>
-                  </div>
-               </div>
-               
-               <div className="grid grid-cols-1 gap-12">
-                 {authors.map((author, index) => (
-                   <div key={index} className={cardClasses}>
-                     <div className="flex items-center justify-between mb-12 border-b border-border/10 pb-8">
-                        <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center text-secondary font-headline font-black">0{index + 1}</div>
-                           <span className="font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 italic">Collaborator Profile</span>
-                        </div>
-                        {authors.length > 1 && (
-                           <button type="button" onClick={() => removeAuthor(index)} className="group/del flex items-center gap-3 font-headline font-black text-[10px] uppercase tracking-widest text-primary hover:text-red-600 transition-all">
-                              <X size={14} className="group-hover/del:rotate-90 transition-transform" /> Discard Profile
-                           </button>
-                        )}
-                     </div>
-                     
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div>
-                          <Label className={labelClasses}>Full Scholarly Name *</Label>
-                          <Input value={author.name} onChange={(e) => updateAuthor(index, 'name', e.target.value)} required placeholder="Format: Surname Firstname" className={inputClasses} />
-                        </div>
-                        <div>
-                          <Label className={labelClasses}>Institutional Email *</Label>
-                          <Input type="email" value={author.email} onChange={(e) => updateAuthor(index, 'email', e.target.value)} required placeholder="Official .edu or institutional mail" className={inputClasses} />
-                        </div>
-                        <div>
-                          <Label className={labelClasses}>Academic Affiliation</Label>
-                          <Input value={author.affiliation} onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)} placeholder="University / Centre / Institution" className={inputClasses} />
-                        </div>
-                        <div>
-                          <Label className={labelClasses}>ORCID Digital iD</Label>
-                          <div className="relative">
-                             <Input value={author.orcid} onChange={(e) => updateAuthor(index, 'orcid', e.target.value)} placeholder="0000-0000-0000-0000" className={inputClasses + " pl-12"} />
-                             <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/20" />
+            {/* Step 3: Author Info */}
+            <div className="relative group section-fade-in">
+              <div className="absolute -left-16 top-0 opacity-[0.05] font-headline text-8xl font-bold italic select-none hidden lg:block">03</div>
+              <div className="space-y-8">
+                <h3 className="font-headline text-3xl font-bold border-b border-outline-variant/30 pb-4 tracking-tight">Author Registry</h3>
+                <div className="space-y-12">
+                  {authors.map((author, index) => (
+                    <div key={index} className="p-10 bg-surface-container-low border-l-4 border-primary relative">
+                       <div className="flex items-center justify-between mb-10">
+                          <div className="flex items-center gap-4">
+                             <span className="text-4xl font-headline font-bold italic opacity-20">0{index+1}</span>
+                             <span className="font-label uppercase tracking-widest text-[9px] font-bold text-on-surface-variant">Scholarly Identity Profile</span>
                           </div>
-                        </div>
+                          {authors.length > 1 && (
+                            <button 
+                              type="button" 
+                              onClick={() => removeAuthor(index)}
+                              className="text-[9px] font-label font-bold uppercase tracking-widest text-primary hover:text-red-500 transition-colors flex items-center gap-2"
+                            >
+                              <X size={12} /> Discard Identity
+                            </button>
+                          )}
+                       </div>
+                       
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                         <div className="space-y-2">
+                            <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Full Name *</label>
+                            <input 
+                              className="w-full bg-white/50 border-b-2 border-transparent focus:border-primary px-4 py-3 outline-none font-headline text-lg italic transition-all" 
+                              type="text" 
+                              value={author.name}
+                              onChange={(e) => updateAuthor(index, 'name', e.target.value)}
+                              placeholder="Format: Surname Firstname"
+                              required
+                            />
+                         </div>
+                         <div className="space-y-2">
+                            <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Email Address *</label>
+                            <input 
+                              className="w-full bg-white/50 border-b-2 border-transparent focus:border-primary px-4 py-3 outline-none font-headline text-lg italic transition-all" 
+                              type="email" 
+                              value={author.email}
+                              onChange={(e) => updateAuthor(index, 'email', e.target.value)}
+                              placeholder="Official .edu or institutional mail"
+                              required
+                            />
+                         </div>
+                         <div className="space-y-2">
+                            <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Institutional Affiliation</label>
+                            <input 
+                              className="w-full bg-white/50 border-b-2 border-transparent focus:border-primary px-4 py-3 outline-none font-headline text-lg italic transition-all" 
+                              type="text" 
+                              value={author.affiliation}
+                              onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)}
+                              placeholder="University or Research Organization"
+                            />
+                         </div>
+                         <div className="space-y-2">
+                            <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">ORCID Digital iD</label>
+                            <input 
+                              className="w-full bg-white/50 border-b-2 border-transparent focus:border-primary px-4 py-3 outline-none font-headline text-lg italic transition-all" 
+                              type="text" 
+                              value={author.orcid}
+                              onChange={(e) => updateAuthor(index, 'orcid', e.target.value)}
+                              placeholder="0000-0000-0000-0000"
+                            />
+                         </div>
+                       </div>
+                    </div>
+                  ))}
+                  
+                  <button 
+                    type="button" 
+                    onClick={addAuthor} 
+                    className="w-full py-10 border-2 border-dashed border-outline-variant/30 hover:border-secondary transition-all flex flex-col items-center gap-3 group/add bg-surface-container-lowest"
+                  >
+                     <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center text-secondary group-hover/add:bg-secondary group-hover/add:text-white transition-all">
+                        <Plus size={20} />
                      </div>
-                   </div>
-                 ))}
-                 
-                 <button 
-                   type="button" 
-                   onClick={addAuthor} 
-                   className="w-full py-12 border-2 border-dashed border-border/20 hover:border-secondary/40 transition-all flex flex-col items-center gap-4 group/add bg-white/50"
-                 >
-                    <div className="w-12 h-12 bg-secondary/10 flex items-center justify-center text-secondary group-hover/add:bg-secondary group-hover/add:text-white transition-all shadow-inner">
-                       <Plus size={24} className="group-hover/add:rotate-90 transition-transform" />
-                    </div>
-                    <span className="font-headline font-black text-[11px] uppercase tracking-[0.5em] text-foreground/30">Registry Integration</span>
-                 </button>
+                     <span className="font-label font-bold text-[10px] uppercase tracking-[0.4em] text-on-surface/30">Adjoin Contributor Profile</span>
+                  </button>
 
-                 <div className="bg-foreground text-white p-12 md:p-16 shadow-2xl relative overflow-hidden group/correspondence">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 opacity-0 group-hover/correspondence:opacity-100 transition-opacity" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-                    <Label htmlFor="correspondingEmail" className={labelClasses + " text-white/50"}>Corresponding Identity *</Label>
+                  <div className="bg-on-surface p-10 lg:p-14 relative overflow-hidden group/correspondence shadow-2xl">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 opacity-10 group-hover/correspondence:bg-primary transition-all duration-1000" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                    <label className="block font-label text-[10px] uppercase tracking-widest text-white/50 font-bold mb-6">Corresponding Identity Hub *</label>
                     <div className="relative">
-                       <Input id="correspondingEmail" type="email" value={correspondingAuthorEmail} onChange={(e) => setCorrespondingAuthorEmail(e.target.value)} required className={inputClasses + " bg-white/5 border-white/10 text-white focus:border-secondary h-16 text-2xl"} />
-                       <ShieldCheck className="absolute right-6 top-1/2 -translate-y-1/2 text-secondary opacity-40" />
+                      <input 
+                        type="email" 
+                        className="w-full bg-white/10 border-b-2 border-white/20 text-white focus:border-primary px-6 py-6 text-2xl font-headline italic outline-none transition-all placeholder:text-white/10"
+                        value={correspondingAuthorEmail}
+                        onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
+                        placeholder="Primary destination for registry protocols..."
+                        required
+                      />
                     </div>
-                    <p className="mt-8 font-body italic text-white/20 text-sm leading-relaxed max-w-xl">
+                    <p className="mt-8 font-body italic text-white/30 text-xs leading-relaxed max-w-xl">
                       All official editorial decisions, assessment reports, and production protocols will be routed to this specific digital architecture.
                     </p>
-                 </div>
-               </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Phase 4: Scholarly Declarations */}
-            <div className="space-y-12">
-               <div className="flex items-center gap-8 border-b border-primary/20 pb-8">
-                  <div className="w-16 h-16 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
-                     <Info size={32} />
-                  </div>
-                  <div className="flex flex-col">
-                     <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">Phase 04</span>
-                     <h2 className="text-4xl md:text-5xl font-headline font-black uppercase tracking-tighter">Technical Protocol Ledger</h2>
-                  </div>
-               </div>
-               
-               <div className={cardClasses}>
-                  <div className="grid gap-16 relative z-10">
+            {/* Step 4: Disclosures & Cover Letter */}
+            <div className="relative group section-fade-in">
+              <div className="absolute -left-16 top-0 opacity-[0.05] font-headline text-8xl font-bold italic select-none hidden lg:block">04</div>
+              <div className="space-y-8">
+                <h3 className="font-headline text-3xl font-bold border-b border-outline-variant/30 pb-4 tracking-tight">Technical Protocol Ledger</h3>
+                <div className="space-y-12">
+                  <div className="flex items-start space-x-6 p-10 bg-surface-container-low border-l-8 border-secondary">
+                    <ShieldCheck size={32} className="text-secondary flex-shrink-0 mt-1" />
                     <div>
-                      <Label htmlFor="funding" className={labelClasses}>Funding Infrastructure</Label>
-                      <Textarea id="funding" value={fundingInfo} onChange={(e) => setFundingInfo(e.target.value)} rows={4} className={inputClasses + " h-auto py-6 italic text-foreground/70"} placeholder="Grant identifiers, institutional sponsoring bodies, or developmental foundations..." />
-                    </div>
-                    <div>
-                      <Label htmlFor="conflicts" className={labelClasses}>Internal Conflicts Registry</Label>
-                      <Textarea id="conflicts" value={conflictsOfInterest} onChange={(e) => setConflictsOfInterest(e.target.value)} rows={4} className={inputClasses + " h-auto py-6 italic text-foreground/70"} placeholder="State 'None' if professional interests are neutral..." />
-                    </div>
-                    <div>
-                      <Label htmlFor="coverLetter" className={labelClasses}>Editorial Cover Dossier</Label>
-                      <Textarea id="coverLetter" value={coverLetter} onChange={(e) => setCoverLetter(e.target.value)} rows={8} className={inputClasses + " h-auto py-8 text-xl leading-relaxed italic text-foreground/80"} placeholder="Specifically justify the significance, novelty, and multicisciplinary impact of this research for the African commons..." />
+                      <h4 className="font-headline font-bold text-xl mb-2 italic">Institutional Ethical Guidelines</h4>
+                      <p className="font-body text-sm text-on-surface-variant leading-relaxed italic opacity-70">
+                        By submitting, you confirm this work is original and has not been published elsewhere. All data sources must be credited under the IJSDS sovereign integrity protocol.
+                      </p>
                     </div>
                   </div>
-               </div>
+
+                  <div className="space-y-6">
+                    <label className="flex items-center space-x-4 cursor-pointer group/check">
+                      <input 
+                        type="checkbox" 
+                        className="w-5 h-5 text-primary border-primary/20 rounded-none focus:ring-primary h-center" 
+                        checked={ethicsAgree}
+                        onChange={(e) => setEthicsAgree(e.target.checked)}
+                      />
+                      <span className="text-sm font-label font-bold uppercase tracking-widest text-on-surface/60 group-hover/check:text-primary transition-colors">I confirm no competing financial or personal interests.</span>
+                    </label>
+                    <label className="flex items-center space-x-4 cursor-pointer group/check">
+                      <input 
+                        type="checkbox" 
+                        className="w-5 h-5 text-primary border-primary/20 rounded-none focus:ring-primary" 
+                        checked={feesAgree}
+                        onChange={(e) => setFeesAgree(e.target.checked)}
+                      />
+                      <span className="text-sm font-label font-bold uppercase tracking-widest text-on-surface/60 group-hover/check:text-primary transition-colors transition-all">I acknowledge the Open Access processing fees.</span>
+                    </label>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Funding infrastructure & Grant identifiers</label>
+                    <textarea 
+                      className="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary px-6 py-6 font-body text-lg italic outline-none transition-all placeholder:opacity-30" 
+                      placeholder="e.g. Tertiary Education Trust Fund (TETFund)..." 
+                      rows={3}
+                      value={fundingInfo}
+                      onChange={(e) => setFundingInfo(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Editorial Cover Dossier *</label>
+                    <textarea 
+                      className="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary px-6 py-8 font-headline text-2xl italic outline-none transition-all placeholder:opacity-30 min-h-[250px]" 
+                      placeholder="Justify the significance and sovereign impact..." 
+                      rows={6}
+                      value={coverLetter}
+                      onChange={(e) => setCoverLetter(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Decorative Quote */}
+            <div className="py-24 flex flex-col items-center justify-center text-center animate-fade-in">
+              <div className="w-16 h-px bg-primary mb-12 opacity-30"></div>
+              <blockquote className="font-headline text-4xl italic font-light text-on-surface-variant/80 max-w-2xl leading-snug">
+                "The scholarly word is the vessel of our collective future; treat its presentation with the reverence it deserves."
+              </blockquote>
+              <div className="w-16 h-px bg-primary mt-12 opacity-30"></div>
             </div>
 
             {/* Final Transmission Control */}
-            <div className="flex flex-col lg:flex-row justify-between items-center gap-12 pt-24 border-t border-border/20">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-12 pt-24 border-t border-border/20">
                <div className="flex items-center gap-6">
-                  <Zap size={24} className="text-secondary animate-pulse" />
-                  <p className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/20 italic">Ensuring Scientific Continuity</p>
+                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+                  <p className="font-label text-[10px] uppercase tracking-[0.5em] text-on-surface/20 italic">Ensuring Scientific Continuity</p>
                </div>
 
-               <div className="flex flex-col sm:flex-row items-center gap-8 w-full lg:w-auto">
+               <div className="flex flex-col sm:flex-row items-center gap-8 w-full sm:w-auto">
                   <button 
                     type="button" 
-                    onClick={() => navigate('/dashboard')} 
-                    className="font-headline font-black text-xs uppercase tracking-[0.4em] text-primary hover:text-foreground transition-all order-2 sm:order-1"
+                    onClick={saveDraft}
+                    disabled={autoSaving}
+                    className="font-label font-bold text-[10px] uppercase tracking-[0.4em] text-on-surface/40 hover:text-primary transition-all order-2 sm:order-1"
                   >
-                    Discard Record Draft
+                    {autoSaving ? 'Vaulting State...' : 'Vault Draft Registry'}
                   </button>
                   
                   <button 
-                    type="submit" 
+                    onClick={handleSubmit}
                     disabled={loading} 
-                    className="w-full sm:w-auto bg-primary text-white py-10 px-24 font-headline font-black text-sm uppercase tracking-[0.5em] shadow-[0_30px_60px_-10px_rgba(27,67,50,0.4)] hover:bg-foreground transition-all group relative overflow-hidden order-1 sm:order-2"
+                    className="w-full sm:w-auto bg-primary text-white py-8 px-16 font-label font-bold text-[10px] uppercase tracking-[0.5em] shadow-xl hover:bg-on-surface transition-all group relative overflow-hidden order-1 sm:order-2"
                   >
                     <span className="relative z-10 flex items-center justify-center gap-6">
-                       {loading ? 'Transmitting Data Registry...' : 'Finalize Transmission'}
-                       <ArrowRight size={20} className="group-hover:translate-x-3 transition-transform" />
+                       {loading ? 'Transmitting Data...' : 'Finalize Submission'}
+                       <ArrowRight size={16} className="group-hover:translate-x-3 transition-transform" />
                     </span>
                     <div className="absolute inset-0 bg-white translate-x-full group-hover:translate-x-0 transition-transform duration-700 opacity-10"></div>
                   </button>
                </div>
             </div>
-          </form>
-        )}
-      </ContentSection>
+          </div>
+        </div>
+      </main>
+
+      {/* Global Accent Elements */}
+      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-[0.03] pointer-events-none -mr-48 -mb-48 border-[40px] border-primary rotate-45"></div>
+      <div className="fixed top-0 right-0 w-64 h-64 opacity-[0.02] pointer-events-none -mr-32 -mt-32 rounded-full border-[60px] border-secondary"></div>
     </div>
   );
 };

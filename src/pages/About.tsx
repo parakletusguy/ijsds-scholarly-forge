@@ -308,112 +308,95 @@ export const About = () => {
         {/* ── Submission Guidelines Section ───────────────────────────────── */}
         <section
           id="submissions"
-          className="bg-[#1c1b1b] text-white p-12 lg:p-24 relative overflow-hidden group"
+          className="bg-surface-container-low rounded-xl p-12 lg:p-20 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity duration-1000">
-            <span className="material-symbols-outlined text-[40rem] rotate-12 text-primary translate-x-20">
-              description
-            </span>
+          <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 pointer-events-none">
+            <CheckCircle className="w-[30rem] h-[30rem] rotate-12 translate-x-20 text-primary" />
           </div>
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-20">
-            <div className="lg:col-span-5 flex flex-col justify-center">
-              <span className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-8 block">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16">
+            <div className="lg:col-span-5">
+              <span className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-6 block">
                 Author Protocols
               </span>
-              <h2 className="text-6xl md:text-8xl font-headline leading-[0.9] tracking-tighter mb-10">
-                Submit <br />
-                <span className="italic text-primary">Your Work</span>
+              <h2 className="text-5xl font-headline mb-8 text-primary">
+                Submit Your Research
               </h2>
-              <p className="text-white/40 text-xl mb-12 leading-relaxed italic pr-10">
-                We invite original research, case studies, and critical reviews
-                aligning with our focus on social work and development.
+              <p className="text-on-surface-variant text-lg mb-10 leading-relaxed">
+                We invite original research articles, case studies, and critical
+                reviews that align with our thematic focus on social work and
+                development.
               </p>
 
-              <div className="space-y-6 mb-16">
+              <div className="space-y-4 mb-12">
                 {[
-                  { icon: CheckCircle, label: "Peer-Reviewed Publication" },
-                  { icon: Info, label: "DOAJ & Scopus Indexed" },
-                  { icon: Globe, label: "Open Access Options" },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-5 text-white/80 group/li cursor-default"
-                  >
-                    <item.icon className="text-primary w-5 h-5 transition-transform group-hover/li:scale-125" />
-                    <span className="text-sm font-bold uppercase tracking-widest font-label">
-                      {item.label}
-                    </span>
+                  "Peer-Reviewed Publication",
+                  "DOAJ & Scopus Indexed",
+                  "Open Access Options",
+                ].map((label) => (
+                  <div key={label} className="flex items-center gap-4 text-on-background">
+                    <CheckCircle className="text-primary w-5 h-5 shrink-0" />
+                    <span className="text-sm font-medium">{label}</span>
                   </div>
                 ))}
               </div>
 
               <button
-                onClick={() => navigate("/submit")}
-                className="bg-primary text-white px-10 py-5 font-bold text-sm uppercase tracking-widest hover:bg-primary/90 shadow-2xl shadow-primary/30 transition-all flex items-center justify-between group/btn w-full sm:w-80 active:scale-95"
+                onClick={() => navigate("/auth")}
+                className="bg-primary-container text-white px-8 py-4 rounded-lg font-medium text-lg hover:brightness-110 shadow-lg shadow-primary/20 transition-all flex items-center gap-3 active:scale-95"
               >
                 Start Submission
-                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
 
             <div className="lg:col-span-7">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {[
                   {
                     step: "01",
                     title: "Format Manuscript",
-                    desc: "Follow APA 7th edition formatting and our journal-specific style guide criteria.",
+                    desc: "Ensure your submission follows the APA 7th edition formatting and our journal-specific style guide.",
                   },
                   {
                     step: "02",
                     title: "Anonymize File",
-                    desc: "Remove all identifying metadata to ensure a fair double-blind editorial review.",
+                    desc: "Remove all identifying information from the main document to ensure a fair double-blind review.",
                   },
                   {
                     step: "03",
                     title: "Upload Files",
-                    desc: "Submit the anonymized manuscript, title page, and supplementary data sets.",
+                    desc: "Submit the anonymized manuscript along with a separate title page and any supplementary tables.",
                   },
                   {
                     step: "04",
                     title: "Track Progress",
-                    desc: "Monitor the real-time status of your peer review and editorial decisions.",
+                    desc: "Use our dashboard to monitor the status of your peer review and editorial decisions.",
                   },
-                ].map((s, idx) => (
-                  <div
-                    key={idx}
-                    className="space-y-6 p-8 border border-white/10 hover:bg-white/[0.03] transition-colors relative overflow-hidden group"
-                  >
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-white/[0.02] rotate-45 translate-x-8 -translate-y-8"></div>
-                    <span className="text-5xl font-headline text-primary/30 group-hover:text-primary transition-colors block leading-none">
-                      {s.step}
-                    </span>
-                    <h4 className="font-headline text-xl tracking-tight text-white/90">
-                      {s.title}
-                    </h4>
-                    <p className="text-sm text-white/30 leading-relaxed italic">
-                      {s.desc}
-                    </p>
+                ].map((s) => (
+                  <div key={s.step} className="space-y-4">
+                    <span className="text-3xl font-headline text-primary opacity-30">{s.step}</span>
+                    <h4 className="font-bold text-lg">{s.title}</h4>
+                    <p className="text-sm text-on-surface-variant leading-relaxed">{s.desc}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-16 p-8 bg-white/[0.02] border border-white/5 backdrop-blur-sm flex gap-6 items-start">
-                <Info className="text-primary w-6 h-6 shrink-0 mt-1" />
-                <div>
-                  <h5 className="font-black text-[10px] uppercase tracking-[0.2em] mb-2 text-white/80">
-                    Pre-Submission Inquiry
-                  </h5>
-                  <p className="text-sm text-white/40 leading-relaxed italic">
-                    Not sure if your work fits our scope? Send an abstract to{" "}
-                    <a
-                      href="mailto:editorial@ijsds.org"
-                      className="text-primary hover:underline underline-offset-4"
-                    >
-                      editor.ijsds@gmail.com
-                    </a>{" "}
-                    for an informal assessment.
-                  </p>
+              <div className="mt-12 p-6 bg-white/50 backdrop-blur-sm rounded border border-primary/10">
+                <div className="flex gap-4">
+                  <Info className="text-primary w-5 h-5 shrink-0 mt-0.5" />
+                  <div>
+                    <h5 className="font-bold text-sm mb-1">Pre-Submission Inquiry</h5>
+                    <p className="text-xs text-on-surface-variant leading-relaxed">
+                      Not sure if your work fits our scope? Send an abstract to{" "}
+                      <a
+                        href="mailto:editor.ijsds@gmail.com"
+                        className="text-primary underline underline-offset-4"
+                      >
+                        editor.ijsds@gmail.com
+                      </a>{" "}
+                      for an informal preliminary assessment.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

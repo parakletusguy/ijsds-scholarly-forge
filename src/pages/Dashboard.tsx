@@ -1,38 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Calendar, User } from 'lucide-react';
-import { RejectionMessages } from '@/components/messages/RejectionMessages';
-import { getSubmissions } from '@/lib/submissionService';
+import { useNavigate, Link } from 'react-router-dom';
+import { getSubmissions, Submission } from '@/lib/submissionService';
 import { useAuth } from '@/hooks/useAuth';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { ProcessinFeeDialog } from '@/components/submission/paystackDialogBox';
-import { ArrowLeft } from 'lucide-react';
-
-
-interface Submission {
-  id: string;
-  article_id: string;
-  status: string;
-  submitted_at: string;
-  articles: {
-    title: string;
-    abstract: string;
-    status: string;
-    authors: any;
-  };
-  vetting_fee:boolean,
-  processing_fee:boolean
-}
 
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  // const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,180 +69,185 @@ export const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        
-        <div className="space-y-6">
-          <div className="h-8 bg-muted animate-pulse rounded" />
-          <div className="h-32 bg-muted animate-pulse rounded" />
-          {[1, 2, 3].map(i => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="h-6 bg-muted animate-pulse rounded" />
-                <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted animate-pulse rounded" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 space-y-6">
+        <div className="h-8 bg-stone-100 animate-pulse rounded w-1/3" />
+        <div className="h-48 bg-stone-100 animate-pulse rounded" />
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-24 bg-stone-100 animate-pulse rounded" />
+        ))}
       </div>
     );
   }
 
+  const activeSubmissions = submissions.length;
+  const inReviewSubmissions = submissions.filter(s => s.status === 'under_review').length;
+  const acceptedSubmissions = submissions.filter(s => s.status === 'accepted').length;
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="relative py-3">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mb-4 absolute top-1 left-3"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </div>
-      <div className="space-y-6  mt-6">
-        <div className="flex items-center justify-between">
+    <div className="max-w-[1400px] mx-auto px-8 md:px-12 py-16 animate-fade-in-up">
+      {/* Welcome Header */}
+      <header className="mb-16">
+        <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Registry Dashboard</p>
+        <h3 className="text-4xl md:text-5xl font-headline text-on-surface max-w-2xl leading-tight">
+          Curation of Institutional Knowledge & Sovereign Protocols.
+        </h3>
+      </header>
+
+      {/* Metrics Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16">
+        <div className="md:col-span-8 bg-surface-container-low p-10 flex flex-col justify-between group hover:bg-surface-container transition-colors duration-500">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Manage your article submissions and track their progress
-            </p>
+            <div className="flex justify-between items-start mb-12">
+              <h4 className="font-headline text-2xl uppercase tracking-tighter">Active Manuscripts</h4>
+              <span className="text-[10px] font-label uppercase tracking-[0.2em] text-primary bg-primary/5 px-3 py-1">In Review: {inReviewSubmissions}</span>
+            </div>
+            <div className="flex items-end gap-4">
+              <span className="text-7xl md:text-8xl font-headline leading-none tabular-nums">
+                {activeSubmissions.toString().padStart(2, '0')}
+              </span>
+              <span className="text-xs font-label text-on-surface/40 mb-3 uppercase tracking-[0.2em]">Total Submissions</span>
+            </div>
           </div>
-          <Button onClick={() => navigate('/submit')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Submit New Article
-          </Button>
+          <div className="mt-12 h-[1px] bg-outline-variant/20 relative overflow-hidden">
+            <div className="absolute left-0 top-0 h-full bg-primary transition-all duration-1000 ease-out" style={{ width: `${(inReviewSubmissions / (activeSubmissions || 1)) * 100}%` }}></div>
+          </div>
         </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{submissions.length}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Under Review</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {submissions.filter(s => s.status === 'under_review').length}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Accepted</CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {submissions.filter(s => s.status === 'accepted').length}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Submissions List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Your Submissions</h2>
-          
-          {submissions.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No submissions yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Start by submitting your first article to the journal.
-                </p>
-                <Button onClick={() => navigate('/submit')}>
-                  Submit Your First Article
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            submissions.map((submission) => {
-              const art = submission.article || (submission as any).articles || {};
-              return <Card key={submission.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-lg leading-tight">
-                        {art.title}
-                      </CardTitle>
-                      <CardDescription>
-                        Submitted on {new Date(submission.submitted_at).toLocaleDateString()}
-                      </CardDescription>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className={getStatusColor(submission.status)}
-                    >
-                      {formatStatus(submission.status)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className='flex items-center justify-between'>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {art.abstract}
-                    </p>
-                    <div className='flex flex-col items-center justify-between h-16'>
-                          <Badge
-                            variant='secondary'
-                            className={getPaymentColor(art.vetting_fee) }
-                          >
-                            <p>vetting fee: {art.vetting_fee ? "paid" : "not paid"}</p>
-                          </Badge>
-                          <Badge
-                            variant='secondary'
-                            className={getPaymentColor(art.processing_fee || art.Processing_fee)}
-                          >
-                            <p>processing fee: {(art.processing_fee || art.Processing_fee) ? "paid" : "not paid"}</p>
-                          </Badge>
-                    </div>
-                  </div>
-
-                  {submission.status === 'rejected' && (
-                    <div className="mb-4">
-                      <RejectionMessages submissionId={submission.id} />
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Article Status: {formatStatus(art.status)}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/submission/${submission.id}/details`)}
-                      className='m-4'
-                    >
-                      View Details
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            })
-          )}
+        
+        <div className="md:col-span-4 bg-primary p-10 flex flex-col justify-between text-on-primary group hover:bg-primary-container transition-colors duration-500">
+          <div className="flex justify-between items-start">
+            <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Sovereign Registry</h4>
+            <span className="material-symbols-outlined opacity-50">verified</span>
+          </div>
+          <div>
+            <div className="flex items-end gap-2 mb-2">
+              <span className="text-6xl md:text-7xl font-headline leading-none tabular-nums">
+                {acceptedSubmissions.toString().padStart(2, '0')}
+              </span>
+              <span className="text-[10px] uppercase tracking-widest mb-2 opacity-70">Accepted</span>
+            </div>
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">Validated Scholarly Record</p>
+          </div>
         </div>
       </div>
-      {/* <processinFeeDialog open={open} setopen={setopen} userData={userdat}/> */}
-      {/* <ProcessinFeeDialog  open={open} setopen={setopen} userData={userdat}/> */}
+
+      {/* Asymmetric Content Sections */}
+      <div className="asymmetric-grid">
+        {/* Manuscript Management List */}
+        <section>
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-outline-variant/10">
+            <h4 className="font-headline text-xl italic">Recent Manuscripts</h4>
+            <button 
+              onClick={() => navigate('/articles')}
+              className="text-[10px] uppercase tracking-widest text-on-surface/40 hover:text-primary transition-colors"
+            >
+              View Archive →
+            </button>
+          </div>
+          
+          <div className="space-y-6">
+            {submissions.length === 0 ? (
+              <div className="bg-surface-container-lowest p-12 text-center border border-dashed border-outline-variant/30">
+                <p className="text-sm text-on-surface/40 uppercase tracking-widest mb-6">No records found in sovereign registry</p>
+                <button 
+                  onClick={() => navigate('/submit')}
+                  className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
+                >
+                  Initiate First Submission
+                </button>
+              </div>
+            ) : (
+              submissions.slice(0, 5).map((submission) => {
+                const art = (submission.article as any) || {};
+                return (
+                  <div 
+                    key={submission.id}
+                    className="bg-surface-container-lowest p-8 group hover:bg-surface-container transition-all duration-300 border border-transparent hover:border-outline-variant/10 cursor-pointer"
+                    onClick={() => navigate(`/submission/${submission.id}/details`)}
+                  >
+                    <div className="flex justify-between items-start mb-6">
+                      <span className={`text-[10px] font-label uppercase tracking-widest px-3 py-1 ${
+                        submission.status === 'accepted' ? 'bg-green-100/50 text-green-800' : 
+                        submission.status === 'rejected' ? 'bg-red-100/50 text-red-800' :
+                        'bg-secondary-container/20 text-secondary'
+                      }`}>
+                        {formatStatus(submission.status)}
+                      </span>
+                      <span className="text-[10px] font-label text-on-surface/30 uppercase tracking-widest">SDS-{submission.id.slice(0, 8)}</span>
+                    </div>
+                    <h5 className="font-headline text-xl mb-4 group-hover:text-primary transition-colors leading-snug">
+                      {art.title}
+                    </h5>
+                    <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-on-surface/50">
+                      <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Institutional Scholar'}</span>
+                      <span className="w-1 h-1 bg-outline-variant/30 rounded-full"></span>
+                      <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        {/* Registry Continuity & Efficiency */}
+        <section className="hidden md:block">
+          <div className="bg-surface-container-high p-10 h-full border-t border-primary/10">
+            <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Registry Protocol</h4>
+            <p className="text-sm leading-relaxed text-on-surface/70 mb-12 font-body italic">
+              Efficiency and continuity are the pillars of the IJSDS curation cycle. Each registry entry undergoes a triple-layer validation against sovereign design principles.
+            </p>
+            
+            <div className="space-y-12 relative">
+              <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-outline-variant/30"></div>
+              
+              <div className="relative pl-8">
+                <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-surface-container-high"></div>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Ingestion</h6>
+                <p className="text-[10px] text-on-surface/50 leading-relaxed">Initial alignment check with West African intellectual heritage.</p>
+              </div>
+              
+              <div className="relative pl-8">
+                <div className="absolute left-0 top-1 w-4 h-4 bg-outline-variant border-4 border-surface-container-high"></div>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 02: Peer Evaluation</h6>
+                <p className="text-[10px] text-on-surface/50 leading-relaxed">Double-blind review by the Sovereign Scholarly Committee.</p>
+              </div>
+              
+              <div className="relative pl-8">
+                <div className="absolute left-0 top-1 w-4 h-4 bg-outline-variant border-4 border-surface-container-high"></div>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 03: Registry Finalization</h6>
+                <p className="text-[10px] text-on-surface/50 leading-relaxed">Archival timestamping and institutional registry entry.</p>
+              </div>
+            </div>
+
+            {/* Afrocentric Separator Accent */}
+            <div className="mt-16 flex gap-1 transform scale-75 origin-left">
+              <div className="h-8 w-8 bg-primary"></div>
+              <div className="h-8 w-8 border border-primary/30"></div>
+              <div className="h-8 w-8 bg-primary"></div>
+              <div className="h-8 w-8 border border-primary/30"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Pull Quote Section */}
+      <section className="mt-32 mb-16 text-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+        <div className="w-12 h-[1px] bg-primary mx-auto mb-10 opacity-30"></div>
+        <blockquote className="text-2xl md:text-3xl font-headline italic text-on-surface/80 max-w-3xl mx-auto leading-snug">
+          "Design is not merely utility; it is the physical manifestation of institutional memory and sovereign dignity."
+        </blockquote>
+        <div className="w-12 h-[1px] bg-primary mx-auto mt-10 opacity-30"></div>
+      </section>
+
+      {/* Bottom Institutional Credits */}
+      <footer className="mt-32 pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-label uppercase tracking-[0.3em] text-on-surface/30">
+        <span>© 2024 International Journal of Sovereign Design Systems</span>
+        <div className="flex gap-10">
+          <Link to="/about" className="hover:text-primary transition-colors">Registry Ethics</Link>
+          <Link to="/about" className="hover:text-primary transition-colors">Continuity Protocol</Link>
+          <Link to="/archive" className="hover:text-primary transition-colors">Archive Access</Link>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -1,30 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
-import { getProfile, updateProfile } from '@/lib/profileService';
-import { Button } from '@/components/ui/button';
+import { getProfile, updateProfile, Profile as ProfileData } from '@/lib/profileService';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { User, Building, Link, Save, ArrowLeft, ShieldCheck, Award, GraduationCap, Mail, UserCheck, BookOpen, Globe, Database, Zap, MapPin } from 'lucide-react';
+import { User, Building, Link, Save, ArrowLeft, ShieldCheck, Award, GraduationCap, Mail, Globe, Database, Zap, MapPin, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
-import { Badge } from '@/components/ui/badge';
-
-interface ProfileData {
-  id: string;
-  full_name: string;
-  email: string;
-  bio?: string;
-  affiliation?: string;
-  orcid_id?: string;
-  is_editor: boolean;
-  is_reviewer: boolean;
-  request_reviewer: boolean;
-  request_editor: boolean;
-  is_admin: boolean;
-}
 
 export const Profile = () => {
   const { user } = useAuth();

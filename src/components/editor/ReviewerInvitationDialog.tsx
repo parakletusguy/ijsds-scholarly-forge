@@ -11,6 +11,7 @@ import { UserPlus, AlertCircle } from 'lucide-react';
 import { sendEmailNotification, generateReviewInvitationEmail } from '@/lib/emailService';
 import { getProfiles } from '@/lib/profileService';
 import { createReview } from '@/lib/reviewService';
+import { type Submission } from '@/lib/submissionService';
 import { ReviewStatusIndicator } from '@/components/review/ReviewStatusIndicator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AutomatedReviewerMatchingInterface } from '../workflow/AutomatedReviewerMatchingInterface';
@@ -19,14 +20,14 @@ interface ReviewerInvitationDialogProps {
   submissionId: string;
   submissionTitle: string;
   onInvite: () => void;
-  submission:any
+  submission: Submission;
 }
 
 interface Reviewer {
   id: string;
   full_name: string;
   email: string;
-  affiliation: string;
+  affiliation?: string;
 }
 
 export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvite,submission }: ReviewerInvitationDialogProps) => {
@@ -212,8 +213,8 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
   <TabsContent value='workflow'>
               <AutomatedReviewerMatchingInterface 
                                   articleData={{
-                                      title: submission.articles.title,
-                                      abstract: submission.articles.abstract,
+                                      title: submission.article?.title || submissionTitle,
+                                      abstract: submission.article?.abstract || '',
                                     keywords: [],
                                     subject_area: ''
                                   }}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Users, Globe, ArrowRight, User, TrendingUp, MapPin, Clock, CheckCircle, Menu, X } from 'lucide-react';
+import { BookOpen, Users, Globe, ArrowRight, User, TrendingUp, MapPin, Clock, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';

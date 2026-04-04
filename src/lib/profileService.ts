@@ -1,21 +1,7 @@
 import { api } from './apiClient';
+import { Profile } from '@/types/profile';
 
-export interface Profile {
-  id: string;
-  full_name: string;
-  email: string;
-  affiliation?: string | null;
-  orcid_id?: string | null;
-  bio?: string | null;
-  is_editor: boolean;
-  is_reviewer: boolean;
-  is_admin: boolean;
-  email_notifications_enabled?: boolean;
-  deadline_reminder_days?: number;
-  request_reviewer?: boolean;
-  request_editor?: boolean;
-  role: string;
-}
+export type { Profile };
 
 interface ListResponse { success: true; data: Profile[] }
 interface SingleResponse { success: true; data: Profile }

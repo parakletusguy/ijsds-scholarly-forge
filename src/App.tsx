@@ -44,6 +44,7 @@ const ArticleInfo = lazy(() => import('./pages/articleInfo').then(m => ({ defaul
 const Guide = lazy(() => import('./pages/guide').then(m => ({ default: m.Guide })));
 const Blog = lazy(() => import('./pages/Blog').then(m => ({ default: m.Blog })));
 const BlogPost = lazy(() => import('./pages/BlogPost').then(m => ({ default: m.BlogPost })));
+const AuthCallback = lazy(() => import('./pages/AuthCallback').then(m => ({ default: m.AuthCallback })));
 const Partners = lazy(() => import('./pages/Partners').then(m => ({ default: m.Partners })));
 const BlogAdmin = lazy(() => import('./components/blog/BlogAdmin').then(m => ({ default: m.BlogAdmin })));
 const PartnersAdmin = lazy(() => import('./components/partners/PartnersAdmin').then(m => ({ default: m.PartnersAdmin })));
@@ -76,11 +77,25 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen flex w-full">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
-        <header className="fixed w-[100%] md:h-24 h-20 flex items-center border-b border-border bg-[#ffffff9c] p-4">
-          <SidebarTrigger className="fixed z-30" />
-          <Link to={"/openAccess"}><Button className="ml-10">Open Access Notice</Button></Link>
-          <div className="md:w-20 w-14 fixed right-6">
-            <img src={logo_2} alt="Rivers State University Logo" />
+        <header className="fixed top-0 right-0 left-0 md:left-72 h-20 bg-[#fdf9f5]/80 backdrop-blur-md flex justify-between items-center px-12 z-40 border-b-[0.5px] border-[#ddc0b8]/15">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            <Link to={"/openAccess"} className="ml-4 md:ml-8">
+              <Button variant="outline" className="text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5 text-primary">
+                Open Access Notice
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 border-r border-outline-variant/30 pr-6">
+              <button className="p-2 text-on-surface/60 hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">notifications</span>
+              </button>
+            </div>
+            <div className="w-12 md:w-16">
+              <img src={logo_2} alt="Rivers State University Logo" className="w-full h-auto" />
+            </div>
           </div>
         </header>
         <main className="flex-1 mt-24">
@@ -123,6 +138,7 @@ const App = () => (
                     <Route path="/copyright" element={<PublicLayout><Copyright /></PublicLayout>} />
                     <Route path="/orcidGuide" element={<PublicLayout><Guide /></PublicLayout>} />
                     <Route path="/auth" element={<PublicLayout><Auth /></PublicLayout>} />
+                    <Route path="/auth/callback" element={<PublicLayout><AuthCallback /></PublicLayout>} />
                     <Route path="/reset-password" element={<PublicLayout><ResetPassword /></PublicLayout>} />
 
                     {/* ── Protected Routes (With Sidebar) ──────────────────────────────── */}

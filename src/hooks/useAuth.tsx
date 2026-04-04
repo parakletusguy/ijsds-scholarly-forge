@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
-import { getCurrentUser, type AuthProfile } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
+import { Profile } from '@/types/profile';
 import { getToken, clearToken } from '@/lib/apiClient';
 
 /** Minimal user object — keeps backward-compat for code that uses user.id / user.email */
@@ -9,12 +10,10 @@ export interface AuthUser {
 }
 
 interface AuthContextType {
-  user: AuthUser | null;
-  profile: AuthProfile | null;
+  user: Profile | null;
+  profile: Profile | null; // Keep profile for backward-compat
   loading: boolean;
-  /** Call this after a successful login/register to refresh auth state */
-  refreshAuth: (profile: AuthProfile) => void;
-  /** Call this after logout to clear auth state */
+  refreshAuth: (profile: Profile) => void;
   clearAuth: () => void;
 }
 
@@ -27,10 +26,10 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [profile, setProfile] = useState<AuthProfile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const applyProfile = (p: AuthProfile | null) => {
+  const applyProfile = (p: Profile | null) => {
     setProfile(p);
   };
 
@@ -45,14 +44,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  const refreshAuth = (p: AuthProfile) => applyProfile(p);
+  const refreshAuth = (p: Profile) => applyProfile(p);
 
   const clearAuth = () => {
     clearToken();
     setProfile(null);
   };
 
-  const user: AuthUser | null = profile ? { id: profile.id, email: profile.email } : null;
+  const user = profile;
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, refreshAuth, clearAuth }}>

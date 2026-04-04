@@ -12,7 +12,8 @@ import {
   Info,
   ChevronRight,
   Activity,
-  Server
+  Server,
+  Award
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';

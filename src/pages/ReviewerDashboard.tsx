@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Clock, CheckCircle2, AlertCircle, ArrowLeft, Calendar, User, ShieldCheck, ChevronRight, Activity, ClipboardCheck } from 'lucide-react';
+import { FileText, Clock, CheckCircle2, ArrowLeft, ArrowRight, ShieldCheck, ChevronRight, Activity, ClipboardCheck } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { useNavigate } from 'react-router-dom';
@@ -79,8 +79,8 @@ export const ReviewerDashboard = () => {
   };
 
   if (loading || !isReviewer) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center bg-surface">
+      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
@@ -89,7 +89,7 @@ export const ReviewerDashboard = () => {
   const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
+    <div className="pb-24 bg-surface min-h-screen">
       <PageHeader 
         title="Evaluator" 
         subtitle="Command" 
@@ -110,19 +110,18 @@ export const ReviewerDashboard = () => {
         </div>
 
         {/* Evaluation Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
            {[
-             { label: "Assignment Dossier", val: reviews.length, icon: <ClipboardCheck />, color: "border-foreground" },
-             { label: "Active Pipelines", val: pendingReviews.length, icon: <Activity />, color: "border-primary" },
-             { label: "Finalized Reviews", val: completedReviews.length, icon: <CheckCircle2 />, color: "border-secondary" }
+             { label: "Total Assigned", val: reviews.length, icon: <ClipboardCheck size={18} />, accent: "border-stone-400" },
+             { label: "Pending Assessment", val: pendingReviews.length, icon: <Activity size={18} />, accent: "border-primary" },
+             { label: "Completed", val: completedReviews.length, icon: <CheckCircle2 size={18} />, accent: "border-green-500" },
            ].map((stat, i) => (
-             <div key={i} className={`bg-white p-10 border-t-8 ${stat.color} shadow-xl relative overflow-hidden group`}>
-                <div className="absolute top-0 right-0 w-16 h-16 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-                <div className="flex items-center justify-between mb-4">
-                   <div className="p-3 bg-muted rounded-none text-foreground/40">{stat.icon}</div>
-                   <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{stat.val}</span>
+             <div key={i} className={`bg-white border border-stone-100 border-l-4 ${stat.accent} p-6 shadow-sm`}>
+                <div className="flex items-center justify-between mb-3">
+                   <div className="text-stone-400">{stat.icon}</div>
+                   <span className="font-headline text-3xl font-bold text-stone-900">{stat.val}</span>
                 </div>
-                <p className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40">{stat.label}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-stone-400">{stat.label}</p>
              </div>
            ))}
         </div>
@@ -133,7 +132,7 @@ export const ReviewerDashboard = () => {
               { val: "pending", label: "Pending Assessment", count: pendingReviews.length },
               { val: "completed", label: "Archival Assessments", count: completedReviews.length }
             ].map(tab => (
-              <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-4 px-8 data-[state=active]:bg-foreground data-[state=active]:text-white font-headline font-black uppercase text-[10px] tracking-widest transition-all gap-4 grow border-r border-border/10 last:border-0">
+              <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-4 px-8 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-4 grow border-r border-stone-100 last:border-0">
                 {tab.label} <Badge className="bg-primary/20 text-primary hover:bg-primary/20 border-none rounded-none text-[8px] font-bold px-2">{tab.count}</Badge>
               </TabsTrigger>
             ))}

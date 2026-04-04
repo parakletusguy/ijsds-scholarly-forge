@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { getSubmissions, updateSubmission } from '@/lib/submissionService';
+import { getSubmissions, updateSubmission, type Submission } from '@/lib/submissionService';
 import { api } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Users, Clock, CheckCircle2, ArrowLeft, FileUp, RefreshCw, ShieldAlert, Activity, ClipboardList, Database, ChevronRight } from 'lucide-react';
+import { FileText, Users, Clock, CheckCircle2, ArrowLeft, FileUp, RefreshCw, ShieldAlert, Activity, Database, ChevronRight } from 'lucide-react';
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { RejectSubmissionDialog } from '@/components/editor/RejectSubmissionDialog';
@@ -19,28 +19,7 @@ import { EditorFileManager } from '@/components/editor/EditorFileManager';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
-interface Submission {
-  id: string;
-  submitted_at: string;
-  status: string;
-  article_id: string;
-  submitter_id: string;
-  cover_letter: string;
-  articles: {
-    title: string;
-    abstract: string;
-    corresponding_author_email: string;
-    authors: any;
-    manuscript_file_url: string;
-    vetting_fee: boolean;
-    Processing_fee: boolean;
-    doi: string | null;
-  };
-  profiles: {
-    full_name: string;
-    email: string;
-  };
-}
+// Using Submission type from submissionService
 
 export const Editorial = () => {
   const { user, profile, loading } = useAuth();
@@ -61,9 +40,14 @@ export const Editorial = () => {
   const fetchSubmissions = async () => {
     try {
       const data = await getSubmissions();
-      setSubmissions(data as any || []);
+      setSubmissions(data || []);
     } catch (error: any) {
-      toast({ title: 'Sync Error', description: 'Failed to fetch editorial records.', variant: 'destructive' });
+      console.error('Editorial Sync Error:', error);
+      toast({ 
+        title: 'Sync Error', 
+        description: error.message || 'Failed to fetch editorial records.', 
+        variant: 'destructive' 
+      });
     } finally { setLoadingSubmissions(false); }
   };
 
@@ -113,8 +97,8 @@ export const Editorial = () => {
   };
 
   if (loading || !isEditor) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center bg-surface">
+      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
@@ -126,7 +110,7 @@ export const Editorial = () => {
   const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
+    <div className="pb-24 bg-surface min-h-screen">
       <PageHeader 
         title="Editorial" 
         subtitle="Command" 
@@ -148,20 +132,19 @@ export const Editorial = () => {
         </div>
 
         {/* Global Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
            {[
-             { label: "Manuscript Census", val: submissions.length, icon: <Database />, color: "border-foreground" },
-             { label: "Action Horizon", val: pendingSubmissions.length, icon: <Clock />, color: "border-primary" },
-             { label: "Review Orbit", val: underReviewSubmissions.length, icon: <Users />, color: "border-secondary" },
-             { label: "Archival Finalized", val: completedSubmissions.length, icon: <CheckCircle2 />, color: "border-primary" }
+             { label: "Total Submissions", val: submissions.length, icon: <Database size={18} />, accent: "border-stone-400" },
+             { label: "Pending Review", val: pendingSubmissions.length, icon: <Clock size={18} />, accent: "border-primary" },
+             { label: "Under Review", val: underReviewSubmissions.length, icon: <Users size={18} />, accent: "border-amber-400" },
+             { label: "Completed", val: completedSubmissions.length, icon: <CheckCircle2 size={18} />, accent: "border-green-500" },
            ].map((stat, i) => (
-             <div key={i} className={`bg-white p-10 border-t-8 ${stat.color} shadow-xl relative overflow-hidden group`}>
-                <div className="absolute top-0 right-0 w-16 h-16 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-                <div className="flex items-center justify-between mb-4">
-                   <div className="p-3 bg-muted rounded-none text-foreground/40">{stat.icon}</div>
-                   <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{stat.val}</span>
+             <div key={i} className={`bg-white border border-stone-100 border-l-4 ${stat.accent} p-6 shadow-sm`}>
+                <div className="flex items-center justify-between mb-3">
+                   <div className="text-stone-400">{stat.icon}</div>
+                   <span className="font-headline text-3xl font-bold text-stone-900">{stat.val}</span>
                 </div>
-                <p className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40">{stat.label}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-stone-400">{stat.label}</p>
              </div>
            ))}
         </div>
@@ -180,7 +163,7 @@ export const Editorial = () => {
               { val: "revision", label: "Awaiting Revision", count: revisionSubmissions.length },
               { val: "completed", label: "Work History", count: completedSubmissions.length }
             ].map(tab => (
-              <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-4 px-8 data-[state=active]:bg-foreground data-[state=active]:text-white font-headline font-black uppercase text-[10px] tracking-widest transition-all gap-3 border-r border-border/10 last:border-0 grow">
+              <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-4 px-8 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-3 border-r border-stone-100 last:border-0 grow">
                 {tab.label} <Badge className="bg-primary/20 text-primary hover:bg-primary/20 border-none rounded-none text-[8px] font-bold px-2">{tab.count}</Badge>
               </TabsTrigger>
             ))}
@@ -193,7 +176,7 @@ export const Editorial = () => {
               <div className={cardClasses + " py-24 text-center opacity-40 italic font-body"}>Queue is currently empty. All data synchronized.</div>
             ) : (
               pendingSubmissions.map((submission) => {
-                const art = submission.article || (submission as any).articles || {};
+                const art = (submission.article as any) || {};
                 return (
                   <div key={submission.id} className={cardClasses + " flex flex-col md:flex-row gap-10 hover:border-primary/20 transition-all shadow-md hover:shadow-2xl"}>
                     <div className="flex-1">
@@ -205,7 +188,7 @@ export const Editorial = () => {
                       </div>
                       
                       <h3 className="text-2xl font-headline font-black uppercase tracking-tight mb-4 group-hover:text-primary transition-colors leading-tight">{art.title}</h3>
-                      <p className="font-body text-foreground/40 text-sm italic mb-8 border-l-2 border-primary/20 pl-6 line-clamp-2">Submitted by <span className="text-foreground font-bold not-italic">{submission.profiles.full_name}</span> on {new Date(submission.submitted_at).toLocaleDateString()}</p>
+                      <p className="font-body text-foreground/40 text-sm italic mb-8 border-l-2 border-primary/20 pl-6 line-clamp-2">Submitted by <span className="text-foreground font-bold not-italic">{submission.submitter?.full_name}</span> on {new Date(submission.submitted_at).toLocaleDateString()}</p>
                       
                       <div className="flex flex-wrap gap-4 items-center border-t border-border/20 pt-8">
                         <PaperDownload manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
@@ -219,7 +202,7 @@ export const Editorial = () => {
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-5xl bg-white rounded-none border-none shadow-2xl p-0">
-                            <PageHeader title="Dossier" subtitle="Assets" accent="Asset Management" className="py-12" />
+                            <PageHeader title="Dossier" subtitle="Assets" accent="Asset Management" showBack={false} />
                             <div className="p-10"><EditorFileManager submissionId={submission.id} articleId={submission.article_id} /></div>
                           </DialogContent>
                         </Dialog>
@@ -229,7 +212,9 @@ export const Editorial = () => {
                     <div className="w-full md:w-64 shrink-0 flex flex-col justify-center border-l border-border/40 md:pl-10 space-y-6">
                        <div className="space-y-2">
                           <p className="font-headline font-black text-[9px] uppercase tracking-widest text-foreground/30">Financial Clearance</p>
-                          <PaymentStatusBadge vettingFee={art.vetting_fee} processingFee={art.Processing_fee} />
+                          <Badge variant="outline" className="flex items-center gap-2 rounded-none p-1 border-stone-100">
+                             <PaymentStatusBadge vettingFee={!!submission.vetting_fee} processingFee={!!submission.processing_fee} showLabels={false} />
+                          </Badge>
                        </div>
                        <Button variant="ghost" onClick={() => navigate(`/submission/${submission.id}/details`)} className="w-full justify-between font-headline font-black uppercase text-[9px] tracking-widest text-foreground/40 hover:text-primary p-0">Detailed Dossier <ChevronRight size={14} /></Button>
                     </div>
@@ -244,7 +229,7 @@ export const Editorial = () => {
               <div className={cardClasses + " py-24 text-center opacity-40 italic font-body"}>No manuscripts currently in active evaluation orbit.</div>
             ) : (
               underReviewSubmissions.map((submission) => {
-                const art = submission.article || (submission as any).articles || {};
+                const art = (submission.article as any) || {};
                 return (
                   <div key={submission.id} className={cardClasses + " border-t-8 border-secondary"}>
                     <div className="flex flex-col md:flex-row gap-10">
@@ -257,24 +242,24 @@ export const Editorial = () => {
                           </div>
                           
                           <h3 className="text-2xl font-headline font-black uppercase tracking-tight mb-4 leading-tight">{art.title}</h3>
-                          <p className="font-body text-foreground/40 text-sm italic mb-8">Author: {submission.profiles.full_name} | Verified on {new Date(submission.submitted_at).toLocaleDateString()}</p>
+                          <p className="font-body text-foreground/40 text-sm italic mb-8">Author: {submission.submitter?.full_name} | Verified on {new Date(submission.submitted_at).toLocaleDateString()}</p>
                           
                           <div className="flex flex-wrap gap-4 items-center border-t border-border/20 pt-8">
                              <ApproveSubmissionDialog submissionId={submission.id} onApprove={fetchSubmissions} articleId={submission.article_id} />
-                             <RevisionRequestDialog submissionId={submission.id} submissionTitle={art.title} authorEmail={art.corresponding_author_email} authorName={submission.profiles.full_name} onRequest={fetchSubmissions} />
+                             <RevisionRequestDialog submissionId={submission.id} submissionTitle={art.title || ''} authorEmail={art.corresponding_author_email || ''} authorName={submission.submitter?.full_name || ''} onRequest={fetchSubmissions} />
                              <RejectSubmissionDialog submissionId={submission.id} onReject={fetchSubmissions} />
                              <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/reviews`)} className="rounded-none font-headline font-black uppercase text-[10px] px-6 h-10 border-border/40 hover:border-primary transition-all">Audit Reviews</Button>
                              
                              {art.doi && (
-                                <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.doi!)} className="rounded-none font-headline font-black uppercase text-[9px] tracking-widest text-primary gap-2 hover:bg-primary/5">
+                                <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.doi)} className="rounded-none font-headline font-black uppercase text-[9px] tracking-widest text-primary gap-2 hover:bg-primary/5">
                                    <RefreshCw size={12} className="animate-spin-slow" /> Regenerate DOI
                                 </Button>
                              )}
                           </div>
                        </div>
                        
-                       <div className="w-full md:w-48 shrink-0 flex flex-col justify-center border-l border-border/40 md:pl-10">
-                          <PaymentStatusBadge vettingFee={art.vetting_fee} processingFee={art.Processing_fee} />
+                       <div className="w-full md:w-48 shrink-0 flex flex-col justify-center border-l border-stone-100 md:pl-10">
+                          <PaymentStatusBadge vettingFee={!!submission.vetting_fee} processingFee={!!submission.processing_fee} showLabels={false} />
                        </div>
                     </div>
                   </div>

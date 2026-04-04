@@ -1,4 +1,5 @@
 import { api } from './apiClient';
+import type { Article } from './articleService';
 
 export interface Submission {
   id: string;
@@ -14,8 +15,12 @@ export interface Submission {
   submitted_at: string;
   vetting_fee?: boolean;
   processing_fee?: boolean;
-  article?: Record<string, any>;
-  submitter?: Record<string, any>;
+  article?: Article | Record<string, any>;
+  submitter?: {
+    id: string;
+    full_name: string;
+    email: string;
+  } | Record<string, any>;
   reviews?: Record<string, any>[];
 }
 
@@ -54,8 +59,21 @@ export const createSubmission = async (body: {
   submission_type?: string;
   funding_info?: string | null;
   conflicts_of_interest?: string | null;
+  file?: File;
 }): Promise<CreateResponse['data']> => {
-  const res = await api.post<CreateResponse>('/api/submissions', body);
+  const formData = new FormData();
+  Object.entries(body).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (key === 'file') {
+      formData.append('file', value as File);
+    } else if (Array.isArray(value) || typeof value === 'object') {
+      formData.append(key, JSON.stringify(value));
+    } else {
+      formData.append(key, String(value));
+    }
+  });
+
+  const res = await api.upload<CreateResponse>('/api/submissions', formData);
   return res.data;
 };
 

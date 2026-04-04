@@ -232,5 +232,3 @@ export const Header = () => {
     </header>
   );
 };
-
-import { ArrowRight, Layers } from "lucide-react";

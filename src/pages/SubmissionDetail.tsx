@@ -1,22 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { getSubmission } from '@/lib/submissionService';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, FileText, Calendar, User, Download } from 'lucide-react';
-import { ProcessinFeeDialog, VettingDialog } from '@/components/submission/paystackDialogBox';
-import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
-import { EditorFileManager } from '@/components/editor/EditorFileManager';
-import ReceiptDown from '@/components/receiptGeneration/receiptDownload';
-import { sendEmailNotification } from '@/lib/emailService';
-import { uploadPdf } from '@/lib/cloudinary';
-import { api } from '@/lib/apiClient';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { getSubmission } from "@/lib/submissionService";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "@/hooks/use-toast";
+import { ArrowLeft, FileText, Calendar, User, Download } from "lucide-react";
+import {
+  ProcessinFeeDialog,
+  VettingDialog,
+} from "@/components/submission/paystackDialogBox";
+import { SubmissionFileManager } from "@/components/submission/SubmissionFileManager";
+import { EditorFileManager } from "@/components/editor/EditorFileManager";
+import ReceiptDown from "@/components/receiptGeneration/receiptDownload";
+import { SendRecieptMail } from "@/lib/emailService";
+import { uploadPdf } from "@/lib/cloudinary";
+import { api } from "@/lib/apiClient";
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -45,14 +46,13 @@ export const SubmissionDetail = () => {
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-  const [open,setopen] = useState(false)
-  const [vet,setvet] = useState(false)
-  const [processing,setprocessing] = useState(false)
+  const [vet, setvet] = useState(false);
+  const [processing, setprocessing] = useState(false);
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth');
+      navigate("/auth");
       return;
     }
 
@@ -67,11 +67,11 @@ export const SubmissionDetail = () => {
       setSubmission(data as any);
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: 'Failed to fetch submission details',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to fetch submission details",
+        variant: "destructive",
       });
-      navigate('/dashboard');
+      navigate("/dashboard");
     } finally {
       setLoadingData(false);
     }
@@ -79,136 +79,140 @@ export const SubmissionDetail = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'under_review':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'revision_requested':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'accepted':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "under_review":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "revision_requested":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "accepted":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "rejected":
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-    let userData = null
-    let userDataPro = null
-   {submission ?  userData = {
-      email:submission.submitter.email,
-      amount: 512500,
-      metadata:{
-        name:submission.submitter.full_name
-      },
-      onSuccess: (response) => onSuccess(response,"vetting",512500),
-      onClose:() => {    toast({
-          title: 'payment cancelled',
-          description: `you cancelled payment for the vetting fee`,
-          variant: 'destructive',
-        });}
-    } : null}
+  let userData = null;
+  let userDataPro = null;
+  {
+    submission
+      ? (userData = {
+          email: submission.submitter.email,
+          // amount: 512500, // ₦5,125 in kobo
+          amount: 1000, // ₦5,125 in kobo
+          metadata: {
+            custom_fields: [
+              {
+                display_name: "Name",
+                variable_name: "name",
+                value: submission.submitter.full_name,
+              },
+            ],
+          },
+          onSuccess: (response: { reference: string }) => {
+            setvet(false);
+            onSuccess(response, "vetting", 512500);
+          },
+          onClose: () =>
+            toast({
+              title: "Payment Cancelled",
+              description: "Vetting fee payment was not completed.",
+              variant: "destructive",
+            }),
+        })
+      : null;
+  }
 
-       {submission ?  userDataPro = {
-      email:submission.submitter.email,
-      amount:2050000,
-      metadata:{
-        name:submission.submitter.full_name
-      },
-      onSuccess: (response) => onSuccess(response,"processing",2050000),
-      onClose: async () => {    
-      
+  {
+    submission
+      ? (userDataPro = {
+          email: submission.submitter.email,
+          amount: 2050000, // ₦20,500 in kobo
+          metadata: {
+            custom_fields: [
+              {
+                display_name: "Name",
+                variable_name: "name",
+                value: submission.submitter.full_name,
+              },
+            ],
+          },
+          onSuccess: (response: { reference: string }) => {
+            setprocessing(false);
+            onSuccess(response, "processing", 2050000);
+          },
+          onClose: () =>
+            toast({
+              title: "Payment Cancelled",
+              description: "Processing fee payment was not completed.",
+              variant: "destructive",
+            }),
+        })
+      : null;
+  }
 
-      // In-app notification is already handled by sendEmailNotification function
+  const onSuccess = async (
+    pReponse: { reference: string },
+    type: string,
+    amount: number,
+  ) => {
+    try {
+      const transactionReference = pReponse.reference;
 
-      
-        
-        toast({
-          title: 'payment cancelled',
-          description: `you cancelled payment for the processing fee`,
-          variant: 'destructive',
-        });}
-    } : null}
-
-
-    const onSuccess = async (pReponse, type:string, amount:number) => {
-      try {
-        const transactionReference = pReponse.reference
-        const { success, data } = await api.post<{ success: boolean; data: { status: boolean } }>(
-          '/api/verify-payment',
-          { reference: transactionReference, amount, articleId: submission.article.id, type }
-        );
-        if(!success) throw "server error"
-        if(!data.status) throw "payment not verified"
-
-        // generate custom receipt
-
-        if(type == "vetting"){
-          const blob = await ReceiptDown({
-        name:submission.submitter.full_name,
-        amount:"5125",
-        type:"vetting fee",
-        reference:transactionReference
-      })
-
-      const url = await uploadPdf(blob)
-        await sendEmailNotification({
-        to: submission.submitter.email,
-        subject: 'payment',
-        htmlContent: `
-         <h2>Payment Receipt</h2>
-        <p>Dear ${submission.submitter.full_name || 'user'},</p>
-        <p>Your payment of ₦5125 for article vetting has been received.</p>
-        <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
-        <p>Best regards,<br>Editorial System</p>
-        `,
-        userId: user.id,
-        type: 'payment'
+      // 1. Verify payment with backend (backend also sends confirmation email to author + editors)
+      const { success, data } = await api.post<{
+        success: boolean;
+        data: { status: boolean };
+      }>("/api/verify-payment", {
+        reference: transactionReference,
+        amount,
+        articleId: submission.article.id,
+        type,
       });
-        } else if(type == "processing"){
-            const blob = await ReceiptDown({
-          name:submission.submitter.full_name,
-          amount:"20,500",
-          type:"processing fee",
-        reference:transactionReference
-          })
+      if (!success) throw new Error("Server error during payment verification");
+      if (!data.status) throw new Error("Payment could not be verified");
 
-          const url = await uploadPdf(blob)
-          await sendEmailNotification({
-          to: submission.submitter.email,
-          subject: 'payment',
-          htmlContent: `
-          <h2>Payment Receipt</h2>
-          <p>Dear ${submission.submitter.full_name || 'user'},</p>
-          <p>Your payment of ₦20,500 for article processing has been received.</p>
-          <p>You can download your receipt anytime: <a href="${url}">Download PDF Receipt</a></p>
-          <p>Best regards,<br>Editorial System</p>
-          `,
-          userId: user.id,
-          type: 'payment'
-              });
-        }
-        
-        
+      // 2. Generate and email a PDF receipt (separate from backend confirmation email)
+      const isVetting = type === "vetting";
+      const amountLabel = isVetting ? "5,125" : "20,500";
+      const typeLabel = isVetting ? "vetting fee" : "processing fee";
 
-        toast({
-            title:'payment successful',
-            description:`your payment has been successfully verified`
-          })
-      } catch (error) {
-        if(error){
-          console.log(error)
-  
-          toast({
-            title:'payment failed',
-            description:`payment failed due to ${error}, please contact support or try again later`,
-            variant:'destructive'
-          })
-        }
-      }
+      const blob = await ReceiptDown({
+        name: submission.submitter.full_name,
+        amount: amountLabel,
+        type: typeLabel,
+        reference: transactionReference,
+      });
+      const receiptUrl = await uploadPdf(blob);
+
+      // Use the receipt email template (distinct from backend's payment-confirmed email)
+      await SendRecieptMail(
+        user.id,
+        submission.submitter.full_name,
+        submission.article.title,
+        receiptUrl,
+        typeLabel,
+      );
+
+      toast({
+        title: "Payment Successful",
+        description: `Your ${typeLabel} of ₦${amountLabel} has been verified. A receipt has been sent to your email.`,
+      });
+
+      // 3. Refresh submission so payment badges update immediately
+      await fetchSubmissionDetails();
+    } catch (error: any) {
+      console.error("Payment verification error:", error);
+      toast({
+        title: "Payment Failed",
+        description:
+          error?.message ?? "Please contact support or try again later.",
+        variant: "destructive",
+      });
     }
-
+  };
 
   if (loading || loadingData) {
     return (
@@ -226,16 +230,16 @@ export const SubmissionDetail = () => {
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">Submission Not Found</h2>
-                <div className="relative py-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate(-1)}
-                    className="mb-4 absolute top-1 left-3"
-                    >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-                </div>
+            <div className="relative py-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className="mb-4 absolute top-1 left-3"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </div>
           </div>
         </main>
       </div>
@@ -244,16 +248,16 @@ export const SubmissionDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-          <div className="relative py-3">   
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate(-1)}
-                    className="mb-4 absolute top-1 left-3"
-                    >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-                </div>
+      <div className="relative py-3">
+        <Button
+          variant="outline"
+          onClick={() => navigate(-1)}
+          className="mb-4 absolute top-1 left-3"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+      </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -261,7 +265,7 @@ export const SubmissionDetail = () => {
               Submission Details
             </h1>
             <Badge className={getStatusColor(submission.status)}>
-              {submission.status.replace('_', ' ').toUpperCase()}
+              {submission.status.replace("_", " ").toUpperCase()}
             </Badge>
           </div>
         </div>
@@ -277,7 +281,9 @@ export const SubmissionDetail = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-2xl font-semibold mb-2">{submission.article.title}</h3>
+                  <h3 className="text-2xl font-semibold mb-2">
+                    {submission.article.title}
+                  </h3>
                   {submission.article.subject_area && (
                     <Badge variant="secondary" className="mb-4">
                       {submission.article.subject_area}
@@ -294,31 +300,41 @@ export const SubmissionDetail = () => {
 
                 <div>
                   <h4 className="font-medium text-lg mb-2">Authors</h4>
-                  {submission.article.authors && Array.isArray(submission.article.authors) ? (
+                  {submission.article.authors &&
+                  Array.isArray(submission.article.authors) ? (
                     <div className="space-y-2">
-                      {submission.article.authors.map((author: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{author.name}</span>
-                          {author.affiliation && (
-                            <span className="text-muted-foreground">
-                              ({author.affiliation})
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                      {submission.article.authors.map(
+                        (author: any, index: number) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span>{author.name}</span>
+                            {author.affiliation && (
+                              <span className="text-muted-foreground">
+                                ({author.affiliation})
+                              </span>
+                            )}
+                          </div>
+                        ),
+                      )}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">No author information available</p>
+                    <p className="text-muted-foreground">
+                      No author information available
+                    </p>
                   )}
                 </div>
 
                 {submission.article.manuscript_file_url && (
                   <div>
                     <h4 className="font-medium text-lg mb-2">Manuscript</h4>
-                    <Button 
+                    <Button
                       variant="outline"
-                      onClick={() => window.open(submission.article.manuscript_file_url, '_blank')}
+                      onClick={() =>
+                        window.open(
+                          submission.article.manuscript_file_url,
+                          "_blank",
+                        )
+                      }
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Manuscript
@@ -378,28 +394,62 @@ export const SubmissionDetail = () => {
                 <div>
                   <p className="text-sm font-medium mb-2">Current Status</p>
                   <Badge className={getStatusColor(submission.status)}>
-                    {submission.status.replace('_', ' ').toUpperCase()}
+                    {submission.status.replace("_", " ").toUpperCase()}
                   </Badge>
                 </div>
               </CardContent>
             </Card>
-            <Card className=' py-3 mt-3'>
+            <Card className="py-3 mt-3">
               <CardHeader>
-                <CardTitle> Payment Info</CardTitle>
+                <CardTitle>Publication Fees</CardTitle>
               </CardHeader>
-              <CardContent className='space-y-3'>
-                 <div className='flex justify-between items-center'>
-                <p>Click here to pay for vetting</p>
-                <button className='rounded-sm bg-black text-white px-3 py-1 h-9' onClick={() => setvet(true)} >Pay</button>
-            </div>
-                  <div className='flex justify-between '>
-                <p>Click here to pay for processing</p>
-                <button className='rounded-sm bg-black text-white px-3 py-1 h-9' onClick={() => setprocessing(true)}>Pay</button>
-            </div>
+              <CardContent className="space-y-4">
+                {/* Vetting Fee */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium">Vetting Fee</p>
+                    <p className="text-xs text-muted-foreground">₦5,125</p>
+                  </div>
+                  {submission.article.vetting_fee ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      Paid ✓
+                    </Badge>
+                  ) : (
+                    <button
+                      className="rounded-sm bg-black text-white px-3 py-1 h-9 text-sm hover:bg-gray-800 transition-colors"
+                      onClick={() => setvet(true)}
+                    >
+                      Pay
+                    </button>
+                  )}
+                </div>
+                {/* Processing Fee */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium">Processing Fee</p>
+                    <p className="text-xs text-muted-foreground">₦20,500</p>
+                  </div>
+                  {submission.article.processing_fee ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      Paid ✓
+                    </Badge>
+                  ) : (
+                    <button
+                      className="rounded-sm bg-black text-white px-3 py-1 h-9 text-sm hover:bg-gray-800 transition-colors"
+                      onClick={() => setprocessing(true)}
+                    >
+                      Pay
+                    </button>
+                  )}
+                </div>
               </CardContent>
             </Card>
-            <VettingDialog userData={userData} vet={vet} setvet={setvet}/>
-            <ProcessinFeeDialog userData={userDataPro} processing={processing} setprocessing={setprocessing}/>
+            <VettingDialog userData={userData} vet={vet} setvet={setvet} />
+            <ProcessinFeeDialog
+              userData={userDataPro}
+              processing={processing}
+              setprocessing={setprocessing}
+            />
           </div>
         </div>
       </main>

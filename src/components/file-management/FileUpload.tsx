@@ -10,11 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 interface FileUploadProps {
   bucketName: string; // kept for API compat — not used with custom backend
   folder?: string;
-  onFileUploaded: (fileUrl: string, fileName: string) => void;
+  onFileUploaded: (file: string | File, fileName: string) => void;
   acceptedTypes?: string;
   maxSizeMB?: number;
   disabled?: boolean;
-  articleId?: string; // required by the new backend
+  articleId?: string;
+  autoUpload?: boolean;
 }
 
 export const FileUpload = ({
@@ -23,6 +24,7 @@ export const FileUpload = ({
   maxSizeMB = 10,
   disabled = false,
   articleId = '',
+  autoUpload = true,
 }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -37,11 +39,15 @@ export const FileUpload = ({
         throw new Error(`File size must be less than ${maxSizeMB}MB`);
       }
 
-      const version = await uploadFile(file, articleId);
-      const publicUrl = resolveFileUrl(version.file_url);
-
-      onFileUploaded(publicUrl, file.name);
-      toast({ title: 'File uploaded successfully', description: `${file.name} has been uploaded.` });
+      if (autoUpload) {
+        const version = await uploadFile(file, articleId);
+        const publicUrl = resolveFileUrl(version.file_url);
+        onFileUploaded(publicUrl, file.name);
+        toast({ title: 'File uploaded successfully', description: `${file.name} has been uploaded.` });
+      } else {
+        onFileUploaded(file, file.name);
+        toast({ title: 'File recognized', description: `${file.name} is ready for submission.` });
+      }
     } catch (error: any) {
       console.error('Error uploading file:', error);
       toast({

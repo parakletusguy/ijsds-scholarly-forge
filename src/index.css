@@ -86,8 +86,18 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-on-surface font-body;
+    @apply bg-surface text-on-surface font-body;
     background-color: #fdf9f5;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .asymmetric-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
   }
 
   h1, h2, h3, h4, .serif-brand {
