@@ -32,6 +32,17 @@ import {
 } from "@/components/ui/sidebar";
 import { toast } from "@/hooks/use-toast";
 
+interface NavItemDef {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+}
+
+interface NavSection {
+  label: string;
+  items: NavItemDef[];
+}
+
 export const AppSidebar = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
@@ -61,29 +72,29 @@ export const AppSidebar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   // ── Nav definitions ────────────────────────────────────────────────────────
-  const publicNav = [
+  const publicNav: NavItemDef[] = [
     { title: "Scholarly Archive", url: "/articles", icon: Library },
     { title: "About the Journal", url: "/about", icon: BookMarked },
   ];
 
-  const authorNav = [
+  const authorNav: NavItemDef[] = [
     { title: "Manuscript Management", url: "/dashboard", icon: FileText },
     { title: "Submit Research", url: "/submit", icon: PenTool },
     { title: "Edit Profile", url: "/profile", icon: User },
   ];
 
-  const reviewerNav = [
+  const reviewerNav: NavItemDef[] = [
     { title: "Peer Review Status", url: "/reviewer-dashboard", icon: Eye },
   ];
 
-  const editorNav = [
+  const editorNav: NavItemDef[] = [
     { title: "Editorial Desk", url: "/editorial", icon: FileCheck },
     { title: "Production", url: "/production", icon: Wrench },
     { title: "Publication", url: "/publication", icon: Globe },
     { title: "Manage Blogs", url: "/admin", icon: BookOpen },
   ];
 
-  const adminNav = [
+  const adminNav: NavItemDef[] = [
     { title: "Institutional Registry", url: "/requests", icon: Building2 },
     { title: "Analytics", url: "/analytics", icon: BarChart3 },
     { title: "Data Management", url: "/data-management", icon: Database },
@@ -92,23 +103,32 @@ export const AppSidebar = () => {
     { title: "Scholarly Archive", url: "/archive", icon: Archive },
   ];
 
-  const buildNav = () => {
-    if (!user) return publicNav;
-    if (userRole.is_admin)
-      return [...authorNav, ...reviewerNav, ...editorNav, ...adminNav];
-    if (userRole.is_editor) return [...authorNav, ...reviewerNav, ...editorNav];
-    if (userRole.is_reviewer) return [...authorNav, ...reviewerNav];
-    return [...authorNav, ...publicNav];
+  const buildNavSections = (): NavSection[] => {
+    if (!user) return [{ label: "Public Access", items: publicNav }];
+
+    const sections: NavSection[] = [];
+
+    sections.push({ label: "Author Tools", items: authorNav });
+
+    if (userRole.is_reviewer || userRole.is_editor || userRole.is_admin) {
+      sections.push({ label: "Reviewer Hub", items: reviewerNav });
+    }
+
+    if (userRole.is_editor || userRole.is_admin) {
+      sections.push({ label: "Editorial Board", items: editorNav });
+    }
+
+    if (userRole.is_admin) {
+      sections.push({ label: "Administration", items: adminNav });
+    }
+
+    return sections;
   };
 
-  const navItems = buildNav();
+  const navSections = buildNavSections();
 
   // ── Item renderer ──────────────────────────────────────────────────────────
-  const NavItem = ({
-    item,
-  }: {
-    item: { title: string; url: string; icon: React.ElementType };
-  }) => {
+  const NavItemRender = ({ item }: { item: NavItemDef }) => {
     const active = isActive(item.url);
     return (
       <button
@@ -171,9 +191,25 @@ export const AppSidebar = () => {
 
       {/* ── Navigation ─────────────────────────────────────────────────────── */}
       <SidebarContent className="bg-white px-0 py-4 overflow-x-hidden">
-        <nav className="flex flex-col gap-0.5">
-          {navItems.map((item) => (
-            <NavItem key={item.url} item={item} />
+        <nav className="flex flex-col">
+          {navSections.map((section, index) => (
+            <div key={section.label} className={index > 0 ? "mt-4" : ""}>
+              {open ? (
+                <div className="px-6 mb-2 mt-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                    {section.label}
+                  </span>
+                </div>
+              ) : (
+                index > 0 && <div className="mx-4 my-3 border-t border-stone-100" />
+              )}
+              
+              <div className="flex flex-col gap-0.5">
+                {section.items.map((item) => (
+                  <NavItemRender key={item.url} item={item} />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
       </SidebarContent>

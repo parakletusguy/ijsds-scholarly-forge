@@ -46,7 +46,7 @@ export const MainFeatures = ({
       "Empowering Communities through Research and Practice"
     </>
   ),
-  description = "The International Journal On Social Work and Development Studies (IJSDS) is a peer-reviewed journal dedicated to advancing knowledge and practice in social work and development studies. Our aim is to provide a platform for researchers, practitioners, and policymakers to share their experiences, insights, and research findings.",
+  description = "The International Journal of Social Work and Development Studies (IJSDS) is a peer-reviewed journal dedicated to advancing knowledge and practice in social work and development studies. Our aim is to provide a platform for researchers, practitioners, and policymakers to share their experiences, insights, and research findings.",
   primaryButtonText = "Learn More",
   primaryButtonUrl = "https://ijsds.org/about",
   imageSrc = StatsIllustrationSrc,

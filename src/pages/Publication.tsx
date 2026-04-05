@@ -10,8 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+
 import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle, FileUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -72,13 +71,14 @@ export const Publication = () => {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('is_editor')
+        .select('is_editor, is_admin')
         .eq('id', user.id)
         .single();
 
       if (error) throw error;
 
-      if (!profile?.is_editor && !profile?.is_admin) {
+      const p = profile as any;
+      if (!p?.is_editor && !p?.is_admin) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to access this page",
@@ -242,12 +242,13 @@ export const Publication = () => {
 
   if (loading || !isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div>Loading...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="animate-pulse flex items-center gap-2">
+          <div className="w-4 h-4 bg-primary rounded-full animate-bounce" />
+          <div className="w-4 h-4 bg-primary rounded-full animate-bounce [animation-delay:-.3s]" />
+          <div className="w-4 h-4 bg-primary rounded-full animate-bounce [animation-delay:-.5s]" />
+          <span className="sr-only">Loading...</span>
         </div>
-        <Footer />
       </div>
     );
   }

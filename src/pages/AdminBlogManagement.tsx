@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit2, Trash2, Eye, Calendar, User, Search, Filter, ArrowLeft, BookOpen, GraduationCap, ShieldCheck, Activity, ChevronRight, Hash, Clock } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, Search, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface BlogPost {
   id: string;
@@ -109,147 +108,151 @@ export const AdminBlogManagement = () => {
     });
   };
 
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group mb-12";
-  const labelClasses = "font-headline font-black text-[10px] uppercase tracking-widest text-foreground/40 mb-4 block";
-
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse flex items-center gap-2">
+        <div className="w-4 h-4 bg-primary rounded-full animate-bounce" />
+        <div className="w-4 h-4 bg-primary rounded-full animate-bounce [animation-delay:-.3s]" />
+        <div className="w-4 h-4 bg-primary rounded-full animate-bounce [animation-delay:-.5s]" />
+        <span className="sr-only">Loading...</span>
+      </div>
     </div>
   );
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
-      <PageHeader 
-        title="Scholarly" 
-        subtitle="Press" 
-        accent="Narrative Governance"
-        description="Curate judicial and social work narratives. Manage the dissemination of high-impact journal blog content, community insights, and professional briefings."
-      />
-
-      <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-           <Button onClick={() => navigate('/dashboard')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Return to Command Hub
-           </Button>
-           
-           <Button onClick={() => navigate('/admin/blogs/new')} className="bg-primary hover:bg-secondary text-white rounded-none font-headline font-black uppercase text-xs tracking-widest px-12 py-7 h-auto shadow-xl group">
-              <Plus className="h-5 w-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
-              Generate New Narrative
-           </Button>
+    <div className="min-h-screen flex flex-col">
+      <div className="relative py-3">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/admin')}
+          className="mb-4 absolute top-1 left-3"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Command Hub
+        </Button>
+      </div>
+      
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Blog Management</h1>
+            <p className="text-muted-foreground">
+              Create, edit, and publish scholarly narratives and community insights.
+            </p>
+          </div>
+          <Button onClick={() => navigate('/admin/blogs/new')} className="w-full md:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            New Post
+          </Button>
         </div>
 
-        {/* Intelligence Search Bar */}
-        <div className="bg-white p-8 border-t-8 border-foreground shadow-xl mb-12 relative overflow-hidden">
-           <div className="absolute top-0 right-0 w-24 h-24 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-           <div className="flex flex-col md:flex-row gap-6 items-center relative z-10">
-              <div className="relative flex-1 group">
-                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
-                 <Input
-                   placeholder="Audit by title, category, or scholarly theme..."
-                   value={searchQuery}
-                   onChange={(e) => setSearchQuery(e.target.value)}
-                   className="pl-12 bg-muted/10 border-border/40 rounded-none h-16 font-body text-sm focus:border-primary transition-all"
-                 />
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Narrative Registry</CardTitle>
+            <CardDescription>
+              Manage all your published and drafted scholarly content
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by title, category, or theme..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
               </div>
-              <div className="flex items-center gap-4 bg-muted/20 p-4 border border-border/10">
-                 <ShieldCheck size={14} className="text-secondary" />
-                 <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40 italic">Audit Stream: {filteredPosts.length} Registered Narratives</span>
-              </div>
-           </div>
-        </div>
+              <Badge variant="secondary" className="px-4 py-2">
+                {filteredPosts.length} Posts
+              </Badge>
+            </div>
 
-        {/* Narrative Registry Table */}
-        <div className="bg-white border border-border/40 shadow-sm overflow-hidden">
-           <div className="overflow-x-auto">
+            <div className="border rounded-md">
               <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow className="border-b border-border/40 hover:bg-transparent">
-                    <TableHead className="font-headline font-black uppercase text-[10px] tracking-[0.2em] py-8 px-8 text-foreground/40">Publication Intelligence</TableHead>
-                    <TableHead className="font-headline font-black uppercase text-[10px] tracking-[0.2em] py-8 px-6 text-foreground/40">Scholarly Identity</TableHead>
-                    <TableHead className="font-headline font-black uppercase text-[10px] tracking-[0.2em] py-8 px-6 text-foreground/40 text-center">Protocol State</TableHead>
-                    <TableHead className="font-headline font-black uppercase text-[10px] tracking-[0.2em] py-8 px-6 text-foreground/40">Temporal Audit</TableHead>
-                    <TableHead className="font-headline font-black uppercase text-[10px] tracking-[0.2em] py-8 px-8 text-foreground/40 text-right">Audit Actions</TableHead>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title & Category</TableHead>
+                    <TableHead>Author</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredPosts.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="py-24 text-center font-body text-sm italic opacity-40">Narrative registry is currently clear.</TableCell>
+                      <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                        No posts found.
+                      </TableCell>
                     </TableRow>
                   ) : (
                     filteredPosts.map((post) => (
-                      <TableRow key={post.id} className="border-b border-border/10 hover:bg-secondary/5 transition-colors group">
-                        <TableCell className="py-10 px-8">
-                           <div className="flex flex-col gap-2">
-                              <h3 className="font-headline font-black uppercase text-sm tracking-tight leading-tight group-hover:text-primary transition-colors max-w-[400px]">{post.title}</h3>
-                              {post.category && (
-                                <div className="flex items-center gap-2 font-headline font-bold text-[9px] uppercase tracking-[0.2em] text-secondary">
-                                   <Hash size={10} /> {post.category}
-                                </div>
-                              )}
-                           </div>
+                      <TableRow key={post.id}>
+                        <TableCell>
+                          <div className="font-medium line-clamp-1 max-w-[300px]" title={post.title}>
+                            {post.title}
+                          </div>
+                          {post.category && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {post.category}
+                            </div>
+                          )}
                         </TableCell>
-                        <TableCell className="py-10 px-6">
-                           <div className="flex items-center gap-3">
-                              <div className="p-2 bg-muted rounded-none text-foreground/30"><User size={12} /></div>
-                              <span className="font-body text-xs text-foreground/60">{post.author_profile?.full_name || 'System Curator'}</span>
-                           </div>
+                        <TableCell>
+                          <div className="text-sm">
+                            {post.author_profile?.full_name || 'System Curator'}
+                          </div>
                         </TableCell>
-                        <TableCell className="py-10 px-6 text-center">
-                           <Badge variant="outline" className={`rounded-none font-headline font-bold uppercase text-[8px] tracking-[0.2em] px-3 py-1.5 border-2 ${post.status === 'published' ? 'bg-green-500/5 text-green-600 border-green-500/30' : 'bg-muted/50 text-foreground/30 border-border/40'}`}>
-                             {post.status}
-                           </Badge>
+                        <TableCell>
+                          <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
+                            {post.status}
+                          </Badge>
                         </TableCell>
-                        <TableCell className="py-10 px-6">
-                           <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-[10px] font-body text-foreground/30">
-                                 <Clock size={10} /> <span className="italic">Created:</span> {formatDate(post.created_at)}
-                              </div>
-                              {post.published_at && (
-                                <div className="flex items-center gap-2 text-[10px] font-body text-primary font-bold">
-                                   <Activity size={10} /> <span className="italic">Finalized:</span> {formatDate(post.published_at)}
-                                </div>
-                              )}
-                           </div>
+                        <TableCell>
+                          <div className="text-sm">
+                            {post.status === 'published' ? formatDate(post.published_at) : formatDate(post.created_at)}
+                          </div>
                         </TableCell>
-                        <TableCell className="py-10 px-8 text-right">
-                           <div className="flex justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                             <Button
-                               size="icon"
-                               variant="outline"
-                               onClick={() => navigate(`/blog/${post.id}`)}
-                               disabled={post.status !== 'published'}
-                               className="rounded-none h-12 w-12 border-border/40 hover:border-primary hover:text-primary transition-all"
-                             >
-                               <Eye className="h-4 w-4" />
-                             </Button>
-                             <Button
-                               size="icon"
-                               variant="outline"
-                               onClick={() => navigate(`/admin/blogs/edit/${post.id}`)}
-                               className="rounded-none h-12 w-12 border-border/40 hover:border-secondary hover:text-secondary transition-all"
-                             >
-                               <Edit2 className="h-4 w-4" />
-                             </Button>
-                             <Button
-                               size="icon"
-                               variant="outline"
-                               className="rounded-none h-12 w-12 border-border/40 text-destructive hover:bg-destructive hover:text-white hover:border-destructive transition-all"
-                               onClick={() => handleDelete(post.id)}
-                             >
-                               <Trash2 className="h-4 w-4" />
-                             </Button>
-                           </div>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/blog/${post.id}`)}
+                              disabled={post.status !== 'published'}
+                              title="View post"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/admin/blogs/edit/${post.id}`)}
+                              title="Edit post"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDelete(post.id)}
+                              title="Delete post"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
                   )}
                 </TableBody>
               </Table>
-           </div>
-        </div>
-      </ContentSection>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 };

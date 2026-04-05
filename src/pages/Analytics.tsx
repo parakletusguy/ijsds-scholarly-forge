@@ -251,8 +251,7 @@ export const Analytics = () => {
 
             <div className={chartCardClasses}>
                <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-primary pl-4">Decision Distribution Protocol</h3>
-               <div className="h-[400px]">
-                  <ResponsiveContainer width="100%" height="100%">
+               <ChartContainer config={{}} className="h-[400px] w-full">
                     <PieChart>
                       <Pie
                         data={analytics.editorialPerformance.decisionsByType}
@@ -265,8 +264,7 @@ export const Analytics = () => {
                       </Pie>
                       <ChartTooltip content={<ChartTooltipContent />} />
                     </PieChart>
-                  </ResponsiveContainer>
-               </div>
+               </ChartContainer>
                <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-8">
                   {analytics.editorialPerformance.decisionsByType.map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
@@ -359,8 +357,7 @@ export const Analytics = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                <div className={chartCardClasses}>
                   <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-primary pl-4">Acceptance Velocity Trend</h3>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={{}} className="h-[300px] w-full">
                       <LineChart data={analytics.acceptanceRates.monthlyTrend}>
                         <XAxis dataKey="month" stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
                         <YAxis stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
@@ -373,13 +370,11 @@ export const Analytics = () => {
                           name="Throughput %"
                         />
                       </LineChart>
-                    </ResponsiveContainer>
-                  </div>
+                  </ChartContainer>
                </div>
                <div className={chartCardClasses}>
                   <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-secondary pl-4">Decision Volume Matrix</h3>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={{}} className="h-[300px] w-full">
                       <BarChart data={analytics.acceptanceRates.monthlyTrend}>
                         <XAxis dataKey="month" stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
                         <YAxis stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
@@ -387,8 +382,7 @@ export const Analytics = () => {
                         <Bar dataKey="accepted" fill={COLORS[0]} radius={[4, 4, 0, 0]} name="Validated" />
                         <Bar dataKey="rejected" fill={COLORS[1]} radius={[4, 4, 0, 0]} name="Nullified" />
                       </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                  </ChartContainer>
                </div>
             </div>
           </TabsContent>
@@ -415,16 +409,14 @@ export const Analytics = () => {
 
             <div className={chartCardClasses}>
                <h3 className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 mb-10 border-l-4 border-foreground pl-4">Scholarly Publication Trajectory</h3>
-               <div className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
+               <ChartContainer config={{}} className="h-[350px] w-full">
                     <BarChart data={analytics.publicationStats.publicationTrend}>
                       <XAxis dataKey="month" stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
                       <YAxis stroke="#e5e7eb" tick={{ fontSize: 10, fontFamily: 'Graphik' }} />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Bar dataKey="published" fill={COLORS[2]} radius={[4, 4, 0, 0]} />
                     </BarChart>
-                  </ResponsiveContainer>
-               </div>
+               </ChartContainer>
             </div>
 
             <div className={chartCardClasses}>

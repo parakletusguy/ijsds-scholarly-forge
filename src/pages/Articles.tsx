@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Search, ArrowUpRight, Quote, ChevronRight, ArrowRight, BookOpen } from "lucide-react";
 import { downloadBibTeX } from "@/lib/bibtexService";
 import { toast } from "@/hooks/use-toast";
+import { handleFileDownload } from "@/lib/downloadUtils";
 
 const STOCK_IMAGES = [
   "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800",
@@ -321,8 +322,23 @@ export const Articles = () => {
                             Read Research
                             <ArrowUpRight className="w-4 h-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                           </button>
+                          {article.manuscript_file_url && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFileDownload(article.manuscript_file_url!, article.title);
+                              }}
+                              className="text-secondary/60 hover:text-primary flex items-center gap-2 transition-colors"
+                            >
+                              <BookOpen className="w-4 h-4" />
+                              <span className="text-xs font-bold uppercase tracking-widest">Download</span>
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleCite(article)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCite(article);
+                            }}
                             className="text-secondary/60 hover:text-primary flex items-center gap-2 transition-colors"
                           >
                             <Quote className="w-4 h-4" />

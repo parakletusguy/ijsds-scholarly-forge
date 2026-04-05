@@ -1,14 +1,21 @@
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Link, RefreshCw, Save, ExternalLink, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Link,
+  RefreshCw,
+  Save,
+  ExternalLink,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import { api } from "@/lib/apiClient";
 
-import type { Article } from '@/lib/articleService';
+import type { Article } from "@/lib/articleService";
 
 interface DOIManagerProps {
   article: Article;
@@ -18,52 +25,38 @@ interface DOIManagerProps {
 export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [manualDOI, setManualDOI] = useState(article.doi || '');
+  const [manualDOI, setManualDOI] = useState(article.doi || "");
   const [showManualInput, setShowManualInput] = useState(false);
 
   const generateDOI = async () => {
     setLoading(true);
     try {
-      // First, find the submission ID for this article
-      const { data: submissions, error: submissionError } = await supabase
-        .from('submissions')
-        .select('id')
-        .eq('article_id', article.id)
-        .limit(1);
+      // Call the custom backend to generate DOI
+      const responseData = (await api.post("/api/doi/generate", {
+        article_id: article.id,
+      })) as { success: boolean; data?: { doi: string }; message?: string };
 
-      if (submissionError || !submissions?.length) {
-        throw new Error('Could not find submission for this article');
-      }
-
-      const submissionId = submissions[0].id;
-
-      // Call the edge function to generate DOI
-      const { data, error } = await supabase.functions.invoke('generate-zenodo-doi', {
-        body: { 
-          submissionId,
-          existingDoi: article.doi || null
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
+      if (responseData.success && responseData.data) {
         toast({
-          title: article.doi ? "New Version Created" : "DOI Generated Successfully",
+          title: article.doi
+            ? "New Version Created"
+            : "DOI Generated Successfully",
           description: article.doi
-            ? `New version created. Concept DOI remains: ${data.doi}`
-            : `Concept DOI: ${data.doi}`,
+            ? `New version created. Concept DOI remains: ${responseData.data.doi}`
+            : `Concept DOI: ${responseData.data.doi}`,
         });
         onUpdate();
         setShowManualInput(false);
       } else {
-        throw new Error(data.error || 'Failed to generate DOI');
+        throw new Error(responseData.message || "Failed to generate DOI");
       }
     } catch (error) {
-      console.error('Error generating DOI:', error);
+      console.error("Error generating DOI:", error);
       toast({
         title: "DOI Generation Failed",
-        description: (error as Error).message || 'Failed to generate DOI. You can enter it manually.',
+        description:
+          (error as Error).message ||
+          "Failed to generate DOI. You can enter it manually.",
         variant: "destructive",
       });
       setShowManualInput(true);
@@ -84,22 +77,17 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('articles')
-        .update({ doi: manualDOI.trim() })
-        .eq('id', article.id);
-
-      if (error) throw error;
+      await api.patch(`/api/articles/${article.id}`, { doi: manualDOI.trim() });
 
       toast({
         title: "DOI Saved",
         description: "Manual DOI has been saved successfully",
       });
-      
+
       onUpdate();
       setShowManualInput(false);
     } catch (error) {
-      console.error('Error saving manual DOI:', error);
+      console.error("Error saving manual DOI:", error);
       toast({
         title: "Error",
         description: "Failed to save DOI",
@@ -116,17 +104,20 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
   };
 
   const formatAuthors = (authors: any) => {
-    if (!authors) return 'Unknown Author';
-    if (typeof authors === 'string') return authors;
+    if (!authors) return "Unknown Author";
+    if (typeof authors === "string") return authors;
     if (Array.isArray(authors)) {
-      return authors.map(author => {
-        if (typeof author === 'string') return author;
-        if (author.name) return author.name;
-        const name = `${author.firstName || ''} ${author.lastName || ''}`.trim();
-        return name || 'Unknown Author';
-      }).join(', ');
+      return authors
+        .map((author) => {
+          if (typeof author === "string") return author;
+          if (author.name) return author.name;
+          const name =
+            `${author.firstName || ""} ${author.lastName || ""}`.trim();
+          return name || "Unknown Author";
+        })
+        .join(", ");
     }
-    return 'Unknown Author';
+    return "Unknown Author";
   };
 
   return (
@@ -193,7 +184,9 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.open(`https://doi.org/${article.doi}`, '_blank')}
+                    onClick={() =>
+                      window.open(`https://doi.org/${article.doi}`, "_blank")
+                    }
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Button>
@@ -207,7 +200,8 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                 <span className="font-medium">No DOI Assigned</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                This article does not have a DOI yet. You can generate one automatically or enter it manually.
+                This article does not have a DOI yet. You can generate one
+                automatically or enter it manually.
               </p>
             </div>
           )}
@@ -224,21 +218,34 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h4 className="font-medium">Automatic DOI Generation</h4>
-                <p className="text-sm text-muted-foreground">
-                  {article.doi 
-                    ? 'Create a new version on Zenodo. The concept DOI will remain the same.'
-                    : 'Generate a concept DOI using Zenodo'
-                  }
+                <h4 className="font-headline font-black text-sm uppercase tracking-widest text-foreground">
+                  Automatic DOI Generation
+                </h4>
+                <p className="text-sm font-body text-muted-foreground mt-1">
+                  {article.doi
+                    ? "Create a new version on Zenodo. The concept DOI will remain the same."
+                    : "Generate a concept DOI using Zenodo"}
                 </p>
+                {!article.manuscript_file_url && (
+                  <p className="text-[10px] text-orange-600 font-bold uppercase tracking-widest mt-2 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> Manuscript file required
+                    to generate DOI
+                  </p>
+                )}
               </div>
               <Button
                 onClick={generateDOI}
                 disabled={loading || !article.manuscript_file_url}
-                className="flex items-center gap-2"
+                className="bg-foreground text-white rounded-none font-headline font-black uppercase text-xs tracking-widest px-8 py-6 flex items-center gap-2 hover:bg-primary transition-colors disabled:opacity-30"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Processing...' : (article.doi ? 'Create New Version' : 'Generate DOI')}
+                <RefreshCw
+                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                />
+                {loading
+                  ? "Processing..."
+                  : article.doi
+                    ? "Create New Version"
+                    : "Generate DOI"}
               </Button>
             </div>
           </div>
@@ -249,8 +256,10 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium">Manual DOI Entry</h4>
-                <p className="text-sm text-muted-foreground">
+                <h4 className="font-headline font-black text-sm uppercase tracking-widest text-foreground">
+                  Manual DOI Entry
+                </h4>
+                <p className="text-sm font-body text-muted-foreground mt-1">
                   Enter a DOI manually if automatic generation fails
                 </p>
               </div>
@@ -258,8 +267,9 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                 variant="outline"
                 onClick={() => setShowManualInput(!showManualInput)}
                 disabled={loading}
+                className="rounded-none font-headline font-black uppercase text-xs tracking-widest px-8 py-6"
               >
-                {showManualInput ? 'Cancel' : 'Enter Manually'}
+                {showManualInput ? "Cancel" : "Enter Manually"}
               </Button>
             </div>
 
@@ -271,11 +281,16 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                     placeholder="10.1234/example.doi"
                     value={manualDOI}
                     onChange={(e) => setManualDOI(e.target.value)}
-                    className={!validateDOI(manualDOI) && manualDOI ? 'border-red-300' : ''}
+                    className={
+                      !validateDOI(manualDOI) && manualDOI
+                        ? "border-red-300"
+                        : ""
+                    }
                   />
                   {manualDOI && !validateDOI(manualDOI) && (
                     <p className="text-xs text-red-600 mt-1">
-                      Please enter a valid DOI format (e.g., 10.1234/example.doi)
+                      Please enter a valid DOI format (e.g.,
+                      10.1234/example.doi)
                     </p>
                   )}
                 </div>
@@ -292,7 +307,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
                     variant="outline"
                     onClick={() => {
                       setShowManualInput(false);
-                      setManualDOI(article.doi || '');
+                      setManualDOI(article.doi || "");
                     }}
                   >
                     Cancel
@@ -303,7 +318,6 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
           </div>
         </CardContent>
       </Card>
-
     </div>
   );
 };

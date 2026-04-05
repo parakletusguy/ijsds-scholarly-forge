@@ -53,7 +53,7 @@ export const Footer = () => {
       <div className="px-12 py-8 border-t border-[#8f3514]/5 text-center md:text-left">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-body text-xs text-[#1c1c19]/50">
-            © {today.getFullYear()} International Journal of Sovereign Design & Scholarship (IJSDS). All rights reserved.
+            © {today.getFullYear()} International Journal of Social Work and Development Studies (IJSDS). All rights reserved.
           </p>
           <div className="flex items-center gap-6 opacity-30">
             <ShieldCheck size={20} />

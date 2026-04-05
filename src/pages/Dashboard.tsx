@@ -245,7 +245,7 @@ export const Dashboard = () => {
 
       {/* Bottom Institutional Credits */}
       <footer className="mt-32 pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-label uppercase tracking-[0.3em] text-on-surface/30">
-        <span>© 2024 International Journal of Sovereign Design Systems</span>
+        <span>© 2024 International Journal of Social Work and Development Studies</span>
         <div className="flex gap-10">
           <Link to="/about" className="hover:text-primary transition-colors">Registry Ethics</Link>
           <Link to="/about" className="hover:text-primary transition-colors">Continuity Protocol</Link>

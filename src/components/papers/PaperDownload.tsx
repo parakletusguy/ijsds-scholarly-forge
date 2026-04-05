@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { handleFileDownload } from '@/lib/downloadUtils';
 
 interface PaperDownloadProps {
   manuscriptFileUrl: string;
@@ -9,17 +10,7 @@ interface PaperDownloadProps {
 
 export const PaperDownload = ({ manuscriptFileUrl, title, className }: PaperDownloadProps) => {
   const handleDownload = () => {
-    if (manuscriptFileUrl) {
-      // Create a temporary link to trigger download
-      const link = document.createElement('a');
-      // link.href = `https://csihixcdxcldarcnclvq.supabase.co/storage/v1/object/public/journal-website-db1/${manuscriptFileUrl}`;
-      link.href = `${manuscriptFileUrl}`;
-      link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    handleFileDownload(manuscriptFileUrl, title);
   };
 
   if (!manuscriptFileUrl) {

@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, FileText, Calendar, User, Download, ShieldCheck, ClipboardList, Info, GraduationCap, ChevronRight, Activity } from 'lucide-react';
 import { SubmissionFileManager } from '@/components/submission/SubmissionFileManager';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
+import { handleFileDownload } from '@/lib/downloadUtils';
 
 interface SubmissionDetails {
   id: string;
@@ -161,7 +162,7 @@ export const ReviewerDetail = () => {
                           <p className="font-headline font-black text-[10px] uppercase tracking-widest text-foreground/30 mb-2">Prime Document</p>
                           <p className="font-body text-sm font-bold">Manuscript_v1_Source.pdf</p>
                        </div>
-                       <Button onClick={() => window.open(submission.article.manuscript_file_url!, '_blank')} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-8 py-6 h-auto tracking-widest shadow-xl group">
+                       <Button onClick={() => handleFileDownload(submission.article.manuscript_file_url!, submission.article.title)} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-8 py-6 h-auto tracking-widest shadow-xl group">
                           Download Manuscript <Download size={14} className="ml-3 group-hover:translate-y-1 transition-transform" />
                        </Button>
                     </div>

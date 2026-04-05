@@ -13,6 +13,7 @@ import { downloadBibTeX } from "@/lib/bibtexService";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
 import { PaperDownload } from "@/components/papers/PaperDownload";
+import { handleFileDownload } from "@/lib/downloadUtils";
 import { Search, BookOpen, Quote, Bookmark, Share2, ChevronLeft, Minus, Plus } from "lucide-react";
 
 const JOURNAL_TITLE = "International Journal of Social Work and Development Studies";
@@ -175,6 +176,19 @@ export const ArticleInfo = () => {
                 )}
               </div>
             </div>
+
+            {/* Prominent Download Button */}
+            {article.manuscript_file_url && (
+              <div className="mb-12">
+                <button
+                  onClick={() => handleFileDownload(article.manuscript_file_url!, article.title)}
+                  className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all shadow-xl shadow-primary/10"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Download Full-Text Manuscript
+                </button>
+              </div>
+            )}
 
             {/* Abstract Container */}
             <div className="bg-surface-container-low p-10 lg:p-14 rounded-2xl mb-16 relative overflow-hidden">

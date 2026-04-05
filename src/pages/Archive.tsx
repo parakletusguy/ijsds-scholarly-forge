@@ -161,9 +161,8 @@ export default function Archive() {
 
                           <div className="flex lg:flex-col gap-4 shrink-0 justify-end lg:justify-start pt-8 lg:pt-0">
                              <PaperDownload 
-                               manuscriptFileUrl={article.manuscript_file_url}
+                               manuscriptFileUrl={article.manuscript_file_url!}
                                title={article.title}
-                               iconOnly={false}
                              />
                              <Button 
                                variant="outline"

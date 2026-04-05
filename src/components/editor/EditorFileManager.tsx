@@ -9,7 +9,8 @@ import { FileUpload } from '@/components/file-management/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Upload, FileText, Calendar, RefreshCw, Shield } from 'lucide-react';
+import { Upload, FileText, Calendar, RefreshCw, Shield, Download } from 'lucide-react';
+import { handleFileDownload } from '@/lib/downloadUtils';
 
 interface FileVersion {
   id: string;
@@ -342,13 +343,23 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
                       </span>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(file.file_url, '_blank')}
-                  >
-                    View
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(file.file_url, '_blank')}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleFileDownload(file.file_url, file.file_name)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

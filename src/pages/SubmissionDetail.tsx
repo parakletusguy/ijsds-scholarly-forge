@@ -18,6 +18,7 @@ import ReceiptDown from "@/components/receiptGeneration/receiptDownload";
 import { SendRecieptMail } from "@/lib/emailService";
 import { uploadPdf } from "@/lib/cloudinary";
 import { api } from "@/lib/apiClient";
+import { handleFileDownload } from "@/lib/downloadUtils";
 interface SubmissionDetails {
   id: string;
   status: string;
@@ -333,9 +334,9 @@ export const SubmissionDetail = () => {
                     <Button
                       variant="outline"
                       onClick={() =>
-                        window.open(
+                        handleFileDownload(
                           submission.article.manuscript_file_url,
-                          "_blank",
+                          submission.article.title
                         )
                       }
                     >

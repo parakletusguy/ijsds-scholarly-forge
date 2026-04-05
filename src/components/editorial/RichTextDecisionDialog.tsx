@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { api } from '@/lib/apiClient';
 
 interface RichTextDecisionDialogProps {
   submissionId: string;
@@ -91,6 +92,15 @@ export const RichTextDecisionDialog = ({
         });
 
       if (decisionError) throw decisionError;
+
+      // Automatically trigger DOI generation if accepted
+      if (type === 'accept' && submission?.article_id) {
+        try {
+          await api.post('/api/doi/generate', { article_id: submission.article_id });
+        } catch (doiError) {
+          console.error('Failed to auto-generate DOI:', doiError);
+        }
+      }
 
       toast({
         title: 'Decision Recorded',

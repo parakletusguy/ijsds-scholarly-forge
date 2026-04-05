@@ -33,12 +33,12 @@ export const ArticleStructuredData = ({ articles }: ArticleStructuredDataProps) 
           "keywords": article.keywords?.join(", "),
           "publisher": {
             "@type": "Organization",
-            "name": "International Journal On Social Work and Development Studies",
+            "name": "International Journal of Social Work and Development Studies",
             "alternateName": "IJSDS"
           },
           "isPartOf": {
             "@type": "Periodical",
-            "name": "International Journal On Social Work and Development Studies",
+            "name": "International Journal of Social Work and Development Studies",
             "issn": ""
           },
           ...(article.volume && {

@@ -3,21 +3,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { getProfiles, updateProfile } from '@/lib/profileService';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ProfileCard } from '@/components/admins/approveRequest';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
-import { ShieldCheck, ArrowLeft, Users, ShieldAlert, Award, Activity } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Users, ShieldAlert, Award } from 'lucide-react';
 
 export const ManageRequests = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [loadingData, setLoadingData] = useState(true);
   const IsAdmin = !!profile?.is_admin;
-  const [editorRequests, seteditorRequests] = useState<any[]>([])
-  const [reviewerRequests, setreviewerRequests] = useState<any[]>([])
-  const [adminRequests, setadminRequests] = useState<any[]>([])
+  const [editorRequests, seteditorRequests] = useState<any[]>([]);
+  const [reviewerRequests, setreviewerRequests] = useState<any[]>([]);
+  const [adminRequests, setadminRequests] = useState<any[]>([]);
 
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }
@@ -31,20 +31,23 @@ export const ManageRequests = () => {
   const fetchRequests = async () => {
     try {
       const data = await getProfiles();
-      const edi: any[] = []
-      const rev: any[] = []
-      const adm: any[] = []
+      const edi: any[] = [];
+      const rev: any[] = [];
+      const adm: any[] = [];
       data.forEach((p: any) => {
-        if (p.request_admin) adm.push(p)
-        else if (p.request_editor) edi.push(p)
-        else if (p.request_reviewer) rev.push(p)
-      })
-      seteditorRequests(edi)
-      setreviewerRequests(rev)
-      setadminRequests(adm)
-    } catch (error) { toast({ title: 'Sync Error', description: 'Failed to access recruitment registry.', variant: 'destructive' }); }
-    finally { setLoadingData(false); }
-  }
+        if (p.request_admin) adm.push(p);
+        else if (p.request_editor) edi.push(p);
+        else if (p.request_reviewer) rev.push(p);
+      });
+      seteditorRequests(edi);
+      setreviewerRequests(rev);
+      setadminRequests(adm);
+    } catch (error) { 
+      toast({ title: 'Sync Error', description: 'Failed to access recruitment registry.', variant: 'destructive' }); 
+    } finally { 
+      setLoadingData(false); 
+    }
+  };
 
   const handleApproveEditor = async (id: any, type: string) :Promise<void> => {
     try {
@@ -66,7 +69,7 @@ export const ManageRequests = () => {
       }
       fetchRequests();
     } catch (error) { toast({ title: 'Command Refused', description: 'Failed to finalize decision registry.', variant: 'destructive' }); }
-  }
+  };
 
   const handleApproveReviewer = async (id: any, type: string) : Promise<void> => {
     try {
@@ -88,7 +91,7 @@ export const ManageRequests = () => {
       }
       fetchRequests();
     } catch (error) { toast({ title: 'Command Refused', description: 'Failed to finalize decision registry.', variant: 'destructive' }); }
-  }
+  };
   
   const handleApproveAdmin = async (id: any, type: string) : Promise<void> => {
     try {
@@ -110,115 +113,139 @@ export const ManageRequests = () => {
       }
       fetchRequests();
     } catch (error) { toast({ title: 'Command Refused', description: 'Failed to finalize decision registry.', variant: 'destructive' }); }
-  }
+  };
 
   if (loading || !IsAdmin || loadingData) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse flex items-center gap-2">
+        <div className="w-4 h-4 bg-primary rounded-full animate-bounce" />
+        <div className="w-4 h-4 bg-primary rounded-full animate-bounce [animation-delay:-.3s]" />
+        <div className="w-4 h-4 bg-primary rounded-full animate-bounce [animation-delay:-.5s]" />
+        <span className="sr-only">Loading...</span>
+      </div>
     </div>
   );
 
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
-
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
-      <PageHeader 
-        title="Role" 
-        subtitle="Protocol" 
-        accent="Access Management"
-        description="Oversee the authorization of scholarly identities. Redefine institutional access and manage recruitment requests for editorial and peer evaluation panels."
-      />
+    <div className="min-h-screen flex flex-col">
+      <div className="relative py-3">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate(-1)}
+          className="mb-4 absolute top-1 left-3"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Command Hub
+        </Button>
+      </div>
 
-      <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-           <Button onClick={() => navigate(-1)} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Return to Command
-           </Button>
-           
-           <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
-              <ShieldCheck size={16} className="text-secondary" />
-              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Authorized Governance Control</span>
-           </div>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Institutional Registry</h1>
+          <p className="text-muted-foreground">
+            Manage recruitment requests for editorial and peer evaluation panels.
+          </p>
         </div>
 
-        {/* Governance Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-           <div className={`bg-white p-10 border-t-8 border-primary shadow-xl relative overflow-hidden group`}>
-              <div className="absolute top-0 right-0 w-16 h-16 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-              <div className="flex items-center justify-between mb-4">
-                 <div className="p-3 bg-muted rounded-none text-foreground/40"><Users size={24} /></div>
-                 <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{reviewerRequests.length}</span>
-              </div>
-              <p className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40">Reviewer Invitations Pending</p>
-           </div>
-           <div className={`bg-white p-10 border-t-8 border-secondary shadow-xl relative overflow-hidden group`}>
-              <div className="absolute top-0 right-0 w-16 h-16 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-              <div className="flex items-center justify-between mb-4">
-                 <div className="p-3 bg-muted rounded-none text-foreground/40"><Award size={24} /></div>
-                 <span className="font-headline font-black text-4xl text-foreground tracking-tighter">{editorRequests.length}</span>
-              </div>
-              <p className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40">Editorial Board Applications</p>
-           </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Reviewer Invitations Pending</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{reviewerRequests.length}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Editorial Board Applications</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{editorRequests.length}</div>
+            </CardContent>
+          </Card>
         </div>
 
-        <Tabs defaultValue="reviewers" className="space-y-12">
-          <TabsList className="bg-white border border-border/20 p-2 rounded-none h-auto flex flex-wrap shadow-sm">
-            {[
-              { val: "reviewers", label: "Peer Evaluation Panel", count: reviewerRequests.length },
-              { val: "editors", label: "Editorial Governance", count: editorRequests.length },
-              { val: "admins", label: "Administrative Control", count: adminRequests.length }
-            ].map(tab => (
-              <TabsTrigger key={tab.val} value={tab.val} className="rounded-none py-4 px-8 data-[state=active]:bg-foreground data-[state=active]:text-white font-headline font-black uppercase text-[10px] tracking-widest transition-all gap-4 grow border-r border-border/10 last:border-0 h-16">
-                {tab.label} <Badge className="bg-primary/20 text-primary hover:bg-primary/20 border-none rounded-none text-[8px] font-bold px-2">{tab.count}</Badge>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <Card>
+          <Tabs defaultValue="reviewers" className="w-full">
+            <CardHeader className="p-0 border-b">
+              <TabsList className="w-full h-auto bg-transparent rounded-none border-b-0 p-0 flex">
+                <TabsTrigger 
+                  value="reviewers" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
+                >
+                  Peer Evaluation Panel
+                  <Badge variant="secondary" className="ml-2">{reviewerRequests.length}</Badge>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="editors" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
+                >
+                  Editorial Governance
+                  <Badge variant="secondary" className="ml-2">{editorRequests.length}</Badge>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="admins" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
+                >
+                  Administrative Control
+                  <Badge variant="secondary" className="ml-2">{adminRequests.length}</Badge>
+                </TabsTrigger>
+              </TabsList>
+            </CardHeader>
+            
+            <CardContent className="pt-6">
+              <TabsContent value="reviewers" className="space-y-4 m-0">
+                {reviewerRequests.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">Registry is currently clear.</div>
+                ) : (
+                  reviewerRequests.map(profile => (
+                    <ProfileCard
+                      key={profile.id}
+                      profile={profile}
+                      onApprove={() => handleApproveReviewer(profile.id,'approve')}
+                      onReject={() => handleApproveReviewer(profile.id,'reject')}
+                    />
+                  ))
+                )}
+              </TabsContent>
 
-          <TabsContent value="reviewers" className="space-y-4 mt-0">
-            {reviewerRequests.length === 0 ? (
-               <div className={cardClasses + " py-24 text-center opacity-40 italic font-body"}>Registry is currently clear. All evaluations synchronized.</div>
-            ) : (
-               reviewerRequests.map(profile => (
-                 <ProfileCard
-                   key={profile.id}
-                   profile={profile}
-                   onApprove={() => handleApproveReviewer(profile.id,'approve')}
-                   onReject={() => handleApproveReviewer(profile.id,'reject')}
-                 />
-               ))
-            )}
-          </TabsContent>
+              <TabsContent value="editors" className="space-y-4 m-0">
+                {editorRequests.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">Editorial applications registry clear.</div>
+                ) : (
+                  editorRequests.map(profile => (
+                    <ProfileCard
+                      key={profile.id}
+                      profile={profile}
+                      onApprove={() => handleApproveEditor(profile.id,'approve')}
+                      onReject={() => handleApproveEditor(profile.id,'reject')}
+                    />
+                  ))
+                )}
+              </TabsContent>
 
-          <TabsContent value="editors" className="space-y-4 mt-0">
-            {editorRequests.length === 0 ? (
-               <div className={cardClasses + " py-24 text-center opacity-40 italic font-body"}>Editorial applications registry clear.</div>
-            ) : (
-               editorRequests.map(profile => (
-                 <ProfileCard
-                   key={profile.id}
-                   profile={profile}
-                   onApprove={() => handleApproveEditor(profile.id,'approve')}
-                   onReject={() => handleApproveEditor(profile.id,'reject')}
-                 />
-               ))
-            )}
-          </TabsContent>
-          <TabsContent value="admins" className="space-y-4 mt-0">
-            {adminRequests.length === 0 ? (
-               <div className={cardClasses + " py-24 text-center opacity-40 italic font-body"}>No administrative applications pending.</div>
-            ) : (
-               adminRequests.map(profile => (
-                 <ProfileCard
-                   key={profile.id}
-                   profile={profile}
-                   onApprove={() => handleApproveAdmin(profile.id,'approve')}
-                   onReject={() => handleApproveAdmin(profile.id,'reject')}
-                 />
-               ))
-            )}
-          </TabsContent>
-        </Tabs>
-      </ContentSection>
+              <TabsContent value="admins" className="space-y-4 m-0">
+                {adminRequests.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">No administrative applications pending.</div>
+                ) : (
+                  adminRequests.map(profile => (
+                    <ProfileCard
+                      key={profile.id}
+                      profile={profile}
+                      onApprove={() => handleApproveAdmin(profile.id,'approve')}
+                      onReject={() => handleApproveAdmin(profile.id,'reject')}
+                    />
+                  ))
+                )}
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+        </Card>
+      </main>
     </div>
-  )
-}
+  );
+};

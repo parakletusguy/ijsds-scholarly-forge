@@ -73,7 +73,7 @@ const Receipt = ({ receiptNo, name, amount, description, date, reference }) => (
         <Image style={styles.logo} src={logo} />
         <View style={styles.companyInfo}>
           <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-            International Journal of Sustainable Development Studies (IJSDS)
+            International Journal of Social Work and Development Studies (IJSDS)
           </Text>
           <Text>Email: info@ijsds.org</Text>
           <Text>www.ijsds.org</Text>
