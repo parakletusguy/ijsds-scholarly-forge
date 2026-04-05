@@ -107,6 +107,7 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { TechSupportWidget } from "@/components/support/TechSupportWidget";
 
 const App = () => (
   <ErrorBoundary>
@@ -178,6 +179,7 @@ const App = () => (
                     <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
                   </Routes>
                 </Suspense>
+                <TechSupportWidget />
               </BrowserRouter>
             </div>
           </HelmetProvider>
