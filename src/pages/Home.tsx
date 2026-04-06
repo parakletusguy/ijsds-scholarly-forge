@@ -5,7 +5,7 @@ import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
 import mina from "../images/editors/Mina.jpeg"
-import logo from "/public/ijsds_logo_new.png"
+import logo from "/public/Logo_Black_Edited-removebg-preview.png"
 
 const STOCK_IMAGES = [
   "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=900",
@@ -90,7 +90,7 @@ export const Home = () => {
             <div className="aspect-[4/5] bg-surface-container-high overflow-hidden shadow-2xl relative group">
               <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 mix-blend-multiply" />
               <img
-                className="w-full h-full object-contain brightness-95 transition-transform duration-[2000ms] p-10 bg-white"
+                className="w-full h-full object-contain brightness-95 transition-transform duration-[2000ms] p-2 bg-white"
                 alt="IJSDS social work and development"
                 src={logo}
               />

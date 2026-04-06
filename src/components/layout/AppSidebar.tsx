@@ -174,13 +174,13 @@ export const AppSidebar = () => {
         >
           {open ? (
             <>
-              <img src="/ijsds_logo_new.png" alt="IJSDS Logo" className="h-16 w-auto object-contain" />
+              <img src="/Logo_Black_Edited-removebg-preview.png" alt="IJSDS Logo" className="h-24 w-auto object-contain max-w-[200px]" />
               <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-stone-400 mt-2">
                 Social Work and Development Studies
               </span>
             </>
           ) : (
-            <img src="/ijsds_logo_new.png" alt="IJSDS" className="h-8 w-auto object-contain" />
+            <img src="/Logo%20Symbol.png" alt="IJSDS" className="h-8 w-auto object-contain" />
           )}
         </button>
       </SidebarHeader>

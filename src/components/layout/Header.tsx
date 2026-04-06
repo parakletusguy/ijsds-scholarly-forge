@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import logo from "/public/ijsds_logo_new.png";
+import logo from "/public/Logo_Black_Edited-removebg-preview.png";
 
 export const Header = () => {
   const { user, loading } = useAuth();
@@ -82,7 +82,7 @@ export const Header = () => {
 
       {/* ── Main Navigation ──────────────────────────────────────────────── */}
       <nav
-        className={`bg-white/80 backdrop-blur-xl border-b border-outline-variant/10 transition-all duration-500 ${isScrolled ? "py-3 shadow-lg" : "py-5"}`}
+        className={`bg-white/80 backdrop-blur-xl border-b border-outline-variant/10 transition-all duration-500 ${isScrolled ? "py-2 shadow-sm" : "py-3"}`}
       >
         <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
           <div className="flex items-center gap-12">
@@ -93,7 +93,7 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="h-16 w-auto group-hover:scale-105 transition-transform duration-500"
+                className="h-12 md:h-14 w-auto object-contain group-hover:scale-[1.02] transition-transform duration-500"
               />
             </button>
 

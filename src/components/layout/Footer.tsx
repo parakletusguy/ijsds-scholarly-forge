@@ -8,7 +8,7 @@ export const Footer = () => {
     <footer className="bg-[#f7f3ef] border-t-2 border-[#8f3514]/10 mt-32">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 w-full max-w-7xl mx-auto">
         <div className="md:col-span-1">
-          <img src="/ijsds_logo_new.png" alt="IJSDS Logo" className="h-16 w-auto mb-6 object-contain" />
+          <img src="/Logo_Black_Edited-removebg-preview.png" alt="IJSDS Logo" className="h-24 w-auto mb-6 object-contain max-w-[280px]" />
           <p className="font-body text-sm leading-relaxed text-[#1c1c19]/70 max-w-xs">
             Advancing the global discourse on social work and development through rigorous research and international collaboration.
           </p>
