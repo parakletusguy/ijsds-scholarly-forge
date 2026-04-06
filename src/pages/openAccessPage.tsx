@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { PageHeader, ContentSection } from "@/components/layout/PageElements";
-import { Globe, Scale, DollarSign, MapPin, Mail, ExternalLink, ShieldCheck, Zap, BookOpen, Layers, Award, Target } from "lucide-react";
+import { Globe, Scale, DollarSign, MapPin, Mail, ExternalLink, ShieldCheck, Zap, BookOpen, Layers, Award, Target, ArrowRight } from "lucide-react";
 
 export default function OpenAccessPage() {
   const cardClasses = "bg-white p-12 md:p-16 border border-border/10 shadow-sm relative overflow-hidden group";
@@ -77,7 +77,7 @@ export default function OpenAccessPage() {
              <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/5" style={{ clipPath: 'circle(50% at 0 100%)' }}></div>
              <div className="flex items-center gap-6 mb-10 pb-6 border-b border-border/10">
                 <ShieldCheck className="h-10 w-10 text-secondary" />
-                <h3 className="text-2xl font-black font-headline uppercase tracking-tight">Copyright Sovereignty</h3>
+                <h3 className="text-2xl font-black font-headline uppercase tracking-tight">Copyright Ownership</h3>
              </div>
              <p className="font-body text-foreground/60 text-xl italic leading-relaxed">
                Authors retain full intellectual copyright. By publishing within IJSDS, investigators grant the journal the **canonical right of first publication** while maintaining ownership.

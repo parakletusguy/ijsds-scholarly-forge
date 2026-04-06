@@ -179,7 +179,7 @@ export const Partners = () => {
                 <p className="font-label text-primary-fixed-dim font-bold tracking-[0.3em] uppercase mb-6">Collaborative Advancement</p>
                 <h2 className="font-headline text-5xl md:text-6xl font-bold tracking-tight mb-8">Become a Scholarly Partner</h2>
                 <p className="text-xl text-surface-container-highest opacity-90 leading-relaxed mb-12">
-                  Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
+                  Join a network of excellence dedicated to the scientific advancement of social work and sustainable development globally.
                 </p>
                 <button 
                   onClick={() => navigate('/contact')}
@@ -205,7 +205,7 @@ export const Partners = () => {
             <div className="h-px bg-primary w-1/5 opacity-30"></div>
           </div>
           <p className="font-headline text-3xl font-semibold italic text-on-surface leading-snug">
-            "Partnership is the vessel through which academic theory transforms into African sovereignty."
+            "Partnership is the vessel through which academic theory transforms into sustainable social development."
           </p>
           <div className="flex justify-center items-center gap-4 mt-8">
             <div className="h-px bg-primary w-1/5 opacity-30"></div>

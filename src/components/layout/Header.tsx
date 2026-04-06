@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import logo from "/public/Logo_Black_Edited-removebg-preview.png";
+import logo from "/public/ijsds_logo_new.png";
 
 export const Header = () => {
   const { user, loading } = useAuth();
@@ -93,7 +93,7 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="h-9 w-auto group-hover:scale-105 transition-transform duration-500"
+                className="h-16 w-auto group-hover:scale-105 transition-transform duration-500"
               />
             </button>
 

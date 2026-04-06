@@ -8,9 +8,9 @@ export const Footer = () => {
     <footer className="bg-[#f7f3ef] border-t-2 border-[#8f3514]/10 mt-32">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 px-12 py-20 w-full max-w-7xl mx-auto">
         <div className="md:col-span-1">
-          <div className="font-headline text-3xl italic text-[#795900] mb-6">IJSDS</div>
+          <img src="/ijsds_logo_new.png" alt="IJSDS Logo" className="h-16 w-auto mb-6 object-contain" />
           <p className="font-body text-sm leading-relaxed text-[#1c1c19]/70 max-w-xs">
-            Advancing the global discourse on social development through the lens of sovereign African scholarship and international collaboration.
+            Advancing the global discourse on social work and development through rigorous research and international collaboration.
           </p>
         </div>
         

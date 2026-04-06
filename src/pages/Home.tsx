@@ -5,7 +5,7 @@ import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
 import mina from "../images/editors/Mina.jpeg"
-import logo from "/public/Logo_Black_Edited-removebg-preview.png"
+import logo from "/public/ijsds_logo_new.png"
 
 const STOCK_IMAGES = [
   "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=900",
@@ -64,11 +64,11 @@ export const Home = () => {
               Established 2025 · Open Access · Peer Reviewed
             </span>
             <h1 className="text-6xl md:text-8xl font-headline font-light leading-[1.05] tracking-tight text-on-surface mb-8">
-              Empowering African Agency through{' '}
-              <span className="italic text-primary">Scholarly Sovereignty.</span>
+              Empowering Communities through{' '}
+              <span className="italic text-primary">Social Work and Development.</span>
             </h1>
             <p className="text-lg md:text-xl text-on-surface-variant max-w-xl mb-10 leading-relaxed border-l-4 border-primary/20 pl-6">
-              The International Journal of Social Work and Development Studies (IJSDS) is a premier platform for intellectual discourse, centred on the advancement of the Global South.
+              The International Journal of Social Work and Development Studies (IJSDS) is a premier platform for intellectual discourse, centred on advancing knowledge and practice in social work and development studies.
             </p>
             <div className="flex flex-wrap gap-4">
               <button
@@ -90,9 +90,9 @@ export const Home = () => {
             <div className="aspect-[4/5] bg-surface-container-high overflow-hidden shadow-2xl relative group">
               <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 mix-blend-multiply" />
               <img
-                className="w-full h-full object-cover brightness-95 grayscale-[15%] group-hover:scale-105 transition-transform duration-[2000ms]"
-                alt="IJSDS scholarly heritage"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTh67ohBbQASGWUb0dJe3QQvce4Esh08n_58eIjGj2LwxbFFkLWnwtGgDhn8eSy0pYB37Enc0eM31Ot2bjQjacD7cyk4sW6dL-nri7wudjKUNAjGOp3KI1pTo0sW68vH--zbNer3rezix_TCrQ2zSgB8mHe7g7v9dPTanXsyKlAFQfxLff697SaSkX1nQQTMYFnfq8r0dbD3Ey8FMs9vHOBl3LK46akG-Py2cVHdZC5ZHsKvd7R3lSNLMNBEf04Tl4GqHjTmebLu0"
+                className="w-full h-full object-contain brightness-95 transition-transform duration-[2000ms] p-10 bg-white"
+                alt="IJSDS social work and development"
+                src={logo}
               />
             </div>
             <div className="absolute -bottom-6 -left-6 bg-primary p-8 text-white shadow-2xl max-w-xs">
@@ -343,7 +343,7 @@ export const Home = () => {
                 />
                 <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">"</span>
                 <blockquote className="font-headline text-3xl md:text-4xl leading-snug text-on-surface mb-10 font-light">
-                  Scholarship is not a passive observation of reality; it is the active construction of our future sovereignty. We no longer wait for validation — we define our own excellence.
+                  Scholarship is not a passive observation of reality; it is the active engagement with communities to foster sustainable social development and redefine our collective future.
                 </blockquote>
                 <div className="flex items-center justify-between border-l-4 border-primary pl-6">
                   <div>

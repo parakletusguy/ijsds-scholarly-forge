@@ -93,7 +93,7 @@ export const Dashboard = () => {
       <header className="mb-16">
         <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Registry Dashboard</p>
         <h3 className="text-4xl md:text-5xl font-headline text-on-surface max-w-2xl leading-tight">
-          Curation of Institutional Knowledge & Sovereign Protocols.
+          Curation of Social Work and Development Studies.
         </h3>
       </header>
 
@@ -119,7 +119,7 @@ export const Dashboard = () => {
         
         <div className="md:col-span-4 bg-primary p-10 flex flex-col justify-between text-on-primary group hover:bg-primary-container transition-colors duration-500">
           <div className="flex justify-between items-start">
-            <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Sovereign Registry</h4>
+            <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Scholarly Registry</h4>
             <span className="material-symbols-outlined opacity-50">verified</span>
           </div>
           <div>
@@ -151,7 +151,7 @@ export const Dashboard = () => {
           <div className="space-y-6">
             {submissions.length === 0 ? (
               <div className="bg-surface-container-lowest p-12 text-center border border-dashed border-outline-variant/30">
-                <p className="text-sm text-on-surface/40 uppercase tracking-widest mb-6">No records found in sovereign registry</p>
+                <p className="text-sm text-on-surface/40 uppercase tracking-widest mb-6">No records found in scholarly registry</p>
                 <button 
                   onClick={() => navigate('/submit')}
                   className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
@@ -198,7 +198,7 @@ export const Dashboard = () => {
           <div className="bg-surface-container-high p-10 h-full border-t border-primary/10">
             <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Registry Protocol</h4>
             <p className="text-sm leading-relaxed text-on-surface/70 mb-12 font-body italic">
-              Efficiency and continuity are the pillars of the IJSDS curation cycle. Each registry entry undergoes a triple-layer validation against sovereign design principles.
+              Efficiency and continuity are the pillars of the IJSDS curation cycle. Each registry entry undergoes a rigorous validation against our social development principles.
             </p>
             
             <div className="space-y-12 relative">
@@ -207,13 +207,13 @@ export const Dashboard = () => {
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-surface-container-high"></div>
                 <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Ingestion</h6>
-                <p className="text-[10px] text-on-surface/50 leading-relaxed">Initial alignment check with West African intellectual heritage.</p>
+                <p className="text-[10px] text-on-surface/50 leading-relaxed">Initial alignment check with social work and development focus.</p>
               </div>
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-outline-variant border-4 border-surface-container-high"></div>
                 <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 02: Peer Evaluation</h6>
-                <p className="text-[10px] text-on-surface/50 leading-relaxed">Double-blind review by the Sovereign Scholarly Committee.</p>
+                <p className="text-[10px] text-on-surface/50 leading-relaxed">Double-blind review by the expert Scholarly Committee.</p>
               </div>
               
               <div className="relative pl-8">
@@ -238,7 +238,7 @@ export const Dashboard = () => {
       <section className="mt-32 mb-16 text-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
         <div className="w-12 h-[1px] bg-primary mx-auto mb-10 opacity-30"></div>
         <blockquote className="text-2xl md:text-3xl font-headline italic text-on-surface/80 max-w-3xl mx-auto leading-snug">
-          "Design is not merely utility; it is the physical manifestation of institutional memory and sovereign dignity."
+          "Design is not merely utility; it is the physical manifestation of institutional memory and scholarly dignity."
         </blockquote>
         <div className="w-12 h-[1px] bg-primary mx-auto mt-10 opacity-30"></div>
       </section>

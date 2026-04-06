@@ -8,8 +8,8 @@ const Copyright = () => {
       <PageHeader 
         title="Scholarly" 
         subtitle="Rights" 
-        accent="Intellectual Sovereignty Registry"
-        description="A high-fidelity framework governing intellectual property, licensing, and author rights within the global multidisciplinary research commons. Protecting the sovereignty of African academic knowledge."
+        accent="Intellectual Contributions Registry"
+        description="A high-fidelity framework governing intellectual property, licensing, and author rights within the global multidisciplinary research commons. Protecting the intellectual contributions to social work and development."
       />
 
       {/* Licensing Core — Premium Scholarly Highlight */}
@@ -61,7 +61,7 @@ const Copyright = () => {
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/5 -z-0 opacity-20 pointer-events-none" style={{ clipPath: 'circle(50% at 0 100%)' }}></div>
                 <div className="relative z-10">
                    <Lock className="h-10 w-10 text-primary mb-8 transition-transform group-hover/card:translate-y-2" />
-                   <h3 className="text-2xl font-black font-headline uppercase tracking-tighter mb-4">Sovereign Control</h3>
+                   <h3 className="text-2xl font-black font-headline uppercase tracking-tighter mb-4">Author Control</h3>
                    <p className="font-body text-foreground/30 italic leading-relaxed">Authors are not required to transfer title; they remain the primary owners of their archival record.</p>
                 </div>
              </div>
@@ -161,7 +161,7 @@ const Copyright = () => {
             </div>
             
             <p className="font-headline text-3xl md:text-6xl font-black text-foreground uppercase tracking-tighter italic leading-none max-w-5xl mx-auto relative z-10 mb-16">
-              "Protecting the <span className="text-primary italic">Soverign Voice</span> of African Scholarship."
+              "Protecting the <span className="text-primary italic">Global Voice</span> of Social Work Scholarship."
             </p>
             
             <div className="flex flex-col items-center gap-8 relative z-10">

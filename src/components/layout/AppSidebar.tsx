@@ -174,17 +174,13 @@ export const AppSidebar = () => {
         >
           {open ? (
             <>
-              <span className="font-headline text-2xl font-bold text-stone-900 tracking-tight leading-none">
-                IJSDS
-              </span>
+              <img src="/ijsds_logo_new.png" alt="IJSDS Logo" className="h-16 w-auto object-contain" />
               <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-stone-400 mt-2">
-                Sovereign Design Systems
+                Social Work and Development Studies
               </span>
             </>
           ) : (
-            <span className="font-headline text-lg font-bold text-stone-900">
-              IJ
-            </span>
+            <img src="/ijsds_logo_new.png" alt="IJSDS" className="h-8 w-auto object-contain" />
           )}
         </button>
       </SidebarHeader>

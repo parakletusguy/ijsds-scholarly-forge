@@ -90,7 +90,7 @@ export const Auth = () => {
   return (
     <div className="min-h-screen bg-surface font-body text-on-surface antialiased textile-pattern flex flex-col pt-16 md:pt-24">
       <Helmet>
-        <title>Sovereign Scholar IJSDS - Institutional Access</title>
+        <title>Social Work and Development Studies - Institutional Access</title>
         <meta name="description" content="Secure entry portal for authors, reviewers, and editors of the International Journal of Social Work and Development Studies." />
       </Helmet>
 

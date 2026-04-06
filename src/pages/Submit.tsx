@@ -265,7 +265,7 @@ export const Submit = () => {
           <p className="text-on-surface-variant max-w-2xl leading-relaxed italic">
             Submit your manuscript to the International Journal of Social Work
             and Development Studies. Ensure all metadata aligns with our
-            editorial standards for African-centered intellectual heritage.
+            editorial standards for advancing social work discourse.
           </p>
 
           <div className="mt-8 flex items-center gap-6">
@@ -336,8 +336,8 @@ export const Submit = () => {
                     <option>Sustainable Architecture</option>
                     <option>Digital Heritage</option>
                     <option>Urban Ecology</option>
-                    <option>Economic Sovereignty</option>
-                    <option>Cultural Informatics</option>
+                    <option>Social Development</option>
+                    <option>Community Welfare</option>
                   </select>
                 </div>
                 <div className="space-y-2">
