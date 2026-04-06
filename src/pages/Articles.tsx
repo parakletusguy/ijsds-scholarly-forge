@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getArticles, getPartners, Article, Partner } from "@/lib/articleService";
 import { buildArticleSlug } from "@/lib/articleSlug";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Search, ArrowUpRight, Quote, ChevronRight, ArrowRight, BookOpen } from "lucide-react";
+import { Search, ArrowUpRight, Quote, ChevronRight, ArrowRight, BookOpen, ExternalLink } from "lucide-react";
 import { downloadBibTeX } from "@/lib/bibtexService";
 import { toast } from "@/hooks/use-toast";
 import { handleFileDownload } from "@/lib/downloadUtils";
@@ -204,13 +204,26 @@ export const Articles = () => {
                 <span className="text-[9px] font-bold tracking-widest text-primary uppercase block mb-3">Featured Paper</span>
                 <h4 className="font-headline text-lg leading-snug mb-3 line-clamp-3">{featured.title}</h4>
                 <p className="text-xs text-secondary mb-4 leading-relaxed line-clamp-2">{featured.abstract}</p>
-                <button
-                  onClick={() => navigate(`/article/${buildArticleSlug(featured)}`)}
-                  className="text-xs font-bold text-primary flex items-center gap-2 group"
-                >
-                  VIEW PAPER
-                  <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                </button>
+                <div className="flex items-center justify-between mt-4">
+                  <button
+                    onClick={() => navigate(`/article/${buildArticleSlug(featured)}`)}
+                    className="text-xs font-bold text-primary flex items-center gap-2 group"
+                  >
+                    VIEW PAPER
+                    <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                  {featured.doi && (
+                    <a
+                      href={`https://doi.org/${featured.doi}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[9px] font-bold text-primary/60 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-widest"
+                    >
+                      <ExternalLink size={10} />
+                      DOI
+                    </a>
+                  )}
+                </div>
               </div>
             )}
           </aside>
@@ -280,6 +293,18 @@ export const Articles = () => {
                           )}
                           {pubDate && (
                             <span className="text-secondary/40 text-xs font-mono">{pubDate}</span>
+                          )}
+                          {article.doi && (
+                            <a
+                              href={`https://doi.org/${article.doi}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/70 transition-colors uppercase tracking-widest"
+                            >
+                              <ExternalLink size={12} />
+                              DOI: {article.doi}
+                            </a>
                           )}
                         </div>
 

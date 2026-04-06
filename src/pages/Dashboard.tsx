@@ -93,7 +93,7 @@ export const Dashboard = () => {
       <header className="mb-16">
         <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Registry Dashboard</p>
         <h3 className="text-4xl md:text-5xl font-headline text-on-surface max-w-2xl leading-tight">
-          Curation of Social Work and Development Studies.
+          Curation of Institutional Knowledge & Sovereign Protocols.
         </h3>
       </header>
 
@@ -102,7 +102,7 @@ export const Dashboard = () => {
         <div className="md:col-span-8 bg-surface-container-low p-10 flex flex-col justify-between group hover:bg-surface-container transition-colors duration-500">
           <div>
             <div className="flex justify-between items-start mb-12">
-              <h4 className="font-headline text-2xl uppercase tracking-tighter">Active Manuscripts</h4>
+              <h4 className="font-headline font-black text-xs uppercase tracking-widest text-primary mb-4">Copyright Sovereignty</h4>
               <span className="text-[10px] font-label uppercase tracking-[0.2em] text-primary bg-primary/5 px-3 py-1">In Review: {inReviewSubmissions}</span>
             </div>
             <div className="flex items-end gap-4">
@@ -178,9 +178,9 @@ export const Dashboard = () => {
                       </span>
                       <span className="text-[10px] font-label text-on-surface/30 uppercase tracking-widest">SDS-{submission.id.slice(0, 8)}</span>
                     </div>
-                    <h5 className="font-headline text-xl mb-4 group-hover:text-primary transition-colors leading-snug">
-                      {art.title}
-                    </h5>
+                    <p className="font-headline text-3xl font-semibold italic text-on-surface leading-snug">
+                      "Partnership is the vessel through which academic theory transforms into African sovereignty."
+                    </p>
                     <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-on-surface/50">
                       <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Institutional Scholar'}</span>
                       <span className="w-1 h-1 bg-outline-variant/30 rounded-full"></span>
@@ -197,8 +197,8 @@ export const Dashboard = () => {
         <section className="hidden md:block">
           <div className="bg-surface-container-high p-10 h-full border-t border-primary/10">
             <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Registry Protocol</h4>
-            <p className="text-sm leading-relaxed text-on-surface/70 mb-12 font-body italic">
-              Efficiency and continuity are the pillars of the IJSDS curation cycle. Each registry entry undergoes a rigorous validation against our social development principles.
+            <p className="text-on-surface-variant max-w-md mx-auto italic font-body text-lg">
+              Submission implies adherence to the highest editorial standards for African-centered intellectual heritage.
             </p>
             
             <div className="space-y-12 relative">
@@ -207,7 +207,9 @@ export const Dashboard = () => {
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-surface-container-high"></div>
                 <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Ingestion</h6>
-                <p className="text-[10px] text-on-surface/50 leading-relaxed">Initial alignment check with social work and development focus.</p>
+                <p className="text-xl text-surface-container-highest opacity-90 leading-relaxed mb-12">
+                  Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
+                </p>
               </div>
               
               <div className="relative pl-8">

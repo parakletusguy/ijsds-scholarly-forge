@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, FileText, Calendar, User, Download } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, User, Download, ExternalLink } from "lucide-react";
 import {
   ProcessinFeeDialog,
   VettingDialog,
@@ -34,6 +34,7 @@ interface SubmissionDetails {
     manuscript_file_url: string | null;
     vetting_fee: boolean;
     processing_fee: boolean;
+    doi?: string | null;
   };
   submitter: {
     full_name: string;
@@ -292,6 +293,19 @@ export const SubmissionDetail = () => {
                     <Badge variant="secondary" className="mb-4">
                       {submission.article.subject_area}
                     </Badge>
+                  )}
+                  {submission.article.doi && (
+                    <div className="mb-4">
+                      <a
+                        href={`https://doi.org/${submission.article.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline uppercase tracking-widest bg-primary/5 px-2 py-1"
+                      >
+                        <ExternalLink size={12} />
+                        DOI: {submission.article.doi}
+                      </a>
+                    </div>
                   )}
                 </div>
 

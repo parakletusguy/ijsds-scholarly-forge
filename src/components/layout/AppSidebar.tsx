@@ -173,12 +173,7 @@ export const AppSidebar = () => {
           className={`flex flex-col w-full text-left transition-colors hover:bg-stone-50 ${open ? "px-6 pt-8 pb-6" : "px-4 pt-6 pb-5 items-center"}`}
         >
           {open ? (
-            <>
-              <img src="/Logo_Black_Edited-removebg-preview.png" alt="IJSDS Logo" className="h-24 w-auto object-contain max-w-[200px]" />
-              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-stone-400 mt-2">
-                Social Work and Development Studies
-              </span>
-            </>
+              <img src="/Logo_Black_Edited-removebg-preview.png" alt="IJSDS Logo" className="h-20 w-auto object-contain max-w-[200px]" />
           ) : (
             <img src="/Logo%20Symbol.png" alt="IJSDS" className="h-8 w-auto object-contain" />
           )}

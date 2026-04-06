@@ -14,7 +14,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
 import { PaperDownload } from "@/components/papers/PaperDownload";
 import { handleFileDownload } from "@/lib/downloadUtils";
-import { Search, BookOpen, Quote, Bookmark, Share2, ChevronLeft, Minus, Plus } from "lucide-react";
+import { Search, BookOpen, Quote, Bookmark, Share2, ChevronLeft, Minus, Plus, ExternalLink } from "lucide-react";
 
 const JOURNAL_TITLE = "International Journal of Social Work and Development Studies";
 
@@ -259,7 +259,18 @@ export const ArticleInfo = () => {
                 </button>
               </div>
               {article.doi && (
-                <div className="text-xs text-on-surface-variant italic">DOI: {article.doi}</div>
+                <div className="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+                  <span className="italic">DOI:</span>
+                  <a
+                    href={`https://doi.org/${article.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1 font-mono"
+                  >
+                    {article.doi}
+                    <ExternalLink size={10} />
+                  </a>
+                </div>
               )}
             </div>
           </article>
@@ -344,9 +355,20 @@ export const ArticleInfo = () => {
                       <h4 className="font-headline text-lg leading-snug group-hover:text-primary transition-colors">
                         {ra.title}
                       </h4>
-                      <p className="text-xs text-on-surface-variant mt-2">
-                        By {ra.authors?.[0]?.name || "IJSDS Editorial"}{ra.authors && ra.authors.length > 1 ? ' et al.' : ''}{ra.publication_date ? ` (${new Date(ra.publication_date).getFullYear()})` : ''}
-                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-on-surface-variant">
+                          By {ra.authors?.[0]?.name || "IJSDS Editorial"}{ra.authors && ra.authors.length > 1 ? ' et al.' : ''}{ra.publication_date ? ` (${new Date(ra.publication_date).getFullYear()})` : ''}
+                        </p>
+                        {ra.doi && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-primary/5 text-[9px] font-bold text-primary px-2 py-0.5 rounded flex items-center gap-1 uppercase tracking-widest"
+                          >
+                            <ExternalLink size={8} />
+                            DOI
+                          </div>
+                        )}
+                      </div>
                     </button>
                   )) : (
                     <p className="text-xs text-on-surface-variant italic">No related articles found.</p>

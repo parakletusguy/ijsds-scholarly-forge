@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Users, Globe, ArrowRight, User, TrendingUp, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { BookOpen, Users, Globe, ArrowRight, User, TrendingUp, MapPin, Clock, CheckCircle, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';
@@ -64,11 +64,11 @@ export const Home = () => {
               Established 2025 · Open Access · Peer Reviewed
             </span>
             <h1 className="text-6xl md:text-8xl font-headline font-light leading-[1.05] tracking-tight text-on-surface mb-8">
-              Empowering Communities through{' '}
-              <span className="italic text-primary">Social Work and Development.</span>
+              Empowering African Agency through{' '}
+              <span className="italic text-primary">Scholarly Sovereignty.</span>
             </h1>
             <p className="text-lg md:text-xl text-on-surface-variant max-w-xl mb-10 leading-relaxed border-l-4 border-primary/20 pl-6">
-              The International Journal of Social Work and Development Studies (IJSDS) is a premier platform for intellectual discourse, centred on advancing knowledge and practice in social work and development studies.
+              The International Journal of Social Work and Development Studies (IJSDS) is a premier platform for intellectual discourse, centred on the advancement of the Global South.
             </p>
             <div className="flex flex-wrap gap-4">
               <button
@@ -90,9 +90,9 @@ export const Home = () => {
             <div className="aspect-[4/5] bg-surface-container-high overflow-hidden shadow-2xl relative group">
               <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 mix-blend-multiply" />
               <img
-                className="w-full h-full object-contain brightness-95 transition-transform duration-[2000ms] p-2 bg-white"
-                alt="IJSDS social work and development"
-                src={logo}
+                className="w-full h-full object-cover brightness-95 grayscale-[15%] group-hover:scale-105 transition-transform duration-[2000ms]"
+                alt="IJSDS scholarly heritage"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTh67ohBbQASGWUb0dJe3QQvce4Esh08n_58eIjGj2LwxbFFkLWnwtGgDhn8eSy0pYB37Enc0eM31Ot2bjQjacD7cyk4sW6dL-nri7wudjKUNAjGOp3KI1pTo0sW68vH--zbNer3rezix_TCrQ2zSgB8mHe7g7v9dPTanXsyKlAFQfxLff697SaSkX1nQQTMYFnfq8r0dbD3Ey8FMs9vHOBl3LK46akG-Py2cVHdZC5ZHsKvd7R3lSNLMNBEf04Tl4GqHjTmebLu0"
               />
             </div>
             <div className="absolute -bottom-6 -left-6 bg-primary p-8 text-white shadow-2xl max-w-xs">
@@ -242,15 +242,29 @@ export const Home = () => {
                     <p className="text-on-surface-variant mb-6 line-clamp-3 leading-relaxed">
                       {featured.abstract}
                     </p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
-                        <User size={14} className="text-on-surface/40" />
+                    <div className="flex items-center gap-6 mt-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+                          <User size={14} className="text-on-surface/40" />
+                        </div>
+                        <span className="text-sm font-medium">{formatAuthors(featured.authors)}</span>
+                        {featured.publication_date && (
+                          <span className="text-sm text-on-surface/40">
+                            · {new Date(featured.publication_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
                       </div>
-                      <span className="text-sm font-medium">{formatAuthors(featured.authors)}</span>
-                      {featured.publication_date && (
-                        <span className="text-sm text-on-surface/40">
-                          · {new Date(featured.publication_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
-                        </span>
+                      {featured.doi && (
+                        <a
+                          href={`https://doi.org/${featured.doi}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/70 transition-colors uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-none"
+                        >
+                          <ExternalLink size={12} />
+                          DOI: {featured.doi}
+                        </a>
                       )}
                     </div>
                   </div>
@@ -272,9 +286,23 @@ export const Home = () => {
                       <p className="text-sm text-on-surface-variant mb-6 line-clamp-4 leading-relaxed">
                         {rest[0].abstract}
                       </p>
-                      <span className="text-primary font-bold text-xs uppercase tracking-widest underline underline-offset-4 group-hover:no-underline transition-all">
-                        Read Abstract →
-                      </span>
+                      <div className="flex items-center justify-between mt-auto">
+                        <span className="text-primary font-bold text-xs uppercase tracking-widest underline underline-offset-4 group-hover:no-underline transition-all">
+                          Read Abstract →
+                        </span>
+                        {rest[0].doi && (
+                          <a
+                            href={`https://doi.org/${rest[0].doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1.5 text-[9px] font-bold text-on-surface/40 hover:text-primary transition-colors uppercase tracking-widest"
+                          >
+                            <ExternalLink size={10} />
+                            DOI
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -305,9 +333,23 @@ export const Home = () => {
                       <p className="text-sm text-on-surface-variant line-clamp-2 leading-relaxed mb-4">
                         {article.abstract}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-on-surface/50">
-                        <User size={12} />
-                        <span>{formatAuthors(article.authors)}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs text-on-surface/50">
+                          <User size={12} />
+                          <span>{formatAuthors(article.authors)}</span>
+                        </div>
+                        {article.doi && (
+                          <a
+                            href={`https://doi.org/${article.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[9px] font-bold text-primary/60 hover:text-primary transition-colors uppercase tracking-widest flex items-center gap-1"
+                          >
+                            <ExternalLink size={10} />
+                            DOI
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -343,7 +385,7 @@ export const Home = () => {
                 />
                 <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">"</span>
                 <blockquote className="font-headline text-3xl md:text-4xl leading-snug text-on-surface mb-10 font-light">
-                  Scholarship is not a passive observation of reality; it is the active engagement with communities to foster sustainable social development and redefine our collective future.
+                  Scholarship is not a passive observation of reality; it is the active construction of our future sovereignty. We no longer wait for validation — we define our own excellence.
                 </blockquote>
                 <div className="flex items-center justify-between border-l-4 border-primary pl-6">
                   <div>

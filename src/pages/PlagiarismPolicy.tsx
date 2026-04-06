@@ -42,7 +42,7 @@ export const PlagiarismPolicy = () => {
               The International Journal of Social Work and Development Studies (IJSDS) is committed to the highest standards of <span className="text-foreground font-headline font-black uppercase text-xl leading-relaxed tracking-tight">Academic Integrity.</span>
             </p>
             <p className="text-lg text-foreground/60 font-body leading-relaxed max-w-2xl">
-              We leverage state-of-the-art plagiarism detection protocols (including Crossref Similarity Check) for every manuscript. Our mission is to protect the scholarly authenticity of multidisciplinary research in social work and development.
+              We leverage state-of-the-art plagiarism detection protocols (including Crossref Similarity Check) for every manuscript. Our mission is to protect the intellectual sovereignty and scholarly authenticity of multidisciplinary research across Africa.
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export const PlagiarismPolicy = () => {
                 <ul className="space-y-6 font-headline text-[10px] font-bold uppercase tracking-[0.4em] text-white/50">
                     <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-secondary shrink-0 group-hover/li:rotate-45 transition-transform"></div> Immediate Submission Termination</li>
                     <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-secondary shrink-0 group-hover/li:rotate-45 transition-transform"></div> Formal Institutional Governance Report</li>
-                    <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-secondary shrink-0 group-hover/li:rotate-45 transition-transform"></div> 3-Year Blacklist from Global Registry</li>
+                    <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-secondary shrink-0 group-hover/li:rotate-45 transition-transform"></div> 3-Year Blacklist from Continental Registry</li>
                 </ul>
              </div>
           </div>
@@ -130,7 +130,7 @@ export const PlagiarismPolicy = () => {
                 <h3 className="text-4xl font-black font-headline uppercase tracking-tighter mb-10 leading-[0.85]">Post-Publication <br/><span className="text-primary italic">Purge & Retract</span></h3>
                 <ul className="space-y-6 font-headline text-[10px] font-bold uppercase tracking-[0.4em] text-foreground/40">
                     <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-primary shrink-0 group-hover/li:rotate-90 transition-transform"></div> Immediate Archival Retraction</li>
-                    <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-primary shrink-0 group-hover/li:rotate-90 transition-transform"></div> Permanent Ban from Global Registry</li>
+                    <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-primary shrink-0 group-hover/li:rotate-90 transition-transform"></div> Permanent Ban from Continental Registry</li>
                     <li className="flex items-center gap-4 group/li transition-all"><div className="w-3 h-3 bg-primary shrink-0 group-hover/li:rotate-90 transition-transform"></div> COPE Registry Formal Notification</li>
                 </ul>
              </div>
@@ -184,9 +184,9 @@ export const PlagiarismPolicy = () => {
               </a>
               
               <div className="flex items-center gap-12 font-headline font-black text-xs uppercase tracking-[0.6em] text-foreground/10 italic">
-                 <span>Global Ethics Shield</span>
+                 <span>Continental Ethics Shield</span>
                  <span className="text-foreground/5 shrink-0">•</span>
-                 <span>Global Archival Integrity</span>
+                 <span>Continental Archival Integrity</span>
               </div>
            </div>
         </div>
