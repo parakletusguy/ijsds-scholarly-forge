@@ -115,10 +115,17 @@ export const ArticleInfo = () => {
         <meta name="citation_title" content={article.title} />
         {authors.map((a: any) => <meta key={a.name} name="citation_author" content={a.name} />)}
         <meta name="citation_journal_title" content={JOURNAL_TITLE} />
+        <meta name="citation_issn" content="3115-6940" />
+        <meta name="citation_issn" content="3115-6932" />
+        <meta name="citation_publisher" content={JOURNAL_TITLE} />
         <meta name="citation_volume" content={String(article.volume || "")} />
         <meta name="citation_issue" content={String(article.issue || "")} />
         <meta name="citation_date" content={article.publication_date || ""} />
         {article.doi && <meta name="citation_doi" content={article.doi} />}
+        {article.manuscript_file_url && (
+          <meta name="citation_pdf_url" content={article.manuscript_file_url} />
+        )}
+        <meta name="citation_language" content="en" />
         <style>{`
           .serif-dropcap::first-letter {
             float: left;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Download, ExternalLink, BookOpen, Plus, Layers, Database, History, Search, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Helmet } from 'react-helmet-async';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 import { getArticles, Article } from '@/lib/articleService';
 import { PaperDownload } from '@/components/papers/PaperDownload';
+import { buildArticleSlug } from '@/lib/articleSlug';
 
 interface VolumeIssue {
   volume: number;
@@ -164,13 +166,12 @@ export default function Archive() {
                                manuscriptFileUrl={article.manuscript_file_url!}
                                title={article.title}
                              />
-                             <Button 
-                               variant="outline"
-                               className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4 rounded-none h-auto"
-                               onClick={() => window.location.href = `/article/${article.id}`}
+                             <Link 
+                               to={`/article/${buildArticleSlug(article)}`}
+                               className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4 rounded-none h-auto bg-white"
                              >
                                <Search size={18} /> View Meta-Data
-                             </Button>
+                             </Link>
                           </div>
                         </div>
                       ))}
