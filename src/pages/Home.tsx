@@ -64,18 +64,18 @@ export const Home = () => {
               Established 2025 · Open Access · Peer Reviewed
             </span>
             <h1 className="text-6xl md:text-8xl font-headline font-light leading-[1.05] tracking-tight text-on-surface mb-8">
-              Empowering African Agency through{' '}
-              <span className="italic text-primary">Scholarly Sovereignty.</span>
+              Amplifying African Voices through{' '}
+              <span className="italic text-primary">Rigorous Research.</span>
             </h1>
             <p className="text-lg md:text-xl text-on-surface-variant max-w-xl mb-10 leading-relaxed border-l-4 border-primary/20 pl-6">
-              The International Journal of Social Work and Development Studies (IJSDS) is a premier platform for intellectual discourse, centred on the advancement of the Global South.
+              The International Journal of Social Work and Development Studies (IJSDS) is an international peer-reviewed journal dedicated to publishing high-quality research in social work and development studies.
             </p>
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={() => navigate('/articles')}
                 className="bg-primary text-white px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
-                Explore Archive
+                Browse Articles
               </button>
               <button
                 onClick={() => navigate(user ? '/submit' : '/auth')}
@@ -109,10 +109,10 @@ export const Home = () => {
         <div className="container mx-auto px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">
             {[
-              { icon: Globe, value: `${stats.reach}%`, label: 'Global Research Reach' },
-              { icon: Users, value: `${stats.scholars.toLocaleString()}+`, label: 'Active Impact Scholars' },
-              { icon: TrendingUp, value: `${stats.citations}+`, label: 'Citations Quarterly' },
-              { icon: MapPin, value: `${stats.nations}`, label: 'Member Nations' },
+              { icon: Globe, value: `${stats.reach}%`, label: 'International Reach' },
+              { icon: Users, value: `${stats.scholars.toLocaleString()}+`, label: 'Readers Worldwide' },
+              { icon: TrendingUp, value: `${stats.citations}+`, label: 'Citations' },
+              { icon: MapPin, value: `${stats.nations}`, label: 'Countries Reached' },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label} className="group">
                 <div className="text-5xl font-headline text-primary mb-3 flex items-center justify-center md:justify-start gap-3">
@@ -131,11 +131,11 @@ export const Home = () => {
         <div className="container mx-auto px-8">
           <div className="mb-20 max-w-2xl">
             <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
-              Institutional Excellence
+              Why Publish With Us
             </span>
             <h2 className="font-headline text-4xl md:text-5xl text-on-surface mb-6">Why Choose IJSDS?</h2>
             <p className="text-on-surface-variant leading-relaxed">
-              Advancing the frontiers of social work through rigorous peer review and a commitment to global knowledge equity.
+              We are committed to supporting researchers in publishing impactful, high-quality work that makes a difference in social work and development.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
@@ -144,19 +144,19 @@ export const Home = () => {
                 icon: Globe,
                 stat: '94%',
                 title: 'Global Reach',
-                body: 'Published research cited across 140+ countries and integrated into major policy frameworks worldwide.',
+                body: 'Our published articles are read and cited across 140+ countries and have informed policy decisions worldwide.',
               },
               {
                 icon: Clock,
                 stat: '28 Days',
-                title: 'Rapid Peer Review',
-                body: 'Efficient yet rigorous evaluation process ensuring timely publication of groundbreaking social development insights.',
+                title: 'Fast Peer Review',
+                body: 'We aim to complete the peer review process within 28 days so your research reaches readers quickly.',
               },
               {
                 icon: BookOpen,
                 stat: 'Open Access',
-                title: 'Knowledge Equity',
-                body: 'Committed to gold open access, ensuring your research is available to practitioners in low-resource settings.',
+                title: 'Free for Everyone',
+                body: 'Every article we publish is freely available to anyone — no subscription or payment required to read.',
               },
             ].map(({ icon: Icon, stat, title, body }) => (
               <div key={title} className="space-y-5 group">
@@ -202,7 +202,7 @@ export const Home = () => {
           ) : recentArticles.length === 0 ? (
             <div className="py-20 text-center border-2 border-dashed border-primary/10">
               <p className="text-on-surface/30 font-headline text-3xl italic">
-                "The archives await their next scholarly contribution."
+                "No articles published yet. Be the first to contribute."
               </p>
               <button
                 onClick={() => navigate(user ? '/submit' : '/auth')}
@@ -385,13 +385,13 @@ export const Home = () => {
                 />
                 <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">"</span>
                 <blockquote className="font-headline text-3xl md:text-4xl leading-snug text-on-surface mb-10 font-light">
-                  Scholarship is not a passive observation of reality; it is the active construction of our future sovereignty. We no longer wait for validation — we define our own excellence.
+                  Research is not just an academic exercise — it is how we shape the future. Through our journal, we give African scholars the platform they deserve to lead global conversations.
                 </blockquote>
                 <div className="flex items-center justify-between border-l-4 border-primary pl-6">
                   <div>
                     <p className="text-lg font-bold font-headline">Prof. Mina Magaret Ogbanga</p>
                     <p className="text-on-surface/40 uppercase tracking-[0.3em] text-[9px] font-bold mt-1">
-                      Editor-in-Chief, IJSDS Directorate
+                      Editor-in-Chief, IJSDS
                     </p>
                   </div>
                   <img src={logo} alt="Official Stamp" className="h-10 opacity-20 hidden sm:block grayscale" />
@@ -408,18 +408,18 @@ export const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="font-headline text-4xl md:text-5xl mb-6 font-light leading-tight">
-                Ready to contribute to <span className="italic">scholarly discourse?</span>
+                Ready to share your <span className="italic">research with the world?</span>
               </h2>
               <p className="text-white/70 leading-relaxed max-w-md">
-                IJSDS welcomes original research, field reports, and theoretical contributions advancing social work and development studies globally.
+                IJSDS welcomes original research articles, case studies, and reviews on social work and development studies from researchers worldwide.
               </p>
             </div>
             <div className="flex flex-col gap-6">
               {[
                 'Double-blind peer review within 28 days',
-                'Gold open access — no reader paywalls',
-                'Zenodo DOI registration for every article',
-                'Indexed across 140+ academic databases',
+                'Free to read — no subscription required',
+                'Permanent DOI link assigned to every article',
+                'Listed across 140+ academic databases',
               ].map((point) => (
                 <div key={point} className="flex items-start gap-4">
                   <CheckCircle size={18} className="text-white/60 mt-0.5 shrink-0" />

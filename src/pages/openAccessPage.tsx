@@ -1,188 +1,186 @@
 import { Helmet } from 'react-helmet-async';
-import { PageHeader, ContentSection } from "@/components/layout/PageElements";
-import { Globe, Scale, DollarSign, MapPin, Mail, ExternalLink, ShieldCheck, Zap, BookOpen, Layers, Award, Target, ArrowRight } from "lucide-react";
 
 export default function OpenAccessPage() {
-  const cardClasses = "bg-white p-12 md:p-16 border border-border/10 shadow-sm relative overflow-hidden group";
-
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body relative overflow-hidden">
+    <div className="min-h-screen bg-[#fcf9f8] font-body">
       <Helmet>
-        <title>Open Access Policy — IJSDS Mandate</title>
-        <meta name="description" content="Official institutional mandate for free, unrestricted access to scholarly research for the advancement of social work and development." />
+        <title>Open Access Policy — IJSDS</title>
+        <meta name="description" content="IJSDS is fully open access — every article is free to read, download, and share worldwide, immediately upon publication." />
       </Helmet>
 
-      {/* Atmospheric Background Accents */}
-      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-primary/5 rounded-full -mr-24 -mt-24 blur-[100px] opacity-30"></div>
+      <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
 
-      <PageHeader 
-        title="Open" 
-        subtitle="Access" 
-        accent="Democratizing Knowledge"
-        description="Our institutional mandate for free, unrestricted access to scholarly research. We believe in the immediate dissemination of intellectual assets for global social advancement."
-      />
-
-      {/* Phase-A: The Mandate */}
-      <ContentSection>
-        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-          <div className="w-full lg:w-1/3 relative group">
-             {/* Decorative Motif */}
-             <div className="absolute -inset-4 bg-primary/5 -z-10 rotate-3 group-hover:rotate-0 transition-transform duration-700"></div>
-             
-             <div className="bg-white p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border border-border/10 text-center relative z-10 flex flex-col items-center">
-                <div className="w-32 h-32 bg-primary/5 flex items-center justify-center text-primary mb-10 border border-primary/10 shadow-inner group-hover:scale-110 transition-transform">
-                   <Globe className="h-16 w-16 animate-pulse" />
-                </div>
-                <div className="h-1.5 w-24 bg-secondary mb-8"></div>
-                <p className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/40 italic">Universal Distribution</p>
-                <div className="absolute bottom-0 right-0 w-16 h-16 bg-secondary/5" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }}></div>
-             </div>
-          </div>
-
-          <div className="w-full lg:w-2/3">
-             <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-0.5 bg-primary"></div>
-                <span className="font-headline font-black text-[11px] uppercase tracking-[0.5em] text-secondary italic">Scholarly Ethos</span>
-             </div>
-             <h2 className="text-4xl md:text-7xl font-black font-headline uppercase tracking-tighter mb-10 leading-[0.9] text-foreground">
-               Knowledge Without <br/><span className="text-secondary italic">Boundaries</span>
-             </h2>
-             <div className="relative mb-12">
-                <p className="text-3xl md:text-4xl font-body italic text-foreground/70 leading-relaxed border-l-8 border-primary/20 pl-10 relative z-10">
-                  "All articles are freely available online to anyone, anywhere, immediately upon publication."
-                </p>
-             </div>
-             <p className="text-xl text-foreground/50 font-body leading-[1.8] max-w-3xl">
-               The International Journal of Social Work and Development Studies (IJSDS) operates under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**. This definitive protocol allows the global community to download, distribute, and build upon published work, ensuring that institutional knowledge drives real-world development.
-             </p>
-          </div>
+        {/* Page Header */}
+        <div className="mb-14 pb-10 border-b border-stone-200">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block mb-4">
+            Journal Policy
+          </span>
+          <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
+            Open Access Policy
+          </h1>
+          <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
+            The International Journal of Social Work and Development Studies (IJSDS) is fully open access. 
+            Every article we publish is freely available to anyone, anywhere in the world, immediately upon publication.
+          </p>
         </div>
-      </ContentSection>
 
-      {/* Phase-B: Institutional Protocols (Licensing) */}
-      <ContentSection dark title="Institutional Protocols">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-          <div className={cardClasses}>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-             <div className="flex items-center gap-6 mb-10 pb-6 border-b border-border/10">
-                <Scale className="h-10 w-10 text-primary" />
-                <h3 className="text-2xl font-black font-headline uppercase tracking-tight">Licensing Ledger</h3>
-             </div>
-             <p className="font-body text-foreground/60 text-xl italic leading-relaxed">
-               Articles are disseminated under **CC BY 4.0** terms, permitting continuous reading, printing, and linking for any lawful investigative purpose without technical restriction.
-             </p>
-          </div>
+        {/* Body Content */}
+        <div className="prose prose-stone max-w-none space-y-10 text-stone-700 leading-[1.85] text-[15px]">
 
-          <div className={cardClasses}>
-             <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/5" style={{ clipPath: 'circle(50% at 0 100%)' }}></div>
-             <div className="flex items-center gap-6 mb-10 pb-6 border-b border-border/10">
-                <ShieldCheck className="h-10 w-10 text-secondary" />
-                <h3 className="text-2xl font-black font-headline uppercase tracking-tight">Copyright Ownership</h3>
-             </div>
-             <p className="font-body text-foreground/60 text-xl italic leading-relaxed">
-               Authors retain full intellectual copyright. By publishing within IJSDS, investigators grant the journal the **canonical right of first publication** while maintaining ownership.
-             </p>
-          </div>
+          <section>
+            <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
+              What Open Access Means
+            </h2>
+            <p>
+              Open access means that published research is made freely and permanently available online, 
+              with no barriers such as subscriptions, registration fees, or paywalls. Anyone — whether a student 
+              in a rural university, a policymaker, or a practitioner — can read, download, and use our 
+              published articles without cost.
+            </p>
+            <p className="mt-4">
+              IJSDS publishes all its articles under the{' '}
+              <span className="font-semibold text-stone-900">Creative Commons Attribution 4.0 International (CC BY 4.0)</span>{' '}
+              license. Under this license, readers are free to share and redistribute the material in any medium or 
+              format, and to adapt, remix, or build upon it for any purpose — provided they give appropriate credit 
+              to the original authors and indicate if changes were made.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
+              Copyright
+            </h2>
+            <p>
+              Authors who publish in IJSDS retain full copyright of their work. By submitting an article, 
+              authors grant IJSDS the right of first publication, while retaining the right to archive, 
+              share, and reuse their own work in any future context — including depositing it in institutional 
+              repositories, sharing on personal or academic profile pages, and including it in future publications.
+            </p>
+            <p className="mt-4">
+              We do not require authors to sign over copyright to the journal. The CC BY 4.0 license 
+              grants readers broad permissions while ensuring authors are always credited as the originators of the work.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
+              Article Processing Charges
+            </h2>
+            <p>
+              To cover the costs of peer review management, copyediting, and digital production, IJSDS charges 
+              a fee upon acceptance of a manuscript. There is no fee to submit or to be considered for publication — 
+              charges apply only when an article has been accepted.
+            </p>
+            <div className="mt-5 bg-white border border-stone-200 rounded-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-stone-50 border-b border-stone-200">
+                    <th className="text-left px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Fee Type</th>
+                    <th className="text-right px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-100">
+                  <tr>
+                    <td className="px-5 py-3.5 text-stone-700">Submission Fee</td>
+                    <td className="px-5 py-3.5 text-right font-medium text-stone-500">None</td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-3.5 text-stone-700">Manuscript Review Fee</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦5,125</td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-3.5 text-stone-700">Article Publication Fee (APC)</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦20,500</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
+              Fee Waivers
+            </h2>
+            <p>
+              We are committed to ensuring that financial constraints do not prevent high-quality research 
+              from being published. Full or partial fee waivers are available to authors who are unable to 
+              pay the processing charges, including researchers based in lower-income countries or those in 
+              genuinely difficult financial circumstances.
+            </p>
+            <p className="mt-4">
+              To request a waiver, authors should contact the editorial office before or at the time of 
+              submission. Waiver requests are assessed on a case-by-case basis and are handled with discretion. 
+              Send your request to{' '}
+              <a
+                href="mailto:editor.ijsds@gmail.com"
+                className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
+              >
+                editor.ijsds@gmail.com
+              </a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
+              Self-Archiving & Sharing
+            </h2>
+            <p>
+              Authors are encouraged to share their published articles widely. You may post the final 
+              published version (PDF) on your personal website, university profile, or academic platforms 
+              such as ResearchGate, Academia.edu, or your institution's repository. The CC BY 4.0 license 
+              explicitly permits this — no further permission from the journal is required.
+            </p>
+            <p className="mt-4">
+              Every article published in IJSDS is also archived on{' '}
+              <a
+                href="https://zenodo.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
+              >
+                Zenodo
+              </a>
+              {' '}(operated by CERN) and assigned a permanent DOI link, ensuring your work remains 
+              discoverable and citable for the long term.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
+              Contact
+            </h2>
+            <p>
+              For any questions about our open access policy, licensing terms, or fee waivers, 
+              please contact the editorial office:
+            </p>
+            <div className="mt-5 bg-white border border-stone-200 p-5 space-y-1 text-sm text-stone-600">
+              <p className="font-semibold text-stone-900">Prof. Mina Magaret Ogbanga</p>
+              <p>Editor-in-Chief, IJSDS</p>
+              <p>
+                <a
+                  href="mailto:editor.ijsds@gmail.com"
+                  className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
+                >
+                  editor.ijsds@gmail.com
+                </a>
+              </p>
+              <p className="pt-1 text-stone-400 text-xs">
+                Dept. of Social Work, Faculty of Social Sciences, Rivers State University, Emohua.
+              </p>
+            </div>
+          </section>
+
         </div>
-      </ContentSection>
 
-      {/* Phase-C: Operational Infrastructure (Author Charges) */}
-      <ContentSection title="Operational Infrastructure">
-        <div className="bg-foreground text-white p-16 md:p-28 relative overflow-hidden group shadow-2xl border-t-[20px] border-primary">
-           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white opacity-[0.03] -z-0" style={{ clipPath: 'polygon(70% 0, 100% 0, 100% 40%)' }}></div>
-           <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 -z-0 opacity-50" style={{ clipPath: 'circle(50% at 0 100%)' }}></div>
-           
-           <div className="relative z-10 grid lg:grid-cols-2 gap-20 items-center">
-              <div>
-                 <div className="flex items-center gap-6 mb-10">
-                    <Zap className="h-6 w-6 text-secondary animate-pulse" />
-                    <span className="font-headline font-black text-xs uppercase tracking-[0.6em] text-white/30 italic">Technical Maintenance Fees</span>
-                 </div>
-                 <h3 className="text-5xl md:text-7xl font-black font-headline uppercase tracking-tighter mb-10 leading-none text-white">
-                    Processing <br/><span className="text-secondary italic">Economics</span>
-                 </h3>
-                 <p className="text-2xl font-body italic text-white/40 leading-relaxed mb-12">
-                   IJSDS does not levy submission or page fees. Required charges strictly cover editorial peer-review workflows and digital production infrastructure.
-                 </p>
-                 <div className="flex flex-wrap gap-8">
-                    <div className="bg-white/5 border border-white/10 px-10 py-8 backdrop-blur-md group-hover:border-secondary transition-all">
-                       <p className="font-headline font-black text-4xl mb-2">₦20,500</p>
-                       <p className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-secondary italic">APC Ledger</p>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 px-10 py-8 backdrop-blur-md group-hover:border-primary transition-all">
-                       <p className="font-headline font-black text-4xl mb-2">₦5,125</p>
-                       <p className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-primary italic">Vetting Node</p>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="bg-white p-12 md:p-16 text-foreground relative z-10 shadow-2xl border-l-[16px] border-secondary">
-                 <div className="flex items-center gap-4 mb-8">
-                    <Award size={20} className="text-secondary" />
-                    <h4 className="font-headline font-black text-xl uppercase tracking-tighter">Scholarly Equity Waivers</h4>
-                 </div>
-                 <p className="font-body text-xl text-foreground/50 italic leading-relaxed mb-10 border-l-4 border-border/10 pl-8">
-                   Institutional waivers are available for investigators from low-income domains or those facing verified financial constraints. Intellectual excellence should never be restricted by resource access.
-                 </p>
-                 <button className="w-full bg-foreground text-white py-6 font-headline font-black text-[10px] uppercase tracking-[0.5em] hover:bg-primary transition-all shadow-xl group/waiver">
-                    Request Registry Exemption <ArrowRight size={14} className="inline ml-4 group-hover/waiver:translate-x-2 transition-transform" />
-                 </button>
-              </div>
-           </div>
-           
-           <div className="mt-24 text-center opacity-10 font-headline font-black text-[9px] uppercase tracking-[0.8em]">
-              Financial Protocol v.04 — APC SYNCHRONIZATION
-           </div>
+        {/* Footer line */}
+        <div className="mt-16 pt-8 border-t border-stone-200 flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-[0.3em] text-stone-300">
+          <span>Open Access</span>
+          <span>•</span>
+          <span>CC BY 4.0</span>
+          <span>•</span>
+          <span>Free to Read</span>
         </div>
-      </ContentSection>
 
-      {/* Phase-D: Institutional Presence (Publisher Info) */}
-      <ContentSection dark title="Institutional Presence">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 pt-12">
-           <div className="space-y-8 group/info">
-              <div className="w-16 h-16 bg-primary/10 flex items-center justify-center group-hover/info:bg-primary group-hover/info:text-white transition-all border border-primary/5 shadow-inner">
-                 <MapPin className="h-8 w-8" />
-              </div>
-              <div className="space-y-4">
-                 <h4 className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-primary italic">Command Center</h4>
-                 <p className="font-body text-xl italic text-foreground/40 leading-relaxed max-w-[250px]">
-                   Dept. of Social Work, Faculty of Social Sciences, Rivers State University, Emohua.
-                 </p>
-              </div>
-           </div>
-           
-           <div className="space-y-8 group/info">
-              <div className="w-16 h-16 bg-secondary/10 flex items-center justify-center group-hover/info:bg-secondary group-hover/info:text-white transition-all border border-secondary/5 shadow-inner">
-                 <Mail className="h-8 w-8" />
-              </div>
-              <div className="space-y-4">
-                 <h4 className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-secondary italic">Correspondence Ledger</h4>
-                 <p className="font-body text-xl italic text-foreground/40 leading-relaxed">
-                   Mina Ogbanga, PhD <br/>
-                   <a href="mailto:editor.ijsds@gmail.com" className="font-headline font-black text-foreground hover:text-secondary transition-colors underline decoration-secondary/30">editor.ijsds@gmail.com</a>
-                 </p>
-              </div>
-           </div>
-
-           <div className="space-y-8 group/info">
-              <div className="w-16 h-16 bg-foreground/5 flex items-center justify-center group-hover/info:bg-foreground group-hover/info:text-white transition-all border border-border/10 shadow-inner">
-                 <Globe className="h-8 w-8" />
-              </div>
-              <div className="space-y-4">
-                 <h4 className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/20 italic">Digital Node</h4>
-                 <p className="font-body text-xl italic text-foreground/40 leading-relaxed">
-                   Global Registry <br/>
-                   <a href="http://www.ijsds.org" className="font-headline font-black text-foreground flex items-center gap-4 hover:text-primary transition-colors underline decoration-primary/30">
-                      www.ijsds.org <ExternalLink className="h-4 w-4 opacity-30" />
-                   </a>
-                 </p>
-              </div>
-           </div>
-        </div>
-      </ContentSection>
-      
-      <div className="container mx-auto px-4 mt-24 text-center opacity-10 font-headline font-black text-[9px] uppercase tracking-[0.8em]">
-         Institutional Policy Registry — Permanent Record v.04
       </div>
     </div>
   );

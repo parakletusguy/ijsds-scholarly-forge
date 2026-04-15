@@ -114,7 +114,7 @@ export const About = () => {
         >
           <div className="lg:col-span-7">
             <span className="text-primary font-bold tracking-[0.4em] text-[10px] uppercase mb-6 block">
-              International Scholarly Forum
+              International Peer-Reviewed Journal
             </span>
             <h1 className="text-7xl md:text-8xl font-headline leading-none tracking-tighter mb-10 text-on-background">
               About the <br />
@@ -123,15 +123,14 @@ export const About = () => {
             <div className="space-y-8 text-lg leading-relaxed text-secondary/80 pr-12 max-w-2xl">
               <p className="first-letter:text-6xl first-letter:font-headline first-letter:mr-4 first-letter:float-left first-letter:text-primary first-letter:leading-none font-medium text-on-background/80">
                 The International Journal of Social Work and Development Studies
-                (IJSDS) serves as a prestigious global forum for critical
-                inquiry into the intersections of social welfare and sustainable
-                development.
+                (IJSDS) is a leading international journal dedicated to publishing
+                high-quality research at the intersection of social welfare and
+                sustainable development.
               </p>
               <p className="italic">
-                Our mission is to bridge the gap between rigorous academic
-                theory and transformative frontline practice, prioritizing
-                research that addresses systemic inequalities and innovative
-                community-led strategies.
+                Our mission is to connect academic research with real-world practice,
+                prioritizing work that tackles inequality and supports communities
+                both in Africa and globally.
               </p>
               <div className="flex gap-10 pt-4">
                 <div>
@@ -171,15 +170,13 @@ export const About = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
             <div className="max-w-2xl">
               <span className="font-bold text-[10px] text-primary uppercase tracking-[0.4em] mb-4 block">
-                Scholarly Directorate
+                Meet the Editors
               </span>
               <h2 className="text-5xl md:text-6xl font-headline tracking-tighter mb-6 underline decoration-primary/10 decoration-8 underline-offset-[12px]">
                 Editorial Board
               </h2>
               <p className="text-secondary/60 text-lg leading-relaxed italic">
-                Guided by a distinguished collective of global experts ensuring
-                the highest standards of intellectual integrity and social
-                discourse.
+                Our journal is guided by an international team of experienced academics and practitioners who ensure every published article meets the highest scholarly standards.
               </p>
             </div>
             <div className="flex items-center gap-1 border border-outline-variant/10 p-1 bg-white/50 backdrop-blur">
@@ -316,7 +313,7 @@ export const About = () => {
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16">
             <div className="lg:col-span-5">
               <span className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-6 block">
-                Author Protocols
+                How to Submit
               </span>
               <h2 className="text-5xl font-headline mb-8 text-primary">
                 Submit Your Research
@@ -330,8 +327,8 @@ export const About = () => {
               <div className="space-y-4 mb-12">
                 {[
                   "Peer-Reviewed Publication",
-                  "DOAJ & Scopus Indexed",
-                  "Open Access Options",
+                  "Listed in DOAJ & Scopus",
+                  "Free to Read Worldwide",
                 ].map((label) => (
                   <div key={label} className="flex items-center gap-4 text-on-background">
                     <CheckCircle className="text-primary w-5 h-5 shrink-0" />
@@ -354,23 +351,23 @@ export const About = () => {
                 {[
                   {
                     step: "01",
-                    title: "Format Manuscript",
-                    desc: "Ensure your submission follows the APA 7th edition formatting and our journal-specific style guide.",
+                    title: "Format Your Paper",
+                    desc: "Make sure your manuscript follows the APA 7th edition style and our journal's formatting guidelines.",
                   },
                   {
                     step: "02",
-                    title: "Anonymize File",
-                    desc: "Remove all identifying information from the main document to ensure a fair double-blind review.",
+                    title: "Remove Your Name",
+                    desc: "Delete your name and institution from the main document so reviewers cannot identify you during the blind review process.",
                   },
                   {
                     step: "03",
-                    title: "Upload Files",
-                    desc: "Submit the anonymized manuscript along with a separate title page and any supplementary tables.",
+                    title: "Upload Your Files",
+                    desc: "Submit your anonymised paper along with a title page (with your name) and any additional files such as tables or figures.",
                   },
                   {
                     step: "04",
-                    title: "Track Progress",
-                    desc: "Use our dashboard to monitor the status of your peer review and editorial decisions.",
+                    title: "Track Your Submission",
+                    desc: "Log in to your dashboard to follow the progress of your submission through peer review and editorial decisions.",
                   },
                 ].map((s) => (
                   <div key={s.step} className="space-y-4">

@@ -54,6 +54,7 @@ const PreservationPolicy = lazy(() => import('./pages/PreservationPolicy').then(
 const Archive = lazy(() => import('./pages/Archive'));
 const Indexing = lazy(() => import('./pages/Indexing').then(m => ({ default: m.Indexing })));
 const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
+const EthicalGuidelines = lazy(() => import('./pages/EthicalGuidelines').then(m => ({ default: m.EthicalGuidelines })));
 const AdminBlogManagement = lazy(() => import('./pages/AdminBlogManagement').then(m => ({ default: m.AdminBlogManagement })));
 const EditBlogPost = lazy(() => import('./pages/EditBlogPost').then(m => ({ default: m.EditBlogPost })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
@@ -133,6 +134,7 @@ const App = () => (
                     <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
                     <Route path="/openAccess" element={<PublicLayout><OpenAccessPage /></PublicLayout>} />
                     <Route path="/plagiarism-policy" element={<PublicLayout><PlagiarismPolicy /></PublicLayout>} />
+                    <Route path="/ethical-guidelines" element={<PublicLayout><EthicalGuidelines /></PublicLayout>} />
                     <Route path="/preservation-policy" element={<PublicLayout><PreservationPolicy /></PublicLayout>} />
                     <Route path="/indexing" element={<PublicLayout><Indexing /></PublicLayout>} />
                     <Route path="/copyright" element={<PublicLayout><Copyright /></PublicLayout>} />

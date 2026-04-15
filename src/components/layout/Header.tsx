@@ -4,7 +4,6 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   User,
   LogOut,
-  Search,
   Menu,
   X,
   ChevronDown,
@@ -115,7 +114,6 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-6">
-            <Search className="w-5 h-5 text-stone-400 cursor-pointer hover:text-primary transition-colors hidden sm:block" />
 
             {loading ? (
               <div className="h-10 w-24 bg-stone-100 animate-pulse rounded" />
