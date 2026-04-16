@@ -11,6 +11,7 @@ export const Auth = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const isConfirmed = searchParams.get('confirmed') === 'true';
+  const reason = searchParams.get('reason');
   
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot-password'>(initialMode);
   const [email, setEmail] = useState('');
@@ -107,6 +108,15 @@ export const Auth = () => {
             ref={formRef}
             className="bg-surface-container-lowest p-10 md:p-14 shadow-[0px_12px_24px_-4px_rgba(28,28,25,0.06)] border-[0.5px] border-outline-variant/15"
           >
+            {reason === 'submit' && (
+              <div className="mb-8 p-4 bg-primary/5 border-l-4 border-primary animate-in fade-in slide-in-from-left-4 duration-500">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Submission Requirement</p>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  To properly track and manage your submitted articles through the peer-review process, please sign in or create an account.
+                </p>
+              </div>
+            )}
+
             <div className="mb-10">
               <h2 className="font-headline text-2xl font-semibold mb-2">
                 {mode === 'signin' ? 'Institutional Access' : mode === 'signup' ? 'Initiate Profile' : 'Access Recovery'}

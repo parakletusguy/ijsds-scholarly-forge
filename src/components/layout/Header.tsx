@@ -55,6 +55,7 @@ export const Header = () => {
     { name: "Home", path: "/" },
     { name: "Archive", path: "/articles" },
     { name: "About", path: "/about" },
+    { name: "Indexing", path: "/indexing" },
     { name: "Partners", path: "/partners" },
     { name: "Contact", path: "/contact" },
   ];
@@ -81,7 +82,7 @@ export const Header = () => {
 
       {/* ── Main Navigation ──────────────────────────────────────────────── */}
       <nav
-        className={`bg-white/80 backdrop-blur-xl border-b border-outline-variant/10 transition-all duration-500 ${isScrolled ? "py-2 shadow-sm" : "py-3"}`}
+        className={`bg-white/90 backdrop-blur-md transition-all duration-700 ${isScrolled ? "py-1 shadow-sm" : "py-2"}`}
       >
         <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
           <div className="flex items-center gap-12">
@@ -96,15 +97,15 @@ export const Header = () => {
               />
             </button>
 
-            <div className="hidden md:flex gap-8 items-center pt-1">
+            <div className="hidden md:flex gap-10 items-center">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                  className={`text-[10px] font-medium uppercase tracking-[0.25em] transition-all duration-500 ${
                     isActive(link.path)
-                      ? "text-primary border-b-2 border-primary pb-1"
-                      : "text-stone-500 hover:text-primary"
+                      ? "text-primary border-b border-primary/40 pb-0.5"
+                      : "text-stone-400 hover:text-primary"
                   }`}
                 >
                   {link.name}
@@ -174,10 +175,10 @@ export const Header = () => {
                   Log In
                 </button>
                 <button
-                  onClick={() => navigate("/auth")}
-                  className="bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] hover:bg-primary-container transition-all shadow-lg shadow-primary/10"
+                  onClick={() => navigate("/auth?reason=submit")}
+                  className="bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 border border-transparent"
                 >
-                  Sign Up
+                  Submit Manuscript
                 </button>
               </div>
             )}
