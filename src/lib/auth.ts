@@ -10,12 +10,7 @@ import { getActingRoleFromProfile } from "./roleUtils";
 import { Profile } from "@/types/profile";
 export type AuthProfile = Profile;
 
-interface RegisterResponse {
-  success: true;
-  data: { token: string; profile: AuthProfile };
-}
-
-interface LoginResponse {
+interface AuthResponse {
   success: true;
   token: string;
   profile: AuthProfile;
@@ -32,18 +27,18 @@ export const signUp = async (
   fullName: string,
 ) => {
   try {
-    const res = await api.post<RegisterResponse>("/auth/register", {
+    const res = await api.post<AuthResponse>("/auth/register", {
       email,
       password,
       full_name: fullName,
     });
-    const profile = res.data.profile;
+    const profile = res.profile;
     const actingRole = getActingRoleFromProfile(profile);
     console.log("[Auth] SignUp Computed actingRole:", actingRole);
     if (actingRole) setActingRole(actingRole);
-    setToken(res.data.token);
+    setToken(res.token);
     return {
-      data: { token: res.data.token, profile: res.data.profile },
+      data: { token: res.token, profile: res.profile },
       error: null,
     };
   } catch (err) {
@@ -53,7 +48,7 @@ export const signUp = async (
 
 export const signIn = async (email: string, password: string) => {
   try {
-    const res = await api.post<LoginResponse>("/auth/login", {
+    const res = await api.post<AuthResponse>("/auth/login", {
       email,
       password,
     });
@@ -62,7 +57,7 @@ export const signIn = async (email: string, password: string) => {
     console.log("[Auth] SignIn Computed actingRole:", actingRole);
     if (actingRole) setActingRole(actingRole);
     setToken(res.token);
-    return { data: { token: res.token, profile: res.profile }, error: null };
+    return { data: { token: res.token, profile }, error: null };
   } catch (err) {
     return { data: null, error: err as ApiError };
   }

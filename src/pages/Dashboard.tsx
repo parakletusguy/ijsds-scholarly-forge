@@ -162,24 +162,32 @@ export const Dashboard = () => {
             ) : (
               submissions.slice(0, 5).map((submission) => {
                 const art = (submission.article as any) || {};
+                const borderColor =
+                  submission.status === 'accepted' ? 'border-l-green-500' :
+                  submission.status === 'rejected' ? 'border-l-red-500' :
+                  submission.status === 'under_review' ? 'border-l-blue-500' :
+                  submission.status === 'revision_requested' ? 'border-l-orange-400' :
+                  'border-l-primary';
                 return (
-                  <div 
+                  <div
                     key={submission.id}
-                    className="bg-surface-container-lowest p-8 group hover:bg-surface-container transition-all duration-300 border border-transparent hover:border-outline-variant/10 cursor-pointer"
+                    className={`bg-surface-container-lowest p-8 group hover:bg-surface-container transition-all duration-300 border border-outline-variant/10 border-l-4 ${borderColor} cursor-pointer`}
                     onClick={() => navigate(`/submission/${submission.id}/details`)}
                   >
-                    <div className="flex justify-between items-start mb-6">
+                    <div className="flex justify-between items-start mb-4">
                       <span className={`text-[10px] font-label uppercase tracking-widest px-3 py-1 ${
-                        submission.status === 'accepted' ? 'bg-green-100/50 text-green-800' : 
+                        submission.status === 'accepted' ? 'bg-green-100/50 text-green-800' :
                         submission.status === 'rejected' ? 'bg-red-100/50 text-red-800' :
+                        submission.status === 'under_review' ? 'bg-blue-100/50 text-blue-800' :
+                        submission.status === 'revision_requested' ? 'bg-orange-100/50 text-orange-800' :
                         'bg-secondary-container/20 text-secondary'
                       }`}>
                         {formatStatus(submission.status)}
                       </span>
-                      <span className="text-[10px] font-label text-on-surface/30 uppercase tracking-widest">SDS-{submission.id.slice(0, 8)}</span>
+                      <span className="text-[10px] font-label text-on-surface/30 uppercase tracking-widest">SDS-{submission.id.slice(0, 8).toUpperCase()}</span>
                     </div>
-                    <p className="font-headline text-3xl font-semibold italic text-on-surface leading-snug">
-                      "Partnership is the vessel through which academic theory transforms into African sovereignty."
+                    <p className="font-headline text-xl font-semibold text-on-surface leading-snug mb-4 line-clamp-2">
+                      {art.title || 'Untitled Manuscript'}
                     </p>
                     <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-on-surface/50">
                       <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Institutional Scholar'}</span>
