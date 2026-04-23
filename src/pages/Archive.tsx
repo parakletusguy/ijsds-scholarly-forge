@@ -19,6 +19,7 @@ interface VolumeIssue {
 
 export default function Archive() {
   const [archiveData, setArchiveData] = useState<VolumeIssue[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,38 +70,63 @@ export default function Archive() {
     if (authors.length === 2) return `${authors[0].name} and ${authors[1].name}`;
     return `${authors[0].name} et al.`;
   };
-
+  const filteredArchive = archiveData.filter(vi => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const matchesVol = vi.volume.toString().includes(q);
+    const matchesIssue = vi.issue.toString().includes(q);
+    const matchesYear = vi.year.includes(q);
+    const matchesArticle = vi.articles.some(a => 
+      a.title.toLowerCase().includes(q) || 
+      a.authors?.some((au: any) => au.name.toLowerCase().includes(q))
+    );
+    return matchesVol || matchesIssue || matchesYear || matchesArticle;
+  });
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen font-body">
       <Helmet>
-        <title>Archive IJSDS — Scholarly Record Ledger</title>
-        <meta name="description" content="Browse the complete digital archive of the IJSDS scholarly records grouped by Volume and Issue." />
+        <title>Archive — IJSDS</title>
+        <meta name="description" content="Browse the complete digital archive of IJSDS research articles grouped by Volume and Issue." />
       </Helmet>
 
       <PageHeader 
-        title="Scholarly" 
-        subtitle="Archives" 
-        accent="Digital Institutional Ledger"
-        description="The complete historical record of IJSDS publications, documenting the evolution of multicisciplinary development scholarship."
+        title="Journal" 
+        subtitle="Archive" 
+        accent="Historical Records"
+        description="The complete historical record of IJSDS publications, documenting the evolution of multidisciplinary development scholarship."
       />
 
       <ContentSection>
         <div className="max-w-6xl mx-auto">
+          {/* Search Bar */}
+          <div className="mb-16 relative">
+            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+              <Search size={18} className="text-secondary/40" />
+            </div>
+            <input 
+              type="text"
+              placeholder="Search volumes, issues, or article titles..."
+              className="w-full bg-white border border-outline-variant/10 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
           {loading ? (
             <div className="space-y-12 animate-pulse">
                {[1, 2, 3].map(i => (
                  <div key={i} className="h-32 bg-white border border-border/10 shadow-sm" />
                ))}
             </div>
-          ) : archiveData.length === 0 ? (
+          ) : filteredArchive.length === 0 ? (
             <div className="text-center py-48 bg-white border-2 border-dashed border-border/10 group relative overflow-hidden">
                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                <Database size={64} className="mx-auto text-foreground/10 mb-8 group-hover:rotate-12 transition-transform" />
-               <h3 className="text-3xl font-headline font-black text-foreground/20 uppercase tracking-[0.3em] relative z-10 italic">Archive Repository Status: Empty</h3>
+               <h3 className="text-3xl font-headline font-black text-foreground/20 uppercase tracking-[0.3em] relative z-10 italic">No records found</h3>
             </div>
           ) : (
-            <Accordion type="single" collapsible className="space-y-12">
-              {archiveData.map((volumeIssue) => (
+            <Accordion type="multiple" defaultValue={filteredArchive.length > 0 ? [`${filteredArchive[0].volume}-${filteredArchive[0].issue}`] : []} className="space-y-12">
+              {filteredArchive.map((volumeIssue) => (
                 <AccordionItem 
                   key={`${volumeIssue.volume}-${volumeIssue.issue}`} 
                   value={`${volumeIssue.volume}-${volumeIssue.issue}`}
@@ -120,12 +146,12 @@ export default function Archive() {
                         </h2>
                         <div className="flex items-center gap-6 mt-6">
                            <Badge className="bg-foreground text-white px-4 py-1.5 font-headline text-[10px] font-black uppercase tracking-widest rounded-none shadow-md">
-                              Institutional Release: {volumeIssue.year}
+                              Published: {volumeIssue.year}
                            </Badge>
                            <div className="flex items-center gap-2">
                               <Layers size={14} className="text-secondary" />
                               <span className="text-foreground/40 text-[11px] font-bold uppercase tracking-widest italic">
-                                 {volumeIssue.articles.length} Records Cataloged
+                                 {volumeIssue.articles.length} Articles
                               </span>
                            </div>
                         </div>
@@ -145,7 +171,7 @@ export default function Archive() {
                           <div className="flex-grow space-y-6">
                              <div className="flex items-center gap-4 font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30 italic">
                                 <History size={12} className="text-primary" />
-                                <span>Digital Manuscript Segment</span>
+                                <span>Peer-Reviewed Article</span>
                              </div>
 
                              <h3 className="text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors cursor-pointer">
@@ -170,7 +196,7 @@ export default function Archive() {
                                to={`/article/${buildArticleSlug(article)}`}
                                className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4 rounded-none h-auto bg-white"
                              >
-                               <Search size={18} /> View Meta-Data
+                               <Search size={18} /> View Details
                              </Link>
                           </div>
                         </div>

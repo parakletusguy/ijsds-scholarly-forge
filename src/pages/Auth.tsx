@@ -100,7 +100,7 @@ export const Auth = () => {
           {/* Page Heading */}
           <div className="text-center mb-12">
             <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-3">Heritage &amp; Horizon</h1>
-            <p className="font-body text-xs tracking-[0.2em] uppercase opacity-60">Secure Scholarly Registry Access</p>
+            <p className="font-body text-xs tracking-[0.2em] uppercase opacity-60">User Portal Login</p>
           </div>
 
           {/* Login Container */}
@@ -119,14 +119,14 @@ export const Auth = () => {
 
             <div className="mb-10">
               <h2 className="font-headline text-2xl font-semibold mb-2">
-                {mode === 'signin' ? 'Institutional Access' : mode === 'signup' ? 'Initiate Profile' : 'Access Recovery'}
+                {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
               </h2>
               <p className="text-on-surface-variant text-sm">
                 {mode === 'signin' 
-                  ? 'Please verify your credentials to access the secure scholarly registry.' 
+                  ? 'Sign in to your account to continue.' 
                   : mode === 'signup' 
-                    ? 'Begin your contribution to the global scholarly horizon.' 
-                    : 'Enter your institutional email to recover entry protocols.'}
+                    ? 'Create an account to start submitting and reviewing.' 
+                    : 'Enter your email to receive password reset instructions.'}
               </p>
             </div>
 
@@ -149,7 +149,7 @@ export const Auth = () => {
 
               {/* Field: Institutional Email */}
               <div className="space-y-2">
-                <label className="block font-label text-xs font-semibold uppercase tracking-widest text-on-surface-variant" htmlFor="email">Institutional Email</label>
+                <label className="block font-label text-xs font-semibold uppercase tracking-widest text-on-surface-variant" htmlFor="email">Email Address</label>
                 <input 
                   className="w-full bg-surface-container-high border-0 border-b border-outline-variant py-4 px-0 transition-all focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/40" 
                   id="email" 
@@ -199,7 +199,7 @@ export const Auth = () => {
                   disabled={loading}
                 >
                   <span className="tracking-widest uppercase text-sm">
-                    {loading ? 'Authorizing...' : mode === 'signin' ? 'Secure Portal Access' : mode === 'signup' ? 'Initiate Registry' : 'Dispatch Recall'}
+                    {loading ? 'Authorizing...' : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'}
                   </span>
                   {!loading && <Lock className="text-lg w-5 h-5" />}
                 </button>

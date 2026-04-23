@@ -258,3 +258,14 @@ export const updateArticle = async (
   );
   return res.data;
 };
+
+export const getVolumesIssues = async (): Promise<{ volumes: number[]; issues: number[] }> => {
+  try {
+    const articles = await getArticles({ status: 'published' });
+    const volumes = Array.from(new Set(articles.map(a => a.volume).filter((v): v is number => !!v))).sort((a, b) => b - a);
+    const issues = Array.from(new Set(articles.map(a => a.issue).filter((i): i is number => !!i))).sort((a, b) => b - a);
+    return { volumes, issues };
+  } catch {
+    return { volumes: [5, 4, 3, 2, 1], issues: [4, 3, 2, 1] };
+  }
+};

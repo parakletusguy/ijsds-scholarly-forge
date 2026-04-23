@@ -44,8 +44,8 @@ export const Header = () => {
       });
     } else {
       toast({
-        title: "Registry Access Revoked",
-        description: "Institutional session terminated successfully.",
+        title: "Signed Out",
+        description: "You have been signed out successfully.",
       });
       navigate("/");
     }
@@ -65,9 +65,10 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* ── ISSN Top Bar ────────────────────────────────────────────────── */}
-      <div className="bg-stone-900 text-stone-400 py-1.5 px-8 text-[10px] font-bold tracking-[0.2em] uppercase flex justify-between items-center">
-        <div className="flex gap-6">
+      <div className="bg-stone-900 text-stone-400 py-1.5 px-4 md:px-8 text-[11px] md:text-[10px] font-bold tracking-[0.2em] uppercase flex justify-between items-center">
+        <div className="flex gap-4 md:gap-6 items-center">
           <span>ISSN: 3115-6940</span>
+          <span className="hidden xs:inline text-[9px] md:text-[10px] opacity-40">|</span>
           <span>eISSN: 3115-6932</span>
         </div>
         <div className="hidden sm:flex items-center gap-4">
@@ -127,7 +128,7 @@ export const Header = () => {
                       className="text-stone-400 group-hover:text-primary"
                     />
                     <span className="text-xs font-bold uppercase tracking-widest text-stone-600">
-                      Dossier
+                      My Account
                     </span>
                     <ChevronDown size={14} className="text-stone-300" />
                   </button>
@@ -138,7 +139,7 @@ export const Header = () => {
                 >
                   <div className="mb-3 px-1">
                     <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">
-                      Authenticated Account
+                      Account Session
                     </p>
                     <p className="text-xs font-medium text-stone-900 truncate">
                       {user.email}
@@ -162,7 +163,7 @@ export const Header = () => {
                     onClick={handleSignOut}
                     className="flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest cursor-pointer hover:bg-red-50 text-red-600"
                   >
-                    <LogOut size={14} /> Terminate Session
+                    <LogOut size={14} /> Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

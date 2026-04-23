@@ -232,7 +232,7 @@ export const Profile = () => {
   return (
     <div className="min-h-screen bg-stone-50 font-body">
       <Helmet>
-        <title>My Profile — IJSDS</title>
+        <title>My Account — IJSDS</title>
       </Helmet>
 
       {/* Page header */}
@@ -246,7 +246,7 @@ export const Profile = () => {
             Back
           </button>
           <span className="text-stone-300">/</span>
-          <span className="text-sm font-medium text-stone-700">Profile</span>
+          <span className="text-sm font-medium text-stone-700">My Account</span>
         </div>
       </div>
 
@@ -288,7 +288,7 @@ export const Profile = () => {
                 onClick={() => setEditing(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 hover:border-stone-300 transition-all"
               >
-                <Pencil size={14} /> Edit Profile
+                <Pencil size={14} /> Update Account
               </button>
             ) : (
               <div className="flex gap-2">
@@ -454,7 +454,7 @@ export const Profile = () => {
 
                 <div>
                   <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                    Research Bio
+                    Biography
                   </Label>
                   {editing ? (
                     <Textarea

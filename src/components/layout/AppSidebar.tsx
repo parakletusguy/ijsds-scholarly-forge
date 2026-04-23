@@ -73,29 +73,29 @@ export const AppSidebar = () => {
 
   // ── Nav definitions ────────────────────────────────────────────────────────
   const publicNav: NavItemDef[] = [
-    { title: "Scholarly Archive", url: "/articles", icon: Library },
-    { title: "About the Journal", url: "/about", icon: BookMarked },
+    { title: "Archive", url: "/articles", icon: Library },
+    { title: "About", url: "/about", icon: BookMarked },
   ];
 
   const authorNav: NavItemDef[] = [
-    { title: "Manuscript Management", url: "/dashboard", icon: FileText },
-    { title: "Submit Research", url: "/submit", icon: PenTool },
-    { title: "Edit Profile", url: "/profile", icon: User },
+    { title: "My Submissions", url: "/dashboard", icon: FileText },
+    { title: "Submit Manuscript", url: "/submit", icon: PenTool },
+    { title: "Profile", url: "/profile", icon: User },
   ];
 
   const reviewerNav: NavItemDef[] = [
-    { title: "Peer Review Status", url: "/reviewer-dashboard", icon: Eye },
+    { title: "Reviewer Dashboard", url: "/reviewer-dashboard", icon: Eye },
   ];
 
   const editorNav: NavItemDef[] = [
-    { title: "Editorial Desk", url: "/editorial", icon: FileCheck },
+    { title: "Editor Dashboard", url: "/editorial", icon: FileCheck },
     { title: "Production", url: "/production", icon: Wrench },
     { title: "Publication", url: "/publication", icon: Globe },
     { title: "Manage Blogs", url: "/admin", icon: BookOpen },
   ];
 
   const adminNav: NavItemDef[] = [
-    { title: "Institutional Registry", url: "/requests", icon: Building2 },
+    { title: "Registration Requests", url: "/requests", icon: Building2 },
     { title: "Analytics", url: "/analytics", icon: BarChart3 },
     { title: "Data Management", url: "/data-management", icon: Database },
     { title: "System Settings", url: "/system-settings", icon: Settings },

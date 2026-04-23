@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { getArticles, getPartners, Article, Partner } from "@/lib/articleService";
@@ -9,27 +10,19 @@ import { downloadBibTeX } from "@/lib/bibtexService";
 import { toast } from "@/hooks/use-toast";
 import { handleFileDownload } from "@/lib/downloadUtils";
 
-const STOCK_IMAGES = [
-  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1473186505569-9c61870c11f9?auto=format&fit=crop&q=80&w=800",
-];
-
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 export const Articles = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [activeFilter, setActiveFilter] = useState<{ type: string; value: string | number | null }>({ type: "all", value: null });
+  const [activeIssue, setActiveIssue] = useState<number | null>(null);
   const [page, setPage] = useState(1);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,8 +58,12 @@ export const Articles = () => {
         a.abstract?.toLowerCase().includes(q) ||
         a.authors?.some((au) => au.name.toLowerCase().includes(q));
       if (!matchesSearch) return false;
-      if (activeFilter.type === "subject") return a.subject_area === activeFilter.value;
-      if (activeFilter.type === "volume") return a.volume === activeFilter.value;
+      if (activeFilter.type === "volume") {
+        const matchesVol = a.volume === activeFilter.value;
+        if (!matchesVol) return false;
+        if (activeIssue) return a.issue === activeIssue;
+        return true;
+      }
       if (activeFilter.type === "year") {
         const y = a.publication_date ? new Date(a.publication_date).getFullYear() : null;
         return y === activeFilter.value;
@@ -80,6 +77,7 @@ export const Articles = () => {
 
   const handleFilterChange = (type: string, value: string | number | null) => {
     setActiveFilter({ type, value });
+    setActiveIssue(null);
     setPage(1);
   };
 
@@ -112,91 +110,107 @@ export const Articles = () => {
       <main className="max-w-7xl mx-auto px-8 pt-12 min-h-screen">
         <div className="flex flex-col md:flex-row gap-12">
 
-          {/* ── Sidebar ─────────────────────────────────────────────── */}
-          <aside className="w-full md:w-64 flex-shrink-0 space-y-10">
-            <div>
-              <h3 className="font-headline text-xl text-primary mb-6 italic">Browse Archive</h3>
-              <div className="space-y-8">
+          {/* ── Sidebar (Desktop) ─────────────────────────────────────────────── */}
+          <aside className="hidden md:block w-64 flex-shrink-0 space-y-10 border-r border-outline-variant/10 pr-8">
+            <h3 className="font-headline text-xl text-primary mb-6 italic">Browse Archive</h3>
+            <div className="space-y-8">
 
-                {/* By Topic */}
+              {/* By Topic */}
+              <section>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary/60 mb-4 block">By Topic</span>
+                <ul className="space-y-3">
+                  <li>
+                    <button
+                      onClick={() => handleFilterChange("all", null)}
+                      className={`flex items-center justify-between w-full group ${activeFilter.type === "all" ? "text-primary font-bold" : "text-on-surface hover:text-primary transition-colors"}`}
+                    >
+                      <span className="text-sm font-medium">All Research</span>
+                      <span className="text-[10px] text-secondary/40 font-mono">{articles.length}</span>
+                    </button>
+                  </li>
+                  {subjectAreas.map((area) => {
+                    const count = articles.filter((a) => a.subject_area === area).length;
+                    const active = activeFilter.type === "subject" && activeFilter.value === area;
+                    return (
+                      <li key={area}>
+                        <button
+                          onClick={() => handleFilterChange("subject", area)}
+                          className={`flex items-center justify-between w-full group ${active ? "text-primary font-bold" : "text-on-surface hover:text-primary transition-colors"}`}
+                        >
+                          <span className="text-sm font-medium">{area}</span>
+                          {active
+                            ? <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
+                            : <span className="text-[10px] text-secondary/40 font-mono">{count}</span>
+                          }
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+
+              {/* By Volume & Issue */}
+              {volumes.length > 0 && (
                 <section>
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary/60 mb-4 block">By Topic</span>
-                  <ul className="space-y-3">
-                    <li>
-                      <button
-                        onClick={() => handleFilterChange("all", null)}
-                        className={`flex items-center justify-between w-full group ${activeFilter.type === "all" ? "text-primary font-bold" : "text-on-surface hover:text-primary transition-colors"}`}
-                      >
-                        <span className="text-sm font-medium">All Research</span>
-                        <span className="text-[10px] text-secondary/40 font-mono">{articles.length}</span>
-                      </button>
-                    </li>
-                    {subjectAreas.map((area) => {
-                      const count = articles.filter((a) => a.subject_area === area).length;
-                      const active = activeFilter.type === "subject" && activeFilter.value === area;
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary/60 mb-4 block">Volumes & Issues</span>
+                  <div className="space-y-4">
+                    {volumes.map((vol, i) => {
+                      const activeVol = activeFilter.type === "volume" && activeFilter.value === vol;
+                      const volIssues = Array.from(new Set(articles.filter(a => a.volume === vol).map(a => a.issue).filter(Boolean))).sort() as number[];
+                      
                       return (
-                        <li key={area}>
+                        <div key={vol} className="space-y-2">
                           <button
-                            onClick={() => handleFilterChange("subject", area)}
-                            className={`flex items-center justify-between w-full group ${active ? "text-primary font-bold" : "text-on-surface hover:text-primary transition-colors"}`}
+                            onClick={() => handleFilterChange("volume", vol)}
+                            className={`text-sm font-medium transition-colors flex items-center gap-2 ${activeVol ? "text-primary font-bold" : "text-on-surface hover:text-primary"}`}
                           >
-                            <span className="text-sm font-medium">{area}</span>
-                            {active
-                              ? <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
-                              : <span className="text-[10px] text-secondary/40 font-mono">{count}</span>
-                            }
+                            Volume {vol}{i === 0 ? " (Latest)" : ""}
+                            {activeVol && <ChevronRight size={12} className="rotate-90" />}
                           </button>
-                        </li>
+                          
+                          {activeVol && volIssues.length > 0 && (
+                            <div className="pl-4 border-l border-primary/20 flex flex-wrap gap-2">
+                              {volIssues.map(issue => (
+                                <button
+                                  key={issue}
+                                  onClick={() => { setActiveIssue(activeIssue === issue ? null : issue); setPage(1); }}
+                                  className={`px-2 py-1 text-[10px] font-bold uppercase tracking-widest transition-all ${activeIssue === issue ? "bg-primary text-white" : "bg-surface-container-low text-secondary hover:text-primary"}`}
+                                >
+                                  Issue {issue}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
-                  </ul>
+                  </div>
                 </section>
+              )}
 
-                {/* By Year */}
-                {years.length > 0 && (
-                  <section>
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary/60 mb-4 block">By Year</span>
-                    <div className="grid grid-cols-2 gap-2">
-                      {years.map((year) => (
-                        <button
-                          key={year}
-                          onClick={() => handleFilterChange("year", year)}
-                          className={`px-3 py-2 text-xs font-medium text-center rounded transition-colors ${
-                            activeFilter.type === "year" && activeFilter.value === year
-                              ? "bg-primary text-on-primary"
-                              : "bg-surface-container-low hover:bg-surface-container-highest"
-                          }`}
-                        >
-                          {year}
-                        </button>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* By Volume */}
-                {volumes.length > 0 && (
-                  <section>
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary/60 mb-4 block">By Volume</span>
-                    <ul className="space-y-3">
-                      {volumes.map((vol, i) => {
-                        const active = activeFilter.type === "volume" && activeFilter.value === vol;
-                        return (
-                          <li key={vol}>
-                            <button
-                              onClick={() => handleFilterChange("volume", vol)}
-                              className={`text-sm font-medium transition-colors ${active ? "text-primary font-bold" : "text-on-surface hover:text-primary"}`}
-                            >
-                              Volume {vol}{i === 0 ? " (Current)" : ""}
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </section>
-                )}
-              </div>
+              {/* By Year */}
+              {years.length > 0 && (
+                <section>
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary/60 mb-4 block">By Year</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {years.map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => handleFilterChange("year", year)}
+                        className={`px-3 py-2 text-xs font-medium text-center rounded transition-colors ${
+                          activeFilter.type === "year" && activeFilter.value === year
+                            ? "bg-primary text-on-primary"
+                            : "bg-surface-container-low hover:bg-surface-container-highest"
+                        }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
+          </aside>
 
             {/* Featured Paper Card */}
             {featured && (
@@ -226,7 +240,6 @@ export const Articles = () => {
                 </div>
               </div>
             )}
-          </aside>
 
           {/* ── Main Content ─────────────────────────────────────────── */}
           <div className="flex-1">
@@ -242,7 +255,74 @@ export const Articles = () => {
                     {articles.length} Peer-Reviewed Social Work Papers
                   </p>
                 </div>
+
+                {/* Mobile Filter Toggle */}
+                <div className="md:hidden">
+                  <button 
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className="flex items-center gap-3 px-6 py-3 bg-surface-container text-primary font-bold uppercase tracking-widest text-[10px] shadow-sm active:scale-95 transition-all"
+                  >
+                    <Search size={14} />
+                    {isFilterOpen ? "Close Filters" : "Filter Archive"}
+                  </button>
+                </div>
               </div>
+
+              {/* Mobile Filter Panel */}
+              {isFilterOpen && (
+                <div className="md:hidden bg-surface-container-lowest p-6 mb-8 border border-outline-variant/10 animate-in slide-in-from-top-4 duration-500">
+                  <div className="grid grid-cols-1 gap-8">
+                     <section>
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-secondary/40 mb-3 block">Volume & Issue</span>
+                        <div className="flex flex-wrap gap-2">
+                          {volumes.map(vol => (
+                            <div key={vol} className="flex flex-col gap-1">
+                              <button 
+                                onClick={() => handleFilterChange("volume", vol)}
+                                className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all ${activeFilter.type === "volume" && activeFilter.value === vol ? "bg-primary text-white border-primary" : "bg-white border-outline-variant text-secondary"}`}
+                              >
+                                Vol {vol}
+                              </button>
+                              {activeFilter.type === "volume" && activeFilter.value === vol && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                   {Array.from(new Set(articles.filter(a => a.volume === vol).map(a => a.issue).filter(Boolean))).sort().map(iss => (
+                                      <button 
+                                        key={iss}
+                                        onClick={() => { setActiveIssue(activeIssue === iss ? null : iss); setPage(1); }}
+                                        className={`px-2 py-1 text-[8px] font-bold border ${activeIssue === iss ? "bg-primary/10 border-primary text-primary" : "bg-white border-outline-variant/50 text-secondary/60"}`}
+                                      >
+                                        Iss {iss}
+                                      </button>
+                                   ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                     </section>
+                     <section>
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-secondary/40 mb-3 block">Topic</span>
+                        <div className="flex flex-wrap gap-2">
+                           <button 
+                             onClick={() => handleFilterChange("all", null)}
+                             className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all ${activeFilter.type === "all" ? "bg-primary text-white border-primary" : "bg-white border-outline-variant text-secondary"}`}
+                           >
+                            All
+                           </button>
+                           {subjectAreas.map(area => (
+                              <button 
+                                key={area}
+                                onClick={() => handleFilterChange("subject", area)}
+                                className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all ${activeFilter.type === "subject" && activeFilter.value === area ? "bg-primary text-white border-primary" : "bg-white border-outline-variant text-secondary"}`}
+                              >
+                                {area}
+                              </button>
+                           ))}
+                        </div>
+                     </section>
+                  </div>
+                </div>
+              )}
 
               <div className="relative group">
                 <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
@@ -274,116 +354,86 @@ export const Articles = () => {
               ) : (
                 paginated.map((article, index) => {
                   const globalIndex = (page - 1) * PAGE_SIZE + index;
-                  const img = STOCK_IMAGES[globalIndex % STOCK_IMAGES.length];
                   const pubDate = article.publication_date
                     ? new Date(article.publication_date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })
                     : null;
 
                   return (
-                    <article key={article.id} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start group">
-                      {/* Text */}
-                      <div className="lg:col-span-8">
-                        <div className="flex items-center gap-4 mb-4">
-                          {(article.volume || article.issue) && (
-                            <span className="bg-surface-container-highest px-2 py-1 text-[10px] font-bold tracking-widest uppercase text-secondary">
-                              {article.volume ? `Volume ${article.volume}` : ""}
-                              {article.volume && article.issue ? ", " : ""}
-                              {article.issue ? `Issue ${article.issue}` : ""}
-                            </span>
-                          )}
-                          {pubDate && (
-                            <span className="text-secondary/40 text-xs font-mono">{pubDate}</span>
-                          )}
-                          {article.doi && (
-                            <a
-                              href={`https://doi.org/${article.doi}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/70 transition-colors uppercase tracking-widest"
-                            >
-                              <ExternalLink size={12} />
-                              DOI: {article.doi}
-                            </a>
-                          )}
-                        </div>
-
-                        <h2
-                          onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
-                          className="font-headline text-3xl md:text-4xl text-on-surface group-hover:text-primary transition-colors leading-tight mb-4 cursor-pointer"
-                        >
-                          {article.title}
-                        </h2>
-
-                        {article.authors && article.authors.length > 0 && (
-                          <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6">
-                            {article.authors.slice(0, 3).map((author, i) => (
-                              <span key={i} className="text-sm font-semibold text-secondary">{author.name}</span>
-                            ))}
-                            {article.authors[0]?.affiliation && (
-                              <span className="text-sm text-secondary/60 italic">{article.authors[0].affiliation}</span>
-                            )}
-                          </div>
+                    <article key={article.id} className="group border-b border-outline-variant/10 pb-16 last:border-0">
+                      <div className="flex items-center gap-4 mb-4">
+                        {(article.volume || article.issue) && (
+                          <span className="bg-primary px-2 py-1 text-[10px] font-bold tracking-widest uppercase text-white shadow-sm">
+                            {article.volume ? `Vol ${article.volume}` : ""}
+                            {article.volume && article.issue ? " : " : ""}
+                            {article.issue ? `Iss ${article.issue}` : ""}
+                          </span>
                         )}
-
-                        {article.abstract && (
-                          <p
-                            className="text-on-background/80 leading-relaxed text-lg mb-6 overflow-hidden"
-                            style={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: "vertical",
-                            }}
-                          >
-                            {article.abstract}
-                          </p>
+                        {article.subject_area && (
+                          <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">{article.subject_area}</span>
                         )}
-
-                        <div className="flex items-center gap-8">
-                          <button
-                            onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
-                            className="text-primary font-bold text-sm tracking-widest uppercase flex items-center gap-2 group/link"
-                          >
-                            Read Research
-                            <ArrowUpRight className="w-4 h-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-                          </button>
-                          {article.manuscript_file_url && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleFileDownload(article.manuscript_file_url!, article.title);
-                              }}
-                              className="text-secondary/60 hover:text-primary flex items-center gap-2 transition-colors"
-                            >
-                              <BookOpen className="w-4 h-4" />
-                              <span className="text-xs font-bold uppercase tracking-widest">Download</span>
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCite(article);
-                            }}
-                            className="text-secondary/60 hover:text-primary flex items-center gap-2 transition-colors"
-                          >
-                            <Quote className="w-4 h-4" />
-                            <span className="text-xs font-bold uppercase tracking-widest">Cite</span>
-                          </button>
-                        </div>
                       </div>
 
-                      {/* Image */}
-                      <div className="lg:col-span-4 hidden lg:block">
-                        <div
-                          onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
-                          className="aspect-[4/3] bg-surface-container-low rounded-lg overflow-hidden cursor-pointer"
-                        >
-                          <img
-                            src={img}
-                            alt={article.title}
-                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                          />
+                      <h2
+                        onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
+                        className="font-headline text-3xl md:text-5xl text-on-surface group-hover:text-primary transition-all leading-tight mb-6 cursor-pointer max-w-5xl"
+                      >
+                        {article.title}
+                      </h2>
+
+                      {article.authors && article.authors.length > 0 && (
+                        <div className="flex flex-wrap gap-x-6 gap-y-1 mb-8">
+                          {article.authors.slice(0, 5).map((author, i) => (
+                            <div key={i} className="flex flex-col">
+                              <span className="text-sm font-bold text-on-surface">{author.name}</span>
+                              <span className="text-[10px] text-secondary/60 uppercase tracking-wider">{author.affiliation || "University Dept."}</span>
+                            </div>
+                          ))}
                         </div>
+                      )}
+
+                      {article.abstract && (
+                        <p className="text-on-background/70 leading-relaxed text-lg mb-8 max-w-4xl italic border-l-4 border-primary/10 pl-6 line-clamp-3 group-hover:border-primary transition-all">
+                          {article.abstract}
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-8">
+                        <button
+                          onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
+                          className="bg-primary text-white px-8 py-3 font-bold text-[10px] tracking-widest uppercase flex items-center gap-3 shadow-lg hover:shadow-primary/20 transition-all"
+                        >
+                          Read Research Article
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="flex items-center gap-6">
+                          {article.manuscript_file_url && (
+                             <button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleFileDownload(article.manuscript_file_url!, article.title);
+                               }}
+                               className="text-primary hover:text-primary/70 flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest transition-all"
+                             >
+                                <BookOpen className="w-4 h-4" />
+                                Download PDF
+                             </button>
+                          )}
+                          <button
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               handleCite(article);
+                             }}
+                             className="text-secondary hover:text-primary flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest transition-all"
+                          >
+                             <Quote className="w-4 h-4" />
+                             Cite
+                          </button>
+                        </div>
+
+                        {pubDate && (
+                           <span className="text-secondary/30 text-[10px] font-bold uppercase tracking-[0.2em] ml-auto">{pubDate}</span>
+                        )}
                       </div>
                     </article>
                   );

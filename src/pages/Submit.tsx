@@ -257,7 +257,7 @@ export const Submit = () => {
       <div className="pt-12 pb-24 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto w-full">
         <header className="mb-16">
           <span className="text-[10px] font-bold text-primary-container tracking-[0.2em] uppercase">
-            V4.2 Registry Protocol
+            Submission Form
           </span>
           <h2 className="font-headline text-5xl font-bold text-on-surface mt-4 mb-2 tracking-tight">
             Article Submission Portal
@@ -274,13 +274,13 @@ export const Submit = () => {
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-[10px] font-label uppercase tracking-widest text-on-surface/40 italic">
-                  Vaulting Meta-Data...
+                  Auto-saving...
                 </span>
               </div>
             )}
             {lastSaved && !autoSaving && (
               <span className="text-[10px] font-label uppercase tracking-widest text-secondary font-bold">
-                Registry Secured: {lastSaved.toLocaleTimeString()}
+                Draft Saved: {lastSaved.toLocaleTimeString()}
               </span>
             )}
           </div>
@@ -294,7 +294,7 @@ export const Submit = () => {
                 Article Details
               </h3>
               <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
-                Fundamental bibliometric data for indexing and taxonomy.
+                Key information for your article metadata and indexing.
               </p>
             </div>
             <div className="md:col-span-8 space-y-8">
@@ -343,7 +343,7 @@ export const Submit = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
-                    Theoretical Keywords
+                    Keywords
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -399,7 +399,7 @@ export const Submit = () => {
                 Manuscript Files
               </h3>
               <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
-                Deposit the primary textual artifact and supporting datasets.
+                Upload the primary manuscript and supporting files.
               </p>
             </div>
             <div className="md:col-span-8">
@@ -429,7 +429,7 @@ export const Submit = () => {
                           : manuscriptFileUrl.split("/").pop()}
                       </p>
                       <p className="text-[9px] uppercase tracking-wider text-stone-400 font-bold">
-                        Payload Secured
+                        File Uploaded
                       </p>
                     </div>
                   </div>
@@ -448,14 +448,14 @@ export const Submit = () => {
             </div>
           </section>
 
-          {/* Section 3: Author Registry */}
+          {/* Section 3: Authors */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
               <h3 className="font-headline text-2xl font-bold text-on-surface">
-                Author Registry
+                Authors
               </h3>
               <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
-                Formal identification of the primary intellectual architect.
+                Identify all contributors and their affiliations.
               </p>
             </div>
             <div className="md:col-span-8 space-y-12">
@@ -474,7 +474,7 @@ export const Submit = () => {
                         onClick={() => removeAuthor(index)}
                         className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-error transition-colors"
                       >
-                        Discard Profile
+                        Remove Author
                       </button>
                     )}
                   </div>
@@ -543,16 +543,16 @@ export const Submit = () => {
                 onClick={addAuthor}
               >
                 <Plus size={16} />
-                <span>Adjoin Contributor Profile</span>
+                <span>Add Another Author</span>
               </button>
             </div>
           </section>
 
-          {/* Section 4: Corresponding Identity Hub */}
+          {/* Section 4: Corresponding Author */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12 border-l-4 border-primary pl-8">
             <div className="md:col-span-4">
               <h3 className="font-headline text-2xl font-bold text-on-surface">
-                Corresponding Identity Hub
+                Corresponding Author
               </h3>
             </div>
             <div className="md:col-span-8 space-y-4">
@@ -575,17 +575,17 @@ export const Submit = () => {
             </div>
           </section>
 
-          {/* Section 5: Technical Protocol Ledger */}
+          {/* Section 5: Ethics & Disclosure */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
               <h3 className="font-headline text-2xl font-bold text-on-surface">
-                Technical Protocol Ledger
+                Ethics & Disclosure
               </h3>
             </div>
             <div className="md:col-span-8 space-y-8">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
-                  Funding infrastructure & Grant identifiers
+                  Funding Information
                 </label>
                 <textarea
                   className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
@@ -622,12 +622,12 @@ export const Submit = () => {
             </div>
           </section>
 
-          {/* Section 6: Editorial Cover Dossier */}
+          {/* Section 6: Cover Letter */}
           <section className="pb-12 border-t border-[#ddc0b8]/20 pt-24 text-center">
             <div className="max-w-2xl mx-auto space-y-12">
               <div className="space-y-4">
                 <h3 className="font-headline text-3xl font-bold text-on-surface">
-                  Editorial Cover Dossier
+                  Cover Letter
                 </h3>
                 <div className="flex justify-center items-center space-x-4 opacity-30">
                   <div className="h-[1px] w-12 bg-primary"></div>
@@ -676,10 +676,10 @@ export const Submit = () => {
           <BookOpen size={16} className="text-stone-400" />
           <p className="text-[10px] text-stone-500 uppercase tracking-widest">
             {autoSaving
-              ? "Vaulting State..."
+              ? "Auto-saving..."
               : lastSaved
                 ? `Saved ${lastSaved.toLocaleTimeString()}`
-                : "Ready for registry"}
+                : "Ready for submission"}
           </p>
         </div>
         <div className="flex items-center space-x-4 md:space-x-8 w-full sm:w-auto justify-between sm:justify-end">
@@ -689,14 +689,14 @@ export const Submit = () => {
             disabled={autoSaving}
             className="text-on-surface/60 font-bold uppercase tracking-wider text-[10px] hover:text-primary transition-colors py-2 px-4"
           >
-            Vault Draft Registry
+            Save Draft
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading}
             className="bg-[#af4c2a] text-white px-6 md:px-10 py-4 font-bold uppercase tracking-wider text-xs md:text-sm hover:bg-[#8f3514] transition-all flex items-center space-x-3 shadow-lg disabled:opacity-50"
           >
-            <span>{loading ? "Transmitting..." : "Finalize Submission"}</span>
+            <span>{loading ? "Submitting..." : "Submit Article"}</span>
             {!loading && <ArrowRight size={18} />}
           </button>
         </div>

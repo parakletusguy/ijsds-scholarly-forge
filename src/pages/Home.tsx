@@ -54,123 +54,53 @@ export const Home = () => {
     <div className="min-h-screen bg-surface selection:bg-orange-100 selection:text-primary">
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <header className="relative min-h-[880px] flex items-center overflow-hidden bg-surface">
+      <header className="relative min-h-[700px] flex items-center overflow-hidden bg-surface py-20">
         <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '24px 24px', opacity: 0.06 }}
+          style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '32px 32px', opacity: 0.08 }}
         />
-        <div className="container mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
-          <div className="lg:col-span-7 flex flex-col justify-center">
-            <span className="text-primary tracking-[0.3em] font-bold text-[10px] mb-6 inline-block uppercase">
-              Established 2025 · Open Access · Peer Reviewed
-            </span>
-            <h1 className="text-6xl md:text-8xl font-headline font-light leading-[1.05] tracking-tight text-on-surface mb-8">
-              Amplifying African Voices through{' '}
-              <span className="italic text-primary">Rigorous Research.</span>
-            </h1>
-            <p className="text-lg md:text-xl text-on-surface-variant max-w-xl mb-10 leading-relaxed border-l-4 border-primary/20 pl-6">
-              The International Journal of Social Work and Development Studies (IJSDS) is an international peer-reviewed journal dedicated to publishing high-quality research in social work and development studies.
-            </p>
-            <div className="flex flex-wrap gap-4">
+        <div className="container mx-auto px-8 relative z-10 text-center max-w-5xl">
+          <span className="text-primary tracking-[0.4em] font-bold text-[10px] mb-8 inline-block uppercase">
+            Established 2025 · Open Access · Peer Reviewed
+          </span>
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-headline font-light leading-[1.05] tracking-tight text-on-surface mb-10">
+            Amplifying African Voices through{' '}
+            <span className="italic text-primary">Rigorous Research.</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-on-surface-variant mb-12 leading-relaxed max-w-3xl mx-auto italic">
+            The International Journal of Social Work and Development Studies (IJSDS) is an international peer-reviewed journal publishing high-quality research.
+          </p>
+          
+          <div className="flex flex-col items-center gap-8">
+            <div className="relative w-full max-w-2xl group">
+              <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+                <BookOpen size={20} className="text-primary/40 group-focus-within:text-primary transition-colors" />
+              </div>
+              <input 
+                type="text"
+                placeholder="Search the archive by title, author, or keyword..."
+                className="w-full bg-white border border-on-surface/10 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-xl hover:shadow-2xl"
+                onKeyPress={(e) => e.key === 'Enter' && navigate(`/articles?q=${(e.target as HTMLInputElement).value}`)}
+              />
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto">
               <button
                 onClick={() => navigate('/articles')}
-                className="bg-primary text-white px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                className="bg-primary text-white px-12 py-5 font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 w-full sm:w-auto"
               >
-                Browse Articles
+                Browse All Research
               </button>
               <button
                 onClick={() => navigate(user ? '/submit' : '/auth')}
-                className="border-2 border-on-surface/20 text-on-surface px-10 py-4 font-bold text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all"
+                className="border-2 border-on-surface/20 text-on-surface px-12 py-5 font-bold text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
               >
-                Submit Research
+                Submit Manuscript
               </button>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 relative hidden lg:block">
-            <div className="aspect-[4/5] bg-surface-container-high overflow-hidden shadow-2xl relative group">
-              <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 mix-blend-multiply" />
-              <img
-                className="w-full h-full object-cover brightness-95 grayscale-[15%] group-hover:scale-105 transition-transform duration-[2000ms]"
-                alt="IJSDS scholarly heritage"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTh67ohBbQASGWUb0dJe3QQvce4Esh08n_58eIjGj2LwxbFFkLWnwtGgDhn8eSy0pYB37Enc0eM31Ot2bjQjacD7cyk4sW6dL-nri7wudjKUNAjGOp3KI1pTo0sW68vH--zbNer3rezix_TCrQ2zSgB8mHe7g7v9dPTanXsyKlAFQfxLff697SaSkX1nQQTMYFnfq8r0dbD3Ey8FMs9vHOBl3LK46akG-Py2cVHdZC5ZHsKvd7R3lSNLMNBEf04Tl4GqHjTmebLu0"
-              />
-            </div>
-            <div className="absolute -bottom-6 -left-6 bg-primary p-8 text-white shadow-2xl max-w-xs">
-              <p className="text-2xl font-headline italic leading-snug">
-                "Knowledge is a collective heritage of humanity."
-              </p>
             </div>
           </div>
         </div>
       </header>
 
-      {/* ── Impact Stats ─────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white border-t border-primary/5">
-        <div className="container mx-auto px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">
-            {[
-              { icon: Globe, value: `${stats.reach}%`, label: 'International Reach' },
-              { icon: Users, value: `${stats.scholars.toLocaleString()}+`, label: 'Readers Worldwide' },
-              { icon: TrendingUp, value: `${stats.citations}+`, label: 'Citations' },
-              { icon: MapPin, value: `${stats.nations}`, label: 'Countries Reached' },
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="group">
-                <div className="text-5xl font-headline text-primary mb-3 flex items-center justify-center md:justify-start gap-3">
-                  <Icon size={28} className="opacity-20 group-hover:opacity-60 transition-opacity" />
-                  {value}
-                </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface/40">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why Choose IJSDS ─────────────────────────────────────────────── */}
-      <section className="py-32 bg-surface-container-low">
-        <div className="container mx-auto px-8">
-          <div className="mb-20 max-w-2xl">
-            <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
-              Why Publish With Us
-            </span>
-            <h2 className="font-headline text-4xl md:text-5xl text-on-surface mb-6">Why Choose IJSDS?</h2>
-            <p className="text-on-surface-variant leading-relaxed">
-              We are committed to supporting researchers in publishing impactful, high-quality work that makes a difference in social work and development.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-            {[
-              {
-                icon: Globe,
-                stat: '94%',
-                title: 'Global Reach',
-                body: 'Our published articles are read and cited across 140+ countries and have informed policy decisions worldwide.',
-              },
-              {
-                icon: Clock,
-                stat: '28 Days',
-                title: 'Fast Peer Review',
-                body: 'We aim to complete the peer review process within 28 days so your research reaches readers quickly.',
-              },
-              {
-                icon: BookOpen,
-                stat: 'Open Access',
-                title: 'Free for Everyone',
-                body: 'Every article we publish is freely available to anyone — no subscription or payment required to read.',
-              },
-            ].map(({ icon: Icon, stat, title, body }) => (
-              <div key={title} className="space-y-5 group">
-                <div className="w-12 h-12 border-2 border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all">
-                  <Icon size={20} className="text-primary group-hover:text-white transition-colors" />
-                </div>
-                <div className="text-5xl font-headline text-primary">{stat}</div>
-                <h3 className="font-bold text-lg tracking-tight">{title}</h3>
-                <p className="text-on-surface-variant text-sm leading-relaxed">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Current Issues — Editorial Grid ──────────────────────────────── */}
       <section className="py-32 bg-surface">
@@ -180,7 +110,7 @@ export const Home = () => {
               <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
                 Recent Publications
               </span>
-              <h2 className="font-headline text-4xl md:text-5xl text-on-surface">Current Issues</h2>
+              <h2 className="font-headline text-3xl md:text-5xl text-on-surface">Current Issues</h2>
             </div>
             <button
               onClick={() => navigate('/articles')}
@@ -218,16 +148,9 @@ export const Home = () => {
                 {/* Large featured article */}
                 {featured && (
                   <div
-                    className="lg:col-span-8 group cursor-pointer"
+                    className="lg:col-span-8 group cursor-pointer border-l-8 border-primary pl-8 py-4 bg-primary/5 hover:bg-primary/10 hover:border-primary-container transition-all"
                     onClick={() => navigate(`/article/${buildArticleSlug(featured)}`)}
                   >
-                    <div className="aspect-video overflow-hidden bg-surface-container-high mb-6">
-                      <img
-                        src={STOCK_IMAGES[0]}
-                        alt={featured.title}
-                        className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                      />
-                    </div>
                     <div className="flex gap-4 mb-4">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
                         {featured.subject_area || 'Research Article'}
@@ -236,7 +159,7 @@ export const Home = () => {
                         {estimateReadTime(featured.abstract || '')}
                       </span>
                     </div>
-                    <h3 className="font-headline text-3xl mb-4 leading-snug group-hover:text-primary transition-colors">
+                    <h3 className="font-headline text-4xl mb-4 leading-tight group-hover:text-primary transition-colors">
                       {featured.title}
                     </h3>
                     <p className="text-on-surface-variant mb-6 line-clamp-3 leading-relaxed">
@@ -248,8 +171,13 @@ export const Home = () => {
                           <User size={14} className="text-on-surface/40" />
                         </div>
                         <span className="text-sm font-medium">{formatAuthors(featured.authors)}</span>
+                        {(featured.volume || featured.issue) && (
+                          <span className="text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 ml-2">
+                             V{featured.volume}:I{featured.issue}
+                          </span>
+                        )}
                         {featured.publication_date && (
-                          <span className="text-sm text-on-surface/40">
+                          <span className="text-sm text-on-surface/40 whitespace-nowrap">
                             · {new Date(featured.publication_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
                           </span>
                         )}
@@ -311,19 +239,12 @@ export const Home = () => {
               {/* Bottom 3-column grid */}
               {rest.length > 1 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 border-t border-outline-variant/20 pt-16">
-                  {rest.slice(1, 4).map((article, i) => (
+                  {rest.slice(1, 4).map((article) => (
                     <div
                       key={article.id}
                       className="group cursor-pointer"
                       onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
                     >
-                      <div className="aspect-video overflow-hidden bg-surface-container-high mb-5">
-                        <img
-                          src={STOCK_IMAGES[(i + 2) % STOCK_IMAGES.length]}
-                          alt={article.title}
-                          className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                        />
-                      </div>
                       <span className="text-[9px] font-bold uppercase tracking-widest text-primary block mb-3">
                         {article.subject_area || 'Research Article'}
                       </span>
@@ -336,7 +257,12 @@ export const Home = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs text-on-surface/50">
                           <User size={12} />
-                          <span>{formatAuthors(article.authors)}</span>
+                          <span className="truncate">{formatAuthors(article.authors)}</span>
+                          {(article.volume || article.issue) && (
+                            <span className="text-[9px] font-bold text-primary">
+                              V{article.volume}
+                            </span>
+                          )}
                         </div>
                         {article.doi && (
                           <a
@@ -428,7 +354,7 @@ export const Home = () => {
               ))}
               <button
                 onClick={() => navigate(user ? '/submit' : '/auth')}
-                className="mt-4 bg-white text-primary px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-white/90 transition-all self-start"
+                className="mt-4 bg-white text-primary px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-white/90 transition-all w-full md:w-auto self-start"
               >
                 Submit Your Research
               </button>
@@ -437,18 +363,68 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* ── Partners ─────────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white border-t border-outline-variant/10">
+      {/* ── Impact Stats ─────────────────────────────────────────────────── */}
+      <section className="py-24 bg-white border-t border-primary/5">
         <div className="container mx-auto px-8">
-          <div className="text-center mb-16">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface/25">
-              Global Institutional Partners
-            </span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">
+            {[
+              { icon: Globe, value: `${stats.reach}%`, label: 'International Reach' },
+              { icon: Users, value: `${stats.scholars.toLocaleString()}+`, label: 'Readers Worldwide' },
+              { icon: TrendingUp, value: `${stats.citations}+`, label: 'Citations' },
+              { icon: MapPin, value: `${stats.nations}`, label: 'Countries Reached' },
+            ].map(({ icon: Icon, value, label }) => (
+              <div key={label} className="group">
+                <div className="text-5xl font-headline text-primary mb-3 flex items-center justify-center md:justify-start gap-3">
+                  <Icon size={28} className="opacity-20 group-hover:opacity-60 transition-opacity" />
+                  {value}
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface/40">{label}</div>
+              </div>
+            ))}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-16 items-center justify-items-center opacity-20 hover:opacity-80 transition-opacity duration-700">
-            {['OXFORD', 'UNESCO', 'The UN', 'LSE', 'AFRICA UNION'].map((partner) => (
-              <div key={partner} className="font-headline text-xl font-bold tracking-tighter text-on-surface">
-                {partner}
+        </div>
+      </section>
+
+      {/* ── Why Choose IJSDS ─────────────────────────────────────────────── */}
+      <section className="py-32 bg-surface-container-low">
+        <div className="container mx-auto px-8">
+          <div className="mb-20 max-w-2xl">
+            <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
+              Why Publish With Us
+            </span>
+            <h2 className="font-headline text-4xl md:text-5xl text-on-surface mb-6">Why Choose IJSDS?</h2>
+            <p className="text-on-surface-variant leading-relaxed">
+              We are committed to supporting researchers in publishing impactful, high-quality work that makes a difference in social work and development.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+            {[
+              {
+                icon: Globe,
+                stat: '94%',
+                title: 'Global Reach',
+                body: 'Our published articles are read and cited across 140+ countries and have informed policy decisions worldwide.',
+              },
+              {
+                icon: Clock,
+                stat: '28 Days',
+                title: 'Fast Peer Review',
+                body: 'We aim to complete the peer review process within 28 days so your research reaches readers quickly.',
+              },
+              {
+                icon: BookOpen,
+                stat: 'Open Access',
+                title: 'Free for Everyone',
+                body: 'Every article we publish is freely available to anyone — no subscription or payment required to read.',
+              },
+            ].map(({ icon: Icon, stat, title, body }) => (
+              <div key={title} className="space-y-5 group">
+                <div className="w-12 h-12 border-2 border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all">
+                  <Icon size={20} className="text-primary group-hover:text-white transition-colors" />
+                </div>
+                <div className="text-5xl font-headline text-primary">{stat}</div>
+                <h3 className="font-bold text-lg tracking-tight">{title}</h3>
+                <p className="text-on-surface-variant text-sm leading-relaxed">{body}</p>
               </div>
             ))}
           </div>

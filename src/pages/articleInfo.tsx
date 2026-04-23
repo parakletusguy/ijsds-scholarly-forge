@@ -70,8 +70,8 @@ export const ArticleInfo = () => {
     } catch (error: any) {
       console.error("Failed to fetch scholarly record:", error);
       toast({
-        title: "Access Error",
-        description: "The scholarly record could not be retrieved at this time.",
+        title: "Error",
+        description: "The article could not be retrieved at this time.",
         variant: "destructive",
       });
       // Delay navigation to let user read the toast
@@ -84,7 +84,7 @@ export const ArticleInfo = () => {
   if (loadingData) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
-        <LoadingSpinner size="lg" text="Retrieving scholarly record..." />
+        <LoadingSpinner size="lg" text="Loading article details..." />
       </div>
     );
   }
@@ -145,7 +145,7 @@ export const ArticleInfo = () => {
 
           {/* Article Main Column */}
           <article className="lg:col-span-8">
-            {/* Meta Badge */}
+            {/* Article Type Badge */}
             <div className="flex items-center gap-3 mb-8">
               <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary bg-primary/5 px-3 py-1 rounded-full">
                 {article.subject_area || "Original Research"}
@@ -192,7 +192,7 @@ export const ArticleInfo = () => {
                   className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all shadow-xl shadow-primary/10"
                 >
                   <BookOpen className="w-5 h-5" />
-                  Download Full-Text Manuscript
+                  Download Full PDF
                 </button>
               </div>
             )}
@@ -225,7 +225,7 @@ export const ArticleInfo = () => {
             >
               <h2 className="text-3xl font-bold pt-8">Introduction</h2>
               <p className="serif-dropcap">
-                This article presents a contribution to the field of {article.subject_area || "social development"} through a rigorous examination of the theoretical and empirical frameworks that underpin current scholarly discourse. The findings presented here are grounded in peer-reviewed methodological standards and reflect the diverse intellectual traditions represented within the global academic community.
+                This article contributes to the field of {article.subject_area || "social development"} through a rigorous study of the theoretical and practical frameworks. The findings are based on peer-reviewed standards and reflect the diverse intellectual traditions in the global academic community.
               </p>
               <p>
                 The significance of this research lies in its capacity to bridge existing gaps in the literature, offering new perspectives that speak directly to the lived experiences of communities navigating social, economic, and institutional transitions. By situating these findings within a comparative analytical lens, this work contributes meaningfully to the ongoing dialogue around evidence-based policy and practice.
@@ -267,7 +267,7 @@ export const ArticleInfo = () => {
               </div>
               {article.doi && (
                 <div className="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
-                  <span className="italic">DOI:</span>
+                  <span className="font-bold uppercase tracking-widest text-[10px] opacity-40">DOI</span>
                   <a
                     href={`https://doi.org/${article.doi}`}
                     target="_blank"

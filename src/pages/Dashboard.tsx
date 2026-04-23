@@ -8,6 +8,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     if (!user) {
@@ -91,9 +92,9 @@ export const Dashboard = () => {
     <div className="max-w-[1400px] mx-auto px-8 md:px-12 py-16 animate-fade-in-up">
       {/* Welcome Header */}
       <header className="mb-16">
-        <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Registry Dashboard</p>
+        <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Account Dashboard</p>
         <h3 className="text-4xl md:text-5xl font-headline text-on-surface max-w-2xl leading-tight">
-          Curation of Institutional Knowledge & Sovereign Protocols.
+          Manage your research and submissions.
         </h3>
       </header>
 
@@ -102,7 +103,7 @@ export const Dashboard = () => {
         <div className="md:col-span-8 bg-surface-container-low p-10 flex flex-col justify-between group hover:bg-surface-container transition-colors duration-500">
           <div>
             <div className="flex justify-between items-start mb-12">
-              <h4 className="font-headline font-black text-xs uppercase tracking-widest text-primary mb-4">Copyright Sovereignty</h4>
+              <h4 className="font-headline font-black text-xs uppercase tracking-widest text-primary mb-4">Submission Status</h4>
               <span className="text-[10px] font-label uppercase tracking-[0.2em] text-primary bg-primary/5 px-3 py-1">In Review: {inReviewSubmissions}</span>
             </div>
             <div className="flex items-end gap-4">
@@ -119,7 +120,7 @@ export const Dashboard = () => {
         
         <div className="md:col-span-4 bg-primary p-10 flex flex-col justify-between text-on-primary group hover:bg-primary-container transition-colors duration-500">
           <div className="flex justify-between items-start">
-            <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Scholarly Registry</h4>
+            <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Accepted Articles</h4>
             <span className="material-symbols-outlined opacity-50">verified</span>
           </div>
           <div>
@@ -129,7 +130,7 @@ export const Dashboard = () => {
               </span>
               <span className="text-[10px] uppercase tracking-widest mb-2 opacity-70">Accepted</span>
             </div>
-            <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">Validated Scholarly Record</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">Verified Research</p>
           </div>
         </div>
       </div>
@@ -138,29 +139,34 @@ export const Dashboard = () => {
       <div className="asymmetric-grid">
         {/* Manuscript Management List */}
         <section>
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-outline-variant/10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-outline-variant/10 gap-4">
             <h4 className="font-headline text-xl italic">Recent Manuscripts</h4>
-            <button 
-              onClick={() => navigate('/articles')}
-              className="text-[10px] uppercase tracking-widest text-on-surface/40 hover:text-primary transition-colors"
-            >
-              View Archive →
-            </button>
+            <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+               {['all', 'submitted', 'under_review', 'accepted', 'rejected'].map(stat => (
+                 <button 
+                   key={stat}
+                   onClick={() => setStatusFilter(stat)}
+                   className={`text-[10px] uppercase tracking-widest px-3 py-1.5 transition-all whitespace-nowrap ${statusFilter === stat ? 'bg-primary text-white font-bold' : 'text-on-surface/40 hover:text-primary'}`}
+                 >
+                   {stat === 'all' ? 'All' : formatStatus(stat)}
+                 </button>
+               ))}
+            </div>
           </div>
           
           <div className="space-y-6">
-            {submissions.length === 0 ? (
+            {submissions.filter(s => statusFilter === 'all' || s.status === statusFilter).length === 0 ? (
               <div className="bg-surface-container-lowest p-12 text-center border border-dashed border-outline-variant/30">
-                <p className="text-sm text-on-surface/40 uppercase tracking-widest mb-6">No records found in scholarly registry</p>
+                <p className="text-sm text-on-surface/40 uppercase tracking-widest mb-6">No {statusFilter !== 'all' ? formatStatus(statusFilter).toLowerCase() : ''} submissions found</p>
                 <button 
                   onClick={() => navigate('/submit')}
                   className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
                 >
-                  Initiate First Submission
+                  Start First Submission
                 </button>
               </div>
             ) : (
-              submissions.slice(0, 5).map((submission) => {
+              submissions.filter(s => statusFilter === 'all' || s.status === statusFilter).slice(0, 5).map((submission) => {
                 const art = (submission.article as any) || {};
                 const borderColor =
                   submission.status === 'accepted' ? 'border-l-green-500' :
@@ -190,7 +196,7 @@ export const Dashboard = () => {
                       {art.title || 'Untitled Manuscript'}
                     </p>
                     <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-on-surface/50">
-                      <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Institutional Scholar'}</span>
+                      <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Scholar'}</span>
                       <span className="w-1 h-1 bg-outline-variant/30 rounded-full"></span>
                       <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
                     </div>
@@ -204,9 +210,9 @@ export const Dashboard = () => {
         {/* Registry Continuity & Efficiency */}
         <section className="hidden md:block">
           <div className="bg-surface-container-high p-10 h-full border-t border-primary/10">
-            <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Registry Protocol</h4>
+            <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Submission Status</h4>
             <p className="text-on-surface-variant max-w-md mx-auto italic font-body text-lg">
-              Submission implies adherence to the highest editorial standards for African-centered intellectual heritage.
+              Submissions follow the highest editorial standards for multidisciplinary research and development.
             </p>
             
             <div className="space-y-12 relative">
@@ -214,7 +220,7 @@ export const Dashboard = () => {
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-surface-container-high"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Ingestion</h6>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Submission</h6>
                 <p className="text-xl text-surface-container-highest opacity-90 leading-relaxed mb-12">
                   Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
                 </p>
@@ -228,7 +234,7 @@ export const Dashboard = () => {
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-outline-variant border-4 border-surface-container-high"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 03: Registry Finalization</h6>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 03: Publication</h6>
                 <p className="text-[10px] text-on-surface/50 leading-relaxed">Archival timestamping and institutional registry entry.</p>
               </div>
             </div>
@@ -257,9 +263,9 @@ export const Dashboard = () => {
       <footer className="mt-32 pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-label uppercase tracking-[0.3em] text-on-surface/30">
         <span>© 2024 International Journal of Social Work and Development Studies</span>
         <div className="flex gap-10">
-          <Link to="/about" className="hover:text-primary transition-colors">Registry Ethics</Link>
-          <Link to="/about" className="hover:text-primary transition-colors">Continuity Protocol</Link>
-          <Link to="/archive" className="hover:text-primary transition-colors">Archive Access</Link>
+          <Link to="/about" className="hover:text-primary transition-colors">Ethics</Link>
+          <Link to="/about" className="hover:text-primary transition-colors">About</Link>
+          <Link to="/archive" className="hover:text-primary transition-colors">Archive</Link>
         </div>
       </footer>
     </div>
