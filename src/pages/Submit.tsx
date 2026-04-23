@@ -145,10 +145,11 @@ export const Submit = () => {
 
   const addKeyword = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
-    if (keywordInput.trim() && !keywords.includes(keywordInput.trim())) {
-      setKeywords([...keywords, keywordInput.trim()]);
-      setKeywordInput("");
-    }
+    const parts = keywordInput.split(",").map((k) => k.trim()).filter(Boolean);
+    if (parts.length === 0) return;
+    const unique = parts.filter((p) => !keywords.includes(p));
+    if (unique.length > 0) setKeywords([...keywords, ...unique]);
+    setKeywordInput("");
   };
 
   const removeKeyword = (index: number) =>
@@ -347,7 +348,7 @@ export const Submit = () => {
                   <div className="flex gap-2">
                     <input
                       className="flex-1 bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                      placeholder="e.g. Urbanism"
+                      placeholder="e.g. Urbanism, Social Equity, Policy"
                       type="text"
                       value={keywordInput}
                       onChange={(e) => setKeywordInput(e.target.value)}
@@ -363,6 +364,14 @@ export const Submit = () => {
                       <Plus size={18} />
                     </Button>
                   </div>
+                  <p className="text-[10px] text-on-surface-variant/60 tracking-wide">
+                    Separate multiple keywords with commas — they will be added at once.
+                    {keywordInput.includes(",") && (
+                      <span className="ml-2 text-primary font-bold uppercase tracking-widest">
+                        {keywordInput.split(",").map(k => k.trim()).filter(Boolean).length} keyword{keywordInput.split(",").map(k => k.trim()).filter(Boolean).length !== 1 ? "s" : ""} detected
+                      </span>
+                    )}
+                  </p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {keywords.map((kw, i) => (
                       <span

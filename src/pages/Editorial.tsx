@@ -333,8 +333,8 @@ export const Editorial = () => {
                           Financial Clearance
                         </span>
                         <PaymentStatusBadge
-                          vettingFee={!!submission.vetting_fee}
-                          processingFee={!!submission.processing_fee}
+                          vettingFee={!!art.vetting_fee}
+                          processingFee={!!art.processing_fee}
                           showLabels={true}
                         />
                       </div>
@@ -446,8 +446,8 @@ export const Editorial = () => {
                           Financial Clearance
                         </span>
                         <PaymentStatusBadge
-                          vettingFee={!!submission.vetting_fee}
-                          processingFee={!!submission.processing_fee}
+                          vettingFee={!!art.vetting_fee}
+                          processingFee={!!art.processing_fee}
                           showLabels={true}
                         />
                       </div>
@@ -551,8 +551,8 @@ export const Editorial = () => {
                           Financial Clearance
                         </span>
                         <PaymentStatusBadge
-                          vettingFee={!!submission.vetting_fee}
-                          processingFee={!!submission.processing_fee}
+                          vettingFee={!!art.vetting_fee}
+                          processingFee={!!art.processing_fee}
                           showLabels={true}
                         />
                       </div>

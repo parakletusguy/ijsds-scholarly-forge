@@ -13,8 +13,6 @@ export interface Submission {
   approved_by_editor?: boolean;
   approved_at?: string | null;
   submitted_at: string;
-  vetting_fee?: boolean;
-  processing_fee?: boolean;
   article?: Article | Record<string, any>;
   submitter?: {
     id: string;
