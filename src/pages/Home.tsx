@@ -54,7 +54,7 @@ export const Home = () => {
     <div className="min-h-screen bg-surface selection:bg-orange-100 selection:text-primary">
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <header className="relative min-h-[700px] flex items-center overflow-hidden bg-surface py-20">
+      <header className="relative flex items-center overflow-hidden bg-surface pt-12 pb-16 md:pt-16 md:pb-20">
         <div className="absolute inset-0 pointer-events-none"
           style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '32px 32px', opacity: 0.08 }}
         />
@@ -62,12 +62,12 @@ export const Home = () => {
           <span className="text-primary tracking-[0.4em] font-bold text-[10px] mb-8 inline-block uppercase">
             Established 2025 · Open Access · Peer Reviewed
           </span>
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-headline font-light leading-[1.05] tracking-tight text-on-surface mb-10">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-light leading-[1.1] tracking-tight text-on-surface mb-6 md:mb-10">
             Amplifying African Voices through{' '}
             <span className="italic text-primary">Rigorous Research.</span>
           </h1>
-          <p className="text-xl md:text-2xl text-on-surface-variant mb-12 leading-relaxed max-w-3xl mx-auto italic">
-            The International Journal of Social Work and Development Studies (IJSDS) is an international peer-reviewed journal publishing high-quality research.
+          <p className="text-base sm:text-lg md:text-2xl text-on-surface-variant mb-10 leading-relaxed max-w-3xl mx-auto italic">
+            Published quarterly, IJSDS provides a global platform for original social work and development research.
           </p>
           
           <div className="flex flex-col items-center gap-8">
@@ -77,8 +77,8 @@ export const Home = () => {
               </div>
               <input 
                 type="text"
-                placeholder="Search the archive by title, author, or keyword..."
-                className="w-full bg-white border border-on-surface/10 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-xl hover:shadow-2xl"
+                placeholder="Search the archive..."
+                className="w-full bg-white border border-on-surface/10 py-5 pl-14 pr-8 text-base md:text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-xl hover:shadow-2xl"
                 onKeyPress={(e) => e.key === 'Enter' && navigate(`/articles?q=${(e.target as HTMLInputElement).value}`)}
               />
             </div>
@@ -86,13 +86,13 @@ export const Home = () => {
             <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto">
               <button
                 onClick={() => navigate('/articles')}
-                className="bg-primary text-white px-12 py-5 font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 w-full sm:w-auto"
+                className="bg-primary text-white px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 w-full sm:w-auto"
               >
                 Browse All Research
               </button>
               <button
                 onClick={() => navigate(user ? '/submit' : '/auth')}
-                className="border-2 border-on-surface/20 text-on-surface px-12 py-5 font-bold text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
+                className="border-2 border-on-surface/20 text-on-surface px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
               >
                 Submit Manuscript
               </button>
@@ -104,13 +104,13 @@ export const Home = () => {
 
       {/* ── Current Issues — Editorial Grid ──────────────────────────────── */}
       <section className="py-32 bg-surface">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-4 sm:px-8">
           <div className="flex justify-between items-end mb-16">
             <div>
               <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
                 Recent Publications
               </span>
-              <h2 className="font-headline text-3xl md:text-5xl text-on-surface">Current Issues</h2>
+              <h2 className="font-headline text-3xl md:text-5xl text-on-surface">Latest Issues</h2>
             </div>
             <button
               onClick={() => navigate('/articles')}
@@ -148,7 +148,7 @@ export const Home = () => {
                 {/* Large featured article */}
                 {featured && (
                   <div
-                    className="lg:col-span-8 group cursor-pointer border-l-8 border-primary pl-8 py-4 bg-primary/5 hover:bg-primary/10 hover:border-primary-container transition-all"
+                    className="lg:col-span-8 group cursor-pointer border-l-4 sm:border-l-8 border-primary pl-4 sm:pl-8 py-4 bg-primary/5 hover:bg-primary/10 hover:border-primary-container transition-all"
                     onClick={() => navigate(`/article/${buildArticleSlug(featured)}`)}
                   >
                     <div className="flex gap-4 mb-4">
@@ -159,14 +159,14 @@ export const Home = () => {
                         {estimateReadTime(featured.abstract || '')}
                       </span>
                     </div>
-                    <h3 className="font-headline text-4xl mb-4 leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="font-headline text-2xl sm:text-4xl mb-4 leading-tight group-hover:text-primary transition-colors">
                       {featured.title}
                     </h3>
                     <p className="text-on-surface-variant mb-6 line-clamp-3 leading-relaxed">
                       {featured.abstract}
                     </p>
-                    <div className="flex items-center gap-6 mt-6">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
                           <User size={14} className="text-on-surface/40" />
                         </div>
@@ -201,14 +201,14 @@ export const Home = () => {
                 {/* Side text-only card */}
                 {rest[0] && (
                   <div
-                    className="lg:col-span-4 flex flex-col justify-end cursor-pointer group"
+                    className="lg:col-span-4 flex flex-col justify-end cursor-pointer group h-full"
                     onClick={() => navigate(`/article/${buildArticleSlug(rest[0])}`)}
                   >
-                    <div className="p-8 border-l-2 border-primary/20 bg-surface-container-lowest hover:border-primary transition-colors h-full flex flex-col justify-center">
+                    <div className="p-6 md:p-8 border-l-2 border-primary/20 bg-surface-container-lowest hover:border-primary transition-colors h-full flex flex-col justify-center">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 block">
                         {rest[0].subject_area || 'Field Report'}
                       </span>
-                      <h3 className="font-headline text-2xl leading-snug mb-6 group-hover:text-primary transition-colors">
+                      <h3 className="font-headline text-xl md:text-2xl leading-snug mb-4 md:mb-6 group-hover:text-primary transition-colors">
                         {rest[0].title}
                       </h3>
                       <p className="text-sm text-on-surface-variant mb-6 line-clamp-4 leading-relaxed">
@@ -236,9 +236,9 @@ export const Home = () => {
                 )}
               </div>
 
-              {/* Bottom 3-column grid */}
+              {/* Bottom grid (Responsive: 1 col on mobile/XS, 2 on SM/MD, 3 on LG) */}
               {rest.length > 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 border-t border-outline-variant/20 pt-16">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-12 gap-y-12 md:gap-y-16 border-t border-outline-variant/20 pt-16">
                   {rest.slice(1, 4).map((article) => (
                     <div
                       key={article.id}
@@ -248,7 +248,7 @@ export const Home = () => {
                       <span className="text-[9px] font-bold uppercase tracking-widest text-primary block mb-3">
                         {article.subject_area || 'Research Article'}
                       </span>
-                      <h3 className="font-headline text-xl leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                      <h3 className="font-headline text-lg md:text-xl lg:text-2xl leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2">
                         {article.title}
                       </h3>
                       <p className="text-sm text-on-surface-variant line-clamp-2 leading-relaxed mb-4">
@@ -310,7 +310,7 @@ export const Home = () => {
                   className="absolute -top-4 -right-4 w-32 opacity-[0.03] group-hover/card:opacity-[0.07] transition-opacity duration-1000 -rotate-12 pointer-events-none" 
                 />
                 <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">"</span>
-                <blockquote className="font-headline text-3xl md:text-4xl leading-snug text-on-surface mb-10 font-light">
+                <blockquote className="font-headline text-2xl md:text-3xl lg:text-4xl leading-snug text-on-surface mb-8 md:mb-10 font-light">
                   Research is not just an academic exercise — it is how we shape the future. Through our journal, we give African scholars the platform they deserve to lead global conversations.
                 </blockquote>
                 <div className="flex items-center justify-between border-l-4 border-primary pl-6">
@@ -330,7 +330,7 @@ export const Home = () => {
 
       {/* ── Submission CTA ───────────────────────────────────────────────── */}
       <section className="py-24 bg-primary text-white">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-4 sm:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="font-headline text-4xl md:text-5xl mb-6 font-light leading-tight">
@@ -365,7 +365,7 @@ export const Home = () => {
 
       {/* ── Impact Stats ─────────────────────────────────────────────────── */}
       <section className="py-24 bg-white border-t border-primary/5">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-4 sm:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">
             {[
               { icon: Globe, value: `${stats.reach}%`, label: 'International Reach' },
@@ -387,7 +387,7 @@ export const Home = () => {
 
       {/* ── Why Choose IJSDS ─────────────────────────────────────────────── */}
       <section className="py-32 bg-surface-container-low">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto px-4 sm:px-8">
           <div className="mb-20 max-w-2xl">
             <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
               Why Publish With Us

@@ -83,10 +83,10 @@ export const Header = () => {
 
       {/* ── Main Navigation ──────────────────────────────────────────────── */}
       <nav
-        className={`bg-white/90 backdrop-blur-md transition-all duration-700 ${isScrolled ? "py-1 shadow-sm" : "py-2"}`}
+        className={`bg-white/90 backdrop-blur-md transition-all duration-700 ${isScrolled ? "py-0.5 shadow-sm" : "py-1"}`}
       >
-        <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
-          <div className="flex items-center gap-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex justify-between items-center">
+          <div className="flex items-center gap-4 sm:gap-12">
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-2 group"
@@ -94,7 +94,7 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="h-12 md:h-14 w-auto object-contain group-hover:scale-[1.02] transition-transform duration-500"
+                className="h-28 sm:h-32 md:h-36 lg:h-40 w-auto object-contain scale-[1.5] md:scale-[1.8] lg:scale-[2] origin-left group-hover:scale-[1.55] md:group-hover:scale-[1.85] lg:group-hover:scale-[2.05] transition-transform duration-500 -ml-2 shrink-0"
               />
             </button>
 
@@ -177,7 +177,7 @@ export const Header = () => {
                 </button>
                 <button
                   onClick={() => navigate("/auth?reason=submit")}
-                  className="bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 border border-transparent"
+                  className="hidden md:block bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 border border-transparent whitespace-nowrap"
                 >
                   Submit Manuscript
                 </button>
@@ -213,17 +213,25 @@ export const Header = () => {
             {!user && (
               <div className="pt-6 space-y-4">
                 <button
-                  onClick={() => navigate("/auth")}
-                  className="w-full text-center text-sm font-bold uppercase tracking-widest text-stone-500 py-4 border border-stone-200"
+                  onClick={() => navigate("/auth?reason=submit")}
+                  className="w-full bg-primary text-white py-5 text-[11px] font-bold uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all"
                 >
-                  Log In
+                  Submit Manuscript
                 </button>
-                <button
-                  onClick={() => navigate("/auth")}
-                  className="w-full bg-primary text-white py-4 text-sm font-bold uppercase tracking-widest"
-                >
-                  Sign Up
-                </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="w-full text-center text-[10px] font-bold uppercase tracking-widest text-stone-500 py-4 border border-stone-200"
+                  >
+                    Log In
+                  </button>
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="w-full bg-stone-900 text-white py-4 text-[10px] font-bold uppercase tracking-widest"
+                  >
+                    Sign Up
+                  </button>
+                </div>
               </div>
             )}
           </div>
