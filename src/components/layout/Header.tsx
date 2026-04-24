@@ -94,7 +94,7 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="h-28 sm:h-32 md:h-36 lg:h-40 w-auto object-contain scale-[1.5] md:scale-[1.8] lg:scale-[2] origin-left group-hover:scale-[1.55] md:group-hover:scale-[1.85] lg:group-hover:scale-[2.05] transition-transform duration-500 -ml-2 shrink-0"
+                className="w-56 sm:w-64 md:w-80 lg:w-[360px] h-auto object-contain -my-4 sm:-my-6 md:-my-8 lg:-my-12 -ml-2 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
               />
             </button>
 
