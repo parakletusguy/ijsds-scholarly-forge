@@ -82,7 +82,8 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
     }
   };
 
-  const handleFileUpdate = async (fileUrl: string) => {
+  const handleFileUpdate = async (fileUrl: string | File) => {
+    if (fileUrl instanceof File) return;  // autoUpload=true so this won't happen
     if (!user) return;
 
     setUploading(true);
@@ -328,6 +329,7 @@ export const AuthorFileManager = ({ articleId, submissionId }: AuthorFileManager
             acceptedTypes=".pdf,.doc,.docx"
             maxSizeMB={10}
             disabled={!reuploadEnabled}
+            articleId={articleId}
           />
         </div>
 
