@@ -178,7 +178,7 @@ export const ReviewerDashboard = () => {
             )}
 
             <div className="flex flex-wrap gap-2 pt-2 border-t border-stone-100">
-              <PaperDownload manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
+              <PaperDownload articleId={review.submission?.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
               {!completed ? (
                 <>
                   <Button onClick={() => navigate(`/review/${review.id}`)}

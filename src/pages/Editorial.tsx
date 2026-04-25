@@ -233,7 +233,7 @@ export const Editorial = () => {
                     Start Review
                   </Button>
                   <ReviewerInvitationDialog submissionId={submission.id} submissionTitle={art.title} onInvite={fetchSubmissions} submission={submission} />
-                  <PaperDownload manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
+                  <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                   <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/details`)}
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
                     View Dossier
@@ -266,7 +266,7 @@ export const Editorial = () => {
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
                     View Dossier
                   </Button>
-                  <PaperDownload manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
+                  <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                 </>
               )}
               {tab === "completed" && (
@@ -275,7 +275,7 @@ export const Editorial = () => {
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
                     Registry Details
                   </Button>
-                  <PaperDownload manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
+                  <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                   {submission.status === "accepted" && art.doi && (
                     <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.doi)}
                       className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">

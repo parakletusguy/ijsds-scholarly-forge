@@ -188,7 +188,8 @@ export default function Archive() {
                           </div>
 
                           <div className="flex lg:flex-col gap-4 shrink-0 justify-end lg:justify-start pt-8 lg:pt-0">
-                             <PaperDownload 
+                             <PaperDownload
+                               articleId={article.id}
                                manuscriptFileUrl={article.manuscript_file_url!}
                                title={article.title}
                              />

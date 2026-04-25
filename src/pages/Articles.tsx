@@ -321,7 +321,7 @@ export const Articles = () => {
                         </button>
                         {article.manuscript_file_url && (
                           <button
-                            onClick={e => { e.stopPropagation(); handleFileDownload(article.manuscript_file_url!, article.title); }}
+                            onClick={e => { e.stopPropagation(); handleFileDownload(article.manuscript_file_url!, article.title, article.id); }}
                             className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
                           >
                             <BookOpen size={11} /> PDF

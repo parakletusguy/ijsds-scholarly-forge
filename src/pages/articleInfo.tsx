@@ -290,6 +290,7 @@ export const ArticleInfo = () => {
               <div className="bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_rgba(143,53,20,0.05)] p-8">
                 <div className="flex flex-col gap-4">
                   <PaperDownload
+                    articleId={article.id}
                     manuscriptFileUrl={article.manuscript_file_url}
                     title={article.title}
                     className="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg font-bold flex items-center justify-center gap-3 hover:shadow-lg transition-all"

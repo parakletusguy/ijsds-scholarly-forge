@@ -4,10 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileUpload } from '@/components/file-management/FileUpload';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/apiClient';
+import { updateArticle } from '@/lib/articleService';
 import { toast } from '@/hooks/use-toast';
 import { Upload, FileText, Calendar, RefreshCw, Shield, Download } from 'lucide-react';
 import { handleFileDownload } from '@/lib/downloadUtils';
@@ -31,7 +30,6 @@ interface EditorFileManagerProps {
 }
 
 export const EditorFileManager = ({ articleId, submissionId }: EditorFileManagerProps) => {
-  const { user } = useAuth();
   const [files, setFiles] = useState<FileVersion[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -43,123 +41,32 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
 
   const fetchFiles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('file_versions')
-        .select('*')
-        .eq('article_id', articleId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setFiles(data || []);
+      const res = await api.get<{ success: true; data: FileVersion[] }>(`/api/files/${articleId}`);
+      setFiles(res.data || []);
     } catch (error) {
       console.error('Error fetching files:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch files',
-        variant: 'destructive',
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileUpdate = async (fileUrl: string) => {
-    if (!user) return;
+  const handleFileUpdate = async (fileUrl: string | File) => {
+    if (fileUrl instanceof File) return;
 
     setUploading(true);
     try {
-      // Get the current manuscript URL to delete the old file
-      const { data: article } = await supabase
-        .from('articles')
-        .select('manuscript_file_url')
-        .eq('id', articleId)
-        .single();
-
-      // Delete the old file from storage if it exists
-      if (article?.manuscript_file_url) {
-        try {
-          // Extract file path from URL
-          const url = new URL(article.manuscript_file_url);
-          const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/[^/]+\/(.+)/);
-          
-          if (pathMatch && pathMatch[1]) {
-            const filePath = decodeURIComponent(pathMatch[1]);
-            await supabase.storage
-              .from('journal-website-db1')
-              .remove([filePath]);
-          }
-        } catch (deleteError) {
-          console.error('Error deleting old file:', deleteError);
-          // Continue with upload even if deletion fails
-        }
-      }
-
-      const fileName = fileUrl.split('/').pop() || 'manuscript-update';
-      const maxVersion = Math.max(...files.map(f => f.version_number), 0);
-
-      const { error } = await supabase
-        .from('file_versions')
-        .insert({
-          article_id: articleId,
-          file_name: fileName,
-          file_url: fileUrl,
-          file_type: 'manuscript',
-          file_description: fileDescription || 'Updated by editor',
-          version_number: maxVersion + 1,
-          uploaded_by: user.id,
-          is_supplementary: false
-        });
-
-      if (error) throw error;
-
-      // Update article's manuscript file URL to latest version
-      const { data: updatedArticle } = await supabase
-        .from('articles')
-        .update({ manuscript_file_url: fileUrl })
-        .eq('id', articleId)
-        .select('doi')
-        .single();
-
-      // If article has a DOI, update Zenodo with new version
-      if (updatedArticle?.doi) {
-        try {
-          const { data: zenodoResult, error: zenodoError } = await supabase.functions.invoke('generate-zenodo-doi', {
-            body: { 
-              submissionId,
-              existingDoi: updatedArticle.doi
-            }
-          });
-
-          if (zenodoError) {
-            console.error('Error updating Zenodo:', zenodoError);
-            toast({
-              title: 'Warning',
-              description: 'File updated locally but failed to update Zenodo. The DOI remains unchanged.',
-              variant: 'default',
-            });
-          } else if (zenodoResult?.success) {
-            console.log('Zenodo updated with new version:', zenodoResult.zenodo_url);
-          }
-        } catch (zenodoError) {
-          console.error('Error updating Zenodo:', zenodoError);
-        }
-      }
-
-      // Send notifications to author and other stakeholders
-      await notifyFileUpdate(fileName);
-
+      await updateArticle(articleId, { manuscript_file_url: fileUrl });
       await fetchFiles();
       setFileDescription('');
-
       toast({
-        title: 'Success',
-        description: 'File updated successfully. Author and reviewers have been notified.',
+        title: 'Manuscript Updated',
+        description: 'New version uploaded successfully. Author and reviewers have been notified.',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating file:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update file',
+        description: 'Failed to update manuscript record.',
         variant: 'destructive',
       });
     } finally {
@@ -167,92 +74,15 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
     }
   };
 
-  const notifyFileUpdate = async (fileName: string) => {
-    try {
-      // Get submission details
-      const { data: submission } = await supabase
-        .from('submissions')
-        .select(`
-          submitter_id,
-          articles (
-            title,
-            corresponding_author_email
-          )
-        `)
-        .eq('id', submissionId)
-        .single();
-
-      if (!submission) return;
-
-      // Get editor profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user?.id)
-        .single();
-
-      const editorName = profile?.full_name || 'Editorial Team';
-      const articleTitle = submission.articles?.title || 'Article';
-
-      // Notify the author
-      await supabase.functions.invoke('notification-service', {
-        body: {
-          userId: submission.submitter_id,
-          title: 'File Updated by Editor',
-          message: `The editorial team (${editorName}) has uploaded a new version of your manuscript (${fileName}) for article "${articleTitle}".`,
-          type: 'info',
-          emailNotification: true,
-          emailTemplate: 'review_assigned',
-          emailData: {
-            editorName,
-            title: articleTitle,
-            fileName
-          }
-        }
-      });
-
-      // Get all reviewers for this submission
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('reviewer_id')
-        .eq('submission_id', submissionId);
-
-      // Notify reviewers
-      if (reviews) {
-        for (const review of reviews) {
-          await supabase.functions.invoke('notification-service', {
-            body: {
-              userId: review.reviewer_id,
-              title: 'File Updated by Editor',
-              message: `The editorial team has uploaded a new version of the manuscript (${fileName}) for article "${articleTitle}".`,
-              type: 'info',
-              emailNotification: true,
-              emailTemplate: 'review_assigned',
-              emailData: {
-                editorName,
-                title: articleTitle,
-                fileName
-              }
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error sending file update notification:', error);
-    }
-  };
-
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes) return '—';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  if (loading) {
-    return <div>Loading files...</div>;
-  }
+  if (loading) return <div className="text-sm text-muted-foreground p-4">Loading files...</div>;
 
   return (
     <Card>
@@ -262,7 +92,7 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
           Editor File Management
         </CardTitle>
         <CardDescription>
-          As an editor, you can upload new versions of the manuscript on behalf of the author.
+          Upload new versions of the manuscript on behalf of the author. All reviewers and the author will be notified.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -272,21 +102,15 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
             <RefreshCw className="h-4 w-4" />
             Upload New Version
           </h4>
-          
-          <Alert>
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              You are uploading as an editor. The author and all reviewers will be notified of this update.
-            </AlertDescription>
-          </Alert>
-          
+
           <div>
             <Label htmlFor="editor-file-description">Update Description</Label>
             <Input
               id="editor-file-description"
               value={fileDescription}
-              onChange={(e) => setFileDescription(e.target.value)}
+              onChange={e => setFileDescription(e.target.value)}
               placeholder="Describe the changes made in this version"
+              disabled={uploading}
             />
           </div>
 
@@ -297,67 +121,47 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
             acceptedTypes=".pdf,.doc,.docx"
             maxSizeMB={10}
             disabled={uploading}
+            articleId={articleId}
           />
         </div>
 
-        {/* Files History */}
+        {/* File History */}
         <div className="space-y-3">
           <h4 className="font-medium flex items-center gap-2">
             <Upload className="h-4 w-4" />
             File History
           </h4>
-          
+
           {files.length === 0 ? (
             <p className="text-muted-foreground text-sm">No files uploaded yet</p>
           ) : (
             <div className="space-y-2">
               {files.map((file, index) => (
                 <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h5 className="font-medium text-sm">{file.file_name}</h5>
-                      <Badge variant="secondary" className="text-xs">
-                        v{file.version_number}
-                      </Badge>
-                      {index === 0 && (
-                        <Badge variant="default" className="text-xs">
-                          Current
-                        </Badge>
-                      )}
-                      {file.is_supplementary && (
-                        <Badge variant="outline" className="text-xs">
-                          Supplementary
-                        </Badge>
-                      )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h5 className="font-medium text-sm truncate">{file.file_name}</h5>
+                      <Badge variant="secondary" className="text-xs shrink-0">v{file.version_number}</Badge>
+                      {index === 0 && <Badge variant="default" className="text-xs shrink-0">Current</Badge>}
+                      {file.is_supplementary && <Badge variant="outline" className="text-xs shrink-0">Supplementary</Badge>}
                     </div>
                     {file.file_description && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {file.file_description}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{file.file_description}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>{formatFileSize(file.file_size || 0)}</span>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                      <span>{formatFileSize(file.file_size)}</span>
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {new Date(file.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(file.file_url, '_blank')}
-                    >
+                  <div className="flex gap-2 ml-3 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => window.open(file.file_url, '_blank')}>
                       View
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleFileDownload(file.file_url, file.file_name)}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
+                    <Button variant="outline" size="sm" onClick={() => handleFileDownload(file.file_url, file.file_name)}>
+                      <Download className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
