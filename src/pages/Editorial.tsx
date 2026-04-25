@@ -102,10 +102,13 @@ export const Editorial = () => {
   const revisionSubmissions = submissions.filter(s => s.status === "revision_requested");
   const completedSubmissions = submissions.filter(s => ["accepted", "rejected", "desk_rejected"].includes(s.status));
 
-  // Collect unique subject areas for filter
+  // Collect unique subject areas — skip entries that look like article titles (>60 chars)
   const allSubjects = useMemo(() => {
     const set = new Set<string>();
-    submissions.forEach(s => { const a = s.article as any; if (a?.subject_area) set.add(a.subject_area); });
+    submissions.forEach(s => {
+      const area = (s.article as any)?.subject_area;
+      if (area && area.length <= 60) set.add(area);
+    });
     return Array.from(set).sort();
   }, [submissions]);
 
@@ -171,25 +174,18 @@ export const Editorial = () => {
       <div className={`bg-white border border-stone-100 border-l-4 ${borderColor} transition-all`}>
         {/* Compact header row */}
         <div
-          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-stone-50/60"
+          className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-stone-50/60"
           onClick={toggle}
         >
-          <div className="flex-1 min-w-0 flex items-center gap-3">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 shrink-0">
-              {submission.id.slice(0, 8).toUpperCase()}
-            </span>
-            <h3 className="text-sm font-semibold text-stone-900 truncate leading-tight">
-              {art.title || "Untitled"}
-            </h3>
-          </div>
-          <div className="hidden sm:flex items-center gap-3 shrink-0">
-            {art.subject_area && (
-              <span className="text-[9px] font-medium text-stone-400 bg-stone-50 border border-stone-100 px-2 py-0.5 max-w-[120px] truncate">
-                {art.subject_area}
-              </span>
-            )}
-            <span className="text-[10px] text-stone-400 shrink-0">
-              {new Date(submission.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "2-digit" })}
+          {/* Title takes as much space as possible */}
+          <h3 className="flex-1 min-w-0 text-sm font-semibold text-stone-900 truncate leading-tight">
+            {art.title || "Untitled"}
+          </h3>
+
+          {/* Right side: minimal, fixed-width metadata */}
+          <div className="hidden sm:flex items-center gap-3 shrink-0 ml-2">
+            <span className="text-[9px] text-stone-400 tabular-nums shrink-0">
+              {new Date(submission.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             </span>
             <PaymentStatusBadge
               vettingFee={!!art.vetting_fee}
@@ -197,7 +193,7 @@ export const Editorial = () => {
               showLabels={false}
             />
           </div>
-          {isExpanded ? <ChevronUp size={14} className="text-stone-400 shrink-0" /> : <ChevronDown size={14} className="text-stone-400 shrink-0" />}
+          {isExpanded ? <ChevronUp size={13} className="text-stone-300 shrink-0" /> : <ChevronDown size={13} className="text-stone-300 shrink-0" />}
         </div>
 
         {/* Expanded detail */}
