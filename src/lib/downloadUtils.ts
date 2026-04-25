@@ -2,9 +2,14 @@ export const handleFileDownload = async (fileUrl: string, title?: string) => {
   if (!fileUrl) return;
 
   try {
-    const filename = title 
-      ? `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
-      : fileUrl.split('/').pop()?.split('?')[0] || 'download.pdf';
+    // Extract real extension from URL (pdf, docx, doc) — never assume .pdf
+    const urlPath = fileUrl.split('?')[0];
+    const urlExt = urlPath.split('.').pop()?.toLowerCase() || 'pdf';
+    const safeExt = ['pdf', 'doc', 'docx'].includes(urlExt) ? urlExt : 'pdf';
+
+    const filename = title
+      ? `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${safeExt}`
+      : urlPath.split('/').pop() || `download.${safeExt}`;
 
     let finalUrl = fileUrl;
 
