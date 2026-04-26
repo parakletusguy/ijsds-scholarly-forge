@@ -51,7 +51,6 @@ const ReviewerDetail = lazy(() => import('./pages/reviewersDetails').then(m => (
 const OpenAccessPage = lazy(() => import('./pages/openAccessPage'));
 const PlagiarismPolicy = lazy(() => import('./pages/PlagiarismPolicy').then(m => ({ default: m.PlagiarismPolicy })));
 const PreservationPolicy = lazy(() => import('./pages/PreservationPolicy').then(m => ({ default: m.PreservationPolicy })));
-const Archive = lazy(() => import('./pages/Archive'));
 const Indexing = lazy(() => import('./pages/Indexing').then(m => ({ default: m.Indexing })));
 const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
 const EthicalGuidelines = lazy(() => import('./pages/EthicalGuidelines').then(m => ({ default: m.EthicalGuidelines })));
@@ -127,7 +126,6 @@ const App = () => (
                     <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
                     <Route path="/articles" element={<PublicLayout><Articles /></PublicLayout>} />
                     <Route path="/article/:slug" element={<PublicLayout><ArticleInfo /></PublicLayout>} />
-                    <Route path="/archive" element={<PublicLayout><Archive /></PublicLayout>} />
                     <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
                     <Route path="/blog/:id" element={<PublicLayout><BlogPost /></PublicLayout>} />
                     <Route path="/partners" element={<PublicLayout><Partners /></PublicLayout>} />
