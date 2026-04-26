@@ -53,7 +53,7 @@ export const Header = () => {
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Archive", path: "/articles" },
+    { name: "Articles", path: "/articles" },
     { name: "About", path: "/about" },
     { name: "Indexing", path: "/indexing" },
     { name: "Partners", path: "/partners" },
