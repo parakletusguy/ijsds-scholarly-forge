@@ -188,7 +188,7 @@ export const ArticleInfo = () => {
             {article.manuscript_file_url && (
               <div className="mb-12">
                 <button
-                  onClick={() => handleFileDownload(article.manuscript_file_url!, article.title)}
+                  onClick={() => handleFileDownload(article.manuscript_file_url!, article.title, article.id)}
                   className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all shadow-xl shadow-primary/10"
                 >
                   <BookOpen className="w-5 h-5" />
