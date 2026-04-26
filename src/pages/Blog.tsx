@@ -1,44 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Calendar, User, Search, ChevronLeft, ChevronRight, Layers, ArrowRight } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getBlogPosts, BlogPost } from '@/lib/blogService';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  featured_image_url: string | null;
-  category: string | null;
-  tags: string[] | null;
-  published_at: string;
-  author_profile: {
-    full_name: string;
-  } | null;
-}
+const POSTS_PER_PAGE = 8;
 
 export const Blog = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
-  const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
-  const [totalPages, setTotalPages] = useState(1);
-  const [userRole, setUserRole] = useState<{ is_admin: boolean; is_editor: boolean }>({ is_admin: false, is_editor: false });
 
-  const POSTS_PER_PAGE = 8;
+  const isStaff = profile?.is_admin || profile?.is_editor;
 
   useEffect(() => {
-    fetchUserRole();
-    fetchPosts();
-    fetchCategories();
-  }, [currentPage, searchTerm, selectedCategory]);
+    getBlogPosts()
+      .then(setAllPosts)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -48,83 +34,31 @@ export const Blog = () => {
     setSearchParams(params);
   }, [searchTerm, selectedCategory, currentPage, setSearchParams]);
 
-  const fetchUserRole = async () => {
-    if (!user) return;
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin, is_editor')
-        .eq('id', user.id)
-        .single();
-      if (error) throw error;
-      if (profile) setUserRole(profile);
-    } catch (error) {
-      console.error('Error fetching user role:', error);
-    }
-  };
+  const categories = useMemo(
+    () => [...new Set(allPosts.map(p => p.category).filter(Boolean))] as string[],
+    [allPosts]
+  );
 
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('category')
-        .eq('status', 'published')
-        .not('category', 'is', null);
-      if (error) throw error;
-      const uniqueCategories = [...new Set(data.map(post => post.category))].filter(Boolean);
-      setCategories(uniqueCategories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
+  const filtered = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return allPosts.filter(p => {
+      const matchSearch = !q || p.title.toLowerCase().includes(q) || (p.excerpt || '').toLowerCase().includes(q);
+      const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
+      return matchSearch && matchCat;
+    });
+  }, [allPosts, searchTerm, selectedCategory]);
 
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('blog_posts')
-        .select('*', { count: 'exact' })
-        .eq('status', 'published')
-        .order('published_at', { ascending: false });
+  const totalPages = Math.max(1, Math.ceil(filtered.length / POSTS_PER_PAGE));
+  const posts = filtered.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
 
-      if (searchTerm) query = query.or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
-      if (selectedCategory !== 'all') query = query.eq('category', selectedCategory);
+  const formatDate = (dateString?: string | null) =>
+    dateString
+      ? new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      : '';
 
-      const from = (currentPage - 1) * POSTS_PER_PAGE;
-      const to = from + POSTS_PER_PAGE - 1;
-      const { data, error, count } = await query.range(from, to);
-      if (error) throw error;
-
-      const authorIds = [...new Set(data?.map(post => post.author_id).filter(Boolean))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', authorIds);
-
-      const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || []);
-
-      const typedData = (data || []).map(post => ({
-        ...post,
-        author_profile: post.author_id && profileMap.has(post.author_id)
-          ? { full_name: profileMap.get(post.author_id)!.full_name }
-          : { full_name: 'Editorial Office' }
-      }));
-
-      setPosts(typedData as BlogPost[]);
-      setTotalPages(Math.ceil((count || 0) / POSTS_PER_PAGE));
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-  const generateExcerpt = (content: string, excerpt?: string) => {
-    if (excerpt) return excerpt;
-    const text = content.replace(/<[^>]*>/g, '');
+  const getExcerpt = (post: BlogPost) => {
+    if (post.excerpt) return post.excerpt;
+    const text = (post.content || '').replace(/<[^>]*>/g, '');
     const words = text.split(' ').slice(0, 30);
     return words.join(' ') + (words.length === 30 ? '...' : '');
   };
@@ -149,9 +83,9 @@ export const Blog = () => {
                 News & Updates
               </h1>
             </div>
-            {(userRole.is_admin || userRole.is_editor) && (
+            {isStaff && (
               <button
-                onClick={() => navigate('/blog/admin')}
+                onClick={() => navigate('/admin/blogs')}
                 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors border border-stone-200 px-4 py-2"
               >
                 <Layers size={13} /> Manage Posts
@@ -168,14 +102,14 @@ export const Blog = () => {
               type="text"
               placeholder="Search articles..."
               value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 bg-white focus:border-primary focus:outline-none transition-colors"
             />
           </div>
           {categories.length > 0 && (
             <select
               value={selectedCategory}
-              onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
+              onChange={e => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
               className="px-4 py-2.5 text-sm border border-stone-200 bg-white focus:border-primary focus:outline-none transition-colors text-stone-600"
             >
               <option value="all">All Categories</option>
@@ -200,11 +134,11 @@ export const Blog = () => {
         ) : posts.length > 0 ? (
           <>
             <div className="divide-y divide-stone-100">
-              {posts.map((post) => (
+              {posts.map(post => (
                 <article
                   key={post.id}
                   className="py-8 group cursor-pointer"
-                  onClick={() => navigate(`/blog/${post.id}`)}
+                  onClick={() => navigate(`/blog/${post.slug}`)}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     {post.featured_image_url && (
@@ -232,12 +166,12 @@ export const Blog = () => {
                         {post.title}
                       </h2>
                       <p className="text-sm text-stone-500 leading-relaxed line-clamp-2 mb-3">
-                        {generateExcerpt(post.content, post.excerpt)}
+                        {getExcerpt(post)}
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-stone-400 flex items-center gap-1.5">
                           <User size={11} />
-                          {post.author_profile?.full_name || 'Editorial Office'}
+                          {post.author?.full_name || 'Editorial Office'}
                         </span>
                         <span className="text-xs font-bold text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           Read <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />

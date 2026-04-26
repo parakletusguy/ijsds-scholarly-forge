@@ -11,14 +11,18 @@ export interface BlogPost {
   status: string;
   featured_image_url?: string | null;
   published_at?: string | null;
-  author?: { id: string; full_name: string };
+  created_at?: string;
+  author?: { full_name: string; bio?: string } | null;
 }
 
 interface ListResponse { success: true; data: BlogPost[] }
 interface SingleResponse { success: true; data: BlogPost }
 
-export const getBlogPosts = async (): Promise<BlogPost[]> => {
-  const res = await api.get<ListResponse>('/api/blog');
+export const getBlogPosts = async (params?: { category?: string; tag?: string }): Promise<BlogPost[]> => {
+  const qs = params
+    ? '?' + new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined) as string[][]).toString()
+    : '';
+  const res = await api.get<ListResponse>(`/api/blog${qs}`);
   return res.data;
 };
 
@@ -32,12 +36,17 @@ export const getAllBlogPosts = async (): Promise<BlogPost[]> => {
   return res.data;
 };
 
-export const createBlogPost = async (body: Partial<BlogPost>): Promise<BlogPost> => {
+export const getPostById = async (id: string): Promise<BlogPost> => {
+  const res = await api.get<SingleResponse>(`/api/blog/${id}`);
+  return res.data;
+};
+
+export const createBlogPost = async (body: Partial<BlogPost> & { tags?: string[] }): Promise<BlogPost> => {
   const res = await api.post<SingleResponse>('/api/blog', body);
   return res.data;
 };
 
-export const updateBlogPost = async (id: string, updates: Partial<BlogPost>): Promise<BlogPost> => {
+export const updateBlogPost = async (id: string, updates: Partial<BlogPost> & { tags?: string[] }): Promise<BlogPost> => {
   const res = await api.patch<SingleResponse>(`/api/blog/${id}`, updates);
   return res.data;
 };

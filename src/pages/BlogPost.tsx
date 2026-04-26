@@ -1,112 +1,38 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, User, ArrowLeft, Share2, Copy, BookOpen, Clock, Tag, UserCheck, Layers, Zap, ArrowRight, Quote } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Calendar, User, ArrowLeft, Share2, Clock, Tag, UserCheck, Layers, Zap, ArrowRight, Quote } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
-
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  featured_image_url: string | null;
-  category: string | null;
-  tags: string[] | null;
-  published_at: string;
-  author_profile: {
-    full_name: string;
-    bio?: string;
-  } | null;
-}
+import { getBlogPostBySlug, getBlogPosts, BlogPost as BlogPostType } from '@/lib/blogService';
 
 export const BlogPost = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [post, setPost] = useState<BlogPost | null>(null);
+  const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
 
   useEffect(() => {
-    if (id) {
-      fetchPost();
-    }
+    if (slug) fetchPost();
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [slug]);
 
   const fetchPost = async () => {
-    if (!id) return;
-    
+    if (!slug) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('id', id)
-        .eq('status', 'published')
-        .single();
+      const data = await getBlogPostBySlug(slug);
+      setPost(data);
 
-      if (error) throw error;
-
-      let authorProfile = { full_name: 'Unknown', bio: null };
-      if (data.author_id) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, bio')
-          .eq('id', data.author_id)
-          .single();
-
-        if (profile?.full_name) {
-          authorProfile = {
-            full_name: profile.full_name,
-            bio: profile.bio || null
-          };
-        }
-      }
-
-      setPost({
-        ...data,
-        author_profile: authorProfile
-      } as BlogPost);
-      
       if (data.category) {
-        const { data: related } = await supabase
-          .from('blog_posts')
-          .select('id, title, content, excerpt, category, tags, featured_image_url, published_at, author_id')
-          .eq('status', 'published')
-          .eq('category', data.category)
-          .neq('id', id)
-          .order('published_at', { ascending: false })
-          .limit(3);
-
-        const relatedAuthorIds = [...new Set(related?.map(post => post.author_id).filter(Boolean))];
-        const { data: relatedProfiles } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', relatedAuthorIds);
-
-        const relatedProfileMap = new Map(relatedProfiles?.map(profile => [profile.id, profile]) || []);
-
-        const typedRelated = (related || []).map(post => ({
-          ...post,
-          author_profile: post.author_id && relatedProfileMap.has(post.author_id)
-            ? { full_name: relatedProfileMap.get(post.author_id)!.full_name }
-            : { full_name: 'Anonymous' }
-        }));
-
-        setRelatedPosts(typedRelated as BlogPost[]);
+        const all = await getBlogPosts();
+        setRelatedPosts(
+          all.filter(p => p.category === data.category && p.id !== data.id).slice(0, 3)
+        );
       }
-    } catch (error) {
-      console.error('Error fetching post:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load discourse artifact',
-        variant: 'destructive',
-      });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to load post', variant: 'destructive' });
       navigate('/blog');
     } finally {
       setLoading(false);
@@ -117,12 +43,8 @@ export const BlogPost = () => {
     const url = window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: post?.title,
-          text: post?.excerpt,
-          url: url,
-        });
-      } catch (error) {
+        await navigator.share({ title: post?.title, text: post?.excerpt, url });
+      } catch {
         copyToClipboard(url);
       }
     } else {
@@ -133,27 +55,19 @@ export const BlogPost = () => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast({
-        title: 'Registry Link Copied',
-        description: 'Discourse URL has been vaulted to your clipboard.',
-      });
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
-    }
+      toast({ title: 'Link Copied', description: 'URL copied to clipboard.' });
+    } catch {}
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const formatDate = (dateString?: string | null) =>
+    dateString
+      ? new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      : '';
 
   if (loading) {
     return (
       <div className="min-h-screen bg-secondary/5 flex items-center justify-center font-body">
-         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -163,173 +77,156 @@ export const BlogPost = () => {
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen font-body relative overflow-hidden">
       <Helmet>
-        <title>{post.title} — IJSDS Discourse</title>
+        <title>{post.title} — IJSDS</title>
         <meta name="description" content={post.excerpt} />
       </Helmet>
 
-      {/* Decorative Brand Accents */}
-      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-primary/5 rounded-full -mr-32 -mt-32 blur-[100px] opacity-40"></div>
-      <div className="absolute top-[20%] left-0 w-64 h-64 bg-secondary/5 opacity-40" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
+      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-primary/5 rounded-full -mr-32 -mt-32 blur-[100px] opacity-40" />
+      <div className="absolute top-[20%] left-0 w-64 h-64 bg-secondary/5 opacity-40" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} />
 
       <div className="container mx-auto px-4 py-16 relative z-10">
-        {/* Navigation Layer — High Fidelity */}
+        {/* Nav */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-10 relative">
-           <div className="absolute top-1/2 left-0 w-full h-px bg-border/20 -z-0"></div>
-           
-           <button 
-             onClick={() => navigate('/blog')} 
-             className="relative z-10 flex items-center gap-6 font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 hover:text-primary transition-colors bg-secondary/5 px-8 py-6 border border-border/10"
-           >
-              <ArrowLeft size={16} /> Return to Discourse Hub
-           </button>
-           
-           <div className="relative z-10 flex items-center gap-6">
-              <button 
-                onClick={handleShare}
-                className="h-16 w-16 bg-white border border-border/10 flex items-center justify-center text-foreground hover:text-primary hover:border-primary transition-all shadow-xl group/share"
-              >
-                 <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
-              </button>
-              <div className="bg-white p-6 md:px-10 border border-border/10 shadow-2xl flex items-center gap-6">
-                 <Clock size={16} className="text-secondary opacity-40" />
-                 <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">{formatDate(post.published_at)}</span>
-              </div>
-           </div>
+          <div className="absolute top-1/2 left-0 w-full h-px bg-border/20 -z-0" />
+          <button
+            onClick={() => navigate('/blog')}
+            className="relative z-10 flex items-center gap-6 font-headline font-black text-xs uppercase tracking-[0.4em] text-foreground/40 hover:text-primary transition-colors bg-secondary/5 px-8 py-6 border border-border/10"
+          >
+            <ArrowLeft size={16} /> Back to Blog
+          </button>
+          <div className="relative z-10 flex items-center gap-6">
+            <button
+              onClick={handleShare}
+              className="h-16 w-16 bg-white border border-border/10 flex items-center justify-center text-foreground hover:text-primary hover:border-primary transition-all shadow-xl group/share"
+            >
+              <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
+            </button>
+            <div className="bg-white p-6 md:px-10 border border-border/10 shadow-2xl flex items-center gap-6">
+              <Clock size={16} className="text-secondary opacity-40" />
+              <span className="font-headline font-black text-[10px] uppercase tracking-[0.4em] text-foreground/30 italic">{formatDate(post.published_at)}</span>
+            </div>
+          </div>
         </div>
 
         <article className="max-w-5xl mx-auto">
-          {/* Phase-A: Title & Context */}
+          {/* Header */}
           <header className="mb-20 text-center md:text-left">
             <div className="flex items-center gap-4 mb-10 justify-center md:justify-start">
-               <div className="h-0.5 w-12 bg-primary"></div>
-               {post.category && (
-                 <span className="font-headline font-black text-[11px] uppercase tracking-[0.5em] text-secondary italic">{post.category}</span>
-               )}
+              <div className="h-0.5 w-12 bg-primary" />
+              {post.category && (
+                <span className="font-headline font-black text-[11px] uppercase tracking-[0.5em] text-secondary italic">{post.category}</span>
+              )}
             </div>
-            
             <h1 className="text-5xl md:text-8xl font-headline font-black uppercase tracking-tighter leading-[0.85] mb-12 text-foreground">
-               {post.title}
+              {post.title}
             </h1>
-
             <div className="flex flex-col md:flex-row items-center gap-10 border-t border-border/10 pt-10 justify-center md:justify-start">
-               <div className="flex items-center gap-6">
-                  <div className="w-12 h-12 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
-                     <User size={24} />
-                  </div>
-                  <div className="flex flex-col text-left">
-                     <span className="font-headline font-black text-[9px] uppercase tracking-[0.5em] text-foreground/20 italic">Curated By</span>
-                     <span className="font-headline font-black text-sm uppercase tracking-widest text-foreground">{post.author_profile?.full_name || 'Anonymous Scholar'}</span>
-                  </div>
-               </div>
-
-               <div className="flex items-center gap-4 text-foreground/10 hidden md:flex">
-                  <div className="w-2 h-2 rounded-full bg-border"></div>
-                  <div className="w-2 h-2 rounded-full bg-border"></div>
-                  <div className="w-2 h-2 rounded-full bg-border"></div>
-               </div>
-
-               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                  {post.tags?.map(tag => (
-                    <Badge key={tag} className="bg-white border border-border/10 text-foreground/40 rounded-none font-headline font-black text-[9px] uppercase tracking-[0.3em] px-5 py-2">
-                       #{tag}
-                    </Badge>
-                  ))}
-               </div>
+              <div className="flex items-center gap-6">
+                <div className="w-12 h-12 bg-primary flex items-center justify-center text-white border border-primary/10 shadow-xl">
+                  <User size={24} />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="font-headline font-black text-[9px] uppercase tracking-[0.5em] text-foreground/20 italic">Curated By</span>
+                  <span className="font-headline font-black text-sm uppercase tracking-widest text-foreground">{post.author?.full_name || 'Editorial Office'}</span>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                {post.tags?.map(tag => (
+                  <Badge key={tag} className="bg-white border border-border/10 text-foreground/40 rounded-none font-headline font-black text-[9px] uppercase tracking-[0.3em] px-5 py-2">
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </header>
 
-          {/* Featured Visual Payload */}
+          {/* Featured Image */}
           {post.featured_image_url && (
             <div className="aspect-video overflow-hidden relative mb-24 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.2)] border border-border/10 group">
-               <div className="absolute inset-0 bg-primary/5 -z-0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-               <img 
-                 src={post.featured_image_url} 
-                 alt={post.title}
-                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
-               />
-               <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/10" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }}></div>
+              <img
+                src={post.featured_image_url}
+                alt={post.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+              />
+              <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/10" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }} />
             </div>
           )}
 
-          {/* Phase-B: Intellectual Content */}
+          {/* Content */}
           <div className="relative mb-32">
-             {/* Large Motif Background */}
-             <div className="absolute top-0 right-0 -mr-24 opacity-5 pointer-events-none">
-                <Quote size={200} className="text-primary" />
-             </div>
-
-             <div 
-               className="prose prose-xl max-w-none prose-headings:font-headline prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter prose-p:font-body prose-p:text-foreground/70 prose-p:leading-[1.8] prose-blockquote:border-l-8 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:p-10 prose-blockquote:italic prose-blockquote:text-2xl lg:prose-blockquote:text-3xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-             >
-                <div 
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                  className="text-foreground lg:text-2xl"
-                />
-             </div>
+            <div className="absolute top-0 right-0 -mr-24 opacity-5 pointer-events-none">
+              <Quote size={200} className="text-primary" />
+            </div>
+            <div className="prose prose-xl max-w-none prose-headings:font-headline prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter prose-p:font-body prose-p:text-foreground/70 prose-p:leading-[1.8] prose-blockquote:border-l-8 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:p-10 prose-blockquote:italic prose-blockquote:text-2xl lg:prose-blockquote:text-3xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+              <div
+                dangerouslySetInnerHTML={{ __html: post.content || '' }}
+                className="text-foreground lg:text-2xl"
+              />
+            </div>
           </div>
 
-          {/* Phase-C: Scholar Dossier (Bio) */}
-          {post.author_profile?.bio && (
+          {/* Author Bio */}
+          {post.author?.bio && (
             <div className="mb-32 p-12 md:p-16 bg-foreground text-white relative overflow-hidden group/bio shadow-2xl border-l-[16px] border-secondary">
-               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-               <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left">
-                  <div className="w-24 h-24 bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-xl shrink-0">
-                     <User size={48} />
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }} />
+              <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left">
+                <div className="w-24 h-24 bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-xl shrink-0">
+                  <User size={48} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4 justify-center md:justify-start">
+                    <UserCheck size={16} className="text-secondary" />
+                    <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-white/30 italic">Author</span>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-4 justify-center md:justify-start">
-                       <UserCheck size={16} className="text-secondary" />
-                       <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-white/30 italic">Validated Scholar</span>
-                    </div>
-                    <h3 className="text-3xl md:text-4xl font-headline font-black uppercase tracking-tighter mb-4">{post.author_profile.full_name}</h3>
-                    <p className="font-body text-lg italic text-white/40 leading-relaxed max-w-2xl">{post.author_profile.bio}</p>
-                  </div>
-               </div>
+                  <h3 className="text-3xl md:text-4xl font-headline font-black uppercase tracking-tighter mb-4">{post.author.full_name}</h3>
+                  <p className="font-body text-lg italic text-white/40 leading-relaxed max-w-2xl">{post.author.bio}</p>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Phase-D: Continued Dialogue (Related) */}
+          {/* Related Posts */}
           {relatedPosts.length > 0 && (
             <section className="pt-24 border-t border-border/10">
               <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8">
-                 <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-white border border-border/10 flex items-center justify-center text-secondary shadow-xl">
-                       <Layers size={21} />
-                    </div>
-                    <div className="flex flex-col">
-                       <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/20 italic">Global Archive</span>
-                       <h3 className="text-3xl md:text-5xl font-headline font-black uppercase tracking-tighter">Continued Dialogue</h3>
-                    </div>
-                 </div>
-                 <button 
-                   onClick={() => navigate('/blog')}
-                   className="font-headline font-black text-xs uppercase tracking-[0.4em] text-primary hover:text-foreground transition-all group/all"
-                 >
-                    View Registry Full <ArrowRight size={14} className="inline ml-2 group-hover/all:translate-x-2 transition-transform" />
-                 </button>
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 bg-white border border-border/10 flex items-center justify-center text-secondary shadow-xl">
+                    <Layers size={21} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-headline font-black text-[10px] uppercase tracking-[0.5em] text-foreground/20 italic">More Articles</span>
+                    <h3 className="text-3xl md:text-5xl font-headline font-black uppercase tracking-tighter">Continued Reading</h3>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/blog')}
+                  className="font-headline font-black text-xs uppercase tracking-[0.4em] text-primary hover:text-foreground transition-all group/all"
+                >
+                  View All <ArrowRight size={14} className="inline ml-2 group-hover/all:translate-x-2 transition-transform" />
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                {relatedPosts.map((relatedPost) => (
-                  <div 
-                    key={relatedPost.id} 
+                {relatedPosts.map(related => (
+                  <div
+                    key={related.id}
                     className="bg-white border border-border/10 group/rel cursor-pointer hover:shadow-2xl transition-all h-full flex flex-col"
-                    onClick={() => navigate(`/blog/${relatedPost.id}`)}
+                    onClick={() => navigate(`/blog/${related.slug}`)}
                   >
-                    {relatedPost.featured_image_url && (
+                    {related.featured_image_url && (
                       <div className="aspect-video overflow-hidden relative">
-                        <img 
-                          src={relatedPost.featured_image_url} 
-                          alt={relatedPost.title}
+                        <img
+                          src={related.featured_image_url}
+                          alt={related.title}
                           className="w-full h-full object-cover group-hover/rel:scale-110 transition-transform duration-[1.5s]"
                         />
                       </div>
                     )}
                     <div className="p-8 flex flex-col flex-grow">
-                      <h4 className="font-headline font-black text-xl uppercase tracking-tight line-clamp-2 mb-6 group-hover/rel:text-primary transition-colors">{relatedPost.title}</h4>
+                      <h4 className="font-headline font-black text-xl uppercase tracking-tight line-clamp-2 mb-6 group-hover/rel:text-primary transition-colors">{related.title}</h4>
                       <div className="mt-auto pt-6 border-t border-border/5 flex items-center justify-between">
-                        <span className="font-headline font-black text-[9px] uppercase tracking-widest text-foreground/30 truncate max-w-[150px]">{relatedPost.author_profile?.full_name || 'Anonymous'}</span>
-                        <span className="font-headline font-black text-[9px] uppercase tracking-[0.3em] text-secondary">{formatDate(relatedPost.published_at)}</span>
+                        <span className="font-headline font-black text-[9px] uppercase tracking-widest text-foreground/30 truncate max-w-[150px]">{related.author?.full_name || 'Editorial Office'}</span>
+                        <span className="font-headline font-black text-[9px] uppercase tracking-[0.3em] text-secondary">{formatDate(related.published_at)}</span>
                       </div>
                     </div>
                   </div>
@@ -338,11 +235,6 @@ export const BlogPost = () => {
             </section>
           )}
         </article>
-      </div>
-      
-      {/* Final Registry Note */}
-      <div className="container mx-auto px-4 mt-32 text-center opacity-10 font-headline font-black text-[9px] uppercase tracking-[0.8em]">
-         Scholarly Protocol Integrated — V.04 ARCHIVE
       </div>
     </div>
   );

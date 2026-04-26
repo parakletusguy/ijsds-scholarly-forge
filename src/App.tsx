@@ -127,7 +127,7 @@ const App = () => (
                     <Route path="/articles" element={<PublicLayout><Articles /></PublicLayout>} />
                     <Route path="/article/:slug" element={<PublicLayout><ArticleInfo /></PublicLayout>} />
                     <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
-                    <Route path="/blog/:id" element={<PublicLayout><BlogPost /></PublicLayout>} />
+                    <Route path="/blog/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
                     <Route path="/partners" element={<PublicLayout><Partners /></PublicLayout>} />
                     <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
                     <Route path="/openAccess" element={<PublicLayout><OpenAccessPage /></PublicLayout>} />
