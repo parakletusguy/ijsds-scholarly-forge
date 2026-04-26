@@ -27,7 +27,6 @@ export const Footer = () => {
           <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-primary">Journal</h4>
           <ul className="space-y-4 font-body text-sm">
             <li><Link className="text-[#1c1c19]/70 hover:text-[#af4c2a] transition-colors" to="/about#editorial">Editorial Board</Link></li>
-            <li><Link className="text-[#1c1c19]/70 hover:text-[#af4c2a] transition-colors" to="/archive">Archive</Link></li>
             <li><Link className="text-[#1c1c19]/70 hover:text-[#af4c2a] transition-colors" to="/blog">Newsletter</Link></li>
           </ul>
         </div>
