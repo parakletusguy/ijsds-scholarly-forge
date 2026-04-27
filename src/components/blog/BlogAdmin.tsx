@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { getAllBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost, getPostById, BlogPost } from '@/lib/blogService';
+import { formatDate } from '@/lib/dateUtils';
 
 const CATEGORIES = ['Research', 'News', 'Events', 'Guidelines', 'Community', 'Publications', 'Announcements'];
 
@@ -124,8 +125,7 @@ export const BlogAdmin = () => {
 
   const resetForm = () => { setFormData(EMPTY_FORM); setEditingPost(null); };
 
-  const formatDate = (date?: string | null) =>
-    date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+  const formatDateDisplay = (date?: string | null) => date ? formatDate(date, 'short') : '—';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -238,7 +238,7 @@ export const BlogAdmin = () => {
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {formatDate(post.published_at || post.created_at)}
+                        {formatDateDisplay(post.published_at || post.created_at)}
                       </div>
                     </TableCell>
                     <TableCell>

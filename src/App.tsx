@@ -166,8 +166,8 @@ const App = () => (
                     <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
 
                     <Route path="/editorial-board" element={<Navigate to="/about" replace />} />
-                    <Route path="/submission-guidelines" element={<Navigate to="/about" replace />} />
-                    <Route path="/peer-review" element={<Navigate to="/about#editorial" replace />} />
+                    <Route path="/submission-guidelines" element={<PublicLayout><SubmissionGuidelines /></PublicLayout>} />
+                    <Route path="/peer-review" element={<PublicLayout><PeerReview /></PublicLayout>} />
 
                     <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
                   </Routes>

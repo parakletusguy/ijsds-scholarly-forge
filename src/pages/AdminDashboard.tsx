@@ -1,20 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  BookOpen, 
-  Settings, 
-  Database, 
-  BarChart3, 
-  CheckSquare, 
-  ArrowLeft,
-  ShieldCheck,
-  Zap,
-  Info,
-  ChevronRight,
-  Activity,
-  Server,
-  Award
-} from 'lucide-react';
+import { BookOpen, Settings, Database, BarChart3, CheckSquare, ArrowLeft, ChevronRight, Activity } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,7 +44,7 @@ export const AdminDashboard = () => {
   const adminCards = [
     {
       title: 'Blog Management',
-      description: 'Create, edit, and publish high-impact journal narratives and community insights.',
+      description: 'Create, edit, and publish posts on the journal blog.',
       icon: BookOpen,
       url: '/admin/blogs',
       color: 'bg-primary text-white border-primary/20',
@@ -66,7 +52,7 @@ export const AdminDashboard = () => {
     },
     {
       title: 'Data Management',
-      description: 'Export scholarly datasets, generate census reports, and monitor longitudinal health.',
+      description: 'Export submission data and generate reports.',
       icon: Database,
       url: '/data-management',
       color: 'bg-secondary text-white border-secondary/20',
@@ -74,23 +60,23 @@ export const AdminDashboard = () => {
     },
     {
       title: 'System Settings',
-      description: 'Configure global journal parameters, architectural boundaries, and protocol limits.',
+      description: 'Configure journal-wide settings and parameters.',
       icon: Settings,
       url: '/system-settings',
       color: 'bg-foreground text-white border-foreground/20',
       roles: ['admin']
     },
     {
-      title: 'Access Protocol',
-      description: 'Authorize or refuse contributor credentials and manage institutional role requests.',
+      title: 'Access Requests',
+      description: 'Review and approve role requests from contributors.',
       icon: CheckSquare,
       url: '/requests',
       color: 'bg-primary/10 text-primary border-primary/20',
       roles: ['admin']
     },
     {
-      title: 'Audit Analytics',
-      description: 'Track submission velocity, citation trends, and global scholarly traffic patterns.',
+      title: 'Analytics',
+      description: 'View submission trends and journal activity metrics.',
       icon: BarChart3,
       url: '/analytics',
       color: 'bg-secondary/10 text-secondary border-secondary/20',
@@ -108,30 +94,18 @@ export const AdminDashboard = () => {
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
-      <PageHeader 
-        title="Command" 
-        subtitle="Hub" 
-        accent="Infrastructure Oversight"
-        description="Oversee the digital heartbeat of the journal. Manage publication workflows, system architecture, and authorized scholarly access with high-fidelity governance tools."
+      <PageHeader
+        title="Admin"
+        subtitle="Dashboard"
+        accent="Administration"
+        description="Manage blog posts, review access requests, and configure journal settings."
       />
 
       <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-           <Button onClick={() => navigate('/dashboard')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Return to User Portal
-           </Button>
-           
-           <div className="flex items-center gap-6 bg-white/50 p-4 border border-border/20">
-              <div className="flex items-center gap-3">
-                 <Server size={14} className="text-secondary" />
-                 <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Infrastructure: <span className="text-green-600">Optimal</span></span>
-              </div>
-              <div className="w-px h-4 bg-border/40"></div>
-              <div className="flex items-center gap-3">
-                 <ShieldCheck size={14} className="text-primary" />
-                 <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Access: <span className="text-foreground">{isAdmin ? 'Full Domain' : 'Editorial'}</span></span>
-              </div>
-           </div>
+        <div className="flex items-center mb-12">
+          <Button onClick={() => navigate('/dashboard')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
+            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -154,38 +128,23 @@ export const AdminDashboard = () => {
                 <h3 className="text-xl font-headline font-black uppercase tracking-tight mb-4 group-hover:text-primary transition-colors">{card.title}</h3>
                 <p className="font-body text-xs text-foreground/40 leading-relaxed mb-8 italic">{card.description}</p>
                 
-                <div className="pt-6 border-t border-border/10 flex items-center justify-between">
-                   <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/30 flex items-center gap-2 group-hover:text-primary transition-colors">
-                      Enter Module <ChevronRight size={10} />
-                   </span>
-                   <Award size={14} className="text-foreground/10 group-hover:text-secondary group-hover:opacity-40 transition-all" />
+                <div className="pt-6 border-t border-border/10 flex items-center">
+                  <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/30 flex items-center gap-2 group-hover:text-primary transition-colors">
+                    Open <ChevronRight size={10} />
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        <div className="mt-20 border-t-8 border-foreground bg-white p-12 shadow-2xl relative overflow-hidden">
-           <div className="absolute bottom-0 right-0 p-12 opacity-5 pointer-events-none transform translate-y-1/4 translate-x-1/4">
-              <Zap size={200} />
-           </div>
-           
-           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
-              <div className="lg:col-span-1">
-                 <div className="p-4 bg-muted text-foreground/40 inline-block"><Info size={32} /></div>
-              </div>
-              <div className="lg:col-span-7">
-                 <h3 className="text-xl font-headline font-black uppercase tracking-tight mb-4">Governance Intelligence Bulletin</h3>
-                 <p className="font-body text-sm text-foreground/60 leading-relaxed italic border-l-4 border-primary pl-6">
-                    Administrative components are now integrated into the primary navigation architecture. Ensure role-based credentials are synchronized across departmental workflows to maintain institutional compliance and system integrity.
-                 </p>
-              </div>
-              <div className="lg:col-span-4 flex justify-end">
-                 <Button onClick={() => navigate('/system-settings')} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] tracking-widest px-12 py-6 h-auto hover:bg-secondary transition-all flex items-center gap-3">
-                    Audit Settings <Activity size={14} />
-                 </Button>
-              </div>
-           </div>
+        <div className="mt-16 bg-white border border-border/40 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <p className="font-body text-sm text-foreground/60 leading-relaxed max-w-xl">
+            All admin tools are also accessible from the sidebar navigation. Make sure user roles are kept up to date under Access Requests.
+          </p>
+          <Button onClick={() => navigate('/system-settings')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest px-8 py-5 h-auto border-primary/20 hover:border-primary transition-all shrink-0 flex items-center gap-2">
+            System Settings <Activity size={13} />
+          </Button>
         </div>
       </ContentSection>
     </div>

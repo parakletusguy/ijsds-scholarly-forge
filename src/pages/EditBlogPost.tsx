@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save, X, ArrowLeft, Image as ImageIcon, Hash, Layout, Tag } from 'lucide-react';
+import { Save, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 import { getPostById, createBlogPost, updateBlogPost } from '@/lib/blogService';
 
 const CATEGORIES = ['Research', 'News', 'Events', 'Guidelines', 'Community', 'Publications', 'Announcements'];
+
+const labelClass = 'text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2 block';
+const inputClass = 'border-stone-200 rounded-none focus:border-primary bg-white text-sm transition-colors';
 
 export const EditBlogPost = () => {
   const { profile } = useAuth();
@@ -30,6 +31,8 @@ export const EditBlogPost = () => {
     tags: '',
     status: 'draft' as 'draft' | 'published',
   });
+
+  const set = (key: string, value: string) => setFormData(p => ({ ...p, [key]: value }));
 
   useEffect(() => {
     if (isEditing) {
@@ -54,32 +57,26 @@ export const EditBlogPost = () => {
     if (e) e.preventDefault();
     if (!profile) return;
     if (!formData.title.trim() || !formData.content.trim()) {
-      toast({ title: 'Required', description: 'Title and content are required.', variant: 'destructive' });
+      toast({ title: 'Title and content are required.', variant: 'destructive' });
       return;
     }
-
     setSaving(true);
     try {
-      const tagsArray = formData.tags
-        ? formData.tags.split(',').map(t => t.trim()).filter(Boolean)
-        : [];
-
       const payload = {
         title: formData.title,
         content: formData.content,
         excerpt: formData.excerpt || undefined,
         featured_image_url: formData.featured_image_url || undefined,
         category: formData.category || undefined,
-        tags: tagsArray,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
         status: formData.status,
       };
-
       if (isEditing) {
         await updateBlogPost(id!, payload);
-        toast({ title: 'Saved', description: 'Post updated successfully.' });
+        toast({ title: 'Post updated.' });
       } else {
         await createBlogPost(payload);
-        toast({ title: 'Created', description: 'Post created successfully.' });
+        toast({ title: 'Post created.' });
       }
       navigate('/admin/blogs');
     } catch (error: any) {
@@ -89,181 +86,168 @@ export const EditBlogPost = () => {
     }
   };
 
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
-  const labelClasses = "font-headline font-black text-[10px] uppercase tracking-widest text-foreground/40 mb-4 block";
-  const inputClasses = "bg-muted/10 border-border/60 rounded-none focus:border-primary transition-all font-body text-sm py-6";
-
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
-      <PageHeader
-        title={isEditing ? "Edit" : "New"}
-        subtitle="Blog Post"
-        accent="Editorial Workspace"
-        description="Draft and publish blog entries for the journal."
-      />
+    <div className="pb-16 bg-stone-50 min-h-screen font-body text-stone-900">
 
-      <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-          <Button onClick={() => navigate('/admin/blogs')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Button>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => navigate('/admin/blogs')} className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest px-8 py-6 h-auto border-border/40 hover:border-primary hover:text-primary transition-all">
-              <X className="h-4 w-4 mr-2" /> Discard
-            </Button>
-            <Button onClick={() => handleSave()} disabled={saving} className="bg-primary hover:bg-secondary text-white rounded-none font-headline font-black uppercase text-[10px] tracking-widest px-12 py-6 h-auto shadow-xl group">
-              {saving ? 'Saving...' : <><Save className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform" /> {isEditing ? 'Update Post' : 'Create Post'}</>}
-            </Button>
+      {/* Header */}
+      <div className="bg-white border-b border-stone-100 px-8 py-6 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/admin/blogs')}
+              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
+            >
+              <ArrowLeft size={12} /> All Posts
+            </button>
+            <span className="text-stone-200">/</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-600">
+              {isEditing ? 'Edit Post' : 'New Post'}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={formData.status} onValueChange={v => set('status', v)}>
+              <SelectTrigger className="h-9 w-32 text-[10px] font-bold uppercase tracking-widest border-stone-200 rounded-none bg-white focus:border-primary">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-none text-[10px] font-bold uppercase tracking-widest">
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+              </SelectContent>
+            </Select>
+            <button
+              onClick={() => handleSave()}
+              disabled={saving}
+              className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              <Save size={13} />
+              {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main content */}
-          <div className="lg:col-span-8 space-y-12">
-            <div className={cardClasses + " border-t-8 border-foreground"}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} />
-              <div className="relative z-10 space-y-10">
-                <div className="flex items-center gap-4 pb-6 border-b border-border/20">
-                  <div className="p-3 bg-primary text-white"><Layout className="h-5 w-5" /></div>
-                  <h2 className="text-2xl font-headline font-black uppercase tracking-tighter">Content</h2>
-                </div>
+      {/* Body */}
+      <div className="max-w-6xl mx-auto px-8 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                <div className="space-y-4">
-                  <Label htmlFor="title" className="text-xl font-headline font-black uppercase tracking-tight text-foreground/40">Title *</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter a compelling title..."
-                    value={formData.title}
-                    onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
-                    required
-                    className="text-4xl font-headline font-black bg-transparent border-0 border-b-4 border-muted/50 focus:border-primary rounded-none h-24 px-0 placeholder:text-foreground/10 transition-all tracking-tight"
-                  />
-                </div>
+          {/* Main — title + excerpt + content */}
+          <div className="lg:col-span-2 space-y-6">
 
-                <div className="space-y-4">
-                  <Label htmlFor="excerpt" className={labelClasses}>Excerpt / Summary</Label>
-                  <Textarea
-                    id="excerpt"
-                    placeholder="A concise summary shown in the blog list..."
-                    value={formData.excerpt}
-                    onChange={e => setFormData(p => ({ ...p, excerpt: e.target.value }))}
-                    rows={3}
-                    className={inputClasses + " resize-none min-h-[120px]"}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="content" className={labelClasses}>Content *</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="Write your full post here. HTML is supported."
-                    value={formData.content}
-                    onChange={e => setFormData(p => ({ ...p, content: e.target.value }))}
-                    required
-                    className="min-h-[700px] bg-muted/5 border-border/40 rounded-none focus:border-primary text-lg leading-relaxed font-serif p-10 transition-all"
-                  />
-                </div>
-              </div>
+            {/* Title */}
+            <div className="bg-white border border-stone-100 p-6 space-y-3">
+              <Label htmlFor="title" className={labelClass}>Title *</Label>
+              <Input
+                id="title"
+                placeholder="Post title..."
+                value={formData.title}
+                onChange={e => set('title', e.target.value)}
+                required
+                className={inputClass + ' text-xl font-bold h-12'}
+              />
             </div>
+
+            {/* Excerpt */}
+            <div className="bg-white border border-stone-100 p-6 space-y-3">
+              <Label htmlFor="excerpt" className={labelClass}>Excerpt</Label>
+              <Textarea
+                id="excerpt"
+                placeholder="Short summary shown in the blog list..."
+                value={formData.excerpt}
+                onChange={e => set('excerpt', e.target.value)}
+                rows={3}
+                className={inputClass + ' resize-none'}
+              />
+            </div>
+
+            {/* Content */}
+            <div className="bg-white border border-stone-100 p-6 space-y-3">
+              <Label htmlFor="content" className={labelClass}>Content * <span className="normal-case font-normal text-stone-300 ml-1">HTML supported</span></Label>
+              <Textarea
+                id="content"
+                placeholder="Write your post here..."
+                value={formData.content}
+                onChange={e => set('content', e.target.value)}
+                required
+                className={inputClass + ' min-h-[520px] resize-y font-mono text-sm leading-relaxed'}
+              />
+            </div>
+
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-12">
-            <div className={cardClasses}>
-              <div className="flex items-center gap-4 mb-10">
-                <Tag className="h-4 w-4 text-primary" />
-                <h4 className="font-headline font-black text-[11px] uppercase tracking-[0.3em] text-foreground/40">Settings</h4>
+          {/* Sidebar — settings + image */}
+          <div className="space-y-6">
+
+            {/* Settings */}
+            <div className="bg-white border border-stone-100 p-6 space-y-5">
+              <p className={labelClass}>Settings</p>
+
+              <div className="space-y-2">
+                <Label htmlFor="category" className={labelClass}>Category</Label>
+                <Select value={formData.category} onValueChange={v => set('category', v)}>
+                  <SelectTrigger className="rounded-none border-stone-200 h-10 text-sm bg-white focus:border-primary w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none text-sm">
+                    {CATEGORIES.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="space-y-10">
-                <div className="space-y-4">
-                  <Label className={labelClasses}>Category</Label>
-                  <Select value={formData.category} onValueChange={v => setFormData(p => ({ ...p, category: v }))}>
-                    <SelectTrigger className="rounded-none border-border/40 h-14 font-headline font-black uppercase text-[10px] tracking-widest bg-muted/10 px-6">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest">
-                      {CATEGORIES.map(c => (
-                        <SelectItem key={c} value={c} className="py-4 hover:bg-primary/5">{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                <div className="space-y-4">
-                  <Label className={labelClasses}>Status</Label>
-                  <Select value={formData.status} onValueChange={(v: 'draft' | 'published') => setFormData(p => ({ ...p, status: v }))}>
-                    <SelectTrigger className="rounded-none border-border/40 h-14 font-headline font-black uppercase text-[10px] tracking-widest bg-muted/10 px-6">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest">
-                      <SelectItem value="draft" className="py-4">Draft</SelectItem>
-                      <SelectItem value="published" className="py-4">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="tags" className={labelClasses}>Tags <Hash size={10} className="inline ml-1" /></Label>
-                  <div className="relative">
-                    <Input
-                      id="tags"
-                      placeholder="research, news, events..."
-                      value={formData.tags}
-                      onChange={e => setFormData(p => ({ ...p, tags: e.target.value }))}
-                      className={inputClasses + " pl-10 h-14"}
-                    />
-                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/20" />
-                  </div>
-                  <p className="text-[10px] font-body text-foreground/30 italic">Separate tags with commas.</p>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="tags" className={labelClass}>Tags</Label>
+                <Input
+                  id="tags"
+                  placeholder="research, news, events..."
+                  value={formData.tags}
+                  onChange={e => set('tags', e.target.value)}
+                  className={inputClass + ' h-10'}
+                />
+                <p className="text-[10px] text-stone-400">Separate with commas</p>
               </div>
             </div>
 
-            <div className={cardClasses}>
-              <div className="flex items-center gap-4 mb-10">
-                <ImageIcon className="h-4 w-4 text-secondary" />
-                <h4 className="font-headline font-black text-[11px] uppercase tracking-[0.3em] text-foreground/40">Featured Image</h4>
+            {/* Featured Image */}
+            <div className="bg-white border border-stone-100 p-6 space-y-4">
+              <p className={labelClass}>Featured Image</p>
+              <div className="space-y-2">
+                <Label htmlFor="featured_image" className={labelClass}>URL</Label>
+                <Input
+                  id="featured_image"
+                  type="url"
+                  placeholder="https://..."
+                  value={formData.featured_image_url}
+                  onChange={e => set('featured_image_url', e.target.value)}
+                  className={inputClass + ' h-10'}
+                />
               </div>
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <Label htmlFor="featured_image" className={labelClasses}>Image URL</Label>
-                  <Input
-                    id="featured_image"
-                    type="url"
-                    placeholder="https://..."
-                    value={formData.featured_image_url}
-                    onChange={e => setFormData(p => ({ ...p, featured_image_url: e.target.value }))}
-                    className={inputClasses + " h-14"}
+              {formData.featured_image_url ? (
+                <div className="border border-stone-200 overflow-hidden aspect-video">
+                  <img
+                    src={formData.featured_image_url}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={e => (e.currentTarget.style.display = 'none')}
                   />
                 </div>
-                {formData.featured_image_url ? (
-                  <div className="border-4 border-foreground p-2 shadow-2xl group relative">
-                    <div className="overflow-hidden aspect-video">
-                      <img
-                        src={formData.featured_image_url}
-                        alt="Preview"
-                        className="w-full h-full object-cover transform scale-100 group-hover:scale-110 transition-transform duration-500"
-                        onError={e => (e.currentTarget.style.display = 'none')}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border border-dashed border-border/40 aspect-video flex flex-col items-center justify-center bg-muted/10 gap-4">
-                    <ImageIcon className="h-8 w-8 text-foreground/20" />
-                    <span className="font-headline font-black uppercase text-[8px] tracking-widest text-foreground/30">No image set</span>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div className="border border-dashed border-stone-200 aspect-video flex flex-col items-center justify-center bg-stone-50 gap-2">
+                  <ImageIcon size={24} className="text-stone-300" />
+                  <span className="text-[10px] uppercase tracking-widest text-stone-300">No image set</span>
+                </div>
+              )}
             </div>
+
           </div>
         </div>
-      </ContentSection>
+      </div>
     </div>
   );
 };
