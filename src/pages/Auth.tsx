@@ -96,15 +96,9 @@ export const Auth = () => {
       </Helmet>
 
       <main className="flex-grow flex items-center justify-center px-6 py-8">
-        <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {/* Page Heading */}
-          <div className="text-center mb-12">
-            <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-3">Heritage &amp; Horizon</h1>
-            <p className="font-body text-xs tracking-[0.2em] uppercase opacity-60">User Portal Login</p>
-          </div>
-
+        <div className="max-w-xl w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
           {/* Login Container */}
-          <div 
+          <div
             ref={formRef}
             className="bg-surface-container-lowest p-10 md:p-14 shadow-[0px_12px_24px_-4px_rgba(28,28,25,0.06)] border-[0.5px] border-outline-variant/15"
           >
@@ -243,15 +237,14 @@ export const Auth = () => {
             </form>
           </div>
 
-          {/* Footer Link - Registry Access */}
-          <div className="mt-12 text-center">
-            <p className="text-on-surface-variant text-sm mb-6 italic font-headline text-lg">"Knowledge is the bridge between our heritage and our horizon."</p>
-            <button 
+          {/* Footer Link */}
+          <div className="mt-8 text-center">
+            <button
               onClick={() => navigate('/')}
               className="inline-flex items-center gap-2 group"
             >
               <span className="font-label text-sm font-bold uppercase tracking-widest border-b border-on-surface pb-1 group-hover:text-primary group-hover:border-primary transition-all">Back to Home</span>
-              <ArrowRight className="text-sm w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>

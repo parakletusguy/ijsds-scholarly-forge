@@ -87,11 +87,6 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
           </div>
           
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 border-r border-outline-variant/30 pr-6">
-              <button className="p-2 text-on-surface/60 hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-            </div>
             <div className="w-12 md:w-16">
               <img src="/riversstate-removebg-preview.png" alt="Rivers State University Logo" className="w-full h-auto" />
             </div>
@@ -163,8 +158,6 @@ const App = () => (
                     <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
                     <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
                     <Route path="/admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
-                    <Route path="/Admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
-                    <Route path="/admin/" element={<PageLayout><AdminDashboard /></PageLayout>} />
                     <Route path="/admin/blog" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
                     <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
                     <Route path="/admin/blog/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
@@ -176,7 +169,7 @@ const App = () => (
                     <Route path="/submission-guidelines" element={<Navigate to="/about" replace />} />
                     <Route path="/peer-review" element={<Navigate to="/about#editorial" replace />} />
 
-                    <Route path="*" element={<PageLayout><NotFound /></PageLayout>} />
+                    <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
                   </Routes>
                 </Suspense>
                 <TechSupportWidget />
