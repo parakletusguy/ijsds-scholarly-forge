@@ -54,3 +54,10 @@ export const updateBlogPost = async (id: string, updates: Partial<BlogPost> & { 
 export const deleteBlogPost = async (id: string): Promise<void> => {
   await api.delete(`/api/blog/${id}`);
 };
+
+export const uploadBlogImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await api.upload<{ success: true; url: string }>('/api/blog/image', formData);
+  return res.url;
+};

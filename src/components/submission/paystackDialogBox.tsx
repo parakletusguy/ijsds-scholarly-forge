@@ -46,7 +46,31 @@ export const ProcessinFeeDialog = ({ processing, setprocessing, userData }) => {
             Cancel
           </button>
           <Paystackbtn info={userData} onClick={() => setprocessing(false)} />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
+export const IndexingFeeDialog = ({ userData, indexing, setIndexing }) => {
+  return (
+    <Dialog onOpenChange={setIndexing} open={indexing}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Pay Indexing Fee</DialogTitle>
+          <DialogDescription>
+            An indexing fee of ₦5,125 is required to register your article with
+            indexing databases. Click "Pay Now" to proceed securely via Paystack.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex items-center justify-between pt-2">
+          <button
+            onClick={() => setIndexing(false)}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Cancel
+          </button>
+          <Paystackbtn info={userData} onClick={() => setIndexing(false)} />
         </div>
       </DialogContent>
     </Dialog>

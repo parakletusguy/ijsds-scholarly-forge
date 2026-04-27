@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Calendar, User, ArrowLeft, Share2, Tag } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Share2, Tag, X, ZoomIn } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { getBlogPostBySlug, getBlogPosts, BlogPost as BlogPostType } from '@/lib/blogService';
 import { formatDate } from '@/lib/dateUtils';
@@ -12,6 +12,7 @@ export const BlogPost = () => {
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     if (slug) fetchPost();
@@ -43,6 +44,16 @@ export const BlogPost = () => {
     } else {
       copyToClipboard(url);
     }
+  };
+
+  const processContent = (content: string) => {
+    if (!/<[a-z][\s\S]*>/i.test(content)) {
+      return content
+        .split(/\n\n+/)
+        .map(p => `<p>${p.replace(/\n/g, '<br />')}</p>`)
+        .join('');
+    }
+    return content;
   };
 
   const copyToClipboard = async (text: string) => {
@@ -116,13 +127,41 @@ export const BlogPost = () => {
 
         {/* Featured Image */}
         {post.featured_image_url && (
-          <div className="overflow-hidden border border-stone-100 shadow-sm">
-            <img
-              src={post.featured_image_url}
-              alt={post.title}
-              className="w-full aspect-video object-cover"
-            />
-          </div>
+          <>
+            <div
+              className="relative overflow-hidden border border-stone-100 shadow-sm cursor-zoom-in group"
+              onClick={() => setLightboxOpen(true)}
+            >
+              <img
+                src={post.featured_image_url}
+                alt={post.title}
+                className="w-full object-contain max-h-[520px]"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                <ZoomIn size={28} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+              </div>
+            </div>
+
+            {lightboxOpen && (
+              <div
+                className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+                onClick={() => setLightboxOpen(false)}
+              >
+                <button
+                  className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+                  onClick={() => setLightboxOpen(false)}
+                >
+                  <X size={28} />
+                </button>
+                <img
+                  src={post.featured_image_url}
+                  alt={post.title}
+                  className="max-w-full max-h-full object-contain"
+                  onClick={e => e.stopPropagation()}
+                />
+              </div>
+            )}
+          </>
         )}
 
         {/* Excerpt */}
@@ -135,7 +174,7 @@ export const BlogPost = () => {
         {/* Body */}
         <div
           className="prose prose-stone max-w-none prose-headings:font-headline prose-headings:font-bold prose-headings:tracking-tight prose-p:text-stone-600 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:italic prose-blockquote:text-stone-500 prose-img:border prose-img:border-stone-100"
-          dangerouslySetInnerHTML={{ __html: post.content || '' }}
+          dangerouslySetInnerHTML={{ __html: processContent(post.content || '') }}
         />
 
         {/* Tags */}

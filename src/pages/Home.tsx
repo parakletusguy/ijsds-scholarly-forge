@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
+import { getBlogPosts, BlogPost } from '@/lib/blogService';
+import { formatDate } from '@/lib/dateUtils';
 import mina from "../images/editors/Mina.jpeg"
 import logo from "/public/Logo_Black_Edited-removebg-preview.png"
 
@@ -20,19 +22,24 @@ export const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [recentArticles, setRecentArticles] = useState<Article[]>([]);
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const stats = { reach: 94, scholars: 12000, citations: 450, nations: 82 };
 
   useEffect(() => {
-    fetchRecentArticles();
+    fetchData();
   }, []);
 
-  const fetchRecentArticles = async () => {
+  const fetchData = async () => {
     try {
-      const data = await getArticles({ status: 'published' });
-      setRecentArticles(data.slice(0, 6));
+      const [articles, posts] = await Promise.all([
+        getArticles({ status: 'published' }),
+        getBlogPosts(),
+      ]);
+      setRecentArticles(articles.slice(0, 6));
+      setRecentPosts(posts.slice(0, 3));
     } catch (error) {
-      console.error('Error fetching recent articles:', error);
+      console.error('Error fetching home data:', error);
     } finally {
       setLoading(false);
     }
@@ -285,6 +292,65 @@ export const Home = () => {
           )}
         </div>
       </section>
+
+      {/* ── Recent Blog Posts ────────────────────────────────────────────── */}
+      {recentPosts.length > 0 && (
+        <section className="py-24 bg-white border-t border-stone-100">
+          <div className="container mx-auto px-4 sm:px-8">
+            <div className="flex justify-between items-end mb-12">
+              <div>
+                <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-3 block">
+                  From the Blog
+                </span>
+                <h2 className="font-headline text-3xl md:text-4xl text-on-surface">Latest News &amp; Updates</h2>
+              </div>
+              <button
+                onClick={() => navigate('/blog')}
+                className="group flex items-center gap-2 text-primary font-bold text-sm border-b border-primary/30 pb-1 hover:border-primary transition-colors"
+              >
+                All Posts
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              {recentPosts.map(post => (
+                <div
+                  key={post.id}
+                  onClick={() => navigate(`/blog/${post.slug}`)}
+                  className="group cursor-pointer border border-stone-100 bg-stone-50 hover:border-primary/30 transition-all overflow-hidden"
+                >
+                  {post.featured_image_url ? (
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={post.featured_image_url}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-primary/5 flex items-center justify-center">
+                      <BookOpen size={28} className="text-primary/20" />
+                    </div>
+                  )}
+                  <div className="p-5 space-y-2">
+                    {post.category && (
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{post.category}</span>
+                    )}
+                    <h3 className="font-headline text-base font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    {post.excerpt && (
+                      <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">{post.excerpt}</p>
+                    )}
+                    <p className="text-[10px] text-stone-400 pt-1">{formatDate(post.published_at, 'short')}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Editorial Spotlight ──────────────────────────────────────────── */}
       <section className="py-32 bg-surface-container-highest relative overflow-hidden">

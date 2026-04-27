@@ -7,10 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, FileText, Calendar, User, Download, ExternalLink } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Calendar,
+  User,
+  Download,
+  ExternalLink,
+} from "lucide-react";
 import {
   ProcessinFeeDialog,
   VettingDialog,
+  IndexingFeeDialog,
 } from "@/components/submission/paystackDialogBox";
 import { SubmissionFileManager } from "@/components/submission/SubmissionFileManager";
 import { EditorFileManager } from "@/components/editor/EditorFileManager";
@@ -33,6 +41,7 @@ interface SubmissionDetails {
     authors: any;
     manuscript_file_url: string | null;
     vetting_fee: boolean;
+    indexing_fee: boolean;
     processing_fee: boolean;
     doi?: string | null;
   };
@@ -44,6 +53,7 @@ interface SubmissionDetails {
 
 // Fee amounts in kobo (100 kobo = ₦1)
 const VETTING_FEE_KOBO = 512500; // ₦5,125
+const INDEXING_FEE_KOBO = 512500; // ₦5,125
 const PROCESSING_FEE_KOBO = 2050000; // ₦20,500
 
 export const SubmissionDetail = () => {
@@ -53,6 +63,7 @@ export const SubmissionDetail = () => {
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [vet, setvet] = useState(false);
+  const [indexing, setIndexing] = useState(false);
   const [processing, setprocessing] = useState(false);
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
@@ -101,6 +112,7 @@ export const SubmissionDetail = () => {
   };
 
   let userData = null;
+  let userDataIndex = null;
   let userDataPro = null;
   {
     submission
@@ -124,6 +136,34 @@ export const SubmissionDetail = () => {
             toast({
               title: "Payment Cancelled",
               description: "Vetting fee payment was not completed.",
+              variant: "destructive",
+            }),
+        })
+      : null;
+  }
+
+  {
+    submission
+      ? (userDataIndex = {
+          email: submission.submitter.email,
+          amount: INDEXING_FEE_KOBO,
+          metadata: {
+            custom_fields: [
+              {
+                display_name: "Name",
+                variable_name: "name",
+                value: submission.submitter.full_name,
+              },
+            ],
+          },
+          onSuccess: (response: { reference: string }) => {
+            setIndexing(false);
+            onSuccess(response, "indexing", INDEXING_FEE_KOBO);
+          },
+          onClose: () =>
+            toast({
+              title: "Payment Cancelled",
+              description: "Indexing fee payment was not completed.",
               variant: "destructive",
             }),
         })
@@ -180,9 +220,13 @@ export const SubmissionDetail = () => {
       if (!data.status) throw new Error("Payment could not be verified");
 
       // 2. Generate and email a PDF receipt (separate from backend confirmation email)
-      const isVetting = type === "vetting";
-      const amountLabel = isVetting ? "5,125" : "20,500";
-      const typeLabel = isVetting ? "vetting fee" : "processing fee";
+      const feeLabels: Record<string, { amount: string; label: string }> = {
+        vetting: { amount: "5,125", label: "vetting fee" },
+        indexing: { amount: "5,125", label: "indexing fee" },
+        processing: { amount: "20,500", label: "processing fee" },
+      };
+      const { amount: amountLabel, label: typeLabel } =
+        feeLabels[type] ?? feeLabels.vetting;
 
       const blob = await ReceiptDown({
         name: submission.submitter.full_name,
@@ -350,7 +394,7 @@ export const SubmissionDetail = () => {
                       onClick={() =>
                         handleFileDownload(
                           submission.article.manuscript_file_url,
-                          submission.article.title
+                          submission.article.title,
                         )
                       }
                     >
@@ -441,6 +485,25 @@ export const SubmissionDetail = () => {
                     </button>
                   )}
                 </div>
+                {/* Indexing Fee */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium">Indexing Fee</p>
+                    <p className="text-xs text-muted-foreground">₦5,125</p>
+                  </div>
+                  {submission.article.indexing_fee ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      Paid ✓
+                    </Badge>
+                  ) : (
+                    <button
+                      className="rounded-sm bg-black text-white px-3 py-1 h-9 text-sm hover:bg-gray-800 transition-colors"
+                      onClick={() => setIndexing(true)}
+                    >
+                      Pay
+                    </button>
+                  )}
+                </div>
                 {/* Processing Fee */}
                 <div className="flex justify-between items-center">
                   <div>
@@ -463,6 +526,11 @@ export const SubmissionDetail = () => {
               </CardContent>
             </Card>
             <VettingDialog userData={userData} vet={vet} setvet={setvet} />
+            <IndexingFeeDialog
+              userData={userDataIndex}
+              indexing={indexing}
+              setIndexing={setIndexing}
+            />
             <ProcessinFeeDialog
               userData={userDataPro}
               processing={processing}

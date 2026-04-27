@@ -3,11 +3,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { Save, ArrowLeft, Image as ImageIcon, Upload, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPostById, createBlogPost, updateBlogPost } from '@/lib/blogService';
+import { getPostById, createBlogPost, updateBlogPost, uploadBlogImage } from '@/lib/blogService';
 
 const CATEGORIES = ['Research', 'News', 'Events', 'Guidelines', 'Community', 'Publications', 'Announcements'];
 
@@ -22,6 +22,7 @@ export const EditBlogPost = () => {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -33,6 +34,22 @@ export const EditBlogPost = () => {
   });
 
   const set = (key: string, value: string) => setFormData(p => ({ ...p, [key]: value }));
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const url = await uploadBlogImage(file);
+      set('featured_image_url', url);
+      toast({ title: 'Image uploaded.' });
+    } catch (error: any) {
+      toast({ title: 'Upload failed', description: error.message || 'Could not upload image.', variant: 'destructive' });
+    } finally {
+      setUploadingImage(false);
+      e.target.value = '';
+    }
+  };
 
   useEffect(() => {
     if (isEditing) {
@@ -217,8 +234,19 @@ export const EditBlogPost = () => {
             {/* Featured Image */}
             <div className="bg-white border border-stone-100 p-6 space-y-4">
               <p className={labelClass}>Featured Image</p>
-              <div className="space-y-2">
-                <Label htmlFor="featured_image" className={labelClass}>URL</Label>
+
+              {/* Upload button */}
+              <div>
+                <label className={`inline-flex items-center gap-2 cursor-pointer border border-stone-200 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-stone-500 hover:border-primary hover:text-primary transition-colors ${uploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <Upload size={12} />
+                  {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
+                </label>
+              </div>
+
+              {/* URL fallback */}
+              <div className="space-y-1">
+                <Label htmlFor="featured_image" className={labelClass}>Or paste URL</Label>
                 <Input
                   id="featured_image"
                   type="url"
@@ -228,14 +256,24 @@ export const EditBlogPost = () => {
                   className={inputClass + ' h-10'}
                 />
               </div>
+
+              {/* Preview */}
               {formData.featured_image_url ? (
-                <div className="border border-stone-200 overflow-hidden aspect-video">
+                <div className="relative border border-stone-200 overflow-hidden aspect-video group">
                   <img
                     src={formData.featured_image_url}
                     alt="Preview"
                     className="w-full h-full object-cover"
                     onError={e => (e.currentTarget.style.display = 'none')}
                   />
+                  <button
+                    type="button"
+                    onClick={() => set('featured_image_url', '')}
+                    className="absolute top-2 right-2 bg-white border border-stone-200 p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-200"
+                    title="Remove image"
+                  >
+                    <X size={12} className="text-stone-500 hover:text-red-500" />
+                  </button>
                 </div>
               ) : (
                 <div className="border border-dashed border-stone-200 aspect-video flex flex-col items-center justify-center bg-stone-50 gap-2">
