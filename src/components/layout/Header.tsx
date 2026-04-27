@@ -54,6 +54,7 @@ export const Header = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Articles", path: "/articles" },
+    { name: "Blog", path: "/blog" },
     { name: "About", path: "/about" },
     { name: "Indexing", path: "/indexing" },
     { name: "Partners", path: "/partners" },
@@ -94,7 +95,7 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="w-56 sm:w-64 md:w-80 lg:w-[360px] h-auto object-contain -my-4 sm:-my-6 md:-my-8 lg:-my-12 -ml-2 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
+                className="w-40 sm:w-48 md:w-60 lg:w-[260px] h-auto object-contain -my-2 sm:-my-3 md:-my-5 lg:-my-7 -ml-2 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
               />
             </button>
 
