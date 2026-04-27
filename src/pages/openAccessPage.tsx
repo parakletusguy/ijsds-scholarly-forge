@@ -89,6 +89,10 @@ export default function OpenAccessPage() {
                     <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦5,125</td>
                   </tr>
                   <tr>
+                    <td className="px-5 py-3.5 text-stone-700">Indexing Fee</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦5,125</td>
+                  </tr>
+                  <tr>
                     <td className="px-5 py-3.5 text-stone-700">Article Publication Fee (APC)</td>
                     <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦20,500</td>
                   </tr>

@@ -153,11 +153,11 @@ export const About = () => {
             </div>
           </div>
           <div className="lg:col-span-5 relative">
-            <div className="aspect-[4/5] bg-surface-container-low overflow-hidden shadow-2xl relative z-10 skew-y-1">
+            <div className="aspect-[4/5] bg-surface-container-low overflow-hidden shadow-2xl relative z-10 skew-y-1 bg-white p-8">
               <img
-                className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 hover:scale-105 transition-all duration-1000"
+                className="w-full h-full object-contain hover:scale-105 transition-all duration-1000"
                 alt="IJSDS scholarly heritage"
-                src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=900"
+                src="/Logo Symbol.png"
               />
             </div>
             <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
@@ -179,16 +179,7 @@ export const About = () => {
                 Our journal is guided by an international team of experienced academics and practitioners who ensure every published article meets the highest scholarly standards.
               </p>
             </div>
-            <div className="flex items-center gap-1 border border-outline-variant/10 p-1 bg-white/50 backdrop-blur">
-              {["Executive", "Reviewers", "Advisory"].map((cat, i) => (
-                <button
-                  key={cat}
-                  className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${i === 0 ? "bg-primary text-white shadow-lg" : "hover:bg-primary/5 text-secondary"}`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+
           </div>
 
           {/* Chief Leadership Spotlight */}
@@ -401,97 +392,7 @@ export const About = () => {
         </section>
       </main>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <footer className="bg-stone-100 py-24 mt-20 border-t border-outline-variant/10">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
-            <div className="space-y-8">
-              <div className="font-headline italic text-3xl font-black text-primary">
-                IJSDS
-              </div>
-              <p className="text-secondary/60 text-sm leading-relaxed max-w-xs italic font-medium">
-                Advancing global discourse in social work and sustainable
-                development through rigorous research and continental heritage.
-              </p>
-              <div className="flex gap-4">
-                <button className="w-10 h-10 border border-outline-variant/20 flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all">
-                  <Share2 size={16} />
-                </button>
-                <button className="w-10 h-10 border border-outline-variant/20 flex items-center justify-center text-secondary hover:bg-primary hover:text-white transition-all">
-                  <Globe size={16} />
-                </button>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-10">
-                Journal
-              </h5>
-              <ul className="space-y-4">
-                {[
-                  "Ethics & Policy",
-                  "Editorial Board",
-                  "Open Access",
-                  "Archive",
-                ].map((link) => (
-                  <li key={link}>
-                    <button className="text-secondary/60 hover:text-primary transition-colors text-sm font-medium">
-                      {link}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h5 className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-10">
-                Support
-              </h5>
-              <ul className="space-y-4">
-                {[
-                  "Contact",
-                  "Institutional Login",
-                  "Help Center",
-                  "Guidelines",
-                ].map((link) => (
-                  <li key={link}>
-                    <button className="text-secondary/60 hover:text-primary transition-colors text-sm font-medium">
-                      {link}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h5 className="text-primary font-black text-[10px] uppercase tracking-[0.4em] mb-10">
-                Contact
-              </h5>
-              <p className="text-secondary/60 text-sm italic leading-relaxed mb-6">
-                Rivers State University, Nkpolu-Oroworukwo, Port Harcourt,
-                Nigeria.
-              </p>
-              <p className="text-sm font-bold text-primary">
-                editor.ijsds@gmail.com
-              </p>
-            </div>
-          </div>
-          <div className="pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-secondary/30 text-[10px] font-black uppercase tracking-[0.2em]">
-              © 2025 International Journal of Social Work and Development
-              Studies. All Rights Reserved.
-            </p>
-            <div className="flex gap-10 text-[10px] font-black uppercase tracking-widest text-secondary/40">
-              <button className="hover:text-primary transition-colors">
-                Privacy
-              </button>
-              <button className="hover:text-primary transition-colors">
-                Terms
-              </button>
-              <button className="hover:text-primary transition-colors">
-                Cookies
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 };
