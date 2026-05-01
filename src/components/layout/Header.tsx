@@ -99,12 +99,12 @@ export const Header = () => {
               />
             </button>
 
-            <div className="hidden md:flex gap-10 items-center">
+            <div className="hidden md:flex gap-6 lg:gap-8 items-center">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-[10px] font-medium uppercase tracking-[0.25em] transition-all duration-500 ${
+                  className={`text-[10px] font-medium uppercase tracking-[0.25em] transition-all duration-500 whitespace-nowrap ${
                     isActive(link.path)
                       ? "text-primary border-b border-primary/40 pb-0.5"
                       : "text-stone-400 hover:text-primary"
@@ -116,14 +116,14 @@ export const Header = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6">
 
             {loading ? (
               <div className="h-10 w-24 bg-stone-100 animate-pulse rounded" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-stone-50 border border-stone-200 hover:border-primary transition-all group font-headline">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-stone-50 border border-stone-200 hover:border-primary transition-all group font-headline whitespace-nowrap">
                     <User
                       size={16}
                       className="text-stone-400 group-hover:text-primary"
@@ -172,7 +172,7 @@ export const Header = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate("/auth")}
-                  className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors px-4 py-2"
+                  className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors px-4 py-2 whitespace-nowrap"
                 >
                   Log In
                 </button>
@@ -183,7 +183,7 @@ export const Header = () => {
                   Submit Manuscript
                 </button>
               </div>
-            )}
+            ) }
 
             <button
               className="md:hidden"
