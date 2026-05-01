@@ -1,6 +1,6 @@
 // Receipt.tsx
 import React from "react";
-import logo from "../../../public/Logo Symbol.png"
+import logo from "../../../public/Logo_Black_Edited-removebg-preview.png"
 import {
   Page,
   Text,

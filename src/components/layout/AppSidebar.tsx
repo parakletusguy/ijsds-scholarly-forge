@@ -175,7 +175,7 @@ export const AppSidebar = () => {
           {open ? (
               <img src="/Logo_Black_Edited-removebg-preview.png" alt="IJSDS Logo" className="h-20 w-auto object-contain max-w-[200px]" />
           ) : (
-            <img src="/Logo%20Symbol.png" alt="IJSDS" className="h-8 w-auto object-contain" />
+            <img src="/Logo_Black_Edited-removebg-preview.png" alt="IJSDS" className="h-8 w-auto object-contain" />
           )}
         </button>
       </SidebarHeader>

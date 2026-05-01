@@ -157,7 +157,7 @@ export const About = () => {
               <img
                 className="w-full h-full object-contain hover:scale-105 transition-all duration-1000"
                 alt="IJSDS scholarly heritage"
-                src="/Logo Symbol.png"
+                src="/Logo_Black_Edited-removebg-preview.png"
               />
             </div>
             <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
