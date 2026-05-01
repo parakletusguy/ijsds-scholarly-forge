@@ -1,1 +1,1 @@
-International Journal of Social Work and Developmental Studies
+International Journal of Social Work and Development Studies
