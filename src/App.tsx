@@ -57,6 +57,7 @@ const EthicalGuidelines = lazy(() => import('./pages/EthicalGuidelines').then(m 
 const AdminBlogManagement = lazy(() => import('./pages/AdminBlogManagement').then(m => ({ default: m.AdminBlogManagement })));
 const EditBlogPost = lazy(() => import('./pages/EditBlogPost').then(m => ({ default: m.EditBlogPost })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminRegister = lazy(() => import('./pages/AdminRegister').then(m => ({ default: m.AdminRegister })));
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
@@ -164,6 +165,7 @@ const App = () => (
                     <Route path="/admin/blogs/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
                     <Route path="/admin/blog/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
                     <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
+                    <Route path="/admin/register" element={<PublicLayout><AdminRegister /></PublicLayout>} />
 
                     <Route path="/editorial-board" element={<Navigate to="/about" replace />} />
                     <Route path="/submission-guidelines" element={<PublicLayout><SubmissionGuidelines /></PublicLayout>} />

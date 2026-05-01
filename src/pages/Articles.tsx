@@ -122,40 +122,7 @@ export const Articles = () => {
         </ul>
       </div>
 
-      {volumes.length > 0 && (
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-3">Volumes</p>
-          <div className="space-y-2">
-            {volumes.map((vol, i) => {
-              const activeVol = activeFilter.type === "volume" && activeFilter.value === vol;
-              const volIssues = Array.from(new Set(articles.filter(a => a.volume === vol).map(a => a.issue).filter(Boolean))).sort() as number[];
-              return (
-                <div key={vol}>
-                  <button
-                    onClick={() => handleFilterChange("volume", vol)}
-                    className={`flex items-center justify-between w-full py-1.5 px-2 text-sm transition-colors rounded-sm ${activeVol ? "text-primary font-semibold bg-primary/5" : "text-stone-600 hover:text-primary hover:bg-stone-50"}`}
-                  >
-                    <span>Vol {vol}{i === 0 ? " (Latest)" : ""}</span>
-                    {activeVol && <ChevronRight size={12} className="rotate-90 text-primary" />}
-                  </button>
-                  {activeVol && volIssues.length > 0 && (
-                    <div className="pl-3 mt-1 flex flex-wrap gap-1.5">
-                      {volIssues.map(iss => (
-                        <button key={iss}
-                          onClick={() => { setActiveIssue(activeIssue === iss ? null : iss); setPage(1); }}
-                          className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest border transition-all ${activeIssue === iss ? "bg-primary text-white border-primary" : "border-stone-200 text-stone-500 hover:border-primary hover:text-primary"}`}
-                        >
-                          Iss {iss}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 
@@ -190,6 +157,56 @@ export const Articles = () => {
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
+            {/* Horizontal Volume/Issue Filter Bar */}
+            {volumes.length > 0 && (
+              <div className="mb-10 p-6 bg-stone-50 border border-stone-100 rounded-sm">
+                <div className="space-y-6">
+                  {/* Volume Selector */}
+                  <div className="flex items-center gap-6">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 shrink-0">Volume</span>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleFilterChange("all", null)}
+                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all ${activeFilter.type !== "volume" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-white border-stone-200 text-stone-500 hover:border-primary hover:text-primary"}`}
+                      >
+                        All
+                      </button>
+                      {volumes.map((vol, i) => {
+                        const active = activeFilter.type === "volume" && activeFilter.value === vol;
+                        return (
+                          <button
+                            key={vol}
+                            onClick={() => handleFilterChange("volume", vol)}
+                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all ${active ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-white border-stone-200 text-stone-500 hover:border-primary hover:text-primary"}`}
+                          >
+                            Vol {vol}{i === 0 ? " (Latest)" : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Issue Selector (only shows if a volume is selected) */}
+                  {activeFilter.type === "volume" && activeFilter.value !== null && (
+                    <div className="flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-500">
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary shrink-0">Issue</span>
+                      <div className="flex flex-wrap gap-2">
+                        {Array.from(new Set(articles.filter(a => a.volume === activeFilter.value).map(a => a.issue).filter(Boolean))).sort().map(iss => (
+                          <button
+                            key={iss}
+                            onClick={() => { setActiveIssue(activeIssue === iss ? null : iss); setPage(1); }}
+                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all ${activeIssue === iss ? "bg-stone-900 text-white border-stone-900 shadow-lg shadow-stone-900/10" : "bg-white border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900"}`}
+                          >
+                            Issue {iss}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Search bar + mobile filter toggle */}
             <div className="flex gap-2 mb-6">
               <div className="relative flex-1">

@@ -218,41 +218,6 @@ export const ArticleInfo = () => {
               )}
             </div>
 
-            {/* Article Body */}
-            <div
-              className="font-headline text-xl leading-[1.8] text-on-surface space-y-8"
-              style={{ fontSize: `${fontSize}rem` }}
-            >
-              <h2 className="text-3xl font-bold pt-8">Introduction</h2>
-              <p className="serif-dropcap">
-                This article contributes to the field of {article.subject_area || "social development"} through a rigorous study of the theoretical and practical frameworks. The findings are based on peer-reviewed standards and reflect the diverse intellectual traditions in the global academic community.
-              </p>
-              <p>
-                The significance of this research lies in its capacity to bridge existing gaps in the literature, offering new perspectives that speak directly to the lived experiences of communities navigating social, economic, and institutional transitions. By situating these findings within a comparative analytical lens, this work contributes meaningfully to the ongoing dialogue around evidence-based policy and practice.
-              </p>
-
-              <figure className="my-16 group">
-                <div className="aspect-video bg-surface-container overflow-hidden rounded-xl">
-                  <img
-                    alt="Research visualization"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=1200"
-                  />
-                </div>
-                <figcaption className="mt-4 text-sm text-on-surface-variant italic font-body text-center px-12">
-                  Figure 1: Contextual mapping of research domains and interdisciplinary intersections. Source: Authors' analysis.
-                </figcaption>
-              </figure>
-
-              <h2 className="text-3xl font-bold pt-8">Methodological Framework</h2>
-              <p>
-                This study employs a rigorous mixed-methods approach integrating quantitative longitudinal analysis with qualitative fieldwork to capture both macro-structural patterns and micro-level dynamics. Data collection involved sustained engagement with relevant stakeholder communities, ensuring that the research maintains fidelity to lived experience while upholding the standards of academic rigour.
-              </p>
-              <p>
-                The analytical framework draws on established theoretical models while remaining adaptive to the emergent complexities encountered in the field. This dual commitment to theoretical grounding and empirical responsiveness constitutes the core methodological contribution of the present study.
-              </p>
-            </div>
-
             {/* Article Footer */}
             <div className="mt-20 pt-10 border-t border-outline-variant/30 flex justify-between items-center">
               <div className="flex gap-4">
@@ -304,46 +269,29 @@ export const ArticleInfo = () => {
                   </button>
                 </div>
 
-                <div className="mt-8 space-y-4">
-                  <div className="flex justify-between text-sm items-center">
-                    <span className="text-on-surface-variant">Views</span>
-                    <span className="font-bold">12,402</span>
-                  </div>
-                  <div className="flex justify-between text-sm items-center">
-                    <span className="text-on-surface-variant">Downloads</span>
-                    <span className="font-bold">3,118</span>
-                  </div>
-                  <div className="flex justify-between text-sm items-center">
-                    <span className="text-on-surface-variant">Citations</span>
-                    <div className="bg-primary-fixed px-3 py-0.5 rounded-full text-on-primary-fixed font-bold text-xs">48</div>
-                  </div>
+                <div className="mt-8 space-y-4 border-t border-stone-100 pt-8">
+                  {pubDate && (
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-on-surface-variant">Published</span>
+                      <span className="font-bold">{pubDate}</span>
+                    </div>
+                  )}
+                  {article.subject_area && (
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-on-surface-variant">Section</span>
+                      <span className="font-bold">{article.subject_area}</span>
+                    </div>
+                  )}
+                  {(article.volume || article.issue) && (
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-on-surface-variant">Issue</span>
+                      <span className="font-bold">Vol {article.volume || '—'}, Iss {article.issue || '—'}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Article Impact */}
-              <div className="bg-surface-container-low rounded-2xl p-8">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-6">Article Impact</h3>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-xs font-semibold text-on-surface-variant">Academic Relevance</span>
-                      <span className="text-xs font-bold">Top 5%</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                      <div className="w-[95%] h-full bg-primary rounded-full" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-xs font-semibold text-on-surface-variant">Policy Impact Score</span>
-                      <span className="text-xs font-bold">8.4 / 10</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                      <div className="w-[84%] h-full bg-primary-container rounded-full" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+
 
               {/* Related Research */}
               <div>

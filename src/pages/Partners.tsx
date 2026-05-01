@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+import * as partnersService from '@/lib/partnersService';
+
 interface Partner {
   id: string;
   name: string;
@@ -42,8 +44,7 @@ export const Partners = () => {
   const fetchPartners = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('partners').select('*').eq('is_active', true).order('display_order', { ascending: true });
-      if (error) throw error;
+      const data = await partnersService.getPartners();
       setPartners(data || []);
     } catch (error) {
       console.error('Error fetching partners:', error);

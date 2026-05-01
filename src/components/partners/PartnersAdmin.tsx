@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
+import * as partnersService from '@/lib/partnersService';
 
 interface Partner {
   id: string;
@@ -80,7 +81,7 @@ export const PartnersAdmin = () => {
       } else {
         toast({
           title: 'Access Denied',
-          description: 'Higher clearance required for institutional governance',
+          description: 'You do not have permission to manage partners.',
           variant: 'destructive',
         });
         navigate('/partners');
@@ -94,18 +95,13 @@ export const PartnersAdmin = () => {
   const fetchPartners = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('partners')
-        .select('*')
-        .order('display_order', { ascending: true });
-
-      if (error) throw error;
+      const data = await partnersService.getPartners();
       setPartners(data || []);
     } catch (error) {
       console.error('Error fetching partners:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load institutional registry',
+        description: 'Failed to load partners',
         variant: 'destructive',
       });
     } finally {
@@ -127,27 +123,16 @@ export const PartnersAdmin = () => {
       };
 
       if (editingPartner) {
-        const { error } = await supabase
-          .from('partners')
-          .update(partnerData)
-          .eq('id', editingPartner.id);
-
-        if (error) throw error;
-
+        await partnersService.updatePartner(editingPartner.id, partnerData);
         toast({
-          title: 'Registry Updated',
-          description: 'Institutional partner details have been synchronized.',
+          title: 'Partner Updated',
+          description: 'Partner details have been saved successfully.',
         });
       } else {
-        const { error } = await supabase
-          .from('partners')
-          .insert([partnerData]);
-
-        if (error) throw error;
-
+        await partnersService.createPartner(partnerData);
         toast({
-          title: 'Partner Onboarded',
-          description: 'New scholarly institution added to the global network.',
+          title: 'Partner Added',
+          description: 'New partner institution has been registered.',
         });
       }
 
@@ -157,8 +142,8 @@ export const PartnersAdmin = () => {
     } catch (error: any) {
       console.error('Error saving partner:', error);
       toast({
-        title: 'Governance Error',
-        description: error.message || 'Failed to update partnership ledger',
+        title: 'Error',
+        description: error.response?.data?.message || error.message || 'Failed to save partner',
         variant: 'destructive',
       });
     }
@@ -177,27 +162,20 @@ export const PartnersAdmin = () => {
   };
 
   const handleDelete = async (partnerId: string) => {
-    if (!confirm('Execute partnership termination? This will remove the institution from the registry.')) return;
+    if (!confirm('Are you sure you want to remove this partner?')) return;
 
     try {
-      const { error } = await supabase
-        .from('partners')
-        .delete()
-        .eq('id', partnerId);
-
-      if (error) throw error;
-
+      await partnersService.deletePartner(partnerId);
       toast({
-        title: 'Registry Purged',
-        description: 'Institutional record removed successfully.',
+        title: 'Partner Removed',
+        description: 'The partner record has been deleted.',
       });
-      
       fetchPartners();
     } catch (error: any) {
       console.error('Error deleting partner:', error);
       toast({
         title: 'Error',
-        description: 'Failed to purge institutional record',
+        description: 'Failed to delete partner record',
         variant: 'destructive',
       });
     }
@@ -215,19 +193,13 @@ export const PartnersAdmin = () => {
       const targetPartner = partners[targetIndex];
 
       await Promise.all([
-        supabase
-          .from('partners')
-          .update({ display_order: targetPartner.display_order })
-          .eq('id', partner.id),
-        supabase
-          .from('partners')
-          .update({ display_order: partner.display_order })
-          .eq('id', targetPartner.id)
+        partnersService.updatePartner(partner.id, { display_order: targetPartner.display_order }),
+        partnersService.updatePartner(targetPartner.id, { display_order: partner.display_order })
       ]);
 
       toast({
-        title: 'Order Synchronized',
-        description: 'Institutional hierarchy updated.',
+        title: 'Order Updated',
+        description: 'The display order has been updated.',
       });
 
       fetchPartners();
@@ -235,7 +207,7 @@ export const PartnersAdmin = () => {
       console.error('Error reordering partners:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update institutional order',
+        description: 'Failed to update partner order',
         variant: 'destructive',
       });
     }
@@ -263,116 +235,114 @@ export const PartnersAdmin = () => {
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen font-body">
       <PageHeader 
-        title="Strategic" 
+        title="Journal" 
         subtitle="Partners" 
-        accent="Institutional Alignment"
-        description="Global partnership oversight and scholarly network governance. Manage institutional collaborations, archival integrations, and developmental synergies."
+        accent="Management"
+        description="Manage the institutions and organizations that partner with IJSDS. You can add, edit, or remove partner logos and information here."
       />
 
       <ContentSection>
         {/* Governance Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 pb-12 border-b border-border/20">
-          <div className="flex items-center gap-6">
-             <div className="p-4 bg-foreground text-white shadow-xl rotate-3"><Building2 size={24} /></div>
-             <div>
-                <h2 className="text-3xl font-headline font-black uppercase tracking-tighter">Institutional Registry</h2>
-                <p className="font-body text-sm text-foreground/40 italic">Active global collaborators and supporting academic bodies.</p>
-             </div>
-          </div>
+           <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary text-white rounded-md"><Building2 size={20} /></div>
+              <div>
+                 <h2 className="text-2xl font-headline font-bold text-stone-900">Partner List</h2>
+                 <p className="font-body text-xs text-stone-500">View and manage all active partner institutions.</p>
+              </div>
+           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) resetForm();
           }}>
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-secondary text-white font-headline font-black uppercase text-[10px] tracking-widest px-10 py-8 h-auto shadow-2xl rounded-none transition-all group">
-                <Plus className="h-4 w-4 mr-3 group-hover:rotate-90 transition-transform" />
-                Onboard Institution
+              <Button className="bg-primary hover:bg-primary/90 text-white font-bold uppercase text-[10px] tracking-widest px-6 py-3 rounded-md transition-all flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Partner
               </Button>
             </DialogTrigger>
             
-            <DialogContent className="max-w-2xl rounded-none border-none p-0 overflow-hidden shadow-2xl font-body">
-              <div className="bg-foreground p-12 text-white relative">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}></div>
-                  <DialogHeader className="relative z-10">
-                    <DialogTitle className="text-4xl font-headline font-black uppercase tracking-tighter mb-2">
-                       {editingPartner ? 'Update Institution' : 'Onboard Institution'}
+            <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-lg border-none shadow-2xl font-body">
+              <div className="bg-stone-900 p-6 text-white">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-headline font-bold">
+                       {editingPartner ? 'Edit Partner' : 'Add New Partner'}
                     </DialogTitle>
-                    <DialogDescription className="text-white/40 italic font-body text-sm">
-                       {editingPartner ? 'Synchronizing institutional archival details.' : 'Registering new scholarly partnership protocol.'}
+                    <DialogDescription className="text-stone-400 text-xs">
+                       {editingPartner ? 'Update partner organization details.' : 'Enter details for a new institutional partner.'}
                     </DialogDescription>
                   </DialogHeader>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-12 space-y-8 bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <Label htmlFor="name" className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40">Organization Name</Label>
+              <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-xs font-bold text-stone-600">Organization Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       required
-                      className="rounded-none border-border/40 focus:border-primary h-12 shadow-sm font-headline font-bold text-xs"
+                      className="rounded-md border-stone-200 focus:ring-primary h-10 text-sm"
                     />
                   </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="website_url" className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40">Portal Link (Institutional)</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="website_url" className="text-xs font-bold text-stone-600">Website URL</Label>
                     <Input
                       id="website_url"
                       type="url"
                       value={formData.website_url}
                       onChange={(e) => setFormData(prev => ({ ...prev, website_url: e.target.value }))}
                       placeholder="https://example.edu"
-                      className="rounded-none border-border/40 focus:border-secondary h-12 shadow-sm font-headline font-bold text-xs"
+                      className="rounded-md border-stone-200 focus:ring-primary h-10 text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="logo_url" className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40">Branding Asset URL (Logo)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="logo_url" className="text-xs font-bold text-stone-600">Logo URL</Label>
                   <Input
                     id="logo_url"
                     type="url"
                     value={formData.logo_url}
                     onChange={(e) => setFormData(prev => ({ ...prev, logo_url: e.target.value }))}
-                    placeholder="https://example.com/branding_v1.png"
-                    className="rounded-none border-border/40 focus:border-primary h-12 shadow-sm font-headline font-bold text-xs"
+                    placeholder="https://example.com/logo.png"
+                    className="rounded-md border-stone-200 focus:ring-primary h-10 text-sm"
                   />
-                  <p className="text-[9px] font-body italic text-foreground/20">Preferably high-fidelity PNG or SVG assets with negative space.</p>
+                  <p className="text-[10px] text-stone-400">Provide a direct link to the organization's logo image.</p>
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="description" className="font-headline font-black uppercase text-[10px] tracking-widest text-foreground/40">Archival Synopsis (Optional)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-xs font-bold text-stone-600">Description (Optional)</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe the institutional alignment or partnership history..."
+                    placeholder="Brief description of the partner..."
                     rows={4}
-                    className="rounded-none border-border/40 focus:border-secondary shadow-sm font-body text-sm resize-none"
+                    className="rounded-md border-stone-200 focus:ring-primary text-sm resize-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-6 bg-secondary/5 border border-secondary/10">
-                  <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-between p-4 bg-stone-50 border border-stone-100 rounded-md">
+                  <div className="flex items-center space-x-3">
                     <Switch
                       id="is_active"
                       checked={formData.is_active}
                       onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                     />
-                    <Label htmlFor="is_active" className="font-headline font-black uppercase text-[10px] tracking-widest cursor-pointer">Live Partnership Stream</Label>
+                    <Label htmlFor="is_active" className="text-xs font-bold text-stone-700 cursor-pointer">Active (Show on website)</Label>
                   </div>
-                  <div className="h-2 w-2 rounded-full bg-secondary animate-pulse"></div>
                 </div>
 
-                <DialogFooter className="pt-8 border-t border-border/10">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-8 px-10 h-auto">
-                    <X className="h-4 w-4" /> Cancel
+                <DialogFooter className="pt-4 mt-2 border-t border-stone-100 flex gap-3">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-md text-[10px] font-bold px-4 py-2 h-9">
+                    Cancel
                   </Button>
-                  <Button type="submit" className="rounded-none bg-foreground text-white hover:bg-primary font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-8 px-12 h-auto shadow-xl transition-all">
-                    <Save className="h-4 w-4" /> {editingPartner ? 'Update Registry' : 'Commit Onboarding'}
+                  <Button type="submit" className="rounded-md bg-stone-900 text-white hover:bg-stone-800 text-[10px] font-bold px-6 py-2 h-9 transition-all">
+                    {editingPartner ? 'Save Changes' : 'Add Partner'}
                   </Button>
                 </DialogFooter>
               </form>
@@ -392,104 +362,104 @@ export const PartnersAdmin = () => {
             <Table>
               <TableHeader className="bg-muted/5">
                 <TableRow className="hover:bg-transparent border-b-2 border-border/20">
-                  <TableHead className="font-headline font-black uppercase text-[9px] tracking-widest py-8 px-8 w-40"><div className="flex items-center gap-2"><ListOrdered size={12} /> Hierarchy</div></TableHead>
-                  <TableHead className="font-headline font-black uppercase text-[9px] tracking-widest py-8"><div className="flex items-center gap-2"><Building2 size={12} /> Institution</div></TableHead>
-                  <TableHead className="font-headline font-black uppercase text-[9px] tracking-widest py-8">Portal</TableHead>
-                  <TableHead className="font-headline font-black uppercase text-[9px] tracking-widest py-8">Efficacy</TableHead>
-                  <TableHead className="font-headline font-black uppercase text-[9px] tracking-widest py-8">Archived</TableHead>
-                  <TableHead className="font-headline font-black uppercase text-[9px] tracking-widest py-8 text-right px-8">Actions</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 px-6 w-32">Order</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6">Organization</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6">Website</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6">Status</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6">Added On</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase tracking-widest py-6 text-right px-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {partners.map((partner, index) => (
                   <TableRow key={partner.id} className="group hover:bg-secondary/5 transition-colors">
-                    <TableCell className="py-10 px-8">
-                      <div className="flex items-center gap-5">
-                        <span className="font-headline font-black text-2xl text-foreground/10 group-hover:text-primary/20 transition-colors">0{partner.display_order}</span>
-                        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <TableCell className="py-6 px-6">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-sm text-stone-400">#{partner.display_order}</span>
+                        <div className="flex flex-col gap-0.5">
                           <Button
-                            size="sm"
-                            variant="outline"
+                            size="icon"
+                            variant="ghost"
                             onClick={() => handleReorder(partner.id, 'up')}
                             disabled={index === 0}
-                            className="h-8 w-8 p-0 rounded-none border-border/20 hover:border-primary transition-all shadow-sm"
+                            className="h-6 w-6 text-stone-400 hover:text-primary"
                           >
-                            <ArrowUp className="h-3.5 w-3.5" />
+                            <ArrowUp size={12} />
                           </Button>
                           <Button
-                            size="sm"
-                            variant="outline"
+                            size="icon"
+                            variant="ghost"
                             onClick={() => handleReorder(partner.id, 'down')}
                             disabled={index === partners.length - 1}
-                            className="h-8 w-8 p-0 rounded-none border-border/20 hover:border-secondary transition-all shadow-sm"
+                            className="h-6 w-6 text-stone-400 hover:text-primary"
                           >
-                            <ArrowDown className="h-3.5 w-3.5" />
+                            <ArrowDown size={12} />
                           </Button>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-10">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 p-2 bg-white border border-border/20 shadow-sm flex items-center justify-center shrink-0">
+                    <TableCell className="py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 p-1.5 bg-white border border-stone-100 flex items-center justify-center shrink-0">
                           {partner.logo_url ? (
                             <img 
                               src={partner.logo_url} 
                               alt={partner.name}
-                              className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-all"
+                              className="max-w-full max-h-full object-contain"
                             />
                           ) : (
-                            <Building2 className="h-6 w-6 text-foreground/10" />
+                            <Building2 className="h-5 w-5 text-stone-200" />
                           )}
                         </div>
-                        <div className="max-w-md">
-                          <div className="font-headline font-black text-lg uppercase tracking-tight leading-tight mb-1 group-hover:text-primary transition-colors">{partner.name}</div>
+                        <div>
+                          <div className="font-bold text-stone-900">{partner.name}</div>
                           {partner.description && (
-                            <div className="text-[10px] font-body text-foreground/40 italic line-clamp-1">
+                            <div className="text-[10px] text-stone-400 line-clamp-1">
                               {partner.description}
                             </div>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-10">
+                    <TableCell className="py-6">
                       {partner.website_url ? (
                         <a 
                           href={partner.website_url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="font-headline font-black text-[9px] uppercase tracking-widest text-primary flex items-center gap-2 hover:text-secondary transition-colors"
+                          className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5 hover:underline"
                         >
-                          <Globe className="h-3 w-3" /> External Access
+                          Visit <ExternalLink size={10} />
                         </a>
                       ) : (
-                        <span className="text-[9px] font-headline font-bold uppercase tracking-widest text-foreground/10 italic">N/A Digital Link</span>
+                        <span className="text-[10px] text-stone-300 italic">No Link</span>
                       )}
                     </TableCell>
-                    <TableCell className="py-10">
-                      <Badge className={`rounded-none font-headline font-black uppercase text-[8px] tracking-[0.2em] px-4 py-1 shadow-sm border-none ${partner.is_active ? 'bg-secondary text-white' : 'bg-muted text-foreground/30'}`}>
-                        {partner.is_active ? 'High Density' : 'Dormant Stream'}
+                    <TableCell className="py-6">
+                      <Badge variant="outline" className={`rounded-full font-bold uppercase text-[8px] tracking-widest px-3 py-0.5 ${partner.is_active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-stone-50 text-stone-400 border-stone-200'}`}>
+                        {partner.is_active ? 'Active' : 'Hidden'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-10 text-[10px] font-headline font-bold text-foreground/20 italic">
+                    <TableCell className="py-6 text-[10px] text-stone-400">
                       {formatDate(partner.created_at)}
                     </TableCell>
-                    <TableCell className="py-10 text-right px-8">
-                      <div className="flex items-center justify-end gap-3 translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                    <TableCell className="py-6 text-right px-6">
+                      <div className="flex items-center justify-end gap-2">
                         <Button
-                          size="sm"
-                          variant="outline"
+                          size="icon"
+                          variant="ghost"
                           onClick={() => handleEdit(partner)}
-                          className="h-10 w-10 p-0 rounded-none border-border/20 text-foreground hover:bg-foreground hover:text-white transition-all shadow-sm"
+                          className="h-8 w-8 text-stone-400 hover:text-primary hover:bg-primary/5"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-3.5 w-3.5" />
                         </Button>
                         <Button
-                          size="sm"
-                          variant="outline"
+                          size="icon"
+                          variant="ghost"
                           onClick={() => handleDelete(partner.id)}
-                          className="h-10 w-10 p-0 rounded-none border-border/20 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                          className="h-8 w-8 text-stone-400 hover:text-red-600 hover:bg-red-50"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </TableCell>
@@ -500,12 +470,7 @@ export const PartnersAdmin = () => {
           )}
         </div>
         
-        {/* Ledger Footer Branding */}
-        <div className="mt-16 flex items-center justify-center gap-8 py-12 border-t border-border/10 opacity-30">
-           <ShieldCheck size={18} />
-           <p className="font-headline font-bold text-[9px] uppercase tracking-[0.5em]">Institutional Governance Protocol — Secure Access Stream</p>
-           <ShieldCheck size={18} />
-        </div>
+
       </ContentSection>
     </div>
   );
