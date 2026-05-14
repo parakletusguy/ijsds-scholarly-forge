@@ -8,12 +8,12 @@ export const Indexing = () => {
     <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Indexing & Visibility — IJSDS</title>
-        <meta name="description" content="Discover how IJSDS ensures global visibility for your research through NJOL and Zenodo." />
+        <meta name="description" content="Discover how IJSDS ensures global visibility through NJOL, Zenodo, Crossref, and Google Scholar indexing." />
       </Helmet>
 
       {/* Minimalist Header */}
       <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
             ← Back to Home
           </Link>
@@ -26,62 +26,112 @@ export const Indexing = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-8 py-16 space-y-20">
-        
+      <main className="max-w-5xl mx-auto px-8 py-16 space-y-20">
+
         {/* core repositories */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-16">
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {/* NJOL */}
-          <div className="space-y-8 group">
-            <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow">
-              <img 
-                src="/assets/indexing/njol_logo.png" 
-                alt="NJOL Logo" 
-                className="w-full max-w-[280px] h-auto object-contain mb-6"
-              />
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center">
-                  <Globe size={14} className="text-indigo-900" />
-                </div>
-                <h2 className="text-lg font-bold tracking-tight uppercase text-stone-800">NJOL Hosting</h2>
+          <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+            <img
+              src="/assets/indexing/njol_logo.png"
+              alt="NJOL Logo"
+              className="w-full max-w-[200px] h-16 object-contain mb-6"
+            />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
+                <Globe size={14} className="text-indigo-900" />
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed mb-8">
-                The <span className="font-semibold text-stone-700">Nigerian Journals Online</span> platform hosts our journal locally, providing professional infrastructure for Nigerian academic works and ensuring automatic indexing in Google Scholar for maximum regional and global reach.
-              </p>
-              <a 
-                href="https://www.nigerianjournalsonline.com" 
-                target="_blank" 
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-900 hover:opacity-70 transition-opacity"
-              >
-                Visit Platform <ExternalLink size={10} />
-              </a>
+              <h2 className="text-sm font-bold tracking-tight uppercase text-stone-800">NJOL Hosting</h2>
             </div>
+            <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1">
+              The <span className="font-semibold text-stone-700">Nigerian Journals Online</span> platform hosts our journal locally, providing professional infrastructure for Nigerian academic works and ensuring indexing in Google Scholar for regional and global reach.
+            </p>
+            <a
+              href="https://www.nigerianjournalsonline.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-900 hover:opacity-70 transition-opacity mt-auto"
+            >
+              Visit Platform <ExternalLink size={10} />
+            </a>
           </div>
 
           {/* Zenodo */}
-          <div className="space-y-8 group">
-            <div className="bg-stone-900 p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/5">
-              <img 
-                src="/assets/indexing/zenodo_logo.png" 
-                alt="Zenodo Logo" 
-                className="w-full max-w-[200px] h-auto object-contain mb-8 brightness-200"
-              />
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <BookOpen size={14} className="text-white" />
-                </div>
-                <h2 className="text-lg font-bold tracking-tight uppercase text-white">Zenodo Repository</h2>
+          <div className="bg-stone-900 p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/5 flex flex-col">
+            <img
+              src="/assets/indexing/zenodo_logo.png"
+              alt="Zenodo Logo"
+              className="w-full max-w-[160px] h-16 object-contain mb-6 brightness-200"
+            />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                <BookOpen size={14} className="text-white" />
               </div>
-              <p className="text-stone-400 text-sm leading-relaxed mb-8">
-                Every IJSDS article is cross-published on <span className="font-semibold text-white">Zenodo</span>, a CERN-backed repository. This provides a permanent, citable record assigned a unique DOI (<span className="text-primary font-mono text-xs">10.5281/zenodo</span>) for long-term preservation.
-              </p>
-              <a 
-                href="https://zenodo.org" 
-                target="_blank" 
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors"
-              >
-                CERN Repository <ExternalLink size={10} />
-              </a>
+              <h2 className="text-sm font-bold tracking-tight uppercase text-white">Zenodo Repository</h2>
             </div>
+            <p className="text-stone-400 text-sm leading-relaxed mb-6 flex-1">
+              Every IJSDS article is cross-published on <span className="font-semibold text-white">Zenodo</span>, a CERN-backed open repository. Each record receives a permanent DOI (<span className="text-primary font-mono text-xs">10.5281/zenodo</span>) ensuring long-term preservation and citability.
+            </p>
+            <a
+              href="https://zenodo.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors mt-auto"
+            >
+              CERN Repository <ExternalLink size={10} />
+            </a>
+          </div>
+
+          {/* Crossref */}
+          <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+            <img
+              src="https://res.cloudinary.com/drh4ma3hj/image/upload/v1778758989/Crossref-Logo_krmzqx.jpg"
+              alt="Crossref Logo"
+              className="w-full max-w-[180px] h-16 object-contain mb-6"
+            />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
+                <ExternalLink size={14} className="text-primary" />
+              </div>
+              <h2 className="text-sm font-bold tracking-tight uppercase text-stone-800">Crossref DOI Registry</h2>
+            </div>
+            <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1">
+              IJSDS is a <span className="font-semibold text-stone-700">Crossref</span> member, the official DOI registration agency for scholarly publishing. Every article receives a Crossref-registered DOI, enabling citation tracking, reference linking, and discovery across 24,000+ member publishers in 166 countries.
+            </p>
+            <a
+              href="https://www.crossref.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-70 transition-opacity mt-auto"
+            >
+              Crossref.org <ExternalLink size={10} />
+            </a>
+          </div>
+
+          {/* Google Scholar */}
+          <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+            <img
+              src="https://res.cloudinary.com/drh4ma3hj/image/upload/v1778759110/google-scholar4372_knlsib.jpg"
+              alt="Google Scholar Logo"
+              className="w-full max-w-[200px] h-16 object-contain mb-6"
+            />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                <BookOpen size={14} className="text-blue-600" />
+              </div>
+              <h2 className="text-sm font-bold tracking-tight uppercase text-stone-800">Google Scholar</h2>
+            </div>
+            <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1">
+              All IJSDS articles are indexed in <span className="font-semibold text-stone-700">Google Scholar</span>, the world's most widely used academic search engine. This ensures every published article is freely discoverable by researchers, students, and institutions globally — and automatically tracked for citations and author metrics.
+            </p>
+            <a
+              href="https://scholar.google.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:opacity-70 transition-opacity mt-auto"
+            >
+              Google Scholar <ExternalLink size={10} />
+            </a>
           </div>
         </section>
 
