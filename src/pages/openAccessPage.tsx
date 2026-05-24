@@ -1,31 +1,31 @@
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 export default function OpenAccessPage() {
   return (
-    <div className="min-h-screen bg-[#fcf9f8] font-body">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Open Access Policy — IJSDS</title>
         <meta name="description" content="IJSDS is fully open access — every article is free to read, download, and share worldwide, immediately upon publication." />
       </Helmet>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
-
-        {/* Page Header */}
-        <div className="mb-14 pb-10 border-b border-stone-200">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block mb-4">
-            Journal Policy
-          </span>
-          <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
-            Open Access Policy
+      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+            ← Home
+          </Link>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-3">Journal Policy</span>
+          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+            Open <span className="italic text-primary">Access</span>
           </h1>
-          <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
-            The International Journal of Social Work and Development Studies (IJSDS) is fully open access. 
-            Every article we publish is freely available to anyone, anywhere in the world, immediately upon publication.
+          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+            Every article we publish is freely available to anyone, anywhere in the world, immediately upon publication — no subscriptions, no paywalls.
           </p>
         </div>
+      </header>
 
-        {/* Body Content */}
-        <div className="prose prose-stone max-w-none space-y-10 text-stone-700 leading-[1.85] text-[15px]">
+      <main className="max-w-3xl mx-auto px-8 py-16">
+        <div className="space-y-10 text-stone-700 leading-[1.85] text-[15px]">
 
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
@@ -185,7 +185,7 @@ export default function OpenAccessPage() {
           <span>Free to Read</span>
         </div>
 
-      </div>
+      </main>
     </div>
   );
 }

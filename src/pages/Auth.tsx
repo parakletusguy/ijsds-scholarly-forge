@@ -89,7 +89,7 @@ export const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface font-body text-on-surface antialiased textile-pattern flex flex-col pt-16 md:pt-24">
+    <div className="min-h-screen bg-stone-50 font-body text-stone-900 antialiased flex flex-col pt-16 md:pt-24">
       <Helmet>
         <title>Social Work and Development Studies - Institutional Access</title>
         <meta name="description" content="Secure entry portal for authors, reviewers, and editors of the International Journal of Social Work and Development Studies." />
@@ -100,12 +100,12 @@ export const Auth = () => {
           {/* Login Container */}
           <div
             ref={formRef}
-            className="bg-surface-container-lowest p-10 md:p-14 shadow-[0px_12px_24px_-4px_rgba(28,28,25,0.06)] border-[0.5px] border-outline-variant/15"
+            className="bg-white p-10 md:p-14 border-[0.5px] border-stone-100"
           >
             {reason === 'submit' && (
               <div className="mb-8 p-4 bg-primary/5 border-l-4 border-primary animate-in fade-in slide-in-from-left-4 duration-500">
                 <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Submission Requirement</p>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
+                <p className="text-xs text-stone-500 leading-relaxed">
                   To properly track and manage your submitted articles through the peer-review process, please sign in or create an account.
                 </p>
               </div>
@@ -115,7 +115,7 @@ export const Auth = () => {
               <h2 className="font-headline text-2xl font-semibold mb-2">
                 {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
               </h2>
-              <p className="text-on-surface-variant text-sm">
+              <p className="text-stone-500 text-sm">
                 {mode === 'signin' 
                   ? 'Sign in to your account to continue.' 
                   : mode === 'signup' 
@@ -127,9 +127,9 @@ export const Auth = () => {
             <form onSubmit={handleSubmit} className="space-y-8">
               {mode === 'signup' && (
                 <div className="space-y-2">
-                  <label className="block font-label text-xs font-semibold uppercase tracking-widest text-on-surface-variant" htmlFor="fullName">Full Name</label>
+                  <label className="block font-label text-xs font-semibold uppercase tracking-widest text-stone-500" htmlFor="fullName">Full Name</label>
                   <input 
-                    className="w-full bg-surface-container-high border-0 border-b border-outline-variant py-4 px-0 transition-all focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/40" 
+                    className="w-full bg-stone-50 border-0 border-b border-stone-200 py-4 px-0 transition-all focus:ring-0 focus:border-primary text-stone-900 placeholder:text-stone-400" 
                     id="fullName" 
                     name="fullName" 
                     placeholder="e.g. Scholar Surname" 
@@ -143,9 +143,9 @@ export const Auth = () => {
 
               {/* Field: Institutional Email */}
               <div className="space-y-2">
-                <label className="block font-label text-xs font-semibold uppercase tracking-widest text-on-surface-variant" htmlFor="email">Email Address</label>
+                <label className="block font-label text-xs font-semibold uppercase tracking-widest text-stone-500" htmlFor="email">Email Address</label>
                 <input 
-                  className="w-full bg-surface-container-high border-0 border-b border-outline-variant py-4 px-0 transition-all focus:ring-0 focus:border-primary text-on-surface placeholder:text-on-surface-variant/40" 
+                  className="w-full bg-stone-50 border-0 border-b border-stone-200 py-4 px-0 transition-all focus:ring-0 focus:border-primary text-stone-900 placeholder:text-stone-400" 
                   id="email" 
                   name="email" 
                   placeholder="e.g. scholar@academy.edu" 
@@ -161,11 +161,11 @@ export const Auth = () => {
               {mode !== 'forgot-password' && (
                 <div className="space-y-2">
                   <div className="flex justify-between items-end">
-                    <label className="block font-label text-xs font-semibold uppercase tracking-widest text-on-surface-variant" htmlFor="password">Password</label>
+                    <label className="block font-label text-xs font-semibold uppercase tracking-widest text-stone-500" htmlFor="password">Password</label>
                   </div>
                   <div className="relative">
                     <input 
-                      className="w-full bg-surface-container-high border-0 border-b border-outline-variant py-4 px-0 transition-all focus:ring-0 focus:border-primary text-on-surface" 
+                      className="w-full bg-stone-50 border-0 border-b border-stone-200 py-4 px-0 transition-all focus:ring-0 focus:border-primary text-stone-900" 
                       id="password" 
                       name="password" 
                       placeholder="••••••••••••" 
@@ -176,7 +176,7 @@ export const Auth = () => {
                     />
                     <button 
                       type="button" 
-                      className="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-primary transition-colors"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 text-stone-400 hover:text-primary transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -188,7 +188,7 @@ export const Auth = () => {
               {/* Actions */}
               <div className="pt-4 space-y-6">
                 <button 
-                  className="w-full bg-primary-container hover:bg-primary text-on-primary font-label font-bold py-5 px-8 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  className="w-full bg-stone-900 hover:bg-primary text-white font-label font-bold py-5 px-8 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed" 
                   type="submit"
                   disabled={loading}
                 >
@@ -212,7 +212,7 @@ export const Auth = () => {
                   <button 
                     type="button"
                     onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
-                    className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors"
+                    className="text-stone-500 text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors"
                   >
                     {mode === 'signin' ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
                   </button>
@@ -221,13 +221,13 @@ export const Auth = () => {
 
               {/* SSO Option */}
               {mode !== 'forgot-password' && (
-                <div className="pt-8 border-t border-outline-variant/10">
+                <div className="pt-8 border-t border-stone-100">
                   <button 
                     type="button" 
                     onClick={handleOrcidLogin}
-                    className="w-full border border-outline-variant/30 hover:border-primary transition-all py-4 px-6 flex items-center justify-center gap-3 group"
+                    className="w-full border border-stone-200 hover:border-primary transition-all py-4 px-6 flex items-center justify-center gap-3 group"
                   >
-                    <svg className="h-5 w-5 text-secondary group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="h-5 w-5 text-stone-600 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947 0 .525-.422.947-.947.947-.525 0-.947-.422-.947-.947 0-.525.422-.947.947-.947zm-.722 3.038h1.444v10.041H6.647V7.416zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-1.016 5.016-5.344 5.016h-3.9V7.416zm1.444 1.303v7.444h2.297c2.359 0 3.9-1.303 3.9-3.722 0-2.297-1.303-3.722-3.9-3.722h-2.297z"/>
                     </svg>
                     <span className="font-label text-xs font-bold uppercase tracking-widest">Connect with ORCID</span>
@@ -243,7 +243,7 @@ export const Auth = () => {
               onClick={() => navigate('/')}
               className="inline-flex items-center gap-2 group"
             >
-              <span className="font-label text-sm font-bold uppercase tracking-widest border-b border-on-surface pb-1 group-hover:text-primary group-hover:border-primary transition-all">Back to Home</span>
+              <span className="font-label text-sm font-bold uppercase tracking-widest border-b border-stone-300 pb-1 group-hover:text-primary group-hover:border-primary transition-all">Back to Home</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>

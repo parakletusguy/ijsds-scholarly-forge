@@ -1,31 +1,30 @@
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 export const EthicalGuidelines = () => {
   return (
-    <div className="min-h-screen bg-[#fcf9f8] font-body">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Ethical Guidelines — IJSDS</title>
         <meta name="description" content="IJSDS ethical guidelines for authors, editors, and reviewers — our commitment to integrity, fairness, and transparency in scholarly publishing." />
       </Helmet>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
-
-        {/* Page Header */}
-        <div className="mb-14 pb-10 border-b border-stone-200">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block mb-4">
-            Journal Policy
-          </span>
-          <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
-            Ethical Guidelines
+      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+            ← Home
+          </Link>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-3">Journal Policy</span>
+          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+            Ethical <span className="italic text-primary">Guidelines</span>
           </h1>
-          <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
-            IJSDS is committed to upholding the highest ethical standards in scholarly publishing. 
-            These guidelines apply to all parties involved — authors, editors, and peer reviewers — 
-            and are aligned with the principles of the Committee on Publication Ethics (COPE).
+          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+            Our commitment to integrity, fairness, and transparency in scholarly publishing — aligned with COPE principles and applying to authors, editors, and reviewers.
           </p>
         </div>
+      </header>
 
-        {/* Body */}
+      <main className="max-w-3xl mx-auto px-8 py-16">
         <div className="space-y-10 text-stone-700 leading-[1.85] text-[15px]">
 
           <section>
@@ -221,7 +220,7 @@ export const EthicalGuidelines = () => {
           <span>IJSDS</span>
         </div>
 
-      </div>
+      </main>
     </div>
   );
 };

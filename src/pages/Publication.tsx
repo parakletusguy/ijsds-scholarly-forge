@@ -39,7 +39,7 @@ interface Article {
 }
 
 export const Publication = () => {
-  const { user } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,47 +53,21 @@ export const Publication = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAdminAccess();
-  }, [user]);
+    if (authLoading) return;
+    if (!user) { navigate('/auth'); return; }
+    if (profile?.is_editor || profile?.is_admin) {
+      setIsAdmin(true);
+    } else if (profile) {
+      toast({ title: "Access Denied", description: "You don't have permission to access this page.", variant: "destructive" });
+      navigate('/dashboard');
+    }
+  }, [user, profile, authLoading]);
 
   useEffect(() => {
     if (isAdmin) {
       fetchAcceptedArticles();
     }
   }, [isAdmin]);
-
-  const checkAdminAccess = async () => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_editor, is_admin')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-
-      const p = profile as any;
-      if (!p?.is_editor && !p?.is_admin) {
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access this page",
-          variant: "destructive",
-        });
-        navigate('/dashboard');
-        return;
-      }
-
-      setIsAdmin(true);
-    } catch (error) {
-      console.error('Error checking admin access:', error);
-      navigate('/dashboard');
-    }
-  };
 
   const formatAuthors = (authors: any) => {
     if (!authors) return 'Unknown Author';

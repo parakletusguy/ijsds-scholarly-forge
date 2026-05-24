@@ -252,14 +252,14 @@ export const Profile = () => {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* ── Identity card ─────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+        <div className="bg-white border border-stone-100 shadow-sm overflow-hidden">
           {/* Cover strip */}
           <div className="h-24 bg-gradient-to-r from-primary/90 to-primary/60" />
 
           <div className="px-6 pb-6 -mt-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             {/* Avatar */}
             <div className="flex items-end gap-4">
-              <div className="w-20 h-20 rounded-2xl bg-primary border-4 border-white shadow-md flex items-center justify-center text-white font-headline text-2xl font-bold flex-shrink-0">
+              <div className="w-20 h-20 bg-primary border-4 border-white shadow-md flex items-center justify-center text-white font-headline text-2xl font-bold flex-shrink-0">
                 {getInitials(profile.full_name || "U")}
               </div>
               <div className="pb-1">
@@ -341,7 +341,7 @@ export const Profile = () => {
           {/* ── Main form ──────────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal information */}
-            <section className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
+            <section className="bg-white border border-stone-100 shadow-sm p-6">
               <h2 className="font-headline text-lg font-semibold text-stone-900 mb-5 flex items-center gap-2">
                 <User size={18} className="text-primary" /> Personal Information
               </h2>
@@ -480,14 +480,14 @@ export const Profile = () => {
             </section>
 
             {/* Notification preferences */}
-            <section className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
+            <section className="bg-white border border-stone-100 shadow-sm p-6">
               <h2 className="font-headline text-lg font-semibold text-stone-900 mb-5 flex items-center gap-2">
                 <Bell size={18} className="text-primary" /> Notification
                 Preferences
               </h2>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-xl border border-stone-100 bg-stone-50">
+                <div className="flex items-center justify-between p-4 border border-stone-100 bg-stone-50">
                   <div className="flex items-center gap-3">
                     {form.email_notifications_enabled ? (
                       <Bell size={18} className="text-primary" />
@@ -527,7 +527,7 @@ export const Profile = () => {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-xl border border-stone-100 bg-stone-50">
+                <div className="flex items-center justify-between p-4 border border-stone-100 bg-stone-50">
                   <div className="flex items-center gap-3">
                     <Clock size={18} className="text-stone-500" />
                     <div>
@@ -569,7 +569,7 @@ export const Profile = () => {
           {/* ── Right sidebar ──────────────────────────────────────── */}
           <div className="space-y-6">
             {/* Account details */}
-            <section className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
+            <section className="bg-white border border-stone-100 shadow-sm p-6">
               <h2 className="font-headline text-base font-semibold text-stone-900 mb-4 flex items-center gap-2">
                 <CalendarDays size={16} className="text-primary" /> Account
                 Details
@@ -607,14 +607,14 @@ export const Profile = () => {
             </section>
 
             {/* Role & access */}
-            <section className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
+            <section className="bg-white border border-stone-100 shadow-sm p-6">
               <h2 className="font-headline text-base font-semibold text-stone-900 mb-4 flex items-center gap-2">
                 <BookOpen size={16} className="text-primary" /> Roles & Access
               </h2>
 
               <div className="space-y-3">
                 {/* Reviewer */}
-                <div className="rounded-xl border border-stone-100 p-4">
+                <div className="border border-stone-100 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <GraduationCap size={15} className="text-amber-600" />
@@ -649,7 +649,7 @@ export const Profile = () => {
                 </div>
 
                 {/* Editor */}
-                <div className="rounded-xl border border-stone-100 p-4">
+                <div className="border border-stone-100 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Layers size={15} className="text-primary" />
@@ -684,7 +684,7 @@ export const Profile = () => {
                 </div>
                 
                 {/* Admin */}
-                <div className="rounded-xl border border-stone-100 p-4">
+                <div className="border border-stone-100 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <ShieldAlert size={15} className="text-red-600" />
@@ -721,7 +721,7 @@ export const Profile = () => {
 
             {/* ORCID link */}
             {!profile.orcid_id && (
-              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+              <div className="bg-blue-50 border border-blue-100 p-4">
                 <div className="flex items-start gap-3">
                   <BadgeCheck
                     size={18}

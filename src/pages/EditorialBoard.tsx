@@ -124,13 +124,13 @@ const EditorialBoard = () => {
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 -z-10 translate-x-20 -translate-y-20 opacity-40" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/10 -z-10 -translate-x-10 translate-y-10 rounded-full blur-2xl"></div>
             
-            <div className="bg-white border border-border/20 p-10 md:p-20 flex flex-col lg:flex-row gap-16 lg:items-center relative z-10 shadow-2xl overflow-hidden">
+            <div className="bg-white border border-border/20 p-10 md:p-20 flex flex-col lg:flex-row gap-16 lg:items-center relative z-10 shadow-sm overflow-hidden">
                {/* Afrocentric Corner Accent */}
                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 transition-transform group-hover:scale-110" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
                
                <div className="w-full lg:w-[450px] shrink-0 relative order-2 lg:order-1">
                   <div className="absolute inset-0 border-[10px] border-secondary -translate-x-6 translate-y-6 opacity-20 -z-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-1000"></div>
-                  <div className="aspect-[4/5] bg-muted overflow-hidden border border-border/20 shadow-2xl relative">
+                  <div className="aspect-[4/5] bg-muted overflow-hidden border border-border/20 shadow-sm relative">
                     <img src={chief.image} alt={chief.name} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
                     <div className="absolute bottom-0 left-0 right-0 bg-foreground/90 backdrop-blur-md p-6 text-white translate-y-full group-hover:translate-y-0 transition-transform duration-700">
                         <p className="font-headline font-black text-[10px] uppercase tracking-[0.3em] mb-1">Established 2025</p>
@@ -157,7 +157,7 @@ const EditorialBoard = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-border/10">
                     <div className="group/link flex items-center gap-6 p-6 bg-secondary/5 border border-secondary/10 hover:bg-secondary/10 hover:border-secondary/20 transition-all cursor-pointer">
-                      <div className="w-14 h-14 bg-white shadow-xl flex items-center justify-center shrink-0 border border-secondary/5 group-hover/link:rotate-12 transition-transform">
+                      <div className="w-14 h-14 bg-white shadow-none flex items-center justify-center shrink-0 border border-secondary/5 group-hover/link:rotate-12 transition-transform">
                         <Mail className="h-6 w-6 text-secondary" />
                       </div>
                       <div>
@@ -167,7 +167,7 @@ const EditorialBoard = () => {
                     </div>
                     {chief.Website && (
                       <div className="group/link flex items-center gap-6 p-6 bg-primary/5 border border-primary/10 hover:bg-primary/10 hover:border-primary/20 transition-all cursor-pointer">
-                        <div className="w-14 h-14 bg-white shadow-xl flex items-center justify-center shrink-0 border border-primary/5 group-hover/link:-rotate-12 transition-transform">
+                        <div className="w-14 h-14 bg-white shadow-none flex items-center justify-center shrink-0 border border-primary/5 group-hover/link:-rotate-12 transition-transform">
                           <Globe className="h-6 w-6 text-primary" />
                         </div>
                         <div>
@@ -187,7 +187,7 @@ const EditorialBoard = () => {
       <ContentSection dark title="Scholarly Directorate">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {rest.map((member, idx) => (
-            <div key={idx} className="group flex flex-col bg-white border border-border/10 shadow-sm hover:shadow-2xl transition-all duration-700 relative overflow-hidden h-full">
+            <div key={idx} className="group flex flex-col bg-white border border-border/10 shadow-sm hover:shadow-sm transition-all duration-700 relative overflow-hidden h-full">
               {/* Card Geometric Accents */}
               <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 group-hover:scale-150 transition-transform duration-1000" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }}></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" style={{ clipPath: 'circle(50% at 0 100%)' }}></div>

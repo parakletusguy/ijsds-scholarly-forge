@@ -1,28 +1,32 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 export const PlagiarismPolicy = () => {
   return (
-    <div className="min-h-screen bg-[#fcf9f8] font-body">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Plagiarism Policy — IJSDS</title>
-        <meta name="description" content="Our unwavering commitment to ethical publishing and a zero-tolerance approach to plagiarism and academic dishonesty." />
+        <meta name="description" content="Our zero-tolerance approach to plagiarism and academic dishonesty in all submitted manuscripts." />
       </Helmet>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
-        <div className="mb-14 pb-10 border-b border-stone-200">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block mb-4">
-            Journal Policy
-          </span>
-          <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
-            Plagiarism Policy
+      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+            ← Home
+          </Link>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-3">Journal Policy</span>
+          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+            Plagiarism <span className="italic text-primary">Policy</span>
           </h1>
-          <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
-            Our unwavering commitment to ethical publishing and a zero-tolerance approach to plagiarism and academic dishonesty in all submitted manuscripts.
+          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+            A zero-tolerance approach to plagiarism and academic dishonesty. Every manuscript is screened before peer review.
           </p>
         </div>
+      </header>
 
-        <div className="prose prose-stone max-w-none space-y-10 text-stone-700 leading-[1.85] text-[15px]">
+      <main className="max-w-3xl mx-auto px-8 py-16">
+        <div className="space-y-10 text-stone-700 leading-[1.85] text-[15px]">
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
               Zero Tolerance
@@ -89,7 +93,7 @@ export const PlagiarismPolicy = () => {
             </p>
           </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

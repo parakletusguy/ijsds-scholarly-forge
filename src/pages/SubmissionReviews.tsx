@@ -208,7 +208,7 @@ export const SubmissionReviews = () => {
                )}
 
                <div className="mt-12 pt-8 border-t border-border/20 flex justify-end">
-                  <Button onClick={() => navigate('/editorial')} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-12 py-6 h-auto tracking-widest shadow-xl hover:bg-primary transition-all">Synchronize Command Dashboard</Button>
+                  <Button onClick={() => navigate('/editorial')} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-12 py-6 h-auto tracking-widest hover:bg-primary transition-all">Synchronize Command Dashboard</Button>
                </div>
             </div>
           </div>

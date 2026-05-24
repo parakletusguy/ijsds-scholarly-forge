@@ -256,14 +256,14 @@ export const Submit = () => {
       {/* Content Area */}
       <div className="pt-12 pb-24 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto w-full">
         <header className="mb-16">
-          <span className="text-[10px] font-bold text-primary-container tracking-[0.2em] uppercase">
+          <span className="text-[10px] font-bold text-primary/10 tracking-[0.2em] uppercase">
             Submission Form
           </span>
-          <h2 className="font-headline text-5xl font-bold text-on-surface mt-4 mb-2 tracking-tight">
+          <h2 className="font-headline text-5xl font-bold text-stone-900 mt-4 mb-2 tracking-tight">
             Article Submission Portal
           </h2>
           <div className="w-24 h-1 bg-primary mb-8"></div>
-          <p className="text-on-surface-variant max-w-2xl leading-relaxed italic">
+          <p className="text-stone-500 max-w-2xl leading-relaxed italic">
             Submit your manuscript to the International Journal of Social Work
             and Development Studies. Ensure all metadata aligns with our
             editorial standards for advancing social work discourse.
@@ -273,13 +273,13 @@ export const Submit = () => {
             {autoSaving && (
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-[10px] font-label uppercase tracking-widest text-on-surface/40 italic">
+                <span className="text-[10px] font-label uppercase tracking-widest text-stone-900/40 italic">
                   Auto-saving...
                 </span>
               </div>
             )}
             {lastSaved && !autoSaving && (
-              <span className="text-[10px] font-label uppercase tracking-widest text-secondary font-bold">
+              <span className="text-[10px] font-label uppercase tracking-widest text-stone-600 font-bold">
                 Draft Saved: {lastSaved.toLocaleTimeString()}
               </span>
             )}
@@ -290,20 +290,20 @@ export const Submit = () => {
           {/* Section 1: Article Details */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-on-surface">
+              <h3 className="font-headline text-2xl font-bold text-stone-900">
                 Article Details
               </h3>
-              <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
                 Key information for your article metadata and indexing.
               </p>
             </div>
             <div className="md:col-span-8 space-y-8">
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                   Manuscript Title *
                 </label>
                 <input
-                  className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 font-headline text-xl italic placeholder:text-stone-400 transition-all"
+                  className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 font-headline text-xl italic placeholder:text-stone-400 transition-all"
                   placeholder="Enter full scholarly title..."
                   type="text"
                   value={title}
@@ -312,11 +312,11 @@ export const Submit = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                   Abstract *
                 </label>
                 <textarea
-                  className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm leading-relaxed min-h-[200px]"
+                  className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm leading-relaxed min-h-[200px]"
                   placeholder="Maximum 300 words summarizing research goals, methodology, and findings..."
                   rows={6}
                   value={abstract}
@@ -326,11 +326,11 @@ export const Submit = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                     Primary Topic
                   </label>
                   <select
-                    className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                    className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                     value={subjectArea}
                     onChange={(e) => setSubjectArea(e.target.value)}
                   >
@@ -342,12 +342,12 @@ export const Submit = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                     Keywords
                   </label>
                   <div className="flex gap-2">
                     <input
-                      className="flex-1 bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                      className="flex-1 bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                       placeholder="e.g. Urbanism, Social Equity, Policy"
                       type="text"
                       value={keywordInput}
@@ -364,7 +364,7 @@ export const Submit = () => {
                       <Plus size={18} />
                     </Button>
                   </div>
-                  <p className="text-[10px] text-on-surface-variant/60 tracking-wide">
+                  <p className="text-[10px] text-stone-400 tracking-wide">
                     Separate multiple keywords with commas — they will be added at once.
                     {keywordInput.includes(",") && (
                       <span className="ml-2 text-primary font-bold uppercase tracking-widest">
@@ -376,7 +376,7 @@ export const Submit = () => {
                     {keywords.map((kw, i) => (
                       <span
                         key={i}
-                        className="bg-surface-container-highest text-primary font-bold text-[9px] uppercase tracking-widest px-3 py-1 flex items-center gap-2"
+                        className="bg-stone-100est text-primary font-bold text-[9px] uppercase tracking-widest px-3 py-1 flex items-center gap-2"
                       >
                         {kw}
                         <X
@@ -393,12 +393,12 @@ export const Submit = () => {
           </section>
 
           {/* Section 2: Manuscript Files */}
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-12 bg-surface-container-low p-8 md:p-12">
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-12 bg-stone-50 p-8 md:p-12">
             <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-on-surface">
+              <h3 className="font-headline text-2xl font-bold text-stone-900">
                 Manuscript Files
               </h3>
-              <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
                 Upload the primary manuscript and supporting files.
               </p>
             </div>
@@ -439,7 +439,7 @@ export const Submit = () => {
                       setManuscriptFileUrl("");
                       setManuscriptFile(null);
                     }}
-                    className="text-stone-300 hover:text-error transition-colors"
+                    className="text-stone-300 hover:text-red-500 transition-colors"
                   >
                     <X size={18} />
                   </button>
@@ -451,10 +451,10 @@ export const Submit = () => {
           {/* Section 3: Authors */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-on-surface">
+              <h3 className="font-headline text-2xl font-bold text-stone-900">
                 Authors
               </h3>
-              <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
                 Identify all contributors and their affiliations.
               </p>
             </div>
@@ -462,7 +462,7 @@ export const Submit = () => {
               {authors.map((author, index) => (
                 <div
                   key={index}
-                  className="space-y-6 relative border-t border-outline-variant/20 pt-8 first:border-t-0 first:pt-0"
+                  className="space-y-6 relative border-t border-stone-100 pt-8 first:border-t-0 first:pt-0"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-headline text-xl font-bold italic opacity-30">
@@ -472,7 +472,7 @@ export const Submit = () => {
                       <button
                         type="button"
                         onClick={() => removeAuthor(index)}
-                        className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-error transition-colors"
+                        className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-red-500 transition-colors"
                       >
                         Remove Author
                       </button>
@@ -480,11 +480,11 @@ export const Submit = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                         Full Name *
                       </label>
                       <input
-                        className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                         type="text"
                         value={author.name}
                         onChange={(e) =>
@@ -494,11 +494,11 @@ export const Submit = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                         Email Address *
                       </label>
                       <input
-                        className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                         type="email"
                         value={author.email}
                         onChange={(e) =>
@@ -508,11 +508,11 @@ export const Submit = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                         Institutional Affiliation
                       </label>
                       <input
-                        className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                         type="text"
                         value={author.affiliation}
                         onChange={(e) =>
@@ -521,11 +521,11 @@ export const Submit = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                         ORCID Digital iD
                       </label>
                       <input
-                        className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                         placeholder="0000-0000-0000-0000"
                         type="text"
                         value={author.orcid}
@@ -538,7 +538,7 @@ export const Submit = () => {
                 </div>
               ))}
               <button
-                className="w-full py-6 border-2 border-dashed border-outline-variant/30 text-[#af4c2a] font-bold text-xs uppercase tracking-[0.2em] hover:bg-surface-container-low transition-all flex items-center justify-center space-x-2"
+                className="w-full py-6 border-2 border-dashed border-stone-200 text-[#af4c2a] font-bold text-xs uppercase tracking-[0.2em] hover:bg-stone-50 transition-all flex items-center justify-center space-x-2"
                 type="button"
                 onClick={addAuthor}
               >
@@ -551,22 +551,22 @@ export const Submit = () => {
           {/* Section 4: Corresponding Author */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12 border-l-4 border-primary pl-8">
             <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-on-surface">
+              <h3 className="font-headline text-2xl font-bold text-stone-900">
                 Corresponding Author
               </h3>
             </div>
             <div className="md:col-span-8 space-y-4">
               <input
-                className="w-full bg-surface-container-lowest border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-6 font-headline text-xl italic"
+                className="w-full bg-stone-50est border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-6 font-headline text-xl italic"
                 placeholder="Identify the primary contact email..."
                 type="email"
                 value={correspondingAuthorEmail}
                 onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
                 required
               />
-              <div className="flex items-start space-x-3 bg-primary-container/10 p-4">
+              <div className="flex items-start space-x-3 bg-primary/5 p-4">
                 <ShieldCheck className="text-primary mt-1" size={18} />
-                <p className="text-xs italic text-on-surface-variant leading-relaxed">
+                <p className="text-xs italic text-stone-500 leading-relaxed">
                   All official editorial decisions, assessment reports, and
                   production protocols will be routed to this specific digital
                   architecture.
@@ -578,17 +578,17 @@ export const Submit = () => {
           {/* Section 5: Ethics & Disclosure */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-on-surface">
+              <h3 className="font-headline text-2xl font-bold text-stone-900">
                 Ethics & Disclosure
               </h3>
             </div>
             <div className="md:col-span-8 space-y-8">
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                   Funding Information
                 </label>
                 <textarea
-                  className="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
+                  className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
                   placeholder="Specify ethics committee approval or exemption..."
                   rows={3}
                   value={fundingInfo}
@@ -598,23 +598,23 @@ export const Submit = () => {
               <div className="space-y-4 pt-4">
                 <label className="flex items-center space-x-3 cursor-pointer group">
                   <input
-                    className="w-5 h-5 border-2 border-outline text-primary focus:ring-primary-container rounded-none transition-all"
+                    className="w-5 h-5 border-2 border-stone-300 text-primary focus:ring-primary/20 rounded-none transition-all"
                     type="checkbox"
                     checked={ethicsAgree}
                     onChange={(e) => setEthicsAgree(e.target.checked)}
                   />
-                  <span className="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
+                  <span className="text-sm text-stone-500 group-hover:text-stone-900 transition-colors">
                     I confirm no competing financial or personal interests
                   </span>
                 </label>
                 <label className="flex items-center space-x-3 cursor-pointer group">
                   <input
-                    className="w-5 h-5 border-2 border-outline text-primary focus:ring-primary-container rounded-none transition-all"
+                    className="w-5 h-5 border-2 border-stone-300 text-primary focus:ring-primary/20 rounded-none transition-all"
                     type="checkbox"
                     checked={feesAgree}
                     onChange={(e) => setFeesAgree(e.target.checked)}
                   />
-                  <span className="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">
+                  <span className="text-sm text-stone-500 group-hover:text-stone-900 transition-colors">
                     I acknowledge the Open Access processing fees
                   </span>
                 </label>
@@ -626,7 +626,7 @@ export const Submit = () => {
           <section className="pb-12 border-t border-[#ddc0b8]/20 pt-24 text-center">
             <div className="max-w-2xl mx-auto space-y-12">
               <div className="space-y-4">
-                <h3 className="font-headline text-3xl font-bold text-on-surface">
+                <h3 className="font-headline text-3xl font-bold text-stone-900">
                   Cover Letter
                 </h3>
                 <div className="flex justify-center items-center space-x-4 opacity-30">
@@ -642,7 +642,7 @@ export const Submit = () => {
                   <div className="h-[1px] w-1/5 bg-primary"></div>
                   <div className="h-[1px] w-1/5 bg-primary"></div>
                 </div>
-                <blockquote className="font-headline text-xl italic text-on-surface leading-relaxed my-6 px-12">
+                <blockquote className="font-headline text-xl italic text-stone-900 leading-relaxed my-6 px-12">
                   "The scholarly word is the vessel of our collective future;
                   treat its presentation with the reverence it deserves."
                 </blockquote>
@@ -653,11 +653,11 @@ export const Submit = () => {
               </div>
 
               <div className="space-y-2 text-left mt-8">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
                   Letter to the Editor *
                 </label>
                 <textarea
-                  className="w-full bg-surface-container-lowest border border-outline-variant/20 focus:border-primary focus:ring-0 px-6 py-6 text-sm italic leading-relaxed shadow-sm min-h-[250px]"
+                  className="w-full bg-stone-50est border border-stone-100 focus:border-primary focus:ring-0 px-6 py-6 text-sm italic leading-relaxed shadow-sm min-h-[250px]"
                   placeholder="Contextualize your research for the editorial board..."
                   rows={8}
                   value={coverLetter}
@@ -687,7 +687,7 @@ export const Submit = () => {
             type="button"
             onClick={saveDraft}
             disabled={autoSaving}
-            className="text-on-surface/60 font-bold uppercase tracking-wider text-[10px] hover:text-primary transition-colors py-2 px-4"
+            className="text-stone-900/60 font-bold uppercase tracking-wider text-[10px] hover:text-primary transition-colors py-2 px-4"
           >
             Save Draft
           </button>

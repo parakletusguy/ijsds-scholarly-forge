@@ -83,7 +83,7 @@ export default function Archive() {
     return matchesVol || matchesIssue || matchesYear || matchesArticle;
   });
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body">
       <Helmet>
         <title>Archive — IJSDS</title>
         <meta name="description" content="Browse the complete digital archive of IJSDS research articles grouped by Volume and Issue." />
@@ -106,7 +106,7 @@ export default function Archive() {
             <input 
               type="text"
               placeholder="Search volumes, issues, or article titles..."
-              className="w-full bg-white border border-outline-variant/10 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-sm"
+              className="w-full bg-white border border-stone-100 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -130,11 +130,11 @@ export default function Archive() {
                 <AccordionItem 
                   key={`${volumeIssue.volume}-${volumeIssue.issue}`} 
                   value={`${volumeIssue.volume}-${volumeIssue.issue}`}
-                  className="border-none bg-white shadow-sm hover:shadow-2xl transition-all duration-700 group relative overflow-hidden"
+                  className="border-none bg-white shadow-sm hover:shadow-md transition-all duration-700 group relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-full bg-secondary/5 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                  <div className="absolute top-0 right-0 w-32 h-full bg-stone-50 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
                   
-                  <AccordionTrigger className="px-12 py-10 md:py-16 hover:no-underline border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-secondary/5">
+                  <AccordionTrigger className="px-12 py-10 md:py-16 hover:no-underline border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-stone-50">
                     <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-12 text-left relative z-10 font-headline">
                       <div>
                         <div className="flex items-center gap-4 mb-4">
@@ -159,10 +159,10 @@ export default function Archive() {
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-secondary/5">
+                  <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-stone-50">
                     <div className="grid grid-cols-1 gap-16">
                       {volumeIssue.articles.map((article, idx) => (
-                        <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-12 bg-white p-12 shadow-sm border border-border/10 hover:shadow-2xl transition-all duration-700">
+                        <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-12 bg-white p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700">
                           {/* Article Metadata Prefix */}
                           <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 flex items-center justify-center font-headline font-black text-foreground/10 text-xl group-hover/article:bg-primary group-hover/article:text-white transition-all italic">
                              ID-{idx+1}

@@ -42,11 +42,11 @@ export const PageHeader = ({
             <h1 className="font-headline text-4xl md:text-5xl text-stone-900 leading-tight tracking-tight">
               {title}
               {subtitle && (
-                <span className="text-on-surface-variant"> {subtitle}</span>
+                <span className="text-stone-500"> {subtitle}</span>
               )}
             </h1>
             {description && (
-              <p className="mt-3 text-sm md:text-base text-on-surface-variant leading-relaxed max-w-2xl">
+              <p className="mt-3 text-sm md:text-base text-stone-500 leading-relaxed max-w-2xl">
                 {description}
               </p>
             )}
@@ -75,7 +75,7 @@ export const ContentSection = ({
   return (
     <section
       id={id}
-      className={`py-10 md:py-14 px-6 md:px-10 ${dark ? 'bg-surface-container-low' : 'bg-surface'} ${className}`}
+      className={`py-10 md:py-14 px-6 md:px-10 ${dark ? 'bg-stone-50' : 'bg-white'} ${className}`}
     >
       <div className="max-w-7xl mx-auto">
         {title && (

@@ -98,7 +98,7 @@ export const ReviewerDashboard = () => {
   };
 
   if (loading || !isReviewer) return (
-    <div className="min-h-screen flex items-center justify-center bg-surface">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -223,7 +223,7 @@ export const ReviewerDashboard = () => {
   );
 
   return (
-    <div className="pb-24 bg-surface min-h-screen">
+    <div className="pb-24 bg-stone-50 min-h-screen">
       <PageHeader
         title="Evaluator"
         subtitle="Command"

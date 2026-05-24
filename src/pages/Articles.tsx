@@ -85,7 +85,7 @@ export const Articles = () => {
   const hasActiveFilter = searchQuery || activeFilter.type !== "all";
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <LoadingSpinner size="lg" text="Loading archive..." />
     </div>
   );
@@ -127,7 +127,7 @@ export const Articles = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background text-on-background font-body">
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-body">
       <Helmet>
         <title>Article Archive | IJSDS</title>
         <meta name="description" content="Explore peer-reviewed research from the International Journal of Social Work and Development Studies." />

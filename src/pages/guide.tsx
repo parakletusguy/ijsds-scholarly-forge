@@ -35,62 +35,60 @@ export const Guide = () => {
     ]
 
     return (
-        <div className="min-h-screen bg-[#fcf9f8] font-body">
+        <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
             <Helmet>
-                <title>ORCID Integration Guide — IJSDS</title>
-                <meta name="description" content="Official guide for synchronizing IJSDS publications with your ORCID registry." />
+                <title>ORCID Guide — IJSDS</title>
+                <meta name="description" content="How to add your published IJSDS articles to your ORCID profile — a step-by-step guide." />
             </Helmet>
 
-            <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
-                <div className="mb-14 pb-10 border-b border-stone-200">
-                    <div className="flex justify-between items-start mb-4">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block">
-                            Integration Guide
-                        </span>
-                        <Link to="/" className="text-sm text-stone-500 hover:text-primary transition-colors underline underline-offset-4">
-                            Back to Home
-                        </Link>
-                    </div>
-                    <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
-                        ORCID Registry Sync
+            <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+                <div className="max-w-3xl mx-auto">
+                    <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+                        ← Home
+                    </Link>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-3">Author Resources</span>
+                    <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+                        Adding your article to <span className="italic text-primary">ORCID</span>
                     </h1>
-                    <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
-                        Follow these simple steps to manually add your published IJSDS articles to your global ORCID investigator profile.
+                    <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+                        Follow these steps to manually add your published IJSDS article to your ORCID profile.
                     </p>
                 </div>
+            </header>
 
+            <main className="max-w-3xl mx-auto px-8 py-16">
                 <div className="space-y-16">
                     {guideObject.map((guide, index) => (
                         <div key={index} className="flex flex-col gap-4">
                             <div className="flex items-center gap-4">
-                                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                <div className="w-8 h-8 bg-stone-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
                                     {index + 1}
                                 </div>
-                                <h3 className="text-lg font-semibold text-stone-900 leading-tight">
+                                <h3 className="text-sm font-bold text-stone-900 leading-tight">
                                     {guide.instruction}
                                 </h3>
                             </div>
                             <div className="pl-12">
-                                <img 
-                                    src={guide.image} 
-                                    alt={`Step ${index + 1}`} 
-                                    className="w-full h-auto border border-stone-200 rounded-sm shadow-sm"
+                                <img
+                                    src={guide.image}
+                                    alt={`Step ${index + 1}`}
+                                    className="w-full h-auto border border-stone-100"
                                 />
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-16 pt-10 border-t border-stone-200">
-                    <div className="bg-white p-8 border border-stone-200 rounded-sm text-center">
-                        <h3 className="font-bold text-stone-900 mb-2">Sync Complete!</h3>
-                        <p className="text-stone-600 text-sm mb-6">By integrating with ORCID, your intellectual contributions are accurately attributed and globally discoverable.</p>
-                        <Link to="/" className="inline-block bg-primary text-white px-6 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
-                            Return to Home
+                <div className="mt-16 pt-10 border-t border-stone-100">
+                    <div className="bg-white p-8 border border-stone-100 text-center">
+                        <h3 className="font-bold text-stone-900 mb-2">All done</h3>
+                        <p className="text-stone-500 text-sm mb-6">Your article is now linked on your ORCID profile and will appear in your publication list.</p>
+                        <Link to="/" className="inline-block bg-stone-900 text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors active:scale-[0.98]">
+                            Back to Home
                         </Link>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 };

@@ -93,14 +93,14 @@ export const Dashboard = () => {
       {/* Welcome Header */}
       <header className="mb-16">
         <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Account Dashboard</p>
-        <h3 className="text-4xl md:text-5xl font-headline text-on-surface max-w-2xl leading-tight">
+        <h3 className="text-4xl md:text-5xl font-headline text-stone-900 max-w-2xl leading-tight">
           Manage your research and submissions.
         </h3>
       </header>
 
       {/* Metrics Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16">
-        <div className="md:col-span-8 bg-surface-container-low p-10 flex flex-col justify-between group hover:bg-surface-container transition-colors duration-500">
+        <div className="md:col-span-8 bg-stone-50 p-10 flex flex-col justify-between group hover:bg-stone-100 transition-colors duration-500">
           <div>
             <div className="flex justify-between items-start mb-12">
               <h4 className="font-headline font-black text-xs uppercase tracking-widest text-primary mb-4">Submission Status</h4>
@@ -110,15 +110,15 @@ export const Dashboard = () => {
               <span className="text-7xl md:text-8xl font-headline leading-none tabular-nums">
                 {activeSubmissions.toString().padStart(2, '0')}
               </span>
-              <span className="text-xs font-label text-on-surface/40 mb-3 uppercase tracking-[0.2em]">Total Submissions</span>
+              <span className="text-xs font-label text-stone-400 mb-3 uppercase tracking-[0.2em]">Total Submissions</span>
             </div>
           </div>
-          <div className="mt-12 h-[1px] bg-outline-variant/20 relative overflow-hidden">
+          <div className="mt-12 h-[1px] bg-stone-100 relative overflow-hidden">
             <div className="absolute left-0 top-0 h-full bg-primary transition-all duration-1000 ease-out" style={{ width: `${(inReviewSubmissions / (activeSubmissions || 1)) * 100}%` }}></div>
           </div>
         </div>
         
-        <div className="md:col-span-4 bg-primary p-10 flex flex-col justify-between text-on-primary group hover:bg-primary-container transition-colors duration-500">
+        <div className="md:col-span-4 bg-primary p-10 flex flex-col justify-between text-white group hover:bg-primary/10 transition-colors duration-500">
           <div className="flex justify-between items-start">
             <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Accepted Articles</h4>
             <span className="material-symbols-outlined opacity-50">verified</span>
@@ -139,14 +139,14 @@ export const Dashboard = () => {
       <div className="asymmetric-grid">
         {/* Manuscript Management List */}
         <section>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-outline-variant/10 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-stone-100 gap-4">
             <h4 className="font-headline text-xl italic">Recent Manuscripts</h4>
             <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
                {['all', 'submitted', 'under_review', 'accepted', 'rejected'].map(stat => (
                  <button 
                    key={stat}
                    onClick={() => setStatusFilter(stat)}
-                   className={`text-[10px] uppercase tracking-widest px-3 py-1.5 transition-all whitespace-nowrap ${statusFilter === stat ? 'bg-primary text-white font-bold' : 'text-on-surface/40 hover:text-primary'}`}
+                   className={`text-[10px] uppercase tracking-widest px-3 py-1.5 transition-all whitespace-nowrap ${statusFilter === stat ? 'bg-primary text-white font-bold' : 'text-stone-400 hover:text-primary'}`}
                  >
                    {stat === 'all' ? 'All' : formatStatus(stat)}
                  </button>
@@ -156,8 +156,8 @@ export const Dashboard = () => {
           
           <div className="space-y-6">
             {submissions.filter(s => statusFilter === 'all' || s.status === statusFilter).length === 0 ? (
-              <div className="bg-surface-container-lowest p-12 text-center border border-dashed border-outline-variant/30">
-                <p className="text-sm text-on-surface/40 uppercase tracking-widest mb-6">No {statusFilter !== 'all' ? formatStatus(statusFilter).toLowerCase() : ''} submissions found</p>
+              <div className="bg-white p-12 text-center border border-dashed border-stone-200">
+                <p className="text-sm text-stone-400 uppercase tracking-widest mb-6">No {statusFilter !== 'all' ? formatStatus(statusFilter).toLowerCase() : ''} submissions found</p>
                 <button 
                   onClick={() => navigate('/submit')}
                   className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
@@ -177,7 +177,7 @@ export const Dashboard = () => {
                 return (
                   <div
                     key={submission.id}
-                    className={`bg-surface-container-lowest p-8 group hover:bg-surface-container transition-all duration-300 border border-outline-variant/10 border-l-4 ${borderColor} cursor-pointer`}
+                    className={`bg-white p-8 group hover:bg-stone-100 transition-all duration-300 border border-stone-100 border-l-4 ${borderColor} cursor-pointer`}
                     onClick={() => navigate(`/submission/${submission.id}/details`)}
                   >
                     <div className="flex justify-between items-start mb-4">
@@ -186,18 +186,18 @@ export const Dashboard = () => {
                         submission.status === 'rejected' ? 'bg-red-100/50 text-red-800' :
                         submission.status === 'under_review' ? 'bg-blue-100/50 text-blue-800' :
                         submission.status === 'revision_requested' ? 'bg-orange-100/50 text-orange-800' :
-                        'bg-secondary-container/20 text-secondary'
+                        'bg-stone-100/20 text-secondary'
                       }`}>
                         {formatStatus(submission.status)}
                       </span>
-                      <span className="text-[10px] font-label text-on-surface/30 uppercase tracking-widest">SDS-{submission.id.slice(0, 8).toUpperCase()}</span>
+                      <span className="text-[10px] font-label text-stone-300 uppercase tracking-widest">SDS-{submission.id.slice(0, 8).toUpperCase()}</span>
                     </div>
-                    <p className="font-headline text-xl font-semibold text-on-surface leading-snug mb-4 line-clamp-2">
+                    <p className="font-headline text-xl font-semibold text-stone-900 leading-snug mb-4 line-clamp-2">
                       {art.title || 'Untitled Manuscript'}
                     </p>
-                    <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-on-surface/50">
+                    <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-stone-400">
                       <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Scholar'}</span>
-                      <span className="w-1 h-1 bg-outline-variant/30 rounded-full"></span>
+                      <span className="w-1 h-1 bg-stone-200 rounded-full"></span>
                       <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -209,33 +209,33 @@ export const Dashboard = () => {
 
         {/* Registry Continuity & Efficiency */}
         <section className="hidden md:block">
-          <div className="bg-surface-container-high p-10 h-full border-t border-primary/10">
+          <div className="bg-stone-100 p-10 h-full border-t border-primary/10">
             <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Submission Status</h4>
-            <p className="text-on-surface-variant max-w-md mx-auto italic font-body text-lg">
+            <p className="text-stone-500 max-w-md mx-auto italic font-body text-lg">
               Submissions follow the highest editorial standards for multidisciplinary research and development.
             </p>
             
             <div className="space-y-12 relative">
-              <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-outline-variant/30"></div>
+              <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-stone-200"></div>
               
               <div className="relative pl-8">
-                <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-surface-container-high"></div>
+                <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-stone-100"></div>
                 <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Submission</h6>
-                <p className="text-xl text-surface-container-highest opacity-90 leading-relaxed mb-12">
+                <p className="text-xl text-stone-200 opacity-90 leading-relaxed mb-12">
                   Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
                 </p>
               </div>
               
               <div className="relative pl-8">
-                <div className="absolute left-0 top-1 w-4 h-4 bg-outline-variant border-4 border-surface-container-high"></div>
+                <div className="absolute left-0 top-1 w-4 h-4 bg-stone-300 border-4 border-stone-100"></div>
                 <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 02: Peer Evaluation</h6>
-                <p className="text-[10px] text-on-surface/50 leading-relaxed">Double-blind review by the expert Scholarly Committee.</p>
+                <p className="text-[10px] text-stone-400 leading-relaxed">Double-blind review by the expert Scholarly Committee.</p>
               </div>
               
               <div className="relative pl-8">
-                <div className="absolute left-0 top-1 w-4 h-4 bg-outline-variant border-4 border-surface-container-high"></div>
+                <div className="absolute left-0 top-1 w-4 h-4 bg-stone-300 border-4 border-stone-100"></div>
                 <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 03: Publication</h6>
-                <p className="text-[10px] text-on-surface/50 leading-relaxed">Archival timestamping and institutional registry entry.</p>
+                <p className="text-[10px] text-stone-400 leading-relaxed">Archival timestamping and institutional registry entry.</p>
               </div>
             </div>
 
@@ -253,14 +253,14 @@ export const Dashboard = () => {
       {/* Pull Quote Section */}
       <section className="mt-32 mb-16 text-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
         <div className="w-12 h-[1px] bg-primary mx-auto mb-10 opacity-30"></div>
-        <blockquote className="text-2xl md:text-3xl font-headline italic text-on-surface/80 max-w-3xl mx-auto leading-snug">
+        <blockquote className="text-2xl md:text-3xl font-headline italic text-stone-600 max-w-3xl mx-auto leading-snug">
           "Design is not merely utility; it is the physical manifestation of institutional memory and scholarly dignity."
         </blockquote>
         <div className="w-12 h-[1px] bg-primary mx-auto mt-10 opacity-30"></div>
       </section>
 
       {/* Bottom Institutional Credits */}
-      <footer className="mt-32 pt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-label uppercase tracking-[0.3em] text-on-surface/30">
+      <footer className="mt-32 pt-12 border-t border-stone-100 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-label uppercase tracking-[0.3em] text-stone-300">
         <span>© 2024 International Journal of Social Work and Development Studies</span>
         <div className="flex gap-10">
           <Link to="/about" className="hover:text-primary transition-colors">Ethics</Link>

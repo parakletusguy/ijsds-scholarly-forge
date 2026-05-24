@@ -109,7 +109,7 @@ export const ArticleInfo = () => {
   ].filter(Boolean).join(' • ');
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-body selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>{article.title} | IJSDS</title>
         <meta name="citation_title" content={article.title} />
@@ -151,12 +151,12 @@ export const ArticleInfo = () => {
                 {article.subject_area || "Original Research"}
               </span>
               {volIssue && (
-                <span className="text-xs text-on-surface-variant font-medium">{volIssue}</span>
+                <span className="text-xs text-stone-500 font-medium">{volIssue}</span>
               )}
             </div>
 
             {/* Title */}
-            <h1 className="font-headline text-5xl md:text-6xl leading-[1.1] text-on-surface mb-10 tracking-tight">
+            <h1 className="font-headline text-5xl md:text-6xl leading-[1.1] text-stone-900 mb-10 tracking-tight">
               {article.title}
             </h1>
 
@@ -172,7 +172,7 @@ export const ArticleInfo = () => {
                   </div>
                 ))}
               </div>
-              <div className="space-y-2 text-sm text-on-surface-variant font-medium leading-relaxed max-w-2xl">
+              <div className="space-y-2 text-sm text-stone-500 font-medium leading-relaxed max-w-2xl">
                 {authors.map((author: any, idx: number) => (
                   <p key={idx}>{idx + 1}. {author.affiliation || "Faculty of Social Sciences"}</p>
                 ))}
@@ -189,7 +189,7 @@ export const ArticleInfo = () => {
               <div className="mb-12">
                 <button
                   onClick={() => handleFileDownload(article.manuscript_file_url!, article.title, article.id)}
-                  className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all shadow-xl shadow-primary/10"
+                  className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all"
                 >
                   <BookOpen className="w-5 h-5" />
                   Download Full PDF
@@ -198,19 +198,19 @@ export const ArticleInfo = () => {
             )}
 
             {/* Abstract Container */}
-            <div className="bg-surface-container-low p-10 lg:p-14 rounded-2xl mb-16 relative overflow-hidden">
+            <div className="bg-stone-100 p-10 lg:p-14 mb-16 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5">
                 <BookOpen className="w-32 h-32" />
               </div>
               <h2 className="font-headline text-2xl mb-6 text-primary italic">Abstract</h2>
-              <p className="font-body text-lg leading-relaxed text-on-surface-variant font-light">
+              <p className="font-body text-lg leading-relaxed text-stone-500 font-light">
                 {article.abstract}
               </p>
               {article.keywords && article.keywords.length > 0 && (
-                <div className="mt-8 pt-8 border-t border-outline-variant/20 flex flex-wrap gap-3 items-center">
-                  <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mr-2">Keywords:</span>
+                <div className="mt-8 pt-8 border-t border-stone-200 flex flex-wrap gap-3 items-center">
+                  <span className="text-xs font-bold text-stone-500 uppercase tracking-widest mr-2">Keywords:</span>
                   {article.keywords.map(kw => (
-                    <span key={kw} className="px-3 py-1 bg-surface-container-highest rounded-full text-xs text-on-surface-variant">
+                    <span key={kw} className="px-3 py-1 bg-stone-100 text-xs text-stone-500">
                       {kw}
                     </span>
                   ))}
@@ -219,19 +219,19 @@ export const ArticleInfo = () => {
             </div>
 
             {/* Article Footer */}
-            <div className="mt-20 pt-10 border-t border-outline-variant/30 flex justify-between items-center">
+            <div className="mt-20 pt-10 border-t border-stone-100 flex justify-between items-center">
               <div className="flex gap-4">
-                <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+                <button className="flex items-center gap-2 text-stone-500 hover:text-primary transition-colors">
                   <Bookmark className="w-5 h-5" />
                   <span className="text-xs font-bold uppercase tracking-wider">Save</span>
                 </button>
-                <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+                <button className="flex items-center gap-2 text-stone-500 hover:text-primary transition-colors">
                   <Share2 className="w-5 h-5" />
                   <span className="text-xs font-bold uppercase tracking-wider">Share</span>
                 </button>
               </div>
               {article.doi && (
-                <div className="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+                <div className="flex items-center gap-2 text-xs text-stone-500 font-medium">
                   <span className="font-bold uppercase tracking-widest text-[10px] opacity-40">DOI</span>
                   <a
                     href={`https://doi.org/${article.doi}`}
@@ -252,17 +252,17 @@ export const ArticleInfo = () => {
             <div className="sticky top-32 space-y-12">
 
               {/* Actions Card */}
-              <div className="bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_rgba(143,53,20,0.05)] p-8">
+              <div className="bg-white border border-stone-100 p-8">
                 <div className="flex flex-col gap-4">
                   <PaperDownload
                     articleId={article.id}
                     manuscriptFileUrl={article.manuscript_file_url}
                     title={article.title}
-                    className="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg font-bold flex items-center justify-center gap-3 hover:shadow-lg transition-all"
+                    className="w-full py-4 bg-primary text-white font-bold flex items-center justify-center gap-3 transition-all"
                   />
                   <button
                     onClick={handleBibTeXDownload}
-                    className="w-full py-4 border border-outline-variant/40 text-primary rounded-lg font-bold flex items-center justify-center gap-3 hover:bg-primary/5 transition-all text-sm"
+                    className="w-full py-4 border border-stone-200 text-primary font-bold flex items-center justify-center gap-3 hover:bg-primary/5 transition-all text-sm"
                   >
                     <Quote className="w-4 h-4" />
                     Cite This Article
@@ -272,19 +272,19 @@ export const ArticleInfo = () => {
                 <div className="mt-8 space-y-4 border-t border-stone-100 pt-8">
                   {pubDate && (
                     <div className="flex justify-between text-sm items-center">
-                      <span className="text-on-surface-variant">Published</span>
+                      <span className="text-stone-500">Published</span>
                       <span className="font-bold">{pubDate}</span>
                     </div>
                   )}
                   {article.subject_area && (
                     <div className="flex justify-between text-sm items-center">
-                      <span className="text-on-surface-variant">Section</span>
+                      <span className="text-stone-500">Section</span>
                       <span className="font-bold">{article.subject_area}</span>
                     </div>
                   )}
                   {(article.volume || article.issue) && (
                     <div className="flex justify-between text-sm items-center">
-                      <span className="text-on-surface-variant">Issue</span>
+                      <span className="text-stone-500">Issue</span>
                       <span className="font-bold">Vol {article.volume || '—'}, Iss {article.issue || '—'}</span>
                     </div>
                   )}
@@ -295,7 +295,7 @@ export const ArticleInfo = () => {
 
               {/* Related Research */}
               <div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-8 pb-2 border-b border-outline-variant/20">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-stone-500 mb-8 pb-2 border-b border-stone-200">
                   Related Research
                 </h3>
                 <div className="space-y-10">
@@ -312,7 +312,7 @@ export const ArticleInfo = () => {
                         {ra.title}
                       </h4>
                       <div className="flex items-center justify-between mt-2">
-                        <p className="text-xs text-on-surface-variant">
+                        <p className="text-xs text-stone-500">
                           By {ra.authors?.[0]?.name || "IJSDS Editorial"}{ra.authors && ra.authors.length > 1 ? ' et al.' : ''}{ra.publication_date ? ` (${new Date(ra.publication_date).getFullYear()})` : ''}
                         </p>
                         {ra.doi && (
@@ -327,7 +327,7 @@ export const ArticleInfo = () => {
                       </div>
                     </button>
                   )) : (
-                    <p className="text-xs text-on-surface-variant italic">No related articles found.</p>
+                    <p className="text-xs text-stone-500 italic">No related articles found.</p>
                   )}
                 </div>
               </div>
@@ -338,29 +338,29 @@ export const ArticleInfo = () => {
       </main>
 
       {/* Floating Reading Mode Bar */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 bg-surface/80 backdrop-blur-xl border border-outline-variant/20 rounded-full px-6 py-3 shadow-xl hidden md:flex items-center gap-6">
-        <div className="flex items-center gap-3 pr-6 border-r border-outline-variant/20">
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 bg-white/90 backdrop-blur-sm border border-stone-200 px-6 py-3 shadow-xl hidden md:flex items-center gap-6">
+        <div className="flex items-center gap-3 pr-6 border-r border-stone-200">
           <BookOpen className="w-4 h-4 text-primary" />
-          <span className="text-xs font-bold text-on-surface whitespace-nowrap">Reading Mode</span>
+          <span className="text-xs font-bold text-stone-900 whitespace-nowrap">Reading Mode</span>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setFontSize(p => Math.max(0.9, p - 0.1))}
-            className="p-2 hover:bg-primary/5 rounded-full text-on-surface-variant transition-all"
+            className="p-2 hover:bg-stone-100 text-stone-500 transition-all"
             title="Decrease Font Size"
           >
             <Minus className="w-4 h-4" />
           </button>
           <button
             onClick={() => setFontSize(p => Math.min(1.5, p + 0.1))}
-            className="p-2 hover:bg-primary/5 rounded-full text-on-surface-variant transition-all"
+            className="p-2 hover:bg-stone-100 text-stone-500 transition-all"
             title="Increase Font Size"
           >
             <Plus className="w-4 h-4" />
           </button>
           <button
             onClick={handleBibTeXDownload}
-            className="bg-primary/10 text-primary text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-full hover:bg-primary hover:text-white transition-all"
+            className="bg-primary/10 text-primary text-[10px] font-extrabold uppercase px-4 py-1.5 hover:bg-primary hover:text-white transition-all"
           >
             Quick Cite
           </button>

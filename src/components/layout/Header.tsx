@@ -136,7 +136,7 @@ export const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-64 p-3 bg-white border border-stone-200 shadow-2xl rounded-none"
+                  className="w-64 p-3 bg-white border border-stone-200 shadow-sm rounded-none"
                 >
                   <div className="mb-3 px-1">
                     <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">

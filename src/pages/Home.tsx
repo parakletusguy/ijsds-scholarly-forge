@@ -58,10 +58,10 @@ export const Home = () => {
   const [featured, ...rest] = recentArticles;
 
   return (
-    <div className="min-h-screen bg-surface selection:bg-orange-100 selection:text-primary">
+    <div className="min-h-screen bg-stone-50 selection:bg-orange-100 selection:text-primary">
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <header className="relative flex items-center overflow-hidden bg-surface pt-12 pb-16 md:pt-16 md:pb-20">
+      <header className="relative flex items-center overflow-hidden bg-stone-50 pt-12 pb-16 md:pt-16 md:pb-20">
         <div className="absolute inset-0 pointer-events-none"
           style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '32px 32px', opacity: 0.08 }}
         />
@@ -69,11 +69,11 @@ export const Home = () => {
           <span className="text-primary tracking-[0.4em] font-bold text-[10px] mb-8 inline-block uppercase">
             Established 2025 · Open Access · Peer Reviewed
           </span>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-light leading-[1.1] tracking-tight text-on-surface mb-6 md:mb-10">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-light leading-[1.1] tracking-tight text-stone-900 mb-6 md:mb-10">
             Amplifying African Voices through{' '}
             <span className="italic text-primary">Rigorous Research.</span>
           </h1>
-          <p className="text-base sm:text-lg md:text-2xl text-on-surface-variant mb-10 leading-relaxed max-w-3xl mx-auto italic">
+          <p className="text-base sm:text-lg md:text-2xl text-stone-500 mb-10 leading-relaxed max-w-3xl mx-auto italic">
             Published quarterly, IJSDS provides a global platform for original social work and development research.
           </p>
           
@@ -85,7 +85,7 @@ export const Home = () => {
               <input 
                 type="text"
                 placeholder="Search the archive..."
-                className="w-full bg-white border border-on-surface/10 py-5 pl-14 pr-8 text-base md:text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-xl hover:shadow-2xl"
+                className="w-full bg-white border border-stone-200 py-5 pl-14 pr-8 text-base md:text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all"
                 onKeyPress={(e) => e.key === 'Enter' && navigate(`/articles?q=${(e.target as HTMLInputElement).value}`)}
               />
             </div>
@@ -93,13 +93,13 @@ export const Home = () => {
             <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto">
               <button
                 onClick={() => navigate('/articles')}
-                className="bg-primary text-white px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 w-full sm:w-auto"
+                className="bg-primary text-white px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-none w-full sm:w-auto"
               >
                 Browse All Research
               </button>
               <button
                 onClick={() => navigate(user ? '/submit' : '/auth')}
-                className="border-2 border-on-surface/20 text-on-surface px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
+                className="border-2 border-stone-300 text-stone-900 px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
               >
                 Submit Manuscript
               </button>
@@ -110,14 +110,14 @@ export const Home = () => {
 
 
       {/* ── Current Issues — Editorial Grid ──────────────────────────────── */}
-      <section className="py-32 bg-surface">
+      <section className="py-32 bg-stone-50">
         <div className="container mx-auto px-4 sm:px-8">
           <div className="flex justify-between items-end mb-16">
             <div>
               <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
                 Recent Publications
               </span>
-              <h2 className="font-headline text-3xl md:text-5xl text-on-surface">Latest Issues</h2>
+              <h2 className="font-headline text-3xl md:text-5xl text-stone-900">Latest Issues</h2>
             </div>
             <button
               onClick={() => navigate('/articles')}
@@ -130,15 +130,15 @@ export const Home = () => {
 
           {loading ? (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-              <div className="lg:col-span-8 aspect-video bg-surface-container animate-pulse" />
+              <div className="lg:col-span-8 aspect-video bg-stone-100 animate-pulse" />
               <div className="lg:col-span-4 space-y-4">
-                <div className="h-6 bg-surface-container animate-pulse w-2/3" />
-                <div className="h-32 bg-surface-container animate-pulse" />
+                <div className="h-6 bg-stone-100 animate-pulse w-2/3" />
+                <div className="h-32 bg-stone-100 animate-pulse" />
               </div>
             </div>
           ) : recentArticles.length === 0 ? (
             <div className="py-20 text-center border-2 border-dashed border-primary/10">
-              <p className="text-on-surface/30 font-headline text-3xl italic">
+              <p className="text-stone-300 font-headline text-3xl italic">
                 "No articles published yet. Be the first to contribute."
               </p>
               <button
@@ -155,27 +155,27 @@ export const Home = () => {
                 {/* Large featured article */}
                 {featured && (
                   <div
-                    className="lg:col-span-8 group cursor-pointer border-l-4 sm:border-l-8 border-primary pl-4 sm:pl-8 py-4 bg-primary/5 hover:bg-primary/10 hover:border-primary-container transition-all"
+                    className="lg:col-span-8 group cursor-pointer border-l-4 sm:border-l-8 border-primary pl-4 sm:pl-8 py-4 bg-primary/5 hover:bg-primary/80 transition-all"
                     onClick={() => navigate(`/article/${buildArticleSlug(featured)}`)}
                   >
                     <div className="flex gap-4 mb-4">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
                         {featured.subject_area || 'Research Article'}
                       </span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface/40">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
                         {estimateReadTime(featured.abstract || '')}
                       </span>
                     </div>
                     <h3 className="font-headline text-2xl sm:text-4xl mb-4 leading-tight group-hover:text-primary transition-colors">
                       {featured.title}
                     </h3>
-                    <p className="text-on-surface-variant mb-6 line-clamp-3 leading-relaxed">
+                    <p className="text-stone-500 mb-6 line-clamp-3 leading-relaxed">
                       {featured.abstract}
                     </p>
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                        <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
-                          <User size={14} className="text-on-surface/40" />
+                        <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center">
+                          <User size={14} className="text-stone-400" />
                         </div>
                         <span className="text-sm font-medium">{formatAuthors(featured.authors)}</span>
                         {(featured.volume || featured.issue) && (
@@ -184,7 +184,7 @@ export const Home = () => {
                           </span>
                         )}
                         {featured.publication_date && (
-                          <span className="text-sm text-on-surface/40 whitespace-nowrap">
+                          <span className="text-sm text-stone-400 whitespace-nowrap">
                             · {new Date(featured.publication_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
                           </span>
                         )}
@@ -211,14 +211,14 @@ export const Home = () => {
                     className="lg:col-span-4 flex flex-col justify-end cursor-pointer group h-full"
                     onClick={() => navigate(`/article/${buildArticleSlug(rest[0])}`)}
                   >
-                    <div className="p-6 md:p-8 border-l-2 border-primary/20 bg-surface-container-lowest hover:border-primary transition-colors h-full flex flex-col justify-center">
+                    <div className="p-6 md:p-8 border-l-2 border-primary/20 bg-white hover:border-primary transition-colors h-full flex flex-col justify-center">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 block">
                         {rest[0].subject_area || 'Field Report'}
                       </span>
                       <h3 className="font-headline text-xl md:text-2xl leading-snug mb-4 md:mb-6 group-hover:text-primary transition-colors">
                         {rest[0].title}
                       </h3>
-                      <p className="text-sm text-on-surface-variant mb-6 line-clamp-4 leading-relaxed">
+                      <p className="text-sm text-stone-500 mb-6 line-clamp-4 leading-relaxed">
                         {rest[0].abstract}
                       </p>
                       <div className="flex items-center justify-between mt-auto">
@@ -231,7 +231,7 @@ export const Home = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 text-[9px] font-bold text-on-surface/40 hover:text-primary transition-colors uppercase tracking-widest"
+                            className="flex items-center gap-1.5 text-[9px] font-bold text-stone-400 hover:text-primary transition-colors uppercase tracking-widest"
                           >
                             <ExternalLink size={10} />
                             DOI
@@ -245,7 +245,7 @@ export const Home = () => {
 
               {/* Bottom grid (Responsive: 1 col on mobile/XS, 2 on SM/MD, 3 on LG) */}
               {rest.length > 1 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-12 gap-y-12 md:gap-y-16 border-t border-outline-variant/20 pt-16">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-12 gap-y-12 md:gap-y-16 border-t border-stone-100 pt-16">
                   {rest.slice(1, 4).map((article) => (
                     <div
                       key={article.id}
@@ -258,11 +258,11 @@ export const Home = () => {
                       <h3 className="font-headline text-lg md:text-xl lg:text-2xl leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2">
                         {article.title}
                       </h3>
-                      <p className="text-sm text-on-surface-variant line-clamp-2 leading-relaxed mb-4">
+                      <p className="text-sm text-stone-500 line-clamp-2 leading-relaxed mb-4">
                         {article.abstract}
                       </p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs text-on-surface/50">
+                        <div className="flex items-center gap-2 text-xs text-stone-400">
                           <User size={12} />
                           <span className="truncate">{formatAuthors(article.authors)}</span>
                           {(article.volume || article.issue) && (
@@ -302,7 +302,7 @@ export const Home = () => {
                 <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-3 block">
                   From the Blog
                 </span>
-                <h2 className="font-headline text-3xl md:text-4xl text-on-surface">Latest News &amp; Updates</h2>
+                <h2 className="font-headline text-3xl md:text-4xl text-stone-900">Latest News &amp; Updates</h2>
               </div>
               <button
                 onClick={() => navigate('/blog')}
@@ -341,7 +341,7 @@ export const Home = () => {
                       {post.title}
                     </h3>
                     {post.excerpt && (
-                      <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">{post.excerpt}</p>
+                      <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">{post.excerpt}</p>
                     )}
                     <p className="text-[10px] text-stone-400 pt-1">{formatDate(post.published_at, 'short')}</p>
                   </div>
@@ -353,14 +353,14 @@ export const Home = () => {
       )}
 
       {/* ── Editorial Spotlight ──────────────────────────────────────────── */}
-      <section className="py-32 bg-surface-container-highest relative overflow-hidden">
+      <section className="py-32 bg-stone-200 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none"
           style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '24px 24px', opacity: 0.05 }}
         />
         <div className="container mx-auto px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-10 items-center gap-20">
             <div className="lg:col-span-4 order-2 lg:order-1">
-              <div className="aspect-[3/4] bg-surface-container overflow-hidden shadow-2xl relative group">
+              <div className="aspect-[3/4] bg-stone-100 overflow-hidden relative group">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                   alt="Editor in Chief"
@@ -369,20 +369,20 @@ export const Home = () => {
               </div>
             </div>
             <div className="lg:col-span-6 order-1 lg:order-2">
-              <div className="bg-surface p-12 shadow-xl relative overflow-hidden group/card">
+              <div className="bg-stone-50 p-12 relative overflow-hidden group/card">
                 <img 
                   src={logo} 
                   alt="IJSDS Logo" 
                   className="absolute -top-4 -right-4 w-32 opacity-[0.03] group-hover/card:opacity-[0.07] transition-opacity duration-1000 -rotate-12 pointer-events-none" 
                 />
                 <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">"</span>
-                <blockquote className="font-headline text-2xl md:text-3xl lg:text-4xl leading-snug text-on-surface mb-8 md:mb-10 font-light">
+                <blockquote className="font-headline text-2xl md:text-3xl lg:text-4xl leading-snug text-stone-900 mb-8 md:mb-10 font-light">
                   Research is not just an academic exercise — it is how we shape the future. Through our journal, we give African scholars the platform they deserve to lead global conversations.
                 </blockquote>
                 <div className="flex items-center justify-between border-l-4 border-primary pl-6">
                   <div>
                     <p className="text-lg font-bold font-headline">Prof. Mina Magaret Ogbanga</p>
-                    <p className="text-on-surface/40 uppercase tracking-[0.3em] text-[9px] font-bold mt-1">
+                    <p className="text-stone-400 uppercase tracking-[0.3em] text-[9px] font-bold mt-1">
                       Editor-in-Chief, IJSDS
                     </p>
                   </div>
@@ -444,7 +444,7 @@ export const Home = () => {
                   <Icon size={28} className="opacity-20 group-hover:opacity-60 transition-opacity" />
                   {value}
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface/40">{label}</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{label}</div>
               </div>
             ))}
           </div>
@@ -452,14 +452,14 @@ export const Home = () => {
       </section>
 
       {/* ── Why Choose IJSDS ─────────────────────────────────────────────── */}
-      <section className="py-32 bg-surface-container-low">
+      <section className="py-32 bg-stone-50">
         <div className="container mx-auto px-4 sm:px-8">
           <div className="mb-20 max-w-2xl">
             <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
               Why Publish With Us
             </span>
-            <h2 className="font-headline text-4xl md:text-5xl text-on-surface mb-6">Why Choose IJSDS?</h2>
-            <p className="text-on-surface-variant leading-relaxed">
+            <h2 className="font-headline text-4xl md:text-5xl text-stone-900 mb-6">Why Choose IJSDS?</h2>
+            <p className="text-stone-500 leading-relaxed">
               We are committed to supporting researchers in publishing impactful, high-quality work that makes a difference in social work and development.
             </p>
           </div>
@@ -490,7 +490,7 @@ export const Home = () => {
                 </div>
                 <div className="text-5xl font-headline text-primary">{stat}</div>
                 <h3 className="font-bold text-lg tracking-tight">{title}</h3>
-                <p className="text-on-surface-variant text-sm leading-relaxed">{body}</p>
+                <p className="text-stone-500 text-sm leading-relaxed">{body}</p>
               </div>
             ))}
           </div>

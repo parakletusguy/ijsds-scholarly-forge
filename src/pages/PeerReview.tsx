@@ -1,30 +1,32 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 export const PeerReview = () => {
   return (
-    <div className="min-h-screen bg-[#fcf9f8] font-body">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Peer Review Process — IJSDS</title>
         <meta name="description" content="Information on the rigorous double-blind peer review process at the International Journal of Social Work and Development Studies." />
       </Helmet>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
-        {/* Page Header */}
-        <div className="mb-14 pb-10 border-b border-stone-200">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block mb-4">
-            Journal Policy
-          </span>
-          <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
-            Peer Review Process
+      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+            ← Home
+          </Link>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-3">Journal Policy</span>
+          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+            Peer Review <span className="italic text-primary">Process</span>
           </h1>
-          <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
-            Our rigorous double-blind peer review framework ensures the objectivity, scientific merit, and developmental impact of every published article.
+          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+            Our double-blind peer review process ensures the objectivity, scientific merit, and impact of every published article.
           </p>
         </div>
+      </header>
 
-        {/* Body Content */}
-        <div className="prose prose-stone max-w-none space-y-10 text-stone-700 leading-[1.85] text-[15px]">
+      <main className="max-w-3xl mx-auto px-8 py-16">
+        <div className="space-y-10 text-stone-700 leading-[1.85] text-[15px]">
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
               Double-Blind Protocol
@@ -108,7 +110,7 @@ export const PeerReview = () => {
           </section>
 
         </div>
-      </div>
+      </main>
     </div>
   );
 };

@@ -1,48 +1,54 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 const Copyright = () => {
   return (
-    <div className="min-h-screen bg-[#fcf9f8] font-body">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Copyright & Licensing — IJSDS</title>
-        <meta name="description" content="A framework governing intellectual property, licensing, and author rights." />
+        <meta name="description" content="Authors retain full copyright of their work. All articles are published under the Creative Commons Attribution 4.0 license." />
       </Helmet>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-8 py-16 md:py-24">
-        <div className="mb-14 pb-10 border-b border-stone-200">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary block mb-4">
-            Journal Policy
-          </span>
-          <h1 className="font-headline text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
-            Copyright & Licensing
+      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+            ← Home
+          </Link>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary block mb-3">Journal Policy</span>
+          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+            Copyright & <span className="italic text-primary">Licensing</span>
           </h1>
-          <p className="text-stone-500 text-sm leading-relaxed max-w-xl">
-            A framework governing intellectual property, licensing, and author rights within the global multidisciplinary research commons.
+          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+            Authors retain full copyright of their work. All articles are published under the Creative Commons Attribution 4.0 (CC BY 4.0) license.
           </p>
         </div>
+      </header>
 
-        <div className="prose prose-stone max-w-none space-y-10 text-stone-700 leading-[1.85] text-[15px]">
+      <main className="max-w-3xl mx-auto px-8 py-16">
+        <div className="space-y-10 text-stone-700 leading-[1.85] text-[15px]">
+
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
               Creative Commons Attribution 4.0
             </h2>
             <p>
-              IJSDS operates under the Open Access Protocol. Authors retain full copyright while granting the journal a perpetual license for global dissemination under the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-4">Creative Commons Attribution 4.0 (CC BY 4.0)</a> license.
-            </p>
-            <p>
-              This framework empowers authors to maximize the reach of their multidisciplinary synthesis while maintaining absolute sovereignty over their intellectual property.
+              IJSDS is fully open access. Authors retain full copyright while granting the journal the right to publish and distribute the work under the{' '}
+              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-4 hover:text-primary/70 transition-colors">
+                Creative Commons Attribution 4.0 (CC BY 4.0)
+              </a>{' '}
+              license. This means anyone can read, share, and build on the work — as long as they credit the original authors.
             </p>
           </section>
 
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
-              Scholarly Rights Ledger
+              What Authors Retain
             </h2>
             <ul className="list-disc pl-5 mt-4 space-y-2">
-              <li><strong>Copyright Retention:</strong> Authors maintain primary ownership of the submitted manuscript throughout the archival lifecycle. Authors are not required to transfer title.</li>
-              <li><strong>Archival Attribution:</strong> Universal requirement for third parties to credit the original author and journal in all subsequent iterations.</li>
-              <li><strong>Exploitation Liberty:</strong> Freedom to repurpose, translate, and synthesize the published work in future multidisciplinary monographs.</li>
+              <li><strong>Copyright ownership:</strong> You keep full copyright of your article. You do not need to transfer it to the journal.</li>
+              <li><strong>Attribution:</strong> Anyone who reproduces or builds on your work must credit you as the original author.</li>
+              <li><strong>Reuse rights:</strong> You are free to include your published article in future books, theses, or other publications — no further permission needed from IJSDS.</li>
             </ul>
           </section>
 
@@ -52,17 +58,18 @@ const Copyright = () => {
             </h2>
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-stone-900">Originality Warranty</h3>
-                <p>Authors must certify that the submission is an original intellectual synthesis and does not infringe upon external copyright archives.</p>
+                <h3 className="font-semibold text-stone-900">Originality</h3>
+                <p>By submitting, you confirm that the manuscript is your own original work and does not infringe the copyright of any third party.</p>
               </div>
               <div>
-                <h3 className="font-semibold text-stone-900">Attribution Integrity</h3>
-                <p>Every external data fragment, figure, or conceptual model must be correctly attributed within the multidisciplinary reference ledger.</p>
+                <h3 className="font-semibold text-stone-900">Proper Attribution</h3>
+                <p>All figures, tables, data, and ideas taken from other sources must be properly cited in your reference list.</p>
               </div>
             </div>
           </section>
+
         </div>
-      </div>
+      </main>
     </div>
   );
 };

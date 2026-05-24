@@ -91,7 +91,7 @@ export const AppSidebar = () => {
     { title: "Editor Dashboard", url: "/editorial", icon: FileCheck },
     { title: "Production", url: "/production", icon: Wrench },
     { title: "Publication", url: "/publication", icon: Globe },
-    { title: "Manage Blogs", url: "/admin", icon: BookOpen },
+    { title: "Manage Blogs", url: "/admin/blogs", icon: BookOpen },
   ];
 
   const adminNav: NavItemDef[] = [

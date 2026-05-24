@@ -4,12 +4,12 @@ import { Home } from './Home';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background font-body selection:bg-primary/20 selection:text-primary">
+    <div className="min-h-screen flex flex-col bg-stone-50 font-body selection:bg-primary/20 selection:text-primary">
       {/* Sticky Header */}
       <Header />
       
       {/* Main Content Area */}
-      <main className="flex-1 w-full bg-background relative overflow-hidden">
+      <main className="flex-1 w-full bg-stone-50 relative overflow-hidden">
         {/* Subtle background texture globally applied to main */}
         <div 
           className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply"

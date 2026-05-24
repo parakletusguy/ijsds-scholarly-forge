@@ -71,7 +71,7 @@ export const ResetPassword = () => {
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
         <Card className="w-full max-w-md text-center">
           <CardHeader>
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
@@ -91,7 +91,7 @@ export const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Set new password</CardTitle>

@@ -210,7 +210,7 @@ export const ReviewAssignment = () => {
                      <Button 
                        onClick={assignReviewers} 
                        disabled={selectedReviewers.length === 0 || assigning}
-                       className="flex-1 bg-primary hover:bg-secondary text-white py-8 rounded-none font-headline font-black uppercase text-xs tracking-[0.2em] shadow-xl transition-all"
+                       className="flex-1 bg-primary hover:bg-secondary text-white py-8 rounded-none font-headline font-black uppercase text-xs tracking-[0.2em] transition-all"
                      >
                         {assigning ? 'Synchronizing Assignments...' : `Authorize ${selectedReviewers.length} Evaluator(s)`}
                      </Button>

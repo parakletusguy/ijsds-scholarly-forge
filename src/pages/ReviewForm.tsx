@@ -257,7 +257,7 @@ export const ReviewForm = () => {
                       <Button
                         onClick={handleSubmit}
                         disabled={submitting || saving}
-                        className="flex-1 bg-primary hover:bg-primary/90 text-white py-10 rounded-none font-headline font-black uppercase text-xs tracking-[0.3em] shadow-xl group"
+                        className="flex-1 bg-primary hover:bg-primary/90 text-white py-10 rounded-none font-headline font-black uppercase text-xs tracking-[0.3em] group"
                       >
                         {submitting
                           ? 'Submitting…'

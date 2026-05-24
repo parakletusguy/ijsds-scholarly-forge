@@ -57,7 +57,7 @@ export const Indexing = () => {
           </div>
 
           {/* Zenodo */}
-          <div className="bg-stone-900 p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/5 flex flex-col">
+          <div className="bg-stone-900 p-8 transition-all duration-300 border border-white/5 flex flex-col">
             <img
               src="/assets/indexing/zenodo_logo.png"
               alt="Zenodo Logo"

@@ -1,15 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowRight,
-  Menu,
-  X,
-  CheckCircle,
-  Info,
-  Share2,
-  Globe,
-} from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, CheckCircle, Info, Globe } from "lucide-react";
 
 // Editorial Board Images
 import mina from "../images/editors/Mina.jpeg";
@@ -97,302 +90,165 @@ export const About = () => {
   ];
 
   return (
-    <div className="bg-[#fcf9f8] text-[#1c1b1b] font-body selection:bg-primary/10">
+    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
-        <title>About & Submissions | IJSDS</title>
+        <title>About — IJSDS</title>
         <meta
           name="description"
-          content="Discover the mission, editorial leadership, and submission guidelines of the International Journal of Social Work and Development Studies."
+          content="The mission, editorial board, and submission overview of the International Journal of Social Work and Development Studies."
         />
       </Helmet>
 
-      <main className="max-w-7xl mx-auto px-8 py-20 overflow-hidden">
-        {/* ── Hero / About Section ────────────────────────────────────────── */}
-        <section
-          id="about"
-          className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-40 items-center"
-        >
-          <div className="lg:col-span-7">
-            <span className="text-primary font-bold tracking-[0.4em] text-[10px] uppercase mb-6 block">
-              International Peer-Reviewed Journal
-            </span>
-            <h1 className="text-7xl md:text-8xl font-headline leading-none tracking-tighter mb-10 text-on-background">
-              About the <br />
-              <span className="italic text-primary">Journal</span>
-            </h1>
-            <div className="space-y-8 text-lg leading-relaxed text-secondary/80 pr-12 max-w-2xl">
-              <p className="first-letter:text-6xl first-letter:font-headline first-letter:mr-4 first-letter:float-left first-letter:text-primary first-letter:leading-none font-medium text-on-background/80">
-                The International Journal of Social Work and Development Studies
-                (IJSDS) is a leading international journal dedicated to publishing
-                high-quality research at the intersection of social welfare and
-                sustainable development.
+      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
+            ← Home
+          </Link>
+          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
+            About <span className="italic text-primary">IJSDS</span>
+          </h1>
+          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
+            The International Journal of Social Work and Development Studies publishes peer-reviewed research at the intersection of social welfare, policy, and sustainable development.
+          </p>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-8 py-16 space-y-20">
+
+        {/* Mission */}
+        <section id="about" className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Mission</span>
+            <h2 className="text-3xl font-headline font-light tracking-tight text-stone-900 leading-snug">
+              Connecting research<br />to <span className="italic text-primary">real-world practice</span>
+            </h2>
+            <div className="space-y-4 text-sm text-stone-600 leading-relaxed">
+              <p>
+                IJSDS is dedicated to publishing high-quality research at the intersection of social welfare and sustainable development. We prioritise work that tackles inequality and supports communities across Africa and the wider world.
               </p>
-              <p className="italic">
-                Our mission is to connect academic research with real-world practice,
-                prioritizing work that tackles inequality and supports communities
-                both in Africa and globally.
+              <p>
+                Founded in 2025 and based at Rivers State University, the journal provides a global platform for scholars, practitioners, and policymakers working on development challenges in the Global South.
               </p>
-              <div className="flex gap-10 pt-4">
-                <div>
-                  <div className="text-3xl font-headline text-primary mb-1">
-                    Established
-                  </div>
-                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40">
-                    2025 · Heritage
-                  </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6 pt-2">
+              {[
+                { label: 'Founded', value: '2025' },
+                { label: 'Focus', value: 'Global South' },
+                { label: 'Review', value: 'Double-blind' },
+                { label: 'Access', value: 'Open Access' },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">{label}</p>
+                  <p className="text-sm font-bold text-stone-900">{value}</p>
                 </div>
-                <div>
-                  <div className="text-3xl font-headline text-primary mb-1">
-                    Impact
-                  </div>
-                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40">
-                    Global South · Focus
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-          <div className="lg:col-span-5 relative">
-            <div className="aspect-[4/5] bg-surface-container-low overflow-hidden shadow-2xl relative z-10 skew-y-1 bg-white p-8">
-              <img
-                className="w-full h-full object-contain hover:scale-105 transition-all duration-1000"
-                alt="IJSDS scholarly heritage"
-                src="/Logo_Black_Edited-removebg-preview.png"
-              />
-            </div>
-            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
-            <div className="absolute top-1/2 -right-20 w-40 h-40 bg-secondary/5 rotate-45 -z-10 border border-primary/10"></div>
+          <div className="bg-white border border-stone-100 p-10 flex items-center justify-center aspect-square">
+            <img
+              src="/Logo_Black_Edited-removebg-preview.png"
+              alt="IJSDS"
+              className="w-full max-w-[240px] object-contain"
+            />
           </div>
         </section>
 
-        {/* ── Editorial Board Section ─────────────────────────────────────── */}
-        <section id="editorial" className="mb-40">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-            <div className="max-w-2xl">
-              <span className="font-bold text-[10px] text-primary uppercase tracking-[0.4em] mb-4 block">
-                Meet the Editors
-              </span>
-              <h2 className="text-5xl md:text-6xl font-headline tracking-tighter mb-6 underline decoration-primary/10 decoration-8 underline-offset-[12px]">
-                Editorial Board
-              </h2>
-              <p className="text-secondary/60 text-lg leading-relaxed italic">
-                Our journal is guided by an international team of experienced academics and practitioners who ensure every published article meets the highest scholarly standards.
-              </p>
-            </div>
-
+        {/* Editorial Board */}
+        <section id="editorial" className="space-y-12">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3 block">Editorial Board</span>
+            <h2 className="text-2xl font-headline font-light tracking-tight text-stone-900">
+              The people behind <span className="italic text-primary">IJSDS</span>
+            </h2>
+            <p className="mt-2 text-stone-500 text-sm leading-relaxed max-w-xl">
+              Our journal is guided by an international team of academics and practitioners who ensure every published article meets the highest scholarly standards.
+            </p>
           </div>
 
-          {/* Chief Leadership Spotlight */}
-          <div className="mb-32 group">
-            <div className="bg-white border border-outline-variant/10 p-10 md:p-16 flex flex-col lg:flex-row gap-16 items-center shadow-2xl relative overflow-hidden">
-              <div
-                className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -z-0"
-                style={{ clipPath: "polygon(18% 0, 100% 0, 100% 82%)" }}
-              ></div>
-
-              <div className="w-full lg:w-1/3 relative">
-                <div className="aspect-[4/5] bg-stone-100 overflow-hidden relative grayscale-[100%] group-hover:grayscale-0 transition-all duration-1000 shadow-xl">
-                  <img
-                    src={chiefEditor.image}
-                    alt={chiefEditor.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl -z-10 accent-pulse"></div>
+          {/* Editor in Chief */}
+          <div className="bg-white border border-stone-100 p-8 md:p-10 flex flex-col md:flex-row gap-10 items-start group">
+            <div className="w-full md:w-48 shrink-0">
+              <div className="aspect-[4/5] overflow-hidden bg-stone-100 grayscale group-hover:grayscale-0 transition-all duration-700">
+                <img src={chiefEditor.image} alt={chiefEditor.name} className="w-full h-full object-cover" />
               </div>
-
-              <div className="flex-grow space-y-8 relative z-10">
+            </div>
+            <div className="space-y-4">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{chiefEditor.role}</span>
+                <h3 className="text-xl font-headline font-light tracking-tight text-stone-900 mt-1">{chiefEditor.name}</h3>
+                <p className="text-sm text-stone-500 italic mt-0.5">{chiefEditor.designation}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-stone-400 mt-1">{chiefEditor.institution}</p>
+              </div>
+              <div className="flex flex-wrap gap-6 pt-2 border-t border-stone-100">
                 <div>
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="h-px w-10 bg-primary"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-                      {chiefEditor.role}
-                    </span>
-                  </div>
-                  <h3 className="text-4xl md:text-6xl font-headline tracking-tighter mb-4 leading-none italic">
-                    {chiefEditor.name}
-                  </h3>
-                  <p className="text-xl font-medium text-secondary/60 italic">
-                    {chiefEditor.designation}
-                  </p>
-                  <p className="text-sm font-black uppercase tracking-widest opacity-40 mt-2">
-                    {chiefEditor.institution}
-                  </p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-300 mb-0.5">Website</p>
+                  <a href={`https://${chiefEditor.website}`} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">{chiefEditor.website}</a>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-outline-variant/10">
-                  <div className="flex items-center gap-4 group/link cursor-pointer">
-                    <div className="w-10 h-10 bg-primary/5 flex items-center justify-center rounded-full group-hover/link:bg-primary group-hover/link:text-white transition-all">
-                      <Globe size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest opacity-30">
-                        Platform
-                      </p>
-                      <a
-                        href={`https://${chiefEditor.website}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm border-b border-primary/20 hover:border-primary transition-all"
-                      >
-                        {chiefEditor.website}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 group/link cursor-pointer">
-                    <div className="w-10 h-10 bg-primary/5 flex items-center justify-center rounded-full group-hover/link:bg-primary group-hover/link:text-white transition-all">
-                      <Info size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest opacity-30">
-                        Contact
-                      </p>
-                      <a
-                        href={`mailto:${chiefEditor.contact}`}
-                        className="text-sm border-b border-primary/20 hover:border-primary transition-all"
-                      >
-                        {chiefEditor.contact}
-                      </a>
-                    </div>
-                  </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-300 mb-0.5">Email</p>
+                  <a href={`mailto:${chiefEditor.contact}`} className="text-sm text-primary hover:underline">{chiefEditor.contact}</a>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Board members */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {boardMembers.map((member, idx) => (
-              <div
-                key={idx}
-                className="group bg-white p-8 border border-outline-variant/10 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-700"
-              >
-                <div className="aspect-square mb-8 overflow-hidden bg-stone-100 grayscale-[100%] group-hover:grayscale-0 transition-all duration-1000 relative">
-                  <img
-                    className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
-                    src={member.image}
-                    alt={member.name}
-                  />
-                  <div className="absolute inset-0 border-[1.5rem] border-white group-hover:border-0 transition-all duration-700"></div>
+              <div key={idx} className="group bg-white border border-stone-100 p-6 hover:border-stone-300 hover:shadow-sm transition-all">
+                <div className="aspect-square mb-5 overflow-hidden bg-stone-100 grayscale group-hover:grayscale-0 transition-all duration-500">
+                  <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={member.image} alt={member.name} />
                 </div>
-                <div className="space-y-4">
-                  <div className="flex gap-2 items-center">
-                    <div className="h-0.5 w-6 bg-primary/20 group-hover:w-full transition-all duration-700"></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-primary whitespace-nowrap">
-                      {member.role}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-headline tracking-tight group-hover:text-primary transition-colors">
-                    {member.name}
-                  </h3>
-                  <p className="text-xs text-secondary/60 leading-relaxed font-label uppercase tracking-wider">
-                    {member.institution}
-                  </p>
-                </div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{member.role}</span>
+                <h3 className="text-sm font-bold text-stone-900 mt-1 leading-snug group-hover:text-primary transition-colors">{member.name}</h3>
+                <p className="text-xs text-stone-400 mt-1 leading-relaxed">{member.institution}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── Submission Guidelines Section ───────────────────────────────── */}
-        <section
-          id="submissions"
-          className="bg-surface-container-low rounded-xl p-12 lg:p-20 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 pointer-events-none">
-            <CheckCircle className="w-[30rem] h-[30rem] rotate-12 translate-x-20 text-primary" />
+        {/* Submission overview */}
+        <section id="submissions" className="bg-white border border-stone-100 p-8 md:p-12 space-y-10">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3 block">Submit Your Research</span>
+            <h2 className="text-2xl font-headline font-light tracking-tight text-stone-900">How to submit</h2>
+            <p className="mt-2 text-stone-500 text-sm leading-relaxed max-w-xl">
+              We welcome original research, case studies, and critical reviews on social work and development. Submissions are open year-round.
+            </p>
           </div>
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16">
-            <div className="lg:col-span-5">
-              <span className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-6 block">
-                How to Submit
-              </span>
-              <h2 className="text-5xl font-headline mb-8 text-primary">
-                Submit Your Research
-              </h2>
-              <p className="text-on-surface-variant text-lg mb-10 leading-relaxed">
-                We invite original research articles, case studies, and critical
-                reviews that align with our thematic focus on social work and
-                development.
-              </p>
 
-              <div className="space-y-4 mb-12">
-                {[
-                  "Peer-Reviewed Publication",
-                  "Listed in DOAJ & Scopus",
-                  "Free to Read Worldwide",
-                ].map((label) => (
-                  <div key={label} className="flex items-center gap-4 text-on-background">
-                    <CheckCircle className="text-primary w-5 h-5 shrink-0" />
-                    <span className="text-sm font-medium">{label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => navigate("/auth")}
-                className="bg-primary-container text-white px-8 py-4 rounded-lg font-medium text-lg hover:brightness-110 shadow-lg shadow-primary/20 transition-all flex items-center gap-3 active:scale-95"
-              >
-                Start Submission
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="lg:col-span-7">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[
-                  {
-                    step: "01",
-                    title: "Format Your Paper",
-                    desc: "Make sure your manuscript follows the APA 7th edition style and our journal's formatting guidelines.",
-                  },
-                  {
-                    step: "02",
-                    title: "Remove Your Name",
-                    desc: "Delete your name and institution from the main document so reviewers cannot identify you during the blind review process.",
-                  },
-                  {
-                    step: "03",
-                    title: "Upload Your Files",
-                    desc: "Submit your anonymised paper along with a title page (with your name) and any additional files such as tables or figures.",
-                  },
-                  {
-                    step: "04",
-                    title: "Track Your Submission",
-                    desc: "Log in to your dashboard to follow the progress of your submission through peer review and editorial decisions.",
-                  },
-                ].map((s) => (
-                  <div key={s.step} className="space-y-4">
-                    <span className="text-3xl font-headline text-primary opacity-30">{s.step}</span>
-                    <h4 className="font-bold text-lg">{s.title}</h4>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">{s.desc}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-12 p-6 bg-white/50 backdrop-blur-sm rounded border border-primary/10">
-                <div className="flex gap-4">
-                  <Info className="text-primary w-5 h-5 shrink-0 mt-0.5" />
-                  <div>
-                    <h5 className="font-bold text-sm mb-1">Pre-Submission Inquiry</h5>
-                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                      Not sure if your work fits our scope? Send an abstract to{" "}
-                      <a
-                        href="mailto:editor.ijsds@gmail.com"
-                        className="text-primary underline underline-offset-4"
-                      >
-                        editor.ijsds@gmail.com
-                      </a>{" "}
-                      for an informal preliminary assessment.
-                    </p>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { step: "01", title: "Format your paper", desc: "Use APA 7th edition. Double-spaced, 12pt font, 1-inch margins." },
+              { step: "02", title: "Remove identifying details", desc: "Delete your name and institution from the main manuscript file before submitting." },
+              { step: "03", title: "Upload your files", desc: "Submit your anonymised manuscript plus a separate title page with your author details." },
+              { step: "04", title: "Track your submission", desc: "Log in to your dashboard to follow your submission through review and editorial decisions." },
+            ].map((s) => (
+              <div key={s.step} className="flex gap-4">
+                <span className="text-2xl font-headline text-stone-200 leading-none shrink-0">{s.step}</span>
+                <div>
+                  <h4 className="text-sm font-bold text-stone-900">{s.title}</h4>
+                  <p className="text-xs text-stone-500 mt-1 leading-relaxed">{s.desc}</p>
                 </div>
               </div>
-            </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-stone-100">
+            <button
+              onClick={() => navigate("/submit")}
+              className="inline-flex items-center gap-2 bg-stone-900 text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors active:scale-[0.98]"
+            >
+              Submit Manuscript
+              <ArrowRight size={12} />
+            </button>
+            <p className="text-xs text-stone-400">
+              Questions? <a href="mailto:editor.ijsds@gmail.com" className="text-primary hover:underline">editor.ijsds@gmail.com</a>
+            </p>
           </div>
         </section>
+
       </main>
-
-
     </div>
   );
 };

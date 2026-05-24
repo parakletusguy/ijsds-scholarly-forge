@@ -90,7 +90,7 @@ export const AdminDashboard = () => {
     </div>
   );
 
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group hover:shadow-2xl hover:border-primary/40 transition-all cursor-pointer";
+  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group hover:border-primary/40 transition-all cursor-pointer";
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
