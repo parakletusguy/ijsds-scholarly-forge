@@ -189,16 +189,16 @@ export const Home = () => {
                           </span>
                         )}
                       </div>
-                      {featured.doi && (
+                      {featured.crossrefDoi && (
                         <a
-                          href={`https://doi.org/${featured.doi}`}
+                          href={`https://doi.org/${featured.crossrefDoi}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/70 transition-colors uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-none"
                         >
                           <ExternalLink size={12} />
-                          DOI: {featured.doi}
+                          CrossRef DOI: {featured.crossrefDoi}
                         </a>
                       )}
                     </div>
@@ -225,16 +225,16 @@ export const Home = () => {
                         <span className="text-primary font-bold text-xs uppercase tracking-widest underline underline-offset-4 group-hover:no-underline transition-all">
                           Read Abstract →
                         </span>
-                        {rest[0].doi && (
+                        {rest[0].crossrefDoi && (
                           <a
-                            href={`https://doi.org/${rest[0].doi}`}
+                            href={`https://doi.org/${rest[0].crossrefDoi}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 text-[9px] font-bold text-stone-400 hover:text-primary transition-colors uppercase tracking-widest"
+                            className="flex items-center gap-1.5 text-[9px] font-bold text-green-700 hover:text-green-900 transition-colors uppercase tracking-widest"
                           >
                             <ExternalLink size={10} />
-                            DOI
+                            CrossRef DOI
                           </a>
                         )}
                       </div>
@@ -271,16 +271,16 @@ export const Home = () => {
                             </span>
                           )}
                         </div>
-                        {article.doi && (
+                        {article.crossrefDoi && (
                           <a
-                            href={`https://doi.org/${article.doi}`}
+                            href={`https://doi.org/${article.crossrefDoi}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] font-bold text-primary/60 hover:text-primary transition-colors uppercase tracking-widest flex items-center gap-1"
+                            className="text-[9px] font-bold text-green-700 hover:text-green-900 transition-colors uppercase tracking-widest flex items-center gap-1"
                           >
                             <ExternalLink size={10} />
-                            DOI
+                            CrossRef DOI
                           </a>
                         )}
                       </div>

@@ -345,9 +345,9 @@ export const Publication = () => {
                         <p className="text-xs text-muted-foreground">
                           Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
                         </p>
-                        {article.doi && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            DOI: {article.doi}
+                        {article.crossrefDoi && (
+                          <p className="text-xs text-green-700 font-medium mt-1">
+                            CrossRef DOI: {article.crossrefDoi}
                           </p>
                         )}
                       </div>
@@ -394,10 +394,10 @@ export const Publication = () => {
                                     <TabsTrigger value="files">File Management</TabsTrigger>
                                     <TabsTrigger value="doi">
                                       DOI Management
-                                      {!article.doi && (
+                                      {!article.crossrefDoi && (
                                         <Badge variant="destructive" className="ml-2 h-5">
                                           <AlertTriangle className="h-3 w-3 mr-1" />
-                                          No DOI
+                                          No CrossRef DOI
                                         </Badge>
                                       )}
                                     </TabsTrigger>
@@ -431,9 +431,9 @@ export const Publication = () => {
                           Published: {format(new Date(article.publication_date), 'MMM dd, yyyy')}
                         </p>
                       )}
-                      {article.doi && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          DOI: {article.doi}
+                      {article.crossrefDoi && (
+                        <p className="text-xs text-green-700 font-medium mt-1">
+                          CrossRef DOI: {article.crossrefDoi}
                         </p>
                       )}
                     </Card>

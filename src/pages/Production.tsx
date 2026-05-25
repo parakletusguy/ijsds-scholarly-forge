@@ -142,9 +142,9 @@ export const Production = () => {
                           <Badge className={getStatusColor(article.status)} variant="secondary">
                             {article.status.replace('_', ' ')}
                           </Badge>
-                          {article.doi && (
-                            <span className="text-xs text-muted-foreground">
-                              DOI: {article.doi}
+                          {article.crossrefDoi && (
+                            <span className="text-xs text-green-700 font-medium">
+                              CrossRef DOI: {article.crossrefDoi}
                             </span>
                           )}
                         </div>

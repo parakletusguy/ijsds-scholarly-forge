@@ -18,7 +18,7 @@ export const ArticleStructuredData = ({ articles }: ArticleStructuredDataProps) 
         "position": index + 1,
         "item": {
           "@type": "ScholarlyArticle",
-          "@id": article.doi ? `https://doi.org/${article.doi}` : `https://ijsds.com/articles/${article.id}`,
+          "@id": article.crossrefDoi ? `https://doi.org/${article.crossrefDoi}` : `https://ijsds.com/articles/${article.id}`,
           "headline": article.title,
           "abstract": article.abstract,
           "author": article.authors?.map(author => ({
@@ -47,12 +47,12 @@ export const ArticleStructuredData = ({ articles }: ArticleStructuredDataProps) 
           ...(article.issue && {
             "issueNumber": article.issue.toString()
           }),
-          ...(article.doi && {
+          ...(article.crossrefDoi && {
             "identifier": [
               {
                 "@type": "PropertyValue",
                 "propertyID": "DOI",
-                "value": article.doi
+                "value": article.crossrefDoi
               }
             ]
           })

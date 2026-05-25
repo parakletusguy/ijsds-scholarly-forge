@@ -252,7 +252,7 @@ export const Editorial = () => {
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
                     Audit Reviews
                   </Button>
-                  {art.doi && (
+                  {art.crossrefDoi && (
                     <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
                       className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
                       <RefreshCw size={11} /> Redeposit
@@ -276,7 +276,7 @@ export const Editorial = () => {
                     Registry Details
                   </Button>
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
-                  {submission.status === "accepted" && art.doi && (
+                  {submission.status === "accepted" && art.crossrefDoi && (
                     <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
                       className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
                       <RefreshCw size={11} /> Redeposit
