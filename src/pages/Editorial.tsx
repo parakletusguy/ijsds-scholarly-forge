@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getSubmissions, type Submission } from "@/lib/submissionService";
 import { createEditorialDecision } from "@/lib/editorialService";
 import { updateArticle } from "@/lib/articleService";
-import { api } from "@/lib/apiClient";
+import { crossrefRedeposit } from "@/lib/crossrefService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,15 +64,13 @@ export const Editorial = () => {
     }
   };
 
-  const updateDOIVersion = async (submissionId: string, articleDoi: string) => {
+  const updateDOIVersion = async (_submissionId: string, articleId: string) => {
     try {
-      const data = await api.post<any>("/api/doi/generate", { submissionId, existingDoi: articleDoi });
-      if (data.success) {
-        toast({ title: "Registry Updated", description: `DOI synchronized: ${data.data?.doi}` });
-        fetchSubmissions();
-      } else throw new Error("Registry rejection");
+      await crossrefRedeposit(articleId);
+      toast({ title: "Redeposit Queued", description: "Updated metadata is being sent to CrossRef." });
+      fetchSubmissions();
     } catch (error: any) {
-      toast({ title: "DOI Error", description: error.message || "Failed to update registry.", variant: "destructive" });
+      toast({ title: "Redeposit Failed", description: error.message || "Failed to redeposit metadata.", variant: "destructive" });
     }
   };
 
@@ -147,15 +145,17 @@ export const Editorial = () => {
         <option value="all">All Subject Areas</option>
         {allSubjects.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
-      {(searchQuery || subjectFilter !== "all") && (
-        <button onClick={() => { setSearchQuery(""); setSubjectFilter("all"); }}
-          className="text-[10px] font-bold uppercase tracking-widest text-primary hover:opacity-70 px-2">
-          Clear
-        </button>
-      )}
-      <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 self-center shrink-0">
-        {applyFilters(list).length} / {list.length}
-      </span>
+      <div className="flex items-center gap-2 shrink-0">
+        {(searchQuery || subjectFilter !== "all") && (
+          <button onClick={() => { setSearchQuery(""); setSubjectFilter("all"); }}
+            className="text-[10px] font-bold uppercase tracking-widest text-primary hover:opacity-70 px-2">
+            Clear
+          </button>
+        )}
+        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+          {applyFilters(list).length} / {list.length}
+        </span>
+      </div>
     </div>
   );
 
@@ -253,9 +253,9 @@ export const Editorial = () => {
                     Audit Reviews
                   </Button>
                   {art.doi && (
-                    <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.doi)}
+                    <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
                       className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
-                      <RefreshCw size={11} /> Regen DOI
+                      <RefreshCw size={11} /> Redeposit
                     </Button>
                   )}
                 </>
@@ -277,9 +277,9 @@ export const Editorial = () => {
                   </Button>
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                   {submission.status === "accepted" && art.doi && (
-                    <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.doi)}
+                    <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
                       className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
-                      <RefreshCw size={11} /> Sync Registry
+                      <RefreshCw size={11} /> Redeposit
                     </Button>
                   )}
                 </>
@@ -339,7 +339,8 @@ export const Editorial = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={v => { setActiveTab(v); setExpandedId(null); }} className="space-y-6">
-          <TabsList className="bg-white border border-border/20 p-1.5 rounded-none h-auto flex flex-wrap shadow-sm">
+          <div className="overflow-x-auto -mx-1 px-1">
+          <TabsList className="bg-white border border-border/20 p-1.5 rounded-none h-auto flex min-w-max shadow-sm w-full">
             {[
               { val: "pending", label: "Pending", count: pendingSubmissions.length },
               { val: "review", label: "In Review", count: underReviewSubmissions.length },
@@ -347,7 +348,7 @@ export const Editorial = () => {
               { val: "completed", label: "Completed", count: completedSubmissions.length },
             ].map(tab => (
               <TabsTrigger key={tab.val} value={tab.val}
-                className="rounded-none py-2.5 px-6 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-2 grow">
+                className="rounded-none py-2.5 px-4 sm:px-6 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-2 flex-1">
                 {tab.label}
                 <Badge className="bg-primary/15 text-primary hover:bg-primary/15 border-none rounded-none text-[8px] font-bold px-1.5 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                   {tab.count}
@@ -355,6 +356,7 @@ export const Editorial = () => {
               </TabsTrigger>
             ))}
           </TabsList>
+          </div>
 
           {[
             { val: "pending", list: pendingSubmissions, empty: "No pending submissions." },

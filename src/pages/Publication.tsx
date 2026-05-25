@@ -392,7 +392,7 @@ export const Publication = () => {
                                 <Tabs defaultValue="files" className="w-full">
                                   <TabsList className="grid w-full grid-cols-2">
                                     <TabsTrigger value="files">File Management</TabsTrigger>
-                                    <TabsTrigger value="doi" disabled={!!article.doi}>
+                                    <TabsTrigger value="doi">
                                       DOI Management
                                       {!article.doi && (
                                         <Badge variant="destructive" className="ml-2 h-5">
@@ -403,18 +403,16 @@ export const Publication = () => {
                                     </TabsTrigger>
                                   </TabsList>
                                   <TabsContent value="files">
-                                    <EditorFileManager 
+                                    <EditorFileManager
                                       articleId={article.id}
                                       submissionId={article.submission_id}
                                     />
                                   </TabsContent>
                                   <TabsContent value="doi">
-                                    {!article.doi && (
-                                      <DOIManager 
-                                        article={article}
-                                        onUpdate={fetchAcceptedArticles}
-                                      />
-                                    )}
+                                    <DOIManager
+                                      article={article}
+                                      onUpdate={fetchAcceptedArticles}
+                                    />
                                   </TabsContent>
                                 </Tabs>
                               </DialogContent>

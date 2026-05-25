@@ -350,12 +350,12 @@ export const Articles = () => {
                         >
                           <Quote size={11} /> Cite
                         </button>
-                        {article.doi && (
-                          <a href={`https://doi.org/${article.doi}`} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors ml-auto"
+                        {article.crossrefDoi && (
+                          <a href={`https://doi.org/${article.crossrefDoi}`} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-green-700 hover:text-green-900 transition-colors ml-auto"
                             onClick={e => e.stopPropagation()}
                           >
-                            <ExternalLink size={10} /> DOI
+                            <ExternalLink size={10} /> CrossRef DOI
                           </a>
                         )}
                       </div>

@@ -1,323 +1,235 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  Link,
-  RefreshCw,
-  Save,
-  ExternalLink,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
-import { api } from "@/lib/apiClient";
-
+import { ExternalLink, RefreshCw, FileCode, CheckCircle, AlertCircle, Clock, Loader2, Copy } from "lucide-react";
 import type { Article } from "@/lib/articleService";
+import {
+  crossrefRegister,
+  crossrefRedeposit,
+  crossrefPreview,
+  pollCrossRefJob,
+  type CrossRefJobStatus,
+  type CrossRefJobState,
+} from "@/lib/crossrefService";
 
 interface DOIManagerProps {
   article: Article;
   onUpdate: () => void;
 }
 
+const STATE_LABEL: Record<CrossRefJobState, string> = {
+  waiting: "Queued",
+  delayed: "Queued",
+  active: "Depositing",
+  completed: "Registered",
+  failed: "Failed",
+  unknown: "Unknown",
+};
+
+const StateIndicator = ({ state }: { state: CrossRefJobState }) => {
+  if (state === "completed")
+    return <CheckCircle size={14} className="text-emerald-600 shrink-0" />;
+  if (state === "failed")
+    return <AlertCircle size={14} className="text-red-500 shrink-0" />;
+  if (state === "active")
+    return <Loader2 size={14} className="animate-spin text-primary shrink-0" />;
+  return <Clock size={14} className="text-stone-400 shrink-0" />;
+};
+
 export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [manualDOI, setManualDOI] = useState(article.doi || "");
-  const [showManualInput, setShowManualInput] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [redepositing, setRedepositing] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewXml, setPreviewXml] = useState<string | null>(null);
+  const [jobStatus, setJobStatus] = useState<CrossRefJobStatus | null>(null);
+  const [stopPoll, setStopPoll] = useState<(() => void) | null>(null);
 
-  const generateDOI = async () => {
-    setLoading(true);
-    try {
-      // Call the custom backend to generate DOI
-      const responseData = (await api.post("/api/doi/generate", {
-        article_id: article.id,
-      })) as { success: boolean; data?: { doi: string }; message?: string };
+  useEffect(() => () => { stopPoll?.(); }, [stopPoll]);
 
-      if (responseData.success && responseData.data) {
-        toast({
-          title: article.doi
-            ? "New Version Created"
-            : "DOI Generated Successfully",
-          description: article.doi
-            ? `New version created. Concept DOI remains: ${responseData.data.doi}`
-            : `Concept DOI: ${responseData.data.doi}`,
-        });
+  const startPolling = useCallback((jobId: string) => {
+    stopPoll?.();
+    const stop = pollCrossRefJob(jobId, (status) => {
+      setJobStatus(status);
+      if (status.state === "completed") {
+        toast({ title: "DOI Registered", description: status.result?.doi ?? "CrossRef deposit complete." });
         onUpdate();
-        setShowManualInput(false);
-      } else {
-        throw new Error(responseData.message || "Failed to generate DOI");
+      } else if (status.state === "failed") {
+        toast({ title: "DOI Registration Failed", description: status.failedReason ?? "CrossRef returned an error.", variant: "destructive" });
       }
-    } catch (error) {
-      console.error("Error generating DOI:", error);
-      toast({
-        title: "DOI Generation Failed",
-        description:
-          (error as Error).message ||
-          "Failed to generate DOI. You can enter it manually.",
-        variant: "destructive",
-      });
-      setShowManualInput(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+    setStopPoll(() => stop);
+  }, [stopPoll, onUpdate, toast]);
 
-  const saveManualDOI = async () => {
-    if (!manualDOI.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid DOI",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
+  const handleRegister = async () => {
+    setRegistering(true);
+    setJobStatus(null);
     try {
-      await api.patch(`/api/articles/${article.id}`, { doi: manualDOI.trim() });
-
-      toast({
-        title: "DOI Saved",
-        description: "Manual DOI has been saved successfully",
-      });
-
-      onUpdate();
-      setShowManualInput(false);
-    } catch (error) {
-      console.error("Error saving manual DOI:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save DOI",
-        variant: "destructive",
-      });
+      const res = await crossrefRegister(article.id);
+      toast({ title: "DOI Registration Queued", description: "Depositing metadata to CrossRef — tracking progress below." });
+      startPolling(res.jobId);
+    } catch (err) {
+      toast({ title: "Registration Failed", description: (err as Error).message, variant: "destructive" });
     } finally {
-      setLoading(false);
+      setRegistering(false);
     }
   };
 
-  const validateDOI = (doi: string) => {
-    const doiPattern = /^10\.\d{4,}\/[^\s]+$/;
-    return doiPattern.test(doi);
+  const handleRedeposit = async () => {
+    setRedepositing(true);
+    setJobStatus(null);
+    try {
+      const res = await crossrefRedeposit(article.id);
+      toast({ title: "Redeposit Queued", description: "Updated metadata is being sent to CrossRef." });
+      startPolling(res.jobId);
+    } catch (err) {
+      toast({ title: "Redeposit Failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setRedepositing(false);
+    }
   };
 
-  const formatAuthors = (authors: any) => {
-    if (!authors) return "Unknown Author";
-    if (typeof authors === "string") return authors;
-    if (Array.isArray(authors)) {
-      return authors
-        .map((author) => {
-          if (typeof author === "string") return author;
-          if (author.name) return author.name;
-          const name =
-            `${author.firstName || ""} ${author.lastName || ""}`.trim();
-          return name || "Unknown Author";
-        })
-        .join(", ");
+  const handlePreview = async () => {
+    setPreviewing(true);
+    try {
+      const res = await crossrefPreview(article.id);
+      setPreviewXml(res.xml);
+    } catch (err) {
+      toast({ title: "Preview Failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setPreviewing(false);
     }
-    return "Unknown Author";
   };
+
+  const copyDoi = () => {
+    if (article.doi) navigator.clipboard.writeText(article.doi);
+    toast({ title: "Copied" });
+  };
+
+  const isPolling =
+    jobStatus && (jobStatus.state === "waiting" || jobStatus.state === "delayed" || jobStatus.state === "active");
 
   return (
-    <div className="space-y-6">
-      {/* Article Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link className="h-5 w-5" />
-            DOI Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2">{article.title}</h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              By: {formatAuthors(article.authors)}
+    <div className="space-y-0 divide-y divide-stone-100">
+
+      {/* DOI Status */}
+      <div className="py-6 space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Current DOI</p>
+        {article.doi ? (
+          <div className="flex items-center gap-3">
+            <CheckCircle size={15} className="text-emerald-600 shrink-0" />
+            <code className="text-sm text-stone-800 font-mono bg-stone-100 px-2 py-1 select-all">
+              {article.doi}
+            </code>
+            <button onClick={copyDoi} className="text-stone-400 hover:text-primary transition-colors">
+              <Copy size={13} />
+            </button>
+            <a
+              href={`https://doi.org/${article.doi}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-stone-400 hover:text-primary transition-colors"
+            >
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-stone-500 text-sm">
+            <AlertCircle size={14} className="text-stone-300 shrink-0" />
+            Not yet assigned — CrossRef registration is triggered automatically when an article is accepted.
+          </div>
+        )}
+      </div>
+
+      {/* Job status tracker */}
+      {jobStatus && (
+        <div className="py-5 space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Registration Status</p>
+          <div className="flex items-center gap-2.5">
+            <StateIndicator state={jobStatus.state} />
+            <span className="text-sm font-bold text-stone-800">{STATE_LABEL[jobStatus.state]}</span>
+            <span className="text-[10px] text-stone-400 font-mono ml-auto">{jobStatus.jobId}</span>
+          </div>
+          {jobStatus.state === "failed" && jobStatus.failedReason && (
+            <p className="text-xs text-red-600 bg-red-50 px-3 py-2 border border-red-100">
+              {jobStatus.failedReason}
             </p>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                Status: {article.status}
-              </Badge>
-              {article.doi ? (
-                <Badge className="text-xs bg-green-100 text-green-800">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  DOI Assigned
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="text-xs">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  No DOI
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Current DOI Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current DOI Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {article.doi ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="font-medium">DOI Assigned</span>
-              </div>
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-sm font-medium mb-1">DOI:</p>
-                <div className="flex items-center gap-2">
-                  <code className="text-sm bg-white px-2 py-1 rounded border">
-                    {article.doi}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigator.clipboard.writeText(article.doi)}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      window.open(`https://doi.org/${article.doi}`, "_blank")
-                    }
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-orange-600" />
-                <span className="font-medium">No DOI Assigned</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                This article does not have a DOI yet. You can generate one
-                automatically or enter it manually.
-              </p>
-            </div>
           )}
-        </CardContent>
-      </Card>
+          {jobStatus.state === "completed" && jobStatus.result?.doi && (
+            <p className="text-xs text-emerald-700 bg-emerald-50 px-3 py-2 border border-emerald-100">
+              DOI: {jobStatus.result.doi}
+            </p>
+          )}
+        </div>
+      )}
 
-      {/* DOI Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>DOI Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Auto-generate DOI */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="font-headline font-black text-sm uppercase tracking-widest text-foreground">
-                  Automatic DOI Generation
-                </h4>
-                <p className="text-sm font-body text-muted-foreground mt-1">
-                  {article.doi
-                    ? "Create a new version on Zenodo. The concept DOI will remain the same."
-                    : "Generate a concept DOI using Zenodo"}
-                </p>
-                {!article.manuscript_file_url && (
-                  <p className="text-[10px] text-orange-600 font-bold uppercase tracking-widest mt-2 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" /> Manuscript file required
-                    to generate DOI
-                  </p>
-                )}
-              </div>
-              <Button
-                onClick={generateDOI}
-                disabled={loading || !article.manuscript_file_url}
-                className="bg-foreground text-white rounded-none font-headline font-black uppercase text-xs tracking-widest px-8 py-6 flex items-center gap-2 hover:bg-primary transition-colors disabled:opacity-30"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
-                />
-                {loading
-                  ? "Processing..."
-                  : article.doi
-                    ? "Create New Version"
-                    : "Generate DOI"}
-              </Button>
-            </div>
+      {/* Actions */}
+      <div className="py-6 space-y-4">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Actions</p>
+
+        <div className="flex flex-wrap gap-3">
+          {/* Register (only if no DOI yet) */}
+          {!article.doi && (
+            <button
+              onClick={handleRegister}
+              disabled={registering || !!isPolling}
+              className="inline-flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-40 active:scale-[0.98]"
+            >
+              {registering || isPolling
+                ? <Loader2 size={12} className="animate-spin" />
+                : <RefreshCw size={12} />}
+              Register with CrossRef
+            </button>
+          )}
+
+          {/* Redeposit (only if DOI exists) */}
+          {article.doi && (
+            <button
+              onClick={handleRedeposit}
+              disabled={redepositing || !!isPolling}
+              className="inline-flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-40 active:scale-[0.98]"
+            >
+              {redepositing || isPolling
+                ? <Loader2 size={12} className="animate-spin" />
+                : <RefreshCw size={12} />}
+              Redeposit Metadata
+            </button>
+          )}
+
+          {/* Preview XML */}
+          <button
+            onClick={handlePreview}
+            disabled={previewing}
+            className="inline-flex items-center gap-2 border border-stone-200 text-stone-700 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:border-primary hover:text-primary transition-colors disabled:opacity-40 active:scale-[0.98]"
+          >
+            {previewing ? <Loader2 size={12} className="animate-spin" /> : <FileCode size={12} />}
+            Preview XML
+          </button>
+        </div>
+
+        <p className="text-[10px] text-stone-400 leading-relaxed">
+          {article.doi
+            ? "Use Redeposit to correct metadata (title, authors, volume) after the DOI is already assigned."
+            : "Registration is automatic on acceptance. Use this only if the job did not run or needs to be re-triggered."}
+        </p>
+      </div>
+
+      {/* XML Preview panel */}
+      {previewXml && (
+        <div className="py-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">CrossRef XML Preview</p>
+            <button
+              onClick={() => setPreviewXml(null)}
+              className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
+            >
+              Close
+            </button>
           </div>
-
-          <Separator />
-
-          {/* Manual DOI Entry */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-headline font-black text-sm uppercase tracking-widest text-foreground">
-                  Manual DOI Entry
-                </h4>
-                <p className="text-sm font-body text-muted-foreground mt-1">
-                  Enter a DOI manually if automatic generation fails
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowManualInput(!showManualInput)}
-                disabled={loading}
-                className="rounded-none font-headline font-black uppercase text-xs tracking-widest px-8 py-6"
-              >
-                {showManualInput ? "Cancel" : "Enter Manually"}
-              </Button>
-            </div>
-
-            {showManualInput && (
-              <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">DOI</label>
-                  <Input
-                    placeholder="10.1234/example.doi"
-                    value={manualDOI}
-                    onChange={(e) => setManualDOI(e.target.value)}
-                    className={
-                      !validateDOI(manualDOI) && manualDOI
-                        ? "border-red-300"
-                        : ""
-                    }
-                  />
-                  {manualDOI && !validateDOI(manualDOI) && (
-                    <p className="text-xs text-red-600 mt-1">
-                      Please enter a valid DOI format (e.g.,
-                      10.1234/example.doi)
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={saveManualDOI}
-                    disabled={loading || !validateDOI(manualDOI)}
-                    className="flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    Save DOI
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowManualInput(false);
-                      setManualDOI(article.doi || "");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          <pre className="text-[11px] font-mono bg-stone-950 text-stone-300 p-4 overflow-x-auto max-h-80 leading-relaxed whitespace-pre-wrap">
+            {previewXml}
+          </pre>
+        </div>
+      )}
     </div>
   );
 };

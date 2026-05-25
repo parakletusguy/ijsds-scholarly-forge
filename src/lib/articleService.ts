@@ -26,6 +26,7 @@ export interface Article {
   authors?: ArticleAuthor[];
   corresponding_author_email?: string;
   doi?: string | null;
+  crossrefDoi?: string | null;
   status: string;
   volume?: number | null;
   issue?: number | null;

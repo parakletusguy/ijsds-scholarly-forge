@@ -46,9 +46,12 @@ export function buildBibtexMetadata(article: Article): BibtexMetadata {
       ? `${article.page_start}-${article.page_end}`
       : '';
 
+  // Prefer CrossRef DOI; fall back to legacy doi for entry key only
+  const activeDoi = article.crossrefDoi || article.doi;
+
   // Entry key: ijsds_{year}_{doi-suffix or id}
-  const doiSuffix = article.doi
-    ? article.doi.split('/').pop() ?? article.id
+  const doiSuffix = activeDoi
+    ? activeDoi.split('/').pop() ?? article.id
     : article.id;
   const entryId = `ijsds_${year}_${doiSuffix}`;
 
@@ -65,7 +68,7 @@ export function buildBibtexMetadata(article: Article): BibtexMetadata {
     volume: article.volume ? String(article.volume) : '',
     number: article.issue ? String(article.issue) : '',
     pages,
-    doi: article.doi ?? '',
+    doi: article.crossrefDoi ?? '',
     url: articleUrl,
   };
 }

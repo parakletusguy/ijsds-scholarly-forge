@@ -44,6 +44,7 @@ interface SubmissionDetails {
     indexing_fee: boolean;
     processing_fee: boolean;
     doi?: string | null;
+    crossrefDoi?: string | null;
   };
   submitter: {
     full_name: string;
@@ -66,6 +67,31 @@ export const SubmissionDetail = () => {
   const [indexing, setIndexing] = useState(false);
   const [processing, setprocessing] = useState(false);
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
+  const [crossrefLoading, setCrossrefLoading] = useState(false);
+
+  const registerCrossRefDoi = async () => {
+    if (!submission?.article.id) return;
+    setCrossrefLoading(true);
+    try {
+      const res = await api.post<{ success: boolean; data: { jobId: string } }>(
+        "/api/crossref/register",
+        { articleId: submission.article.id }
+      ) as { success: boolean; data: { jobId: string } };
+      toast({
+        title: "DOI Registration Queued",
+        description: `Job ID: ${res.data.jobId}. CrossRef will process it shortly.`,
+      });
+      fetchSubmissionDetails();
+    } catch (err: any) {
+      toast({
+        title: "Registration Failed",
+        description: err?.message ?? "Could not queue DOI registration.",
+        variant: "destructive",
+      });
+    } finally {
+      setCrossrefLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -338,18 +364,53 @@ export const SubmissionDetail = () => {
                       {submission.article.subject_area}
                     </Badge>
                   )}
-                  {submission.article.doi && (
-                    <div className="mb-4">
+                  {submission.article.crossrefDoi ? (
+                    <div className="mb-4 space-y-2">
                       <a
-                        href={`https://doi.org/${submission.article.doi}`}
+                        href={`https://doi.org/${submission.article.crossrefDoi}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline uppercase tracking-widest bg-primary/5 px-2 py-1"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-green-700 hover:underline uppercase tracking-widest bg-green-50 border border-green-200 px-2 py-1"
                       >
                         <ExternalLink size={12} />
-                        DOI: {submission.article.doi}
+                        CrossRef DOI: {submission.article.crossrefDoi}
                       </a>
+                      {isEditor && (
+                        <div>
+                          <Button size="sm" variant="outline" disabled className="opacity-50 cursor-not-allowed">
+                            CrossRef DOI Registered
+                          </Button>
+                        </div>
+                      )}
                     </div>
+                  ) : (
+                    <>
+                      {submission.article.doi && (
+                        <div className="mb-2">
+                          <a
+                            href={`https://doi.org/${submission.article.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline uppercase tracking-widest bg-primary/5 px-2 py-1"
+                          >
+                            <ExternalLink size={12} />
+                            DOI: {submission.article.doi}
+                          </a>
+                        </div>
+                      )}
+                      {isEditor && (
+                        <div className="mb-4">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={registerCrossRefDoi}
+                            disabled={crossrefLoading}
+                          >
+                            {crossrefLoading ? "Queuing…" : "Register CrossRef DOI"}
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 

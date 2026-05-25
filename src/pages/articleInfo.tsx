@@ -121,7 +121,7 @@ export const ArticleInfo = () => {
         <meta name="citation_volume" content={String(article.volume || "")} />
         <meta name="citation_issue" content={String(article.issue || "")} />
         <meta name="citation_date" content={article.publication_date || ""} />
-        {article.doi && <meta name="citation_doi" content={article.doi} />}
+        {article.crossrefDoi && <meta name="citation_doi" content={article.crossrefDoi} />}
         {article.manuscript_file_url && (
           <meta name="citation_pdf_url" content={article.manuscript_file_url} />
         )}
@@ -230,16 +230,16 @@ export const ArticleInfo = () => {
                   <span className="text-xs font-bold uppercase tracking-wider">Share</span>
                 </button>
               </div>
-              {article.doi && (
+              {article.crossrefDoi && (
                 <div className="flex items-center gap-2 text-xs text-stone-500 font-medium">
                   <span className="font-bold uppercase tracking-widest text-[10px] opacity-40">DOI</span>
                   <a
-                    href={`https://doi.org/${article.doi}`}
+                    href={`https://doi.org/${article.crossrefDoi}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline flex items-center gap-1 font-mono"
                   >
-                    {article.doi}
+                    {article.crossrefDoi}
                     <ExternalLink size={10} />
                   </a>
                 </div>
@@ -315,7 +315,7 @@ export const ArticleInfo = () => {
                         <p className="text-xs text-stone-500">
                           By {ra.authors?.[0]?.name || "IJSDS Editorial"}{ra.authors && ra.authors.length > 1 ? ' et al.' : ''}{ra.publication_date ? ` (${new Date(ra.publication_date).getFullYear()})` : ''}
                         </p>
-                        {ra.doi && (
+                        {ra.crossrefDoi && (
                           <div
                             onClick={(e) => e.stopPropagation()}
                             className="bg-primary/5 text-[9px] font-bold text-primary px-2 py-0.5 rounded flex items-center gap-1 uppercase tracking-widest"

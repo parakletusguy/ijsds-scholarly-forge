@@ -76,7 +76,7 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
     <div className="min-h-screen flex w-full">
       <AppSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         <header className="fixed top-0 right-0 left-0 md:left-72 h-20 bg-[#fdf9f5]/80 backdrop-blur-md flex justify-between items-center px-12 z-40 border-b-[0.5px] border-[#ddc0b8]/15">
           <div className="flex items-center gap-4">
             <SidebarTrigger />
@@ -86,14 +86,14 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
               </Button>
             </Link>
           </div>
-          
+
           <div className="flex items-center gap-6">
             <div className="w-12 md:w-16">
               <img src="/riversstate-removebg-preview.png" alt="Rivers State University Logo" className="w-full h-auto" />
             </div>
           </div>
         </header>
-        <main className="flex-1 mt-24">
+        <main className="flex-1 mt-24 min-w-0">
           {children}
         </main>
         <Footer />
