@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getSubmissions, type Submission } from "@/lib/submissionService";
 import { createEditorialDecision } from "@/lib/editorialService";
 import { updateArticle } from "@/lib/articleService";
-import { crossrefRedeposit } from "@/lib/crossrefService";
+import { crossrefRedeposit, crossrefRegister } from "@/lib/crossrefService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,6 +71,28 @@ export const Editorial = () => {
       fetchSubmissions();
     } catch (error: any) {
       toast({ title: "Redeposit Failed", description: error.message || "Failed to redeposit metadata.", variant: "destructive" });
+    }
+  };
+
+  const registerDOI = async (articleId: string) => {
+    try {
+      await crossrefRegister(articleId);
+      toast({ title: "Registration Queued", description: "CrossRef DOI registration has been triggered." });
+      fetchSubmissions();
+    } catch (error: any) {
+      const msg: string = error?.message ?? "";
+      if (msg.toLowerCase().includes("already has crossref doi") || msg.toLowerCase().includes("already has a doi")) {
+        // Article is already registered — redeposit instead
+        try {
+          await crossrefRedeposit(articleId);
+          toast({ title: "Redeposit Queued", description: "CrossRef DOI already exists — metadata update has been sent." });
+          fetchSubmissions();
+        } catch (rdErr: any) {
+          toast({ title: "Redeposit Failed", description: rdErr?.message || "Failed to redeposit.", variant: "destructive" });
+        }
+      } else {
+        toast({ title: "Registration Failed", description: msg || "Failed to queue DOI registration.", variant: "destructive" });
+      }
     }
   };
 
@@ -252,10 +274,15 @@ export const Editorial = () => {
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
                     Audit Reviews
                   </Button>
-                  {art.crossrefDoi && (
+                  {art.crossrefDoi ? (
                     <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
                       className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
                       <RefreshCw size={11} /> Redeposit
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="ghost" onClick={() => registerDOI(art.id)}
+                      className="h-8 text-[9px] rounded-none text-amber-700 gap-1.5 hover:bg-amber-50 ml-auto">
+                      <RefreshCw size={11} /> Register CrossRef
                     </Button>
                   )}
                 </>
@@ -276,11 +303,18 @@ export const Editorial = () => {
                     Registry Details
                   </Button>
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
-                  {submission.status === "accepted" && art.crossrefDoi && (
-                    <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
-                      className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
-                      <RefreshCw size={11} /> Redeposit
-                    </Button>
+                  {submission.status === "accepted" && (
+                    art.crossrefDoi ? (
+                      <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
+                        className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
+                        <RefreshCw size={11} /> Redeposit
+                      </Button>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={() => registerDOI(art.id)}
+                        className="h-8 text-[9px] rounded-none text-amber-700 gap-1.5 hover:bg-amber-50 ml-auto">
+                        <RefreshCw size={11} /> Sync CrossRef
+                      </Button>
+                    )
                   )}
                 </>
               )}

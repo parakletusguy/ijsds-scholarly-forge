@@ -161,6 +161,12 @@ export const MOCK_ARTICLES: Article[] = [
   },
 ];
 
+// Backend may return crossref_doi (snake_case) — normalize to crossrefDoi
+const normalizeArticle = (a: any): Article => ({
+  ...a,
+  crossrefDoi: a.crossrefDoi ?? a.crossref_doi ?? null,
+});
+
 export const getArticles = async (params?: {
   status?: string;
   subject_area?: string;
@@ -178,9 +184,10 @@ export const getArticles = async (params?: {
         ).toString()
       : "";
     const res = await api.get<ListResponse<Article>>(`/api/articles${qs}`);
+    const normalized = res.data.map(normalizeArticle);
 
     // If we have API data, use it; otherwise fallback to mocks for a rich demo experience
-    return res.data.length > 0 ? res.data : MOCK_ARTICLES;
+    return normalized.length > 0 ? normalized : MOCK_ARTICLES;
   } catch (error) {
     console.error("API fetch failed, falling back to mocks:", error);
     return MOCK_ARTICLES;
@@ -199,7 +206,7 @@ export const getArticle = async (idOrSlug: string): Promise<Article> => {
     const res = await api.get<SingleResponse<Article>>(
       `/api/articles/${idOrSlug}`,
     );
-    return res.data;
+    return normalizeArticle(res.data);
   } catch (error: any) {
     console.warn(`Article detail fetch failed for ${idOrSlug}:`, error);
 

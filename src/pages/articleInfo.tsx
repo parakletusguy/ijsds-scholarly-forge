@@ -14,7 +14,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
 import { PaperDownload } from "@/components/papers/PaperDownload";
 import { handleFileDownload } from "@/lib/downloadUtils";
-import { Search, BookOpen, Quote, Bookmark, Share2, ChevronLeft, Minus, Plus, ExternalLink } from "lucide-react";
+import { Search, BookOpen, Quote, Bookmark, Share2, ChevronLeft, Minus, Plus, ExternalLink, CheckCircle } from "lucide-react";
 
 const JOURNAL_TITLE = "International Journal of Social Work and Development Studies";
 
@@ -218,8 +218,27 @@ export const ArticleInfo = () => {
               )}
             </div>
 
+            {/* CrossRef DOI block */}
+            {article.crossrefDoi && (
+              <div className="mt-2 mb-10 py-5 border-t border-b border-stone-100 flex items-start gap-3">
+                <CheckCircle size={15} className="text-emerald-500 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-1.5">CrossRef Registered DOI</p>
+                  <a
+                    href={`https://doi.org/${article.crossrefDoi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group font-mono text-sm break-all"
+                  >
+                    <span className="text-stone-400">https://doi.org/</span>
+                    <span className="text-stone-700 underline underline-offset-2 decoration-stone-200 group-hover:text-primary group-hover:decoration-primary transition-colors">{article.crossrefDoi}</span>
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* Article Footer */}
-            <div className="mt-20 pt-10 border-t border-stone-100 flex justify-between items-center">
+            <div className="mt-10 pt-10 border-t border-stone-100 flex justify-between items-center">
               <div className="flex gap-4">
                 <button className="flex items-center gap-2 text-stone-500 hover:text-primary transition-colors">
                   <Bookmark className="w-5 h-5" />
@@ -230,20 +249,6 @@ export const ArticleInfo = () => {
                   <span className="text-xs font-bold uppercase tracking-wider">Share</span>
                 </button>
               </div>
-              {article.crossrefDoi && (
-                <div className="flex items-center gap-2 text-xs text-stone-500 font-medium">
-                  <span className="font-bold uppercase tracking-widest text-[10px] opacity-40">DOI</span>
-                  <a
-                    href={`https://doi.org/${article.crossrefDoi}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline flex items-center gap-1 font-mono"
-                  >
-                    {article.crossrefDoi}
-                    <ExternalLink size={10} />
-                  </a>
-                </div>
-              )}
             </div>
           </article>
 

@@ -24,6 +24,14 @@ export interface Submission {
 
 interface ListResponse { success: true; data: Submission[] }
 interface SingleResponse { success: true; data: Submission }
+
+const normalizeArticle = (a: any): any =>
+  a ? { ...a, crossrefDoi: a.crossrefDoi ?? a.crossref_doi ?? null } : a;
+
+const normalizeSubmission = (s: any): Submission => ({
+  ...s,
+  article: normalizeArticle(s.article),
+});
 interface CreateResponse {
   success: true;
   data: { submission: Submission; article: { id: string; title: string } };
@@ -37,12 +45,12 @@ export const getSubmissions = async (params?: {
     Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])
   ).toString() : '';
   const res = await api.get<ListResponse>(`/api/submissions${qs}`);
-  return res.data;
+  return res.data.map(normalizeSubmission);
 };
 
 export const getSubmission = async (id: string): Promise<Submission> => {
   const res = await api.get<SingleResponse>(`/api/submissions/${id}`);
-  return res.data;
+  return normalizeSubmission(res.data);
 };
 
 export const createSubmission = async (body: {
