@@ -18,7 +18,6 @@ import {
 import {
   ProcessinFeeDialog,
   VettingDialog,
-  IndexingFeeDialog,
 } from "@/components/submission/paystackDialogBox";
 import { SubmissionFileManager } from "@/components/submission/SubmissionFileManager";
 import { EditorFileManager } from "@/components/editor/EditorFileManager";
@@ -52,10 +51,9 @@ interface SubmissionDetails {
   };
 }
 
-// Fee amounts in kobo (100 kobo = ₦1)
-const VETTING_FEE_KOBO = 512500; // ₦5,125
-const INDEXING_FEE_KOBO = 512500; // ₦5,125
-const PROCESSING_FEE_KOBO = 2050000; // ₦20,500
+// Fee amounts in kobo (100 kobo = ₦1) — grossed up to cover Paystack's 1.5% + ₦100 fee
+const VETTING_FEE_KOBO = 1025400;    // customer pays ₦10,254 → journal nets ₦10,000
+const PUBLICATION_FEE_KOBO = 2599100; // customer pays ₦25,991 → journal nets ₦25,500
 
 export const SubmissionDetail = () => {
   const { submissionId } = useParams();
@@ -64,7 +62,6 @@ export const SubmissionDetail = () => {
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [vet, setvet] = useState(false);
-  const [indexing, setIndexing] = useState(false);
   const [processing, setprocessing] = useState(false);
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
   const [crossrefLoading, setCrossrefLoading] = useState(false);
@@ -138,7 +135,6 @@ export const SubmissionDetail = () => {
   };
 
   let userData = null;
-  let userDataIndex = null;
   let userDataPro = null;
   {
     submission
@@ -170,37 +166,9 @@ export const SubmissionDetail = () => {
 
   {
     submission
-      ? (userDataIndex = {
-          email: submission.submitter.email,
-          amount: INDEXING_FEE_KOBO,
-          metadata: {
-            custom_fields: [
-              {
-                display_name: "Name",
-                variable_name: "name",
-                value: submission.submitter.full_name,
-              },
-            ],
-          },
-          onSuccess: (response: { reference: string }) => {
-            setIndexing(false);
-            onSuccess(response, "indexing", INDEXING_FEE_KOBO);
-          },
-          onClose: () =>
-            toast({
-              title: "Payment Cancelled",
-              description: "Indexing fee payment was not completed.",
-              variant: "destructive",
-            }),
-        })
-      : null;
-  }
-
-  {
-    submission
       ? (userDataPro = {
           email: submission.submitter.email,
-          amount: PROCESSING_FEE_KOBO,
+          amount: PUBLICATION_FEE_KOBO,
           metadata: {
             custom_fields: [
               {
@@ -212,12 +180,12 @@ export const SubmissionDetail = () => {
           },
           onSuccess: (response: { reference: string }) => {
             setprocessing(false);
-            onSuccess(response, "processing", PROCESSING_FEE_KOBO);
+            onSuccess(response, "processing", PUBLICATION_FEE_KOBO);
           },
           onClose: () =>
             toast({
               title: "Payment Cancelled",
-              description: "Processing fee payment was not completed.",
+              description: "Publication fee payment was not completed.",
               variant: "destructive",
             }),
         })
@@ -247,9 +215,8 @@ export const SubmissionDetail = () => {
 
       // 2. Generate and email a PDF receipt (separate from backend confirmation email)
       const feeLabels: Record<string, { amount: string; label: string }> = {
-        vetting: { amount: "5,125", label: "vetting fee" },
-        indexing: { amount: "5,125", label: "indexing fee" },
-        processing: { amount: "20,500", label: "processing fee" },
+        vetting: { amount: "10,000", label: "vetting fee" },
+        processing: { amount: "25,500", label: "publication fee" },
       };
       const { amount: amountLabel, label: typeLabel } =
         feeLabels[type] ?? feeLabels.vetting;
@@ -531,7 +498,7 @@ export const SubmissionDetail = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-sm font-medium">Vetting Fee</p>
-                    <p className="text-xs text-muted-foreground">₦5,125</p>
+                    <p className="text-xs text-muted-foreground">₦10,000</p>
                   </div>
                   {submission.article.vetting_fee ? (
                     <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -546,30 +513,11 @@ export const SubmissionDetail = () => {
                     </button>
                   )}
                 </div>
-                {/* Indexing Fee */}
+                {/* Publication Fee */}
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-medium">Indexing Fee</p>
-                    <p className="text-xs text-muted-foreground">₦5,125</p>
-                  </div>
-                  {submission.article.indexing_fee ? (
-                    <Badge className="bg-green-100 text-green-800 border-green-200">
-                      Paid ✓
-                    </Badge>
-                  ) : (
-                    <button
-                      className="rounded-sm bg-black text-white px-3 py-1 h-9 text-sm hover:bg-gray-800 transition-colors"
-                      onClick={() => setIndexing(true)}
-                    >
-                      Pay
-                    </button>
-                  )}
-                </div>
-                {/* Processing Fee */}
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-medium">Processing Fee</p>
-                    <p className="text-xs text-muted-foreground">₦20,500</p>
+                    <p className="text-sm font-medium">Publication Fee</p>
+                    <p className="text-xs text-muted-foreground">₦25,500</p>
                   </div>
                   {submission.article.processing_fee ? (
                     <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -587,11 +535,6 @@ export const SubmissionDetail = () => {
               </CardContent>
             </Card>
             <VettingDialog userData={userData} vet={vet} setvet={setvet} />
-            <IndexingFeeDialog
-              userData={userDataIndex}
-              indexing={indexing}
-              setIndexing={setIndexing}
-            />
             <ProcessinFeeDialog
               userData={userDataPro}
               processing={processing}

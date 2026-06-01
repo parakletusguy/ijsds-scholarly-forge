@@ -8,7 +8,7 @@ export const VettingDialog = ({ userData, vet, setvet }) => {
         <DialogHeader>
           <DialogTitle>Pay Vetting Fee</DialogTitle>
           <DialogDescription>
-            A vetting fee of ₦5,125 is required to begin the editorial review
+            A vetting fee of ₦10,000 is required to begin the editorial review
             of your manuscript. Click "Pay Now" to proceed securely via Paystack.
           </DialogDescription>
         </DialogHeader>
@@ -32,9 +32,9 @@ export const ProcessinFeeDialog = ({ processing, setprocessing, userData }) => {
     <Dialog onOpenChange={setprocessing} open={processing}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Pay Processing Fee</DialogTitle>
+          <DialogTitle>Pay Publication Fee</DialogTitle>
           <DialogDescription>
-            A processing fee of ₦20,500 is required to proceed to publication.
+            A publication fee of ₦25,500 is required to proceed to publication.
             Upon successful payment your article will be scheduled for production.
           </DialogDescription>
         </DialogHeader>
@@ -46,31 +46,6 @@ export const ProcessinFeeDialog = ({ processing, setprocessing, userData }) => {
             Cancel
           </button>
           <Paystackbtn info={userData} onClick={() => setprocessing(false)} />
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export const IndexingFeeDialog = ({ userData, indexing, setIndexing }) => {
-  return (
-    <Dialog onOpenChange={setIndexing} open={indexing}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Pay Indexing Fee</DialogTitle>
-          <DialogDescription>
-            An indexing fee of ₦5,125 is required to register your article with
-            indexing databases. Click "Pay Now" to proceed securely via Paystack.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex items-center justify-between pt-2">
-          <button
-            onClick={() => setIndexing(false)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Cancel
-          </button>
-          <Paystackbtn info={userData} onClick={() => setIndexing(false)} />
         </div>
       </DialogContent>
     </Dialog>
