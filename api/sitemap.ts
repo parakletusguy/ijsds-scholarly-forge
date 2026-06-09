@@ -82,17 +82,7 @@ export default async function handler(req: any, res: any) {
     <priority>0.8</priority>
   </url>\n`;
 
-      // Direct PDF URL
-      if (article.manuscript_file_url) {
-        // Encode URL to be valid XML if needed, usually just replacing & with &amp;
-        const pdfUrl = article.manuscript_file_url.replace(/&/g, '&amp;');
-        xml += `  <url>
-    <loc>${pdfUrl}</loc>
-    <lastmod>${lastMod}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>\n`;
-      }
+
     });
 
     xml += `</urlset>`;
