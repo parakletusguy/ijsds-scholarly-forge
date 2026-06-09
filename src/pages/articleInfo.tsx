@@ -126,6 +126,13 @@ export const ArticleInfo = () => {
           <meta name="citation_pdf_url" content={article.manuscript_file_url} />
         )}
         <meta name="citation_language" content="en" />
+        {article.page_start && <meta name="citation_firstpage" content={String(article.page_start)} />}
+        {article.page_end && <meta name="citation_lastpage" content={String(article.page_end)} />}
+        <meta name="citation_abstract_html_url" content={`https://ijsds.org/article/${slug}`} />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.abstract || ''} />
+        <meta property="og:type" content="article" />
         <style>{`
           .serif-dropcap::first-letter {
             float: left;
@@ -136,6 +143,35 @@ export const ArticleInfo = () => {
             font-family: 'Newsreader', serif;
           }
         `}</style>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ScholarlyArticle",
+            "headline": article.title,
+            "abstract": article.abstract,
+            "author": authors.map((author: any) => ({
+              "@type": "Person",
+              "name": author.name,
+              "affiliation": author.affiliation ? {
+                "@type": "Organization",
+                "name": author.affiliation
+              } : undefined
+            })),
+            "datePublished": article.publication_date,
+            "publisher": {
+              "@type": "Organization",
+              "name": "International Journal of Social Work and Development Studies",
+              "alternateName": "IJSDS"
+            },
+            "isPartOf": {
+              "@type": "Periodical",
+              "name": "International Journal of Social Work and Development Studies",
+              "issn": ["3115-6940", "3115-6932"]
+            },
+            ...(article.page_start && { "pageStart": article.page_start.toString() }),
+            ...(article.page_end && { "pageEnd": article.page_end.toString() })
+          })}
+        </script>
       </Helmet>
 
 
@@ -187,13 +223,19 @@ export const ArticleInfo = () => {
             {/* Prominent Download Button */}
             {article.manuscript_file_url && (
               <div className="mb-12">
-                <button
-                  onClick={() => handleFileDownload(article.manuscript_file_url!, article.title, article.id)}
-                  className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all"
+                <a
+                  href={article.manuscript_file_url}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleFileDownload(article.manuscript_file_url!, article.title, article.id);
+                  }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all shadow-xl shadow-primary/10 inline-flex"
                 >
                   <BookOpen className="w-5 h-5" />
-                  Download Full PDF
-                </button>
+                  Download Full-Text Manuscript
+                </a>
               </div>
             )}
 

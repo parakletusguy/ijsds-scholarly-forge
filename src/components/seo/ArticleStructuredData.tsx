@@ -18,7 +18,7 @@ export const ArticleStructuredData = ({ articles }: ArticleStructuredDataProps) 
         "position": index + 1,
         "item": {
           "@type": "ScholarlyArticle",
-          "@id": article.crossrefDoi ? `https://doi.org/${article.crossrefDoi}` : `https://ijsds.com/articles/${article.id}`,
+          "@id": article.crossrefDoi ? `https://doi.org/${article.crossrefDoi}` : `https://ijsds.org/articles/${article.id}`,
           "headline": article.title,
           "abstract": article.abstract,
           "author": article.authors?.map(author => ({
@@ -39,7 +39,7 @@ export const ArticleStructuredData = ({ articles }: ArticleStructuredDataProps) 
           "isPartOf": {
             "@type": "Periodical",
             "name": "International Journal of Social Work and Development Studies",
-            "issn": ""
+            "issn": ["3115-6940", "3115-6932"]
           },
           ...(article.volume && {
             "volumeNumber": article.volume.toString()

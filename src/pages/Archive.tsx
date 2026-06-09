@@ -160,6 +160,14 @@ export default function Archive() {
                   </AccordionTrigger>
 
                   <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-stone-50">
+                    <div className="mb-12 flex flex-wrap gap-6 border-b border-border/10 pb-6">
+                      <Link to={`/archive/vol-${volumeIssue.volume}`} className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:underline">
+                        <Database size={16} /> View Volume {volumeIssue.volume}
+                      </Link>
+                      <Link to={`/archive/vol-${volumeIssue.volume}/issue-${volumeIssue.issue}`} className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:underline">
+                        <Layers size={16} /> View Issue {volumeIssue.issue}
+                      </Link>
+                    </div>
                     <div className="grid grid-cols-1 gap-16">
                       {volumeIssue.articles.map((article, idx) => (
                         <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-12 bg-white p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700">

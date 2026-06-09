@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Users, Globe, ArrowRight, User, TrendingUp, MapPin, Clock, CheckCircle, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
@@ -119,13 +119,13 @@ export const Home = () => {
               </span>
               <h2 className="font-headline text-3xl md:text-5xl text-stone-900">Latest Issues</h2>
             </div>
-            <button
-              onClick={() => navigate('/articles')}
+            <Link
+              to="/archive"
               className="group flex items-center gap-2 text-primary font-bold text-sm border-b border-primary/30 pb-1 hover:border-primary transition-colors"
             >
               View Full Archive
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
           </div>
 
           {loading ? (

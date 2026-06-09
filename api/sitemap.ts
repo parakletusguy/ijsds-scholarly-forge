@@ -11,7 +11,7 @@ const buildArticleSlug = (article: { title: string; doi?: string | null; id: str
 };
 
 const BASE_URL = 'https://ijsds.org';
-const API_URL = process.env.VITE_API_URL || 'https://api.ijsds.org';
+const API_URL = process.env.VITE_API_URL || 'https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net';
 
 export default async function handler(req: any, res: any) {
   try {
@@ -37,32 +37,65 @@ export default async function handler(req: any, res: any) {
       '/orcidGuide',
     ];
 
+    // Identify unique Volume/Issue combinations
+    const volumeIssues = new Set<string>();
+    articles.forEach((article: any) => {
+      if (article.volume && article.issue) {
+        volumeIssues.add(`${article.volume}-${article.issue}`);
+      }
+    });
+
+    const staticLastMod = '2025-01-01'; // Fixed date for static routes
+
     // 3. Build XML
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  ${staticRoutes
-    .map(
-      (route) => `
-  <url>
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    // Static routes
+    staticRoutes.forEach(route => {
+      xml += `  <url>
     <loc>${BASE_URL}${route}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${staticLastMod}</lastmod>
     <changefreq>${route === '' || route === '/articles' ? 'daily' : 'monthly'}</changefreq>
     <priority>${route === '' ? '1.0' : '0.8'}</priority>
-  </url>`,
-    )
-    .join('')}
-  ${articles
-    .map(
-      (article: any) => `
-  <url>
+  </url>\n`;
+    });
+
+    // Volume/Issue Table of Contents routes
+    volumeIssues.forEach(vi => {
+      const [vol, iss] = vi.split('-');
+      xml += `  <url>
+    <loc>${BASE_URL}/archive/vol-${vol}/issue-${iss}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>\n`;
+    });
+
+    // Article URLs and PDF URLs
+    articles.forEach((article: any) => {
+      const lastMod = article.publication_date ? article.publication_date.split('T')[0] : staticLastMod;
+      
+      // Article HTML page
+      xml += `  <url>
     <loc>${BASE_URL}/article/${buildArticleSlug(article)}</loc>
-    <lastmod>${article.publication_date ? article.publication_date.split('T')[0] : new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>`,
-    )
-    .join('')}
-</urlset>`;
+  </url>\n`;
+
+      // Direct PDF URL
+      if (article.manuscript_file_url) {
+        // Encode URL to be valid XML if needed, usually just replacing & with &amp;
+        const pdfUrl = article.manuscript_file_url.replace(/&/g, '&amp;');
+        xml += `  <url>
+    <loc>${pdfUrl}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>\n`;
+      }
+    });
+
+    xml += `</urlset>`;
 
     // 4. Return XML with correct headers
     res.setHeader('Content-Type', 'text/xml');
