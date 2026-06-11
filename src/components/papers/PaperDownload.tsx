@@ -15,7 +15,8 @@ export const PaperDownload = ({ manuscriptFileUrl, articleId, title, className }
 
   if (!manuscriptFileUrl && !articleId) return null;
 
-  const handleClick = async () => {
+  const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
     setLoading(true);
     await handleFileDownload(manuscriptFileUrl || '', title, articleId);
     setLoading(false);
@@ -25,12 +26,19 @@ export const PaperDownload = ({ manuscriptFileUrl, articleId, title, className }
     <Button
       variant="outline"
       size="sm"
-      onClick={handleClick}
       disabled={loading}
       className={className}
+      asChild
     >
-      <Download className="h-4 w-4 mr-2" />
-      {loading ? '...' : 'Download Paper'}
+      <a 
+        href={manuscriptFileUrl || '#'} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        onClick={handleClick}
+      >
+        <Download className="h-4 w-4 mr-2" />
+        {loading ? '...' : 'Download Paper'}
+      </a>
     </Button>
   );
 };

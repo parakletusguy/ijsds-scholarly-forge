@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL || "https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net";
 
 const TOKEN_KEY = "ijsds_token";
 const ROLE_KEY = "ijsds_acting_role";

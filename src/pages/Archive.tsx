@@ -1,14 +1,32 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Download, ExternalLink, BookOpen, Plus, Layers, Database, History, Search, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Helmet } from 'react-helmet-async';
-import { PageHeader, ContentSection } from '@/components/layout/PageElements';
-import { getArticles, Article } from '@/lib/articleService';
-import { PaperDownload } from '@/components/papers/PaperDownload';
-import { buildArticleSlug } from '@/lib/articleSlug';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  Download,
+  ExternalLink,
+  BookOpen,
+  Plus,
+  Layers,
+  Database,
+  History,
+  Search,
+  Zap,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Helmet } from "react-helmet-async";
+import { PageHeader, ContentSection } from "@/components/layout/PageElements";
+import { getArticles, Article } from "@/lib/articleService";
+import { PaperDownload } from "@/components/papers/PaperDownload";
+import { buildArticleSlug } from "@/lib/articleSlug";
 
 interface VolumeIssue {
   volume: number;
@@ -19,7 +37,7 @@ interface VolumeIssue {
 
 export default function Archive() {
   const [archiveData, setArchiveData] = useState<VolumeIssue[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
@@ -30,36 +48,41 @@ export default function Archive() {
   const fetchArchive = async () => {
     try {
       // Use the custom backend service instead of direct Supabase queries
-      const data = await getArticles({ status: 'published' });
+      const data = await getArticles({ status: "published" });
 
       // Group articles by Volume and Issue
-      const grouped = data.reduce((acc: Record<string, VolumeIssue>, article: Article) => {
-        if (!article.volume || !article.issue) return acc;
-        
-        const key = `${article.volume}-${article.issue}`;
-        if (!acc[key]) {
-          acc[key] = {
-            volume: article.volume,
-            issue: article.issue,
-            articles: [],
-            year: article.publication_date 
-              ? new Date(article.publication_date).getFullYear().toString()
-              : 'N/A'
-          };
-        }
-        acc[key].articles.push(article);
-        return acc;
-      }, {});
+      const grouped = data.reduce(
+        (acc: Record<string, VolumeIssue>, article: Article) => {
+          if (!article.volume || !article.issue) return acc;
+
+          const key = `${article.volume}-${article.issue}`;
+          if (!acc[key]) {
+            acc[key] = {
+              volume: article.volume,
+              issue: article.issue,
+              articles: [],
+              year: article.publication_date
+                ? new Date(article.publication_date).getFullYear().toString()
+                : "N/A",
+            };
+          }
+          acc[key].articles.push(article);
+          return acc;
+        },
+        {},
+      );
 
       // Sort by Volume and Issue descending
-      const sortedArchive = (Object.values(grouped) as VolumeIssue[]).sort((a, b) => {
-        if (a.volume !== b.volume) return b.volume - a.volume;
-        return b.issue - a.issue;
-      });
+      const sortedArchive = (Object.values(grouped) as VolumeIssue[]).sort(
+        (a, b) => {
+          if (a.volume !== b.volume) return b.volume - a.volume;
+          return b.issue - a.issue;
+        },
+      );
 
       setArchiveData(sortedArchive);
     } catch (error) {
-      console.error('Error fetching archive:', error);
+      console.error("Error fetching archive:", error);
       setFetchError(true);
     } finally {
       setLoading(false);
@@ -67,20 +90,23 @@ export default function Archive() {
   };
 
   const formatAuthors = (authors: any) => {
-    if (!authors || !Array.isArray(authors) || authors.length === 0) return 'Author TBD';
+    if (!authors || !Array.isArray(authors) || authors.length === 0)
+      return "Author TBD";
     if (authors.length === 1) return authors[0].name;
-    if (authors.length === 2) return `${authors[0].name} and ${authors[1].name}`;
+    if (authors.length === 2)
+      return `${authors[0].name} and ${authors[1].name}`;
     return `${authors[0].name} et al.`;
   };
-  const filteredArchive = archiveData.filter(vi => {
+  const filteredArchive = archiveData.filter((vi) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     const matchesVol = vi.volume.toString().includes(q);
     const matchesIssue = vi.issue.toString().includes(q);
     const matchesYear = vi.year.includes(q);
-    const matchesArticle = vi.articles.some(a => 
-      a.title.toLowerCase().includes(q) || 
-      a.authors?.some((au: any) => au.name.toLowerCase().includes(q))
+    const matchesArticle = vi.articles.some(
+      (a) =>
+        a.title.toLowerCase().includes(q) ||
+        a.authors?.some((au: any) => au.name.toLowerCase().includes(q)),
     );
     return matchesVol || matchesIssue || matchesYear || matchesArticle;
   });
@@ -88,12 +114,15 @@ export default function Archive() {
     <div className="pb-32 bg-stone-50 min-h-screen font-body">
       <Helmet>
         <title>Archive — IJSDS</title>
-        <meta name="description" content="Browse the complete digital archive of IJSDS research articles grouped by Volume and Issue." />
+        <meta
+          name="description"
+          content="Browse the complete digital archive of IJSDS research articles grouped by Volume and Issue."
+        />
       </Helmet>
 
-      <PageHeader 
-        title="Journal" 
-        subtitle="Archive" 
+      <PageHeader
+        title="Journal"
+        subtitle="Archive"
         accent="Historical Records"
         description="The complete historical record of IJSDS publications, documenting the evolution of multidisciplinary development scholarship."
       />
@@ -105,7 +134,7 @@ export default function Archive() {
             <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
               <Search size={18} className="text-secondary/40" />
             </div>
-            <input 
+            <input
               type="text"
               placeholder="Search volumes, issues, or article titles..."
               className="w-full bg-white border border-stone-100 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-sm"
@@ -116,100 +145,156 @@ export default function Archive() {
 
           {loading ? (
             <div className="space-y-12 animate-pulse">
-               {[1, 2, 3].map(i => (
-                 <div key={i} className="h-32 bg-white border border-border/10 shadow-sm" />
-               ))}
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-32 bg-white border border-border/10 shadow-sm"
+                />
+              ))}
             </div>
           ) : fetchError ? (
             <div className="text-center py-48 bg-white border border-border/10">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-3">Archive</p>
-              <h3 className="font-headline text-2xl font-bold text-stone-900 mb-2">An error occurred</h3>
-              <p className="text-sm text-stone-500 mb-6">Couldn't fetch articles. Please check your connection and try again.</p>
-              <button onClick={() => { setFetchError(false); setLoading(true); fetchArchive(); }} className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-3">
+                Archive
+              </p>
+              <h3 className="font-headline text-2xl font-bold text-stone-900 mb-2">
+                An error occurred
+              </h3>
+              <p className="text-sm text-stone-500 mb-6">
+                Couldn't fetch articles. Please check your connection and try
+                again.
+              </p>
+              <button
+                onClick={() => {
+                  setFetchError(false);
+                  setLoading(true);
+                  fetchArchive();
+                }}
+                className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline"
+              >
                 Retry
               </button>
             </div>
           ) : filteredArchive.length === 0 ? (
             <div className="text-center py-48 bg-white border-2 border-dashed border-border/10 group relative overflow-hidden">
-               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-               <Database size={64} className="mx-auto text-foreground/10 mb-8 group-hover:rotate-12 transition-transform" />
-               <h3 className="text-3xl font-headline font-black text-foreground/20 uppercase tracking-[0.3em] relative z-10 italic">No records found</h3>
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <Database
+                size={64}
+                className="mx-auto text-foreground/10 mb-8 group-hover:rotate-12 transition-transform"
+              />
+              <h3 className="text-3xl font-headline font-black text-foreground/20 uppercase tracking-[0.3em] relative z-10 italic">
+                No records found
+              </h3>
             </div>
           ) : (
-            <Accordion type="multiple" defaultValue={filteredArchive.length > 0 ? [`${filteredArchive[0].volume}-${filteredArchive[0].issue}`] : []} className="space-y-12">
+            <Accordion
+              type="multiple"
+              defaultValue={
+                filteredArchive.length > 0
+                  ? [`${filteredArchive[0].volume}-${filteredArchive[0].issue}`]
+                  : []
+              }
+              className="space-y-12"
+            >
               {filteredArchive.map((volumeIssue) => (
-                <AccordionItem 
-                  key={`${volumeIssue.volume}-${volumeIssue.issue}`} 
+                <AccordionItem
+                  key={`${volumeIssue.volume}-${volumeIssue.issue}`}
                   value={`${volumeIssue.volume}-${volumeIssue.issue}`}
                   className="border-none bg-white shadow-sm hover:shadow-md transition-all duration-700 group relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-full bg-stone-50 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-                  
+                  <div
+                    className="absolute top-0 right-0 w-32 h-full bg-stone-50 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0"
+                    style={{ clipPath: "polygon(100% 0, 0 0, 100% 100%)" }}
+                  ></div>
+
                   <AccordionTrigger className="px-5 sm:px-12 py-6 sm:py-10 md:py-16 hover:no-underline border-l-4 sm:border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-stone-50">
                     <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-4 sm:pr-12 text-left relative z-10 font-headline">
                       <div>
                         <div className="flex items-center gap-4 mb-4">
-                           <div className="h-0.5 w-12 bg-primary group-hover:w-20 transition-all duration-700"></div>
-                           <span className="text-[10px] uppercase tracking-[0.5em] text-foreground/30 font-black italic">Archival Record</span>
+                          <div className="h-0.5 w-12 bg-primary group-hover:w-20 transition-all duration-700"></div>
+                          <span className="text-[10px] uppercase tracking-[0.5em] text-foreground/30 font-black italic">
+                            Archival Record
+                          </span>
                         </div>
                         <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-foreground leading-[0.85] group-hover:text-primary transition-colors">
-                          Vol. <span className="text-secondary">{volumeIssue.volume}</span> / Issue {volumeIssue.issue}
+                          Vol.{" "}
+                          <span className="text-secondary">
+                            {volumeIssue.volume}
+                          </span>{" "}
+                          / Issue {volumeIssue.issue}
                         </h2>
                         <div className="flex items-center gap-6 mt-6">
-                           <Badge className="bg-foreground text-white px-4 py-1.5 font-headline text-[10px] font-black uppercase tracking-widest rounded-none shadow-md">
-                              Published: {volumeIssue.year}
-                           </Badge>
-                           <div className="flex items-center gap-2">
-                              <Layers size={14} className="text-secondary" />
-                              <span className="text-foreground/40 text-[11px] font-bold uppercase tracking-widest italic">
-                                 {volumeIssue.articles.length} Articles
-                              </span>
-                           </div>
+                          <Badge className="bg-foreground text-white px-4 py-1.5 font-headline text-[10px] font-black uppercase tracking-widest rounded-none shadow-md">
+                            Published: {volumeIssue.year}
+                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Layers size={14} className="text-secondary" />
+                            <span className="text-foreground/40 text-[11px] font-bold uppercase tracking-widest italic">
+                              {volumeIssue.articles.length} Articles
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-4 sm:px-12 pb-8 sm:pb-16 pt-6 sm:pt-12 border-t border-border/10 relative z-10 bg-stone-50">
-                    <div className="grid grid-cols-1 gap-8 sm:gap-16">
+                  <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-stone-50">
+                    <div className="mb-12 flex flex-wrap gap-6 border-b border-border/10 pb-6">
+                      <Link
+                        to={`/archive/vol-${volumeIssue.volume}`}
+                        className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:underline"
+                      >
+                        <Database size={16} /> View Volume {volumeIssue.volume}
+                      </Link>
+                      <Link
+                        to={`/archive/vol-${volumeIssue.volume}/issue-${volumeIssue.issue}`}
+                        className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:underline"
+                      >
+                        <Layers size={16} /> View Issue {volumeIssue.issue}
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-1 gap-16">
                       {volumeIssue.articles.map((article, idx) => (
-                        <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-6 lg:gap-12 bg-white p-6 sm:p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700">
+                        <div
+                          key={article.id}
+                          className="relative group/article flex flex-col lg:flex-row gap-6 lg:gap-12 bg-white p-6 sm:p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700"
+                        >
                           {/* Article Metadata Prefix */}
                           <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 flex items-center justify-center font-headline font-black text-foreground/10 text-xl group-hover/article:bg-primary group-hover/article:text-white transition-all italic">
-                             ID-{idx+1}
+                            ID-{idx + 1}
                           </div>
 
                           <div className="flex-grow space-y-6">
-                             <div className="flex items-center gap-4 font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30 italic">
-                                <History size={12} className="text-primary" />
-                                <span>Peer-Reviewed Article</span>
-                             </div>
+                            <div className="flex items-center gap-4 font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30 italic">
+                              <History size={12} className="text-primary" />
+                              <span>Peer-Reviewed Article</span>
+                            </div>
 
-                             <h3 className="text-xl sm:text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors cursor-pointer">
-                               {article.title}
-                             </h3>
+                            <h3 className="text-xl sm:text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors cursor-pointer">
+                              {article.title}
+                            </h3>
 
-                             <p className="font-body text-base sm:text-xl text-foreground/40 leading-snug border-l-2 sm:border-l-4 border-primary/20 pl-4 sm:pl-8 italic group-hover/article:border-primary transition-colors">
-                               {formatAuthors(article.authors)}
-                             </p>
+                            <p className="font-body text-base sm:text-xl text-foreground/40 leading-snug border-l-2 sm:border-l-4 border-primary/20 pl-4 sm:pl-8 italic group-hover/article:border-primary transition-colors">
+                              {formatAuthors(article.authors)}
+                            </p>
 
-                             <p className="font-body text-lg text-foreground/50 leading-relaxed max-w-4xl line-clamp-2">
-                               {article.abstract}
-                             </p>
+                            <p className="font-body text-lg text-foreground/50 leading-relaxed max-w-4xl line-clamp-2">
+                              {article.abstract}
+                            </p>
                           </div>
 
                           <div className="flex flex-row lg:flex-col gap-4 shrink-0 justify-start lg:justify-start pt-4 lg:pt-0 flex-wrap">
-                             <PaperDownload
-                               articleId={article.id}
-                               manuscriptFileUrl={article.manuscript_file_url!}
-                               title={article.title}
-                             />
-                             <Link 
-                               to={`/article/${buildArticleSlug(article)}`}
-                               className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4 rounded-none h-auto bg-white"
-                             >
-                               <Search size={18} /> View Details
-                             </Link>
+                            <PaperDownload
+                              articleId={article.id}
+                              manuscriptFileUrl={article.manuscript_file_url!}
+                              title={article.title}
+                            />
+                            <Link
+                              to={`/article/${buildArticleSlug(article)}`}
+                              className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4 rounded-none h-auto bg-white"
+                            >
+                              <Search size={18} /> View Details
+                            </Link>
                           </div>
                         </div>
                       ))}
@@ -225,9 +310,18 @@ export default function Archive() {
       {/* Continuity Note */}
       <ContentSection>
         <div className="max-w-5xl mx-auto py-16 sm:py-32 text-center border-t border-border/10 relative group">
-           <Layers size={32} className="mx-auto text-foreground/5 mb-8 sm:mb-12 group-hover:text-primary transition-colors" />
-           <h3 className="text-3xl sm:text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-6 sm:mb-8 max-w-4xl mx-auto leading-none italic">Preserving the <span className="text-primary not-italic">Scientific Legacy</span></h3>
-           <p className="text-lg sm:text-2xl font-body text-foreground/40 italic mb-8 sm:mb-16 max-w-3xl mx-auto">Access high-impact discoveries documenting developmental transformation.</p>
+          <Layers
+            size={32}
+            className="mx-auto text-foreground/5 mb-8 sm:mb-12 group-hover:text-primary transition-colors"
+          />
+          <h3 className="text-3xl sm:text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-6 sm:mb-8 max-w-4xl mx-auto leading-none italic">
+            Preserving the{" "}
+            <span className="text-primary not-italic">Scientific Legacy</span>
+          </h3>
+          <p className="text-lg sm:text-2xl font-body text-foreground/40 italic mb-8 sm:mb-16 max-w-3xl mx-auto">
+            Access high-impact discoveries documenting developmental
+            transformation.
+          </p>
         </div>
       </ContentSection>
     </div>
