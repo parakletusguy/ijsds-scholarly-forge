@@ -14,7 +14,8 @@ import {
   CreditCard,
   AlertCircle,
 } from "lucide-react";
-import { createSubmission, updateSubmission } from "@/lib/submissionService";
+import { createSubmission } from "@/lib/submissionService";
+import { api } from "@/lib/apiClient";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
@@ -239,14 +240,18 @@ export const Submit = () => {
         file: manuscriptFile || undefined,
       });
 
-      // Mark both fees on the submission record (editor-override path)
-      if (result?.submission?.id) {
-        await updateSubmission(result.submission.id, {
-          vetting_fee: true,
-          processing_fee: true,
-        }).catch(() => {
-          // Non-fatal: webhook will reconcile via Paystack verification
-        });
+      // Verify both Paystack payments against the live API → writes fee flags to article
+      const articleId = result?.article?.id;
+      if (articleId) {
+        const verifyFee = (reference: string | null, amount: number, type: string) => {
+          if (!reference) return Promise.resolve();
+          return api.post("/api/payment/verify-payment", { reference, amount, articleId, type })
+            .catch((err) => console.error(`[payment] ${type} verify failed:`, err));
+        };
+        await Promise.all([
+          verifyFee(vettingRef.current, VETTING_FEE_KOBO, "vetting"),
+          verifyFee(processingRef.current, PUBLICATION_FEE_KOBO, "processing"),
+        ]);
       }
 
       clearDraft();
