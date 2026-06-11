@@ -24,6 +24,7 @@ export const Home = () => {
   const [recentArticles, setRecentArticles] = useState<Article[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [articlesError, setArticlesError] = useState(false);
   const stats = { reach: 94, scholars: 12000, citations: 450, nations: 82 };
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export const Home = () => {
   const fetchData = async () => {
     try {
       const [articles, posts] = await Promise.all([
-        getArticles({ status: 'published' }),
+        getArticles({ status: 'published' }).catch(() => { setArticlesError(true); return []; }),
         getBlogPosts(),
       ]);
       setRecentArticles(articles.slice(0, 6));
@@ -135,6 +136,11 @@ export const Home = () => {
                 <div className="h-6 bg-stone-100 animate-pulse w-2/3" />
                 <div className="h-32 bg-stone-100 animate-pulse" />
               </div>
+            </div>
+          ) : articlesError ? (
+            <div className="py-16 text-center border border-dashed border-stone-200">
+              <p className="text-stone-400 font-headline text-xl italic mb-2">An error occurred</p>
+              <p className="text-sm text-stone-400">Couldn't fetch articles. Please try again later.</p>
             </div>
           ) : recentArticles.length === 0 ? (
             <div className="py-20 text-center border-2 border-dashed border-primary/10">

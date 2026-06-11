@@ -6,15 +6,11 @@ import {
   User,
   LogOut,
   FileText,
-  Settings,
-  BarChart3,
-  Database,
   FileCheck,
   PenTool,
   Eye,
   Wrench,
   Globe,
-  CheckSquare,
   Archive,
   Library,
   Building2,
@@ -96,10 +92,6 @@ export const AppSidebar = () => {
 
   const adminNav: NavItemDef[] = [
     { title: "Registration Requests", url: "/requests", icon: Building2 },
-    { title: "Analytics", url: "/analytics", icon: BarChart3 },
-    { title: "Data Management", url: "/data-management", icon: Database },
-    { title: "System Settings", url: "/system-settings", icon: Settings },
-    { title: "Integrations", url: "/external-integrations", icon: CheckSquare },
     { title: "Scholarly Archive", url: "/archive", icon: Archive },
   ];
 

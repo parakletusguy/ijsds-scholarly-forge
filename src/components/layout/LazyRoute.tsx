@@ -27,18 +27,10 @@ export const LazyDashboard = () => (
   <LazyRoute component={() => import('@/pages/Dashboard').then(m => ({ default: m.Dashboard }))} />
 );
 
-export const LazyAnalytics = () => (
-  <LazyRoute component={() => import('@/pages/Analytics').then(m => ({ default: m.Analytics }))} />
-);
-
 export const LazyProduction = () => (
   <LazyRoute component={() => import('@/pages/Production').then(m => ({ default: m.Production }))} />
 );
 
 export const LazyReports = () => (
   <LazyRoute component={() => import('@/pages/Reports').then(m => ({ default: m.Reports }))} />
-);
-
-export const LazyDataManagement = () => (
-  <LazyRoute component={() => import('@/pages/DataManagement').then(m => ({ default: m.DataManagement }))} />
 );

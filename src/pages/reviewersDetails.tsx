@@ -106,7 +106,7 @@ export const ReviewerDetail = () => {
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
           {/* Main Article Content */}
           <div className="lg:col-span-8 space-y-12">
             <div className={cardClasses}>
@@ -121,7 +121,7 @@ export const ReviewerDetail = () => {
                     <Badge variant="outline" className={`rounded-none font-headline font-bold uppercase text-[9px] tracking-widest px-4 py-2 border-2 ${getStatusStyle(submission.status)} mb-6`}>
                        {submission.status.replace('_', ' ')}
                     </Badge>
-                    <h1 className="text-4xl font-headline font-black uppercase tracking-tight mb-8 leading-tight">{submission.article.title}</h1>
+                    <h1 className="text-2xl sm:text-4xl font-headline font-black uppercase tracking-tight mb-8 leading-tight">{submission.article.title}</h1>
                     
                     {submission.article.subject_area && (
                       <div className="inline-flex items-center gap-3 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 font-headline font-black uppercase text-[10px] tracking-widest mb-10">
@@ -132,7 +132,7 @@ export const ReviewerDetail = () => {
 
                   <div className="mb-12">
                     <span className={labelClasses}>Scholarly Abstract</span>
-                    <p className="font-body text-foreground/70 leading-relaxed text-lg border-l-4 border-primary/20 pl-8 italic">
+                    <p className="font-body text-foreground/70 leading-relaxed text-base sm:text-lg border-l-2 sm:border-l-4 border-primary/20 pl-4 sm:pl-8 italic">
                       {submission.article.abstract}
                     </p>
                   </div>
@@ -157,12 +157,12 @@ export const ReviewerDetail = () => {
                   </div>
 
                   {submission.article.manuscript_file_url && (
-                    <div className="pt-10 border-t border-border/20 flex items-center justify-between">
+                    <div className="pt-10 border-t border-border/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                        <div>
                           <p className="font-headline font-black text-[10px] uppercase tracking-widest text-foreground/30 mb-2">Prime Document</p>
                           <p className="font-body text-sm font-bold">Manuscript_v1_Source.pdf</p>
                        </div>
-                       <Button onClick={() => handleFileDownload(submission.article.manuscript_file_url!, submission.article.title)} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-8 py-6 h-auto tracking-widest group">
+                       <Button onClick={() => handleFileDownload(submission.article.manuscript_file_url!, submission.article.title)} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-6 sm:px-8 py-4 sm:py-6 h-auto tracking-widest group w-full sm:w-auto">
                           Download Manuscript <Download size={14} className="ml-3 group-hover:translate-y-1 transition-transform" />
                        </Button>
                     </div>

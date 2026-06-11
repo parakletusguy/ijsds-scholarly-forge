@@ -20,13 +20,19 @@ const Paystackbtn = ({ info, onClick }: { info: {
 
   const handlePayment = () => {
     if (onClick) onClick();
-    initializePayment({ onSuccess: info.onSuccess, onClose: info.onClose });
+    try {
+      initializePayment({ onSuccess: info.onSuccess, onClose: info.onClose });
+    } catch (err) {
+      console.error("Paystack initialization failed:", err);
+      alert("Payment could not be initialized. Please disable any ad blocker and try again.");
+    }
   };
 
   return (
-    <button 
+    <button
+      type="button"
       onClick={handlePayment}
-      className="rounded-sm bg-black text-white px-6 py-2 text-sm font-medium hover:bg-gray-800 transition-colors"
+      className="bg-primary hover:bg-[#8f3514] text-white px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors shrink-0"
     >
       Pay Now
     </button>

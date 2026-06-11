@@ -8,7 +8,7 @@ export const Indexing = () => {
     <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
         <title>Indexing & Visibility — IJSDS</title>
-        <meta name="description" content="Discover how IJSDS ensures global visibility through NJOL, Zenodo, Crossref, and Google Scholar indexing." />
+        <meta name="description" content="Discover how IJSDS ensures global visibility through NJOL, CrossRef, and Google Scholar indexing." />
       </Helmet>
 
       {/* Minimalist Header */}
@@ -53,32 +53,6 @@ export const Indexing = () => {
               className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-900 hover:opacity-70 transition-opacity mt-auto"
             >
               Visit Platform <ExternalLink size={10} />
-            </a>
-          </div>
-
-          {/* Zenodo */}
-          <div className="bg-stone-900 p-8 transition-all duration-300 border border-white/5 flex flex-col">
-            <img
-              src="/assets/indexing/zenodo_logo.png"
-              alt="Zenodo Logo"
-              className="w-full max-w-[160px] h-16 object-contain mb-6 brightness-200"
-            />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                <BookOpen size={14} className="text-white" />
-              </div>
-              <h2 className="text-sm font-bold tracking-tight uppercase text-white">Zenodo Repository</h2>
-            </div>
-            <p className="text-stone-400 text-sm leading-relaxed mb-6 flex-1">
-              Every IJSDS article is cross-published on <span className="font-semibold text-white">Zenodo</span>, a CERN-backed open repository. Each record receives a permanent DOI (<span className="text-primary font-mono text-xs">10.5281/zenodo</span>) ensuring long-term preservation and citability.
-            </p>
-            <a
-              href="https://zenodo.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors mt-auto"
-            >
-              CERN Repository <ExternalLink size={10} />
             </a>
           </div>
 

@@ -2,13 +2,24 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmissions, type Submission } from "@/lib/submissionService";
 import { createEditorialDecision } from "@/lib/editorialService";
-import { updateArticle } from "@/lib/articleService";
+import { updateArticle, deleteArticle } from "@/lib/articleService";
 import { crossrefRedeposit, crossrefRegister } from "@/lib/crossrefService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Users,
   Clock,
@@ -22,6 +33,7 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  Trash2,
 } from "lucide-react";
 import { PaperDownload } from "@/components/papers/PaperDownload";
 import { PaymentStatusBadge } from "@/components/payment/PaymentStatusBadge";
@@ -93,6 +105,16 @@ export const Editorial = () => {
       } else {
         toast({ title: "Registration Failed", description: msg || "Failed to queue DOI registration.", variant: "destructive" });
       }
+    }
+  };
+
+  const handleDelete = async (articleId: string) => {
+    try {
+      await deleteArticle(articleId);
+      toast({ title: "Article Deleted", description: "The article and its submission have been removed." });
+      fetchSubmissions();
+    } catch (err: any) {
+      toast({ title: "Deletion Failed", description: err?.message ?? "Could not delete the article.", variant: "destructive" });
     }
   };
 
@@ -318,6 +340,34 @@ export const Editorial = () => {
                   )}
                 </>
               )}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 text-[10px] rounded-none text-red-500 gap-1.5 hover:bg-red-50 hover:text-red-600 ml-auto"
+                  >
+                    <Trash2 size={12} /> Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this article?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove the article and all associated submission data. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(art.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete Permanently
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         )}

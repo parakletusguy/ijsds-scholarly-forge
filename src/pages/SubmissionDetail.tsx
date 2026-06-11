@@ -2,11 +2,23 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmission } from "@/lib/submissionService";
+import { deleteArticle } from "@/lib/articleService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   ArrowLeft,
   FileText,
@@ -14,6 +26,7 @@ import {
   User,
   Download,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import {
   ProcessinFeeDialog,
@@ -52,7 +65,7 @@ interface SubmissionDetails {
 }
 
 // Fee amounts in kobo (100 kobo = ₦1) — grossed up to cover Paystack's 1.5% + ₦100 fee
-const VETTING_FEE_KOBO = 1025400;    // customer pays ₦10,254 → journal nets ₦10,000
+const VETTING_FEE_KOBO = 1025400; // customer pays ₦10,254 → journal nets ₦10,000
 const PUBLICATION_FEE_KOBO = 2599100; // customer pays ₦25,991 → journal nets ₦25,500
 
 export const SubmissionDetail = () => {
@@ -65,15 +78,39 @@ export const SubmissionDetail = () => {
   const [processing, setprocessing] = useState(false);
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
   const [crossrefLoading, setCrossrefLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const isSubmitter = user?.id === submission?.submitter_id;
+  const canDelete = isEditor || (isSubmitter && submission?.status === 'submitted');
+
+  const handleDelete = async () => {
+    if (!submission?.article.id) return;
+    setDeleting(true);
+    try {
+      await deleteArticle(submission.article.id);
+      toast({ title: "Article Deleted", description: "The article and its submission have been removed." });
+      navigate(isEditor ? "/editorial" : "/dashboard");
+    } catch (err: any) {
+      toast({
+        title: "Deletion Failed",
+        description: err?.message ?? "Could not delete the article.",
+        variant: "destructive",
+      });
+      setDeleting(false);
+    }
+  };
 
   const registerCrossRefDoi = async () => {
     if (!submission?.article.id) return;
     setCrossrefLoading(true);
     try {
-      const res = await api.post<{ success: boolean; data: { jobId: string } }>(
-        "/api/crossref/register",
-        { articleId: submission.article.id }
-      ) as { success: boolean; data: { jobId: string } };
+      const res = (await api.post<{
+        success: boolean;
+        data: { jobId: string };
+      }>("/api/crossref/register", { articleId: submission.article.id })) as {
+        success: boolean;
+        data: { jobId: string };
+      };
       toast({
         title: "DOI Registration Queued",
         description: `Job ID: ${res.data.jobId}. CrossRef will process it shortly.`,
@@ -302,8 +339,8 @@ export const SubmissionDetail = () => {
       </div>
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               Submission Details
             </h1>
             <Badge className={getStatusColor(submission.status)}>
@@ -344,7 +381,12 @@ export const SubmissionDetail = () => {
                       </a>
                       {isEditor && (
                         <div>
-                          <Button size="sm" variant="outline" disabled className="opacity-50 cursor-not-allowed">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled
+                            className="opacity-50 cursor-not-allowed"
+                          >
                             CrossRef DOI Registered
                           </Button>
                         </div>
@@ -373,7 +415,9 @@ export const SubmissionDetail = () => {
                             onClick={registerCrossRefDoi}
                             disabled={crossrefLoading}
                           >
-                            {crossrefLoading ? "Queuing…" : "Register CrossRef DOI"}
+                            {crossrefLoading
+                              ? "Queuing…"
+                              : "Register CrossRef DOI"}
                           </Button>
                         </div>
                       )}
@@ -487,6 +531,41 @@ export const SubmissionDetail = () => {
                     {submission.status.replace("_", " ").toUpperCase()}
                   </Badge>
                 </div>
+
+                {canDelete && (
+                  <div className="pt-2 border-t border-border/20">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="w-full gap-2 rounded-sm"
+                          disabled={deleting}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete Article
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete this article?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently remove the article and all associated submission data. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete Permanently
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
               </CardContent>
             </Card>
             <Card className="py-3 mt-3">

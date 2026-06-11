@@ -246,7 +246,7 @@ export const ReviewerDashboard = () => {
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-3 gap-px bg-stone-100 border border-stone-100 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-100 border border-stone-100 mb-8">
           {[
             { label: 'Total Assigned', val: reviews.length, icon: <ClipboardCheck size={14} />, accent: 'text-stone-600' },
             { label: 'Pending', val: pendingReviews.length, icon: <Activity size={14} />, accent: 'text-primary' },

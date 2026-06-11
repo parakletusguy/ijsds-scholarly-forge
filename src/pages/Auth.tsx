@@ -5,7 +5,7 @@ import { signIn, signUp, resetPassword } from '@/lib/auth';
 import { sendWelcomeEmail, sendAuthorWelcomeEmail } from '@/lib/emailService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Lock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 export const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -88,51 +88,68 @@ export const Auth = () => {
     window.location.href = `https://orcid.org/oauth/authorize?client_id=${client_id}&response_type=code&scope=/authenticate&redirect_uri=${redirect}`
   };
 
+  const inputClass = "w-full bg-stone-100 border-0 px-4 py-4 text-stone-900 placeholder:text-stone-400 focus:ring-0 focus:bg-stone-200 transition-colors text-sm font-body outline-none";
+  const labelClass = "block text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-2";
+  const modeLabel = mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password';
+
   return (
-    <div className="min-h-screen bg-stone-50 font-body text-stone-900 antialiased flex flex-col pt-16 md:pt-24">
+    <div className="min-h-[calc(100vh-60px)] bg-[#fdf9f5] font-body antialiased">
       <Helmet>
-        <title>Social Work and Development Studies - Institutional Access</title>
+        <title>Institutional Access — IJSDS</title>
         <meta name="description" content="Secure entry portal for authors, reviewers, and editors of the International Journal of Social Work and Development Studies." />
       </Helmet>
 
-      <main className="flex-grow flex items-center justify-center px-6 py-8">
-        <div className="max-w-xl w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {/* Login Container */}
-          <div
-            ref={formRef}
-            className="bg-white p-10 md:p-14 border-[0.5px] border-stone-100"
-          >
+      <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-20 items-start">
+
+          {/* Left: masthead column */}
+          <div className="md:col-span-4 md:pt-4">
+            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-primary mb-5">
+              {mode === 'signin' ? 'Institutional Access' : mode === 'signup' ? 'New Registration' : 'Password Recovery'}
+            </p>
+            <h2 className="font-headline text-4xl sm:text-5xl font-black text-stone-900 leading-[0.95] tracking-tight mb-6">
+              {modeLabel}
+            </h2>
+            <div className="w-10 h-0.5 bg-primary mb-6" />
+            <p className="text-stone-400 text-sm leading-relaxed">
+              {mode === 'signin'
+                ? 'Access your author dashboard, review assignments, and editorial tools.'
+                : mode === 'signup'
+                ? 'Join IJSDS to submit research and participate in peer review.'
+                : 'We will send recovery instructions to your registered email.'}
+            </p>
+
+            <div className="mt-12 pt-8 border-t border-stone-100 space-y-2 hidden md:block">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-300">Secure access for</p>
+              {['Authors', 'Peer Reviewers', 'Editorial Board'].map(r => (
+                <div key={r} className="flex items-center gap-2">
+                  <div className="w-1 h-1 bg-primary rounded-full" />
+                  <span className="text-xs text-stone-400">{r}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: form column */}
+          <div ref={formRef} className="md:col-span-7 md:col-start-6">
             {reason === 'submit' && (
-              <div className="mb-8 p-4 bg-primary/5 border-l-4 border-primary animate-in fade-in slide-in-from-left-4 duration-500">
+              <div className="mb-8 p-4 bg-primary/5 border border-primary/20">
                 <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Submission Requirement</p>
                 <p className="text-xs text-stone-500 leading-relaxed">
-                  To properly track and manage your submitted articles through the peer-review process, please sign in or create an account.
+                  Sign in or create an account to submit and track manuscripts through peer review.
                 </p>
               </div>
             )}
 
-            <div className="mb-10">
-              <h2 className="font-headline text-2xl font-semibold mb-2">
-                {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
-              </h2>
-              <p className="text-stone-500 text-sm">
-                {mode === 'signin' 
-                  ? 'Sign in to your account to continue.' 
-                  : mode === 'signup' 
-                    ? 'Create an account to start submitting and reviewing.' 
-                    : 'Enter your email to receive password reset instructions.'}
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {mode === 'signup' && (
-                <div className="space-y-2">
-                  <label className="block font-label text-xs font-semibold uppercase tracking-widest text-stone-500" htmlFor="fullName">Full Name</label>
-                  <input 
-                    className="w-full bg-stone-50 border-0 border-b border-stone-200 py-4 px-0 transition-all focus:ring-0 focus:border-primary text-stone-900 placeholder:text-stone-400" 
-                    id="fullName" 
-                    name="fullName" 
-                    placeholder="e.g. Scholar Surname" 
+                <div className="space-y-1.5">
+                  <label className={labelClass} htmlFor="fullName">Full Name</label>
+                  <input
+                    className={inputClass}
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Dr. Scholar Surname"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -141,14 +158,13 @@ export const Auth = () => {
                 </div>
               )}
 
-              {/* Field: Institutional Email */}
-              <div className="space-y-2">
-                <label className="block font-label text-xs font-semibold uppercase tracking-widest text-stone-500" htmlFor="email">Email Address</label>
-                <input 
-                  className="w-full bg-stone-50 border-0 border-b border-stone-200 py-4 px-0 transition-all focus:ring-0 focus:border-primary text-stone-900 placeholder:text-stone-400" 
-                  id="email" 
-                  name="email" 
-                  placeholder="e.g. scholar@academy.edu" 
+              <div className="space-y-1.5">
+                <label className={labelClass} htmlFor="email">Email Address</label>
+                <input
+                  className={inputClass}
+                  id="email"
+                  name="email"
+                  placeholder="scholar@institution.edu"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -157,99 +173,83 @@ export const Auth = () => {
                 />
               </div>
 
-              {/* Field: Password */}
               {mode !== 'forgot-password' && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-end">
-                    <label className="block font-label text-xs font-semibold uppercase tracking-widest text-stone-500" htmlFor="password">Password</label>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass} htmlFor="password">Password</label>
                   <div className="relative">
-                    <input 
-                      className="w-full bg-stone-50 border-0 border-b border-stone-200 py-4 px-0 transition-all focus:ring-0 focus:border-primary text-stone-900" 
-                      id="password" 
-                      name="password" 
-                      placeholder="••••••••••••" 
+                    <input
+                      className={inputClass + " pr-12"}
+                      id="password"
+                      name="password"
+                      placeholder="••••••••••••"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
-                    <button 
-                      type="button" 
-                      className="absolute right-0 top-1/2 -translate-y-1/2 text-stone-400 hover:text-primary transition-colors"
+                    <button
+                      type="button"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-primary transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="pt-4 space-y-6">
-                <button 
-                  className="w-full bg-stone-900 hover:bg-primary text-white font-label font-bold py-5 px-8 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed" 
+              {/* Primary CTA */}
+              <div className="pt-3">
+                <button
+                  className="w-full bg-stone-900 hover:bg-primary text-white font-label font-black py-5 transition-colors duration-300 flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed text-xs uppercase tracking-[0.25em]"
                   type="submit"
                   disabled={loading}
                 >
-                  <span className="tracking-widest uppercase text-sm">
-                    {loading ? 'Authorizing...' : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'}
-                  </span>
-                  {!loading && <Lock className="text-lg w-5 h-5" />}
+                  {loading ? 'Authorizing...' : modeLabel}
+                  {!loading && <ArrowRight size={14} />}
                 </button>
-                
-                <div className="flex flex-col gap-4 text-center">
-                  {mode === 'signin' && (
-                    <button 
-                      type="button"
-                      onClick={() => setMode('forgot-password')}
-                      className="text-primary text-xs font-semibold uppercase tracking-widest hover:opacity-70 transition-opacity"
-                    >
-                      Forgotten Credentials?
-                    </button>
-                  )}
-                  
-                  <button 
-                    type="button"
-                    onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
-                    className="text-stone-500 text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors"
-                  >
-                    {mode === 'signin' ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-                  </button>
-                </div>
               </div>
 
-              {/* SSO Option */}
-              {mode !== 'forgot-password' && (
-                <div className="pt-8 border-t border-stone-100">
-                  <button 
-                    type="button" 
-                    onClick={handleOrcidLogin}
-                    className="w-full border border-stone-200 hover:border-primary transition-all py-4 px-6 flex items-center justify-center gap-3 group"
+              {/* Secondary links */}
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === 'signup' ? 'signin' : mode === 'forgot-password' ? 'signin' : 'signup')}
+                  className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
+                >
+                  {mode === 'signup' ? 'Already registered?' : mode === 'forgot-password' ? 'Back to sign in' : 'Create account'}
+                </button>
+                {mode === 'signin' && (
+                  <button
+                    type="button"
+                    onClick={() => setMode('forgot-password')}
+                    className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
                   >
-                    <svg className="h-5 w-5 text-stone-600 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+
+              {/* ORCID */}
+              {mode !== 'forgot-password' && (
+                <div className="pt-6 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={handleOrcidLogin}
+                    className="w-full bg-stone-100 hover:bg-stone-200 transition-colors py-4 px-6 flex items-center justify-center gap-3 group"
+                  >
+                    <svg className="h-4 w-4 text-stone-500 group-hover:text-stone-700 transition-colors shrink-0" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947 0 .525-.422.947-.947.947-.525 0-.947-.422-.947-.947 0-.525.422-.947.947-.947zm-.722 3.038h1.444v10.041H6.647V7.416zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-1.016 5.016-5.344 5.016h-3.9V7.416zm1.444 1.303v7.444h2.297c2.359 0 3.9-1.303 3.9-3.722 0-2.297-1.303-3.722-3.9-3.722h-2.297z"/>
                     </svg>
-                    <span className="font-label text-xs font-bold uppercase tracking-widest">Connect with ORCID</span>
+                    <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500 group-hover:text-stone-700 transition-colors">Continue with ORCID iD</span>
                   </button>
                 </div>
               )}
             </form>
           </div>
 
-          {/* Footer Link */}
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center gap-2 group"
-            >
-              <span className="font-label text-sm font-bold uppercase tracking-widest border-b border-stone-300 pb-1 group-hover:text-primary group-hover:border-primary transition-all">Back to Home</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
         </div>
-      </main>
-
+      </div>
     </div>
   );
 };

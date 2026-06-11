@@ -160,7 +160,7 @@ export const notifyUserApprovalForProcessing = async (userId: string, authorName
  * @param authorName   - Full name for personalisation
  * @param authorEmail  - Email address to send the indexing instructions to
  * @param submissionTitle - Article title
- * @param doi          - Zenodo DOI (e.g. "10.5281/zenodo.XXXXX")
+ * @param doi          - CrossRef DOI (e.g. "10.XXXX/ijsds.XXXXX")
  * @param articleUrl   - Canonical public URL (e.g. "https://ijsds.org/article/uuid")
  */
 export const notifyUserArticlePublished = async (
@@ -222,7 +222,7 @@ export const generatePostPublicationIndexingEmailHtml = (params: PostPublication
   const { authorName, articleTitle, doi, articleUrl } = params;
   const doiLine = doi
     ? `<strong>DOI:</strong> <a href="https://doi.org/${doi}" style="color:#007cba">${doi}</a>`
-    : `<strong>DOI:</strong> (will be assigned via Zenodo — check your dashboard)`;
+    : `<strong>DOI:</strong> (will be registered via CrossRef — check your article page)`;
 
   return `
 <html>
@@ -258,9 +258,8 @@ export const generatePostPublicationIndexingEmailHtml = (params: PostPublication
 
     <ol style="padding-left:20px">
       <li style="margin-bottom:12px">
-        <strong>Add to ORCID (Automatic):</strong> If you have linked your ORCID to your
-        Zenodo account, your paper will appear automatically. If not, you can manually
-        add it using your DOI: <em>${doi ?? 'see your article page'}</em>.<br/>
+        <strong>Add to ORCID:</strong> You can add your article to your ORCID profile
+        manually using your DOI: <em>${doi ?? 'see your article page'}</em>.<br/>
         <a href="https://ijsds.org/orcidGuide" style="color:#007cba">
           → Step-by-step ORCID guide
         </a>

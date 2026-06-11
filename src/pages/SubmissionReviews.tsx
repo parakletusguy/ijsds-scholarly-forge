@@ -120,7 +120,7 @@ export const SubmissionReviews = () => {
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
           {/* Submission summary sidebar */}
           <div className="lg:col-span-4 space-y-12">
             <div className={cardClasses + " border-t-8 border-foreground"}>

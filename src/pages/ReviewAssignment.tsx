@@ -127,7 +127,7 @@ export const ReviewAssignment = () => {
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
           {/* Submission Dossier Summary */}
           <div className="lg:col-span-4 space-y-12">
             <div className={cardClasses + " border-t-8 border-foreground"}>
@@ -161,14 +161,14 @@ export const ReviewAssignment = () => {
           {/* Evaluator Selection Area */}
           <div className="lg:col-span-8 flex flex-col">
             <div className={cardClasses + " flex-1"}>
-               <div className="flex items-center justify-between mb-10 pb-6 border-b border-border/20">
+               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10 pb-6 border-b border-border/20">
                   <div className="flex items-center gap-4">
                      <div className="p-3 bg-primary text-white"><Users className="h-5 w-5" /></div>
-                     <h2 className="text-2xl font-headline font-black uppercase tracking-tighter">Evaluator Registry</h2>
+                     <h2 className="text-xl sm:text-2xl font-headline font-black uppercase tracking-tighter">Evaluator Registry</h2>
                   </div>
-                  <div className="relative hidden md:block">
+                  <div className="relative w-full sm:w-64">
                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/20" />
-                     <input type="text" placeholder="Search Registries..." className="bg-muted/30 border border-border/10 rounded-none h-12 pl-12 pr-4 font-headline uppercase text-[10px] tracking-widest w-64 focus:border-primary outline-none transition-all" />
+                     <input type="text" placeholder="Search Registries..." className="bg-muted/30 border border-border/10 rounded-none h-12 pl-12 pr-4 font-headline uppercase text-[10px] tracking-widest w-full focus:border-primary outline-none transition-all" />
                   </div>
                </div>
 
@@ -177,7 +177,7 @@ export const ReviewAssignment = () => {
                ) : (
                   <div className="space-y-6">
                     {reviewers.map((reviewer) => (
-                      <div key={reviewer.id} className={`flex items-start gap-6 p-8 border hover:border-primary/20 transition-all group ${selectedReviewers.includes(reviewer.id) ? 'bg-primary/5 border-primary/20' : 'bg-muted/10 border-border/10'}`}>
+                      <div key={reviewer.id} className={`flex items-start gap-4 p-5 sm:p-8 border hover:border-primary/20 transition-all group ${selectedReviewers.includes(reviewer.id) ? 'bg-primary/5 border-primary/20' : 'bg-muted/10 border-border/10'}`}>
                          <Checkbox
                            checked={selectedReviewers.includes(reviewer.id)}
                            onCheckedChange={(checked) => handleReviewerSelection(reviewer.id, checked as boolean)}

@@ -140,8 +140,8 @@ export const ArticleInfo = () => {
 
 
 
-      <main className="max-w-7xl mx-auto px-8 mt-16 lg:mt-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 mt-12 lg:mt-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
 
           {/* Article Main Column */}
           <article className="lg:col-span-8">
@@ -156,7 +156,7 @@ export const ArticleInfo = () => {
             </div>
 
             {/* Title */}
-            <h1 className="font-headline text-5xl md:text-6xl leading-[1.1] text-stone-900 mb-10 tracking-tight">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-stone-900 mb-10 tracking-tight">
               {article.title}
             </h1>
 
@@ -198,7 +198,7 @@ export const ArticleInfo = () => {
             )}
 
             {/* Abstract Container */}
-            <div className="bg-stone-100 p-10 lg:p-14 mb-16 relative overflow-hidden">
+            <div className="bg-stone-100 p-6 sm:p-10 lg:p-14 mb-16 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5">
                 <BookOpen className="w-32 h-32" />
               </div>
@@ -254,7 +254,7 @@ export const ArticleInfo = () => {
 
           {/* Sidebar */}
           <aside className="lg:col-span-4">
-            <div className="sticky top-32 space-y-12">
+            <div className="lg:sticky lg:top-24 space-y-8 lg:space-y-12">
 
               {/* Actions Card */}
               <div className="bg-white border border-stone-100 p-8">

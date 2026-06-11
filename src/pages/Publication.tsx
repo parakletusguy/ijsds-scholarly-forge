@@ -252,8 +252,8 @@ export const Publication = () => {
              <Tabs defaultValue='processed'>
              <CardHeader>
                 <TabsList className='flex justify-evenly'>
-                  <TabsTrigger className='w-[50%]' value="processed">ready for publication </TabsTrigger>
-                  <TabsTrigger className='w-[50%]' value="published">published</TabsTrigger>
+                  <TabsTrigger className='flex-1' value="processed">Ready for Publication</TabsTrigger>
+                  <TabsTrigger className='flex-1' value="published">Published</TabsTrigger>
             </TabsList>
              </CardHeader>
           <CardContent>
@@ -266,7 +266,7 @@ export const Publication = () => {
                     <CardTitle className="text-lg">Bulk Publish by Volume & Issue</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex gap-4 items-end">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
                       <div className="flex-1">
                         <Label htmlFor="volume">Volume Number</Label>
                         <Input
@@ -315,7 +315,7 @@ export const Publication = () => {
                 </Card>
 
                 {/* Articles List */}
-                <div className="space-y-4 w-[100%]">
+                <div className="space-y-4 w-full">
                   {processed.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">
                       No processed articles found

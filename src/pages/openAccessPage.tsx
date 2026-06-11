@@ -71,8 +71,8 @@ export default function OpenAccessPage() {
               a fee upon acceptance of a manuscript. There is no fee to submit or to be considered for publication — 
               charges apply only when an article has been accepted.
             </p>
-            <div className="mt-5 bg-white border border-stone-200 rounded-sm overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="mt-5 bg-white border border-stone-200 rounded-sm overflow-hidden overflow-x-auto">
+              <table className="w-full text-sm min-w-[280px]">
                 <thead>
                   <tr className="bg-stone-50 border-b border-stone-200">
                     <th className="text-left px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Fee Type</th>
@@ -85,16 +85,16 @@ export default function OpenAccessPage() {
                     <td className="px-5 py-3.5 text-right font-medium text-stone-500">None</td>
                   </tr>
                   <tr>
-                    <td className="px-5 py-3.5 text-stone-700">Manuscript Review Fee</td>
-                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦5,125</td>
-                  </tr>
-                  <tr>
-                    <td className="px-5 py-3.5 text-stone-700">Indexing Fee</td>
-                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦5,125</td>
+                    <td className="px-5 py-3.5 text-stone-700">Manuscript Vetting Fee</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦10,000</td>
                   </tr>
                   <tr>
                     <td className="px-5 py-3.5 text-stone-700">Article Publication Fee (APC)</td>
-                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦20,500</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦25,500</td>
+                  </tr>
+                  <tr className="bg-stone-50">
+                    <td className="px-5 py-3.5 text-stone-700 font-semibold">Total</td>
+                    <td className="px-5 py-3.5 text-right font-bold text-stone-900">₦35,500</td>
                   </tr>
                 </tbody>
               </table>
@@ -135,17 +135,16 @@ export default function OpenAccessPage() {
               explicitly permits this — no further permission from the journal is required.
             </p>
             <p className="mt-4">
-              Every article published in IJSDS is also archived on{' '}
+              Every article published in IJSDS is registered with{' '}
               <a
-                href="https://zenodo.org"
+                href="https://www.crossref.org"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
               >
-                Zenodo
+                CrossRef
               </a>
-              {' '}(operated by CERN) and assigned a permanent DOI link, ensuring your work remains 
-              discoverable and citable for the long term.
+              {' '}and assigned a permanent DOI, ensuring your work remains discoverable and citable for the long term.
             </p>
           </section>
 

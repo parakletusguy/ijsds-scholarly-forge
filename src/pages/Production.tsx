@@ -109,7 +109,7 @@ export const Production = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Articles List */}
           <div className="lg:col-span-1">
             <Card>
@@ -160,18 +160,18 @@ export const Production = () => {
           <div className="lg:col-span-2">
             {selectedArticle ? (
               <Tabs defaultValue="editing" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="editing" className="flex items-center gap-2">
-                    <Edit3 className="h-4 w-4" />
-                    Edit
+                <TabsList className="grid w-full grid-cols-3 h-auto">
+                  <TabsTrigger value="editing" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+                    <Edit3 className="h-4 w-4 shrink-0" />
+                    <span>Edit</span>
                   </TabsTrigger>
-                  <TabsTrigger value="doi" className="flex items-center gap-2">
-                    <Link className="h-4 w-4" />
-                    DOI
+                  <TabsTrigger value="doi" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+                    <Link className="h-4 w-4 shrink-0" />
+                    <span>DOI</span>
                   </TabsTrigger>
-                  <TabsTrigger value="issues" className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    Issues
+                  <TabsTrigger value="issues" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+                    <BookOpen className="h-4 w-4 shrink-0" />
+                    <span>Issues</span>
                   </TabsTrigger>
                 </TabsList>
 

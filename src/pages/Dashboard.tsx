@@ -1,7 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getSubmissions, Submission } from '@/lib/submissionService';
+import { deleteArticle } from '@/lib/articleService';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Trash2 } from 'lucide-react';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -32,6 +46,21 @@ export const Dashboard = () => {
       console.error('Error fetching submissions:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (articleId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteArticle(articleId);
+      toast({ title: "Article Deleted", description: "Your submission has been removed." });
+      fetchSubmissions();
+    } catch (err: any) {
+      toast({
+        title: "Deletion Failed",
+        description: err?.message ?? "Could not delete the article.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -100,14 +129,14 @@ export const Dashboard = () => {
 
       {/* Metrics Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16">
-        <div className="md:col-span-8 bg-stone-50 p-10 flex flex-col justify-between group hover:bg-stone-100 transition-colors duration-500">
+        <div className="md:col-span-8 bg-stone-50 p-6 sm:p-10 flex flex-col justify-between group hover:bg-stone-100 transition-colors duration-500">
           <div>
             <div className="flex justify-between items-start mb-12">
               <h4 className="font-headline font-black text-xs uppercase tracking-widest text-primary mb-4">Submission Status</h4>
               <span className="text-[10px] font-label uppercase tracking-[0.2em] text-primary bg-primary/5 px-3 py-1">In Review: {inReviewSubmissions}</span>
             </div>
             <div className="flex items-end gap-4">
-              <span className="text-7xl md:text-8xl font-headline leading-none tabular-nums">
+              <span className="text-5xl sm:text-7xl md:text-8xl font-headline leading-none tabular-nums">
                 {activeSubmissions.toString().padStart(2, '0')}
               </span>
               <span className="text-xs font-label text-stone-400 mb-3 uppercase tracking-[0.2em]">Total Submissions</span>
@@ -118,14 +147,14 @@ export const Dashboard = () => {
           </div>
         </div>
         
-        <div className="md:col-span-4 bg-primary p-10 flex flex-col justify-between text-white group hover:bg-primary/10 transition-colors duration-500">
+        <div className="md:col-span-4 bg-primary p-6 sm:p-10 flex flex-col justify-between text-white group hover:bg-primary/10 transition-colors duration-500">
           <div className="flex justify-between items-start">
             <h4 className="font-headline text-2xl uppercase tracking-tighter opacity-90">Accepted Articles</h4>
             <span className="material-symbols-outlined opacity-50">verified</span>
           </div>
           <div>
             <div className="flex items-end gap-2 mb-2">
-              <span className="text-6xl md:text-7xl font-headline leading-none tabular-nums">
+              <span className="text-5xl sm:text-6xl md:text-7xl font-headline leading-none tabular-nums">
                 {acceptedSubmissions.toString().padStart(2, '0')}
               </span>
               <span className="text-[10px] uppercase tracking-widest mb-2 opacity-70">Accepted</span>
@@ -195,10 +224,42 @@ export const Dashboard = () => {
                     <p className="font-headline text-xl font-semibold text-stone-900 leading-snug mb-4 line-clamp-2">
                       {art.title || 'Untitled Manuscript'}
                     </p>
-                    <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-stone-400">
-                      <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Scholar'}</span>
-                      <span className="w-1 h-1 bg-stone-200 rounded-full"></span>
-                      <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-6 text-[10px] font-label uppercase tracking-[0.2em] text-stone-400">
+                        <span className="truncate max-w-[150px]">Author: {art.authors?.[0]?.name || 'Scholar'}</span>
+                        <span className="w-1 h-1 bg-stone-200 rounded-full"></span>
+                        <span>{new Date(submission.submitted_at).toLocaleDateString()}</span>
+                      </div>
+                      {submission.status === 'submitted' && art.id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-2 text-stone-300 hover:text-red-500 transition-colors shrink-0"
+                              title="Delete submission"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete this submission?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently remove the article and all associated data. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={(e) => handleDelete(art.id, e)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete Permanently
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </div>
                 );
@@ -250,14 +311,7 @@ export const Dashboard = () => {
         </section>
       </div>
 
-      {/* Pull Quote Section */}
-      <section className="mt-32 mb-16 text-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-        <div className="w-12 h-[1px] bg-primary mx-auto mb-10 opacity-30"></div>
-        <blockquote className="text-2xl md:text-3xl font-headline italic text-stone-600 max-w-3xl mx-auto leading-snug">
-          "Design is not merely utility; it is the physical manifestation of institutional memory and scholarly dignity."
-        </blockquote>
-        <div className="w-12 h-[1px] bg-primary mx-auto mt-10 opacity-30"></div>
-      </section>
+
 
       {/* Bottom Institutional Credits */}
       <footer className="mt-32 pt-12 border-t border-stone-100 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-label uppercase tracking-[0.3em] text-stone-300">

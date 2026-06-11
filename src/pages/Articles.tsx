@@ -17,6 +17,7 @@ export const Articles = () => {
   const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [activeFilter, setActiveFilter] = useState<{ type: string; value: string | number | null }>({ type: "all", value: null });
   const [activeIssue, setActiveIssue] = useState<number | null>(null);
@@ -26,7 +27,7 @@ export const Articles = () => {
   useEffect(() => {
     getArticles({ status: "published" })
       .then(setArticles)
-      .catch(() => {})
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -87,6 +88,17 @@ export const Articles = () => {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-stone-50">
       <LoadingSpinner size="lg" text="Loading archive..." />
+    </div>
+  );
+
+  if (fetchError) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 gap-4 px-6 text-center">
+      <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-stone-400">Articles</p>
+      <h2 className="font-headline text-2xl font-bold text-stone-900">An error occurred</h2>
+      <p className="text-sm text-stone-500 max-w-sm">Couldn't fetch articles. Please check your connection and try again.</p>
+      <button onClick={() => window.location.reload()} className="mt-4 text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">
+        Retry
+      </button>
     </div>
   );
 
@@ -162,7 +174,7 @@ export const Articles = () => {
               <div className="mb-10 p-6 bg-stone-50 border border-stone-100 rounded-sm">
                 <div className="space-y-6">
                   {/* Volume Selector */}
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 shrink-0">Volume</span>
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -378,7 +390,7 @@ export const Articles = () => {
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                     <button key={p} onClick={() => setPage(p)}
-                      className={`w-7 h-7 flex items-center justify-center text-xs font-bold transition-colors ${p === page ? "bg-primary text-white" : "text-stone-400 hover:text-primary"}`}
+                      className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-colors ${p === page ? "bg-primary text-white" : "text-stone-400 hover:text-primary"}`}
                     >
                       {p}
                     </button>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,17 +6,22 @@ import {
   X,
   Plus,
   ShieldCheck,
-  CloudUpload,
   ArrowRight,
   FileText,
   CheckCircle2,
   BookOpen,
   PenTool,
+  CreditCard,
+  AlertCircle,
 } from "lucide-react";
-import { createSubmission } from "@/lib/submissionService";
+import { createSubmission, updateSubmission } from "@/lib/submissionService";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
+import Paystackbtn from "@/components/paystack/paystackFunction";
+
+const VETTING_FEE_KOBO = 1025400;   // ₦10,000 net → grossed up
+const PUBLICATION_FEE_KOBO = 2599100; // ₦25,500 net → grossed up
 
 interface Author {
   name: string;
@@ -50,9 +55,14 @@ export const Submit = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
 
+  // Fee payment state
+  const [vettingPaid, setVettingPaid] = useState(false);
+  const [processingPaid, setProcessingPaid] = useState(false);
+  const vettingRef = useRef<string | null>(null);
+  const processingRef = useRef<string | null>(null);
+
   // Checks for ethics/disclosure
   const [ethicsAgree, setEthicsAgree] = useState(false);
-  const [feesAgree, setFeesAgree] = useState(false);
 
   useEffect(() => {
     if (user) loadDraft();
@@ -177,11 +187,20 @@ export const Submit = () => {
       return;
     }
 
-    if (!ethicsAgree || !feesAgree) {
+    if (!vettingPaid || !processingPaid) {
+      toast({
+        title: "Payment Required",
+        description: "Please pay both the vetting fee (₦10,000) and publication fee (₦25,500) before submitting.",
+        variant: "destructive",
+      });
+      document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    if (!ethicsAgree) {
       toast({
         title: "Agreement Required",
-        description:
-          "Please acknowledge the ethical guidelines and processing fees.",
+        description: "Please acknowledge the ethical guidelines.",
         variant: "destructive",
       });
       return;
@@ -199,7 +218,7 @@ export const Submit = () => {
     setLoading(true);
     try {
       await saveDraft();
-      await createSubmission({
+      const result = await createSubmission({
         title: title.trim(),
         abstract: abstract.trim(),
         keywords,
@@ -213,9 +232,20 @@ export const Submit = () => {
         conflicts_of_interest: conflictsOfInterest || null,
         file: manuscriptFile || undefined,
       });
+
+      // Mark both fees on the submission record (editor-override path)
+      if (result?.submission?.id) {
+        await updateSubmission(result.submission.id, {
+          vetting_fee: true,
+          processing_fee: true,
+        }).catch(() => {
+          // Non-fatal: webhook will reconcile via Paystack verification
+        });
+      }
+
       clearDraft();
       toast({
-        title: "Success",
+        title: "Submission Complete",
         description: "Manuscript submitted for evaluation.",
       });
       navigate("/dashboard");
@@ -239,71 +269,99 @@ export const Submit = () => {
       case 3:
         return authors.every((a) => a.name && a.email && a.affiliation);
       case 4:
-        return ethicsAgree && feesAgree;
+        return ethicsAgree && vettingPaid && processingPaid;
       default:
         return false;
     }
   };
 
+  const fieldClass = "w-full bg-stone-100 border-0 focus:ring-0 px-4 py-4 text-sm text-stone-900 placeholder:text-stone-400 focus:bg-stone-200 transition-colors outline-none";
+  const labelClass = "text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400";
+
+  const steps = [
+    { n: "01", label: "Article", done: isStepComplete(1) },
+    { n: "02", label: "Manuscript", done: isStepComplete(2) },
+    { n: "03", label: "Authors", done: isStepComplete(3) },
+    { n: "04", label: "Ethics", done: isStepComplete(4) },
+    { n: "05", label: "Fees", done: vettingPaid && processingPaid },
+    { n: "06", label: "Letter", done: coverLetter.trim().length > 50 },
+  ];
+
+  const abstractWords = abstract.trim() ? abstract.trim().split(/\s+/).length : 0;
+
   if (!user) return null;
 
   return (
     <div className="bg-[#fdf9f5] text-[#1c1c19] font-body min-h-screen pb-32">
-      <Helmet>
-        <title>Heritage & Horizon | IJSDS Article Submission Portal</title>
-      </Helmet>
+      <Helmet><title>Submit Manuscript — IJSDS</title></Helmet>
 
-      {/* Content Area */}
-      <div className="pt-12 pb-24 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto w-full">
-        <header className="mb-16">
-          <span className="text-[10px] font-bold text-primary/10 tracking-[0.2em] uppercase">
-            Submission Form
-          </span>
-          <h2 className="font-headline text-5xl font-bold text-stone-900 mt-4 mb-2 tracking-tight">
-            Article Submission Portal
-          </h2>
-          <div className="w-24 h-1 bg-primary mb-8"></div>
-          <p className="text-stone-500 max-w-2xl leading-relaxed italic">
-            Submit your manuscript to the International Journal of Social Work
-            and Development Studies. Ensure all metadata aligns with our
-            editorial standards for advancing social work discourse.
-          </p>
+      {/* Payment banner */}
+      {(!vettingPaid || !processingPaid) && (
+        <div className="sticky top-0 z-40 bg-amber-50 border-b border-amber-200">
+          <div className="max-w-5xl mx-auto px-6 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+            <div className="flex items-center gap-2 shrink-0">
+              <AlertCircle size={13} className="text-amber-600 shrink-0" />
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-800">Payment required</span>
+            </div>
+            <p className="text-[11px] text-amber-700 flex-1">
+              Both fees (₦10,000 vetting + ₦25,500 publication) must be paid before submitting.
+              {vettingPaid && " Vetting paid."}
+              {processingPaid && " Publication paid."}
+            </p>
+            <button
+              type="button"
+              onClick={() => document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" })}
+              className="text-[9px] font-bold uppercase tracking-widest text-amber-900 underline underline-offset-2 shrink-0"
+            >
+              Pay now →
+            </button>
+          </div>
+        </div>
+      )}
 
-          <div className="mt-8 flex items-center gap-6">
-            {autoSaving && (
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-[10px] font-label uppercase tracking-widest text-stone-900/40 italic">
-                  Auto-saving...
-                </span>
-              </div>
-            )}
-            {lastSaved && !autoSaving && (
-              <span className="text-[10px] font-label uppercase tracking-widest text-stone-600 font-bold">
-                Draft Saved: {lastSaved.toLocaleTimeString()}
-              </span>
-            )}
+      <div className="max-w-5xl mx-auto px-6 md:px-10 pt-10 pb-32">
+
+        {/* Header */}
+        <header className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary mb-3">Manuscript Submission</p>
+            <h2 className="font-headline text-3xl sm:text-4xl font-black text-stone-900 leading-tight">Submit Your Research</h2>
+          </div>
+          <div className="text-[9px] font-bold uppercase tracking-widest text-stone-400">
+            {autoSaving && <span className="text-primary">Saving…</span>}
+            {lastSaved && !autoSaving && <span>Saved {lastSaved.toLocaleTimeString()}</span>}
           </div>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-24">
-          {/* Section 1: Article Details */}
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
-            <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-stone-900">
-                Article Details
-              </h3>
-              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
-                Key information for your article metadata and indexing.
-              </p>
+        {/* Step progress */}
+        <div className="mb-12 overflow-x-auto -mx-6 px-6">
+          <div className="flex gap-0 min-w-max">
+            {steps.map((s, i) => (
+              <div key={s.n} className="flex items-center">
+                <div className={`flex items-center gap-2 px-4 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-colors ${s.done ? "text-emerald-700 bg-emerald-50" : "text-stone-400 bg-stone-100"}`}>
+                  {s.done ? <CheckCircle2 size={11} className="text-emerald-500 shrink-0" /> : <span className="opacity-50">{s.n}</span>}
+                  <span>{s.label}</span>
+                </div>
+                {i < steps.length - 1 && <div className="w-px h-9 bg-stone-200 shrink-0" />}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-12">
+
+          {/* ── 01 Article Details ── */}
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+            <div className="md:col-span-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">01</p>
+              <h3 className="font-headline text-lg font-black text-stone-900">Article Details</h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Core metadata used for indexing and review.</p>
             </div>
-            <div className="md:col-span-8 space-y-8">
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                  Manuscript Title *
-                </label>
+            <div className="md:col-span-9 space-y-6">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Manuscript Title *</label>
                 <input
-                  className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 font-headline text-xl italic placeholder:text-stone-400 transition-all"
+                  className={fieldClass + " font-headline text-lg italic"}
                   placeholder="Enter full scholarly title..."
                   type="text"
                   value={title}
@@ -311,29 +369,26 @@ export const Submit = () => {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                  Abstract *
-                </label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className={labelClass}>Abstract *</label>
+                  <span className={`text-[9px] font-bold tabular-nums ${abstractWords > 300 ? "text-red-500" : "text-stone-400"}`}>
+                    {abstractWords}/300 words
+                  </span>
+                </div>
                 <textarea
-                  className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm leading-relaxed min-h-[200px]"
-                  placeholder="Maximum 300 words summarizing research goals, methodology, and findings..."
+                  className={fieldClass + " min-h-[160px] leading-relaxed"}
+                  placeholder="Summarize research goals, methodology, and findings…"
                   rows={6}
                   value={abstract}
                   onChange={(e) => setAbstract(e.target.value)}
                   required
-                ></textarea>
+                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                    Primary Topic
-                  </label>
-                  <select
-                    className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                    value={subjectArea}
-                    onChange={(e) => setSubjectArea(e.target.value)}
-                  >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Primary Topic</label>
+                  <select className={fieldClass} value={subjectArea} onChange={(e) => setSubjectArea(e.target.value)}>
                     <option>Sustainable Architecture</option>
                     <option>Digital Heritage</option>
                     <option>Urban Ecology</option>
@@ -341,363 +396,277 @@ export const Submit = () => {
                     <option>Community Welfare</option>
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                    Keywords
-                  </label>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Keywords</label>
                   <div className="flex gap-2">
                     <input
-                      className="flex-1 bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                      placeholder="e.g. Urbanism, Social Equity, Policy"
+                      className={fieldClass + " flex-1"}
+                      placeholder="Add keywords, separate with commas"
                       type="text"
                       value={keywordInput}
                       onChange={(e) => setKeywordInput(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addKeyword())
-                      }
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
                     />
-                    <Button
-                      type="button"
-                      onClick={() => addKeyword()}
-                      className="bg-primary hover:bg-[#8f3514] text-white px-4 h-auto"
-                    >
-                      <Plus size={18} />
-                    </Button>
+                    <button type="button" onClick={() => addKeyword()} className="bg-primary hover:bg-[#8f3514] text-white px-4 transition-colors shrink-0">
+                      <Plus size={16} />
+                    </button>
                   </div>
-                  <p className="text-[10px] text-stone-400 tracking-wide">
-                    Separate multiple keywords with commas — they will be added at once.
-                    {keywordInput.includes(",") && (
-                      <span className="ml-2 text-primary font-bold uppercase tracking-widest">
-                        {keywordInput.split(",").map(k => k.trim()).filter(Boolean).length} keyword{keywordInput.split(",").map(k => k.trim()).filter(Boolean).length !== 1 ? "s" : ""} detected
-                      </span>
-                    )}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {keywords.map((kw, i) => (
-                      <span
-                        key={i}
-                        className="bg-stone-100est text-primary font-bold text-[9px] uppercase tracking-widest px-3 py-1 flex items-center gap-2"
-                      >
-                        {kw}
-                        <X
-                          size={10}
-                          className="cursor-pointer hover:text-black"
-                          onClick={() => removeKeyword(i)}
-                        />
-                      </span>
-                    ))}
-                  </div>
+                  {keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {keywords.map((kw, i) => (
+                        <span key={i} className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-widest px-2.5 py-1">
+                          {kw}
+                          <button type="button" onClick={() => removeKeyword(i)}><X size={9} /></button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Section 2: Manuscript Files */}
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-12 bg-stone-50 p-8 md:p-12">
-            <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-stone-900">
-                Manuscript Files
-              </h3>
-              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
-                Upload the primary manuscript and supporting files.
-              </p>
+          <div className="h-px bg-stone-200" />
+
+          {/* ── 02 Manuscript File ── */}
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+            <div className="md:col-span-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">02</p>
+              <h3 className="font-headline text-lg font-black text-stone-900">Manuscript File</h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">.doc, .docx, or .pdf — max 25 MB.</p>
             </div>
-            <div className="md:col-span-8">
+            <div className="md:col-span-9">
               <FileUpload
                 bucketName="journal-website-db1"
                 folder="manuscripts"
                 autoUpload={false}
                 onFileUploaded={(file) => {
-                  if (file instanceof File) {
-                    setManuscriptFile(file);
-                    setManuscriptFileUrl(file.name);
-                  } else {
-                    setManuscriptFileUrl(file);
-                  }
+                  if (file instanceof File) { setManuscriptFile(file); setManuscriptFileUrl(file.name); }
+                  else setManuscriptFileUrl(file);
                 }}
                 acceptedTypes=".doc,.docx,.pdf"
                 maxSizeMB={25}
               />
               {manuscriptFileUrl && (
-                <div className="mt-4 bg-white p-4 flex items-center justify-between border-l-4 border-primary shadow-sm">
-                  <div className="flex items-center space-x-4">
-                    <FileText size={20} className="text-primary" />
+                <div className="mt-3 bg-stone-100 px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText size={16} className="text-primary shrink-0" />
                     <div>
-                      <p className="text-sm font-bold truncate max-w-[200px] md:max-w-md">
-                        {manuscriptFile
-                          ? manuscriptFile.name
-                          : manuscriptFileUrl.split("/").pop()}
+                      <p className="text-sm font-bold truncate max-w-[200px] sm:max-w-sm">
+                        {manuscriptFile ? manuscriptFile.name : manuscriptFileUrl.split("/").pop()}
                       </p>
-                      <p className="text-[9px] uppercase tracking-wider text-stone-400 font-bold">
-                        File Uploaded
-                      </p>
+                      <p className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Ready to submit</p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setManuscriptFileUrl("");
-                      setManuscriptFile(null);
-                    }}
-                    className="text-stone-300 hover:text-red-500 transition-colors"
-                  >
-                    <X size={18} />
+                  <button type="button" onClick={() => { setManuscriptFileUrl(""); setManuscriptFile(null); }} className="text-stone-400 hover:text-red-500 transition-colors ml-4">
+                    <X size={15} />
                   </button>
                 </div>
               )}
             </div>
           </section>
 
-          {/* Section 3: Authors */}
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
-            <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-stone-900">
-                Authors
-              </h3>
-              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
-                Identify all contributors and their affiliations.
-              </p>
+          <div className="h-px bg-stone-200" />
+
+          {/* ── 03 Authors ── */}
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+            <div className="md:col-span-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">03</p>
+              <h3 className="font-headline text-lg font-black text-stone-900">Authors</h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">All contributors and their affiliations.</p>
             </div>
-            <div className="md:col-span-8 space-y-12">
+            <div className="md:col-span-9 space-y-8">
               {authors.map((author, index) => (
-                <div
-                  key={index}
-                  className="space-y-6 relative border-t border-stone-100 pt-8 first:border-t-0 first:pt-0"
-                >
+                <div key={index} className="space-y-4 pt-6 border-t border-stone-100 first:border-0 first:pt-0">
                   <div className="flex items-center justify-between">
-                    <span className="font-headline text-xl font-bold italic opacity-30">
-                      0{index + 1}
-                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400">Author {index + 1}</span>
                     {authors.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeAuthor(index)}
-                        className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-red-500 transition-colors"
-                      >
-                        Remove Author
+                      <button type="button" onClick={() => removeAuthor(index)} className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-red-500 transition-colors">
+                        Remove
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                        Full Name *
-                      </label>
-                      <input
-                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                        type="text"
-                        value={author.name}
-                        onChange={(e) =>
-                          updateAuthor(index, "name", e.target.value)
-                        }
-                        required
-                      />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Full Name *</label>
+                      <input className={fieldClass} type="text" value={author.name} onChange={(e) => updateAuthor(index, "name", e.target.value)} required />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                        Email Address *
-                      </label>
-                      <input
-                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                        type="email"
-                        value={author.email}
-                        onChange={(e) =>
-                          updateAuthor(index, "email", e.target.value)
-                        }
-                        required
-                      />
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Email *</label>
+                      <input className={fieldClass} type="email" value={author.email} onChange={(e) => updateAuthor(index, "email", e.target.value)} required />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                        Institutional Affiliation
-                      </label>
-                      <input
-                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                        type="text"
-                        value={author.affiliation}
-                        onChange={(e) =>
-                          updateAuthor(index, "affiliation", e.target.value)
-                        }
-                      />
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Institutional Affiliation</label>
+                      <input className={fieldClass} type="text" value={author.affiliation} onChange={(e) => updateAuthor(index, "affiliation", e.target.value)} />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                        ORCID Digital iD
-                      </label>
-                      <input
-                        className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                        placeholder="0000-0000-0000-0000"
-                        type="text"
-                        value={author.orcid}
-                        onChange={(e) =>
-                          updateAuthor(index, "orcid", e.target.value)
-                        }
-                      />
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>ORCID iD</label>
+                      <input className={fieldClass} placeholder="0000-0000-0000-0000" type="text" value={author.orcid} onChange={(e) => updateAuthor(index, "orcid", e.target.value)} />
                     </div>
                   </div>
                 </div>
               ))}
-              <button
-                className="w-full py-6 border-2 border-dashed border-stone-200 text-[#af4c2a] font-bold text-xs uppercase tracking-[0.2em] hover:bg-stone-50 transition-all flex items-center justify-center space-x-2"
-                type="button"
-                onClick={addAuthor}
-              >
-                <Plus size={16} />
-                <span>Add Another Author</span>
+              <button type="button" onClick={addAuthor} className="w-full py-4 border border-dashed border-stone-300 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 hover:text-primary hover:border-primary transition-colors flex items-center justify-center gap-2">
+                <Plus size={13} /> Add Another Author
               </button>
             </div>
           </section>
 
-          {/* Section 4: Corresponding Author */}
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-12 border-l-4 border-primary pl-8">
-            <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-stone-900">
-                Corresponding Author
-              </h3>
-            </div>
-            <div className="md:col-span-8 space-y-4">
-              <input
-                className="w-full bg-stone-50est border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-6 font-headline text-xl italic"
-                placeholder="Identify the primary contact email..."
-                type="email"
-                value={correspondingAuthorEmail}
-                onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
-                required
-              />
-              <div className="flex items-start space-x-3 bg-primary/5 p-4">
-                <ShieldCheck className="text-primary mt-1" size={18} />
-                <p className="text-xs italic text-stone-500 leading-relaxed">
-                  All official editorial decisions, assessment reports, and
-                  production protocols will be routed to this specific digital
-                  architecture.
-                </p>
-              </div>
-            </div>
-          </section>
+          <div className="h-px bg-stone-200" />
 
-          {/* Section 5: Ethics & Disclosure */}
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-12">
-            <div className="md:col-span-4">
-              <h3 className="font-headline text-2xl font-bold text-stone-900">
-                Ethics & Disclosure
-              </h3>
+          {/* ── 04 Corresponding Author & Ethics ── */}
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+            <div className="md:col-span-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">04</p>
+              <h3 className="font-headline text-lg font-black text-stone-900">Ethics & Contact</h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Disclosures and correspondence details.</p>
             </div>
-            <div className="md:col-span-8 space-y-8">
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                  Funding Information
-                </label>
+            <div className="md:col-span-9 space-y-6">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Corresponding Author Email *</label>
+                <div className="flex items-center gap-3 bg-stone-100 px-4">
+                  <ShieldCheck size={14} className="text-primary shrink-0" />
+                  <input
+                    className="flex-1 bg-transparent border-0 focus:ring-0 py-4 text-sm text-stone-900 placeholder:text-stone-400 outline-none"
+                    placeholder="Primary editorial contact email"
+                    type="email"
+                    value={correspondingAuthorEmail}
+                    onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className={labelClass}>Funding & Ethics Statement</label>
                 <textarea
-                  className="w-full bg-stone-100 border-none border-b-2 border-transparent focus:border-primary focus:ring-0 px-4 py-4 text-sm"
-                  placeholder="Specify ethics committee approval or exemption..."
+                  className={fieldClass}
+                  placeholder="Declare any funding sources or ethics committee approvals…"
                   rows={3}
                   value={fundingInfo}
                   onChange={(e) => setFundingInfo(e.target.value)}
-                ></textarea>
+                />
               </div>
-              <div className="space-y-4 pt-4">
-                <label className="flex items-center space-x-3 cursor-pointer group">
-                  <input
-                    className="w-5 h-5 border-2 border-stone-300 text-primary focus:ring-primary/20 rounded-none transition-all"
-                    type="checkbox"
-                    checked={ethicsAgree}
-                    onChange={(e) => setEthicsAgree(e.target.checked)}
-                  />
-                  <span className="text-sm text-stone-500 group-hover:text-stone-900 transition-colors">
-                    I confirm no competing financial or personal interests
-                  </span>
-                </label>
-                <label className="flex items-center space-x-3 cursor-pointer group">
-                  <input
-                    className="w-5 h-5 border-2 border-stone-300 text-primary focus:ring-primary/20 rounded-none transition-all"
-                    type="checkbox"
-                    checked={feesAgree}
-                    onChange={(e) => setFeesAgree(e.target.checked)}
-                  />
-                  <span className="text-sm text-stone-500 group-hover:text-stone-900 transition-colors">
-                    I acknowledge the Open Access processing fees
-                  </span>
-                </label>
-              </div>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  className="w-4 h-4 mt-0.5 border border-stone-300 text-primary focus:ring-primary/20 rounded-none transition-all shrink-0"
+                  type="checkbox"
+                  checked={ethicsAgree}
+                  onChange={(e) => setEthicsAgree(e.target.checked)}
+                />
+                <span className="text-sm text-stone-500 group-hover:text-stone-800 transition-colors leading-relaxed">
+                  I confirm there are no competing financial or personal interests that could influence this work.
+                </span>
+              </label>
             </div>
           </section>
 
-          {/* Section 6: Cover Letter */}
-          <section className="pb-12 border-t border-[#ddc0b8]/20 pt-24 text-center">
-            <div className="max-w-2xl mx-auto space-y-12">
-              <div className="space-y-4">
-                <h3 className="font-headline text-3xl font-bold text-stone-900">
-                  Cover Letter
-                </h3>
-                <div className="flex justify-center items-center space-x-4 opacity-30">
-                  <div className="h-[1px] w-12 bg-primary"></div>
-                  <PenTool className="text-primary" size={20} />
-                  <div className="h-[1px] w-12 bg-primary"></div>
-                </div>
-              </div>
+          <div className="h-px bg-stone-200" />
 
-              {/* Pull Quote Pattern */}
-              <div className="py-4">
-                <div className="flex items-center justify-between opacity-30 px-12 md:px-20">
-                  <div className="h-[1px] w-1/5 bg-primary"></div>
-                  <div className="h-[1px] w-1/5 bg-primary"></div>
-                </div>
-                <blockquote className="font-headline text-xl italic text-stone-900 leading-relaxed my-6 px-12">
-                  "The scholarly word is the vessel of our collective future;
-                  treat its presentation with the reverence it deserves."
-                </blockquote>
-                <div className="flex items-center justify-between opacity-30 px-12 md:px-20">
-                  <div className="h-[1px] w-1/5 bg-primary"></div>
-                  <div className="h-[1px] w-1/5 bg-primary"></div>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-left mt-8">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500">
-                  Letter to the Editor *
-                </label>
-                <textarea
-                  className="w-full bg-stone-50est border border-stone-100 focus:border-primary focus:ring-0 px-6 py-6 text-sm italic leading-relaxed shadow-sm min-h-[250px]"
-                  placeholder="Contextualize your research for the editorial board..."
-                  rows={8}
-                  value={coverLetter}
-                  onChange={(e) => setCoverLetter(e.target.value)}
-                  required
-                ></textarea>
+          {/* ── 05 Publication Fees ── */}
+          <section id="payment-section" className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+            <div className="md:col-span-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">05</p>
+              <h3 className="font-headline text-lg font-black text-stone-900">Publication Fees</h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Paid once before entering review. Processed securely via Paystack.</p>
+              <div className="mt-6">
+                <p className={labelClass}>Total due</p>
+                <p className="font-headline text-2xl font-black text-stone-900 mt-1">₦35,500</p>
               </div>
             </div>
+            <div className="md:col-span-9 space-y-3">
+              {[
+                { label: "Manuscript Vetting", amount: "₦10,000", desc: "Editorial screening and peer-review coordination", paid: vettingPaid, kobo: VETTING_FEE_KOBO, feeType: "vetting", onPaid: (ref: string) => { vettingRef.current = ref; setVettingPaid(true); toast({ title: "Vetting Fee Paid" }); } },
+                { label: "Article Publication", amount: "₦25,500", desc: "Production, typesetting, and open-access hosting", paid: processingPaid, kobo: PUBLICATION_FEE_KOBO, feeType: "publication", onPaid: (ref: string) => { processingRef.current = ref; setProcessingPaid(true); toast({ title: "Publication Fee Paid" }); } },
+              ].map((fee) => (
+                <div key={fee.feeType} className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 transition-colors ${fee.paid ? "bg-emerald-50" : "bg-stone-100"}`}>
+                  <div className="flex-1 min-w-0 flex items-start gap-3">
+                    {fee.paid
+                      ? <CheckCircle2 size={15} className="text-emerald-500 mt-0.5 shrink-0" />
+                      : <div className="w-3.5 h-3.5 mt-0.5 rounded-full border-2 border-stone-300 shrink-0" />
+                    }
+                    <div>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-500">{fee.label}</p>
+                      <p className="font-headline text-lg font-black text-stone-900">{fee.amount}</p>
+                      <p className="text-xs text-stone-400 mt-0.5">{fee.desc}</p>
+                    </div>
+                  </div>
+                  {fee.paid ? (
+                    <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-100 px-3 py-2 shrink-0">
+                      <CheckCircle2 size={11} /> Paid
+                    </span>
+                  ) : (
+                    <Paystackbtn
+                      info={{
+                        email: user!.email,
+                        amount: fee.kobo,
+                        metadata: {
+                          custom_fields: [
+                            { display_name: "Fee Type", variable_name: "fee_type", value: fee.feeType },
+                            { display_name: "Submitter", variable_name: "submitter_id", value: user!.id },
+                          ],
+                        },
+                        onSuccess: (res) => fee.onPaid(res.reference),
+                        onClose: () => {},
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+              {vettingPaid && processingPaid && (
+                <div className="flex items-center gap-2.5 px-5 py-3 bg-emerald-50">
+                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                  <p className="text-sm font-bold text-emerald-800">All fees paid — submission is unlocked.</p>
+                </div>
+              )}
+            </div>
           </section>
+
+          <div className="h-px bg-stone-200" />
+
+          {/* ── 06 Cover Letter ── */}
+          <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+            <div className="md:col-span-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">06</p>
+              <h3 className="font-headline text-lg font-black text-stone-900">Cover Letter</h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Contextualize your research for the editorial board.</p>
+            </div>
+            <div className="md:col-span-9 space-y-1.5">
+              <label className={labelClass}>Letter to the Editor *</label>
+              <textarea
+                className={fieldClass + " min-h-[220px] leading-relaxed italic"}
+                placeholder="Describe the significance of your research, why it is suited to IJSDS, and any relevant context the editors should know…"
+                rows={9}
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                required
+              />
+            </div>
+          </section>
+
         </form>
       </div>
 
-      {/* Sticky Footer for Actions */}
-      <footer className="fixed bottom-0 left-0 right-0 md:left-72 bg-[#fdf9f5]/95 backdrop-blur-sm border-t border-[#ddc0b8]/20 h-24 flex items-center justify-between px-6 md:px-12 z-50 transition-all duration-300">
-        <div className="hidden sm:flex items-center space-x-4">
-          <BookOpen size={16} className="text-stone-400" />
-          <p className="text-[10px] text-stone-500 uppercase tracking-widest">
-            {autoSaving
-              ? "Auto-saving..."
-              : lastSaved
-                ? `Saved ${lastSaved.toLocaleTimeString()}`
-                : "Ready for submission"}
-          </p>
+      {/* Sticky footer */}
+      <footer className="fixed bottom-0 left-0 right-0 bg-[#fdf9f5]/95 backdrop-blur-sm border-t border-stone-200 flex items-center justify-between px-4 sm:px-8 z-50 h-20">
+        <div className="hidden sm:flex items-center gap-3">
+          <BookOpen size={14} className="text-stone-300" />
+          <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400">
+            {autoSaving ? "Saving…" : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : "IJSDS Submission Portal"}
+          </span>
         </div>
-        <div className="flex items-center space-x-4 md:space-x-8 w-full sm:w-auto justify-between sm:justify-end">
-          <button
-            type="button"
-            onClick={saveDraft}
-            disabled={autoSaving}
-            className="text-stone-900/60 font-bold uppercase tracking-wider text-[10px] hover:text-primary transition-colors py-2 px-4"
-          >
+        <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
+          <button type="button" onClick={saveDraft} disabled={autoSaving} className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors">
             Save Draft
           </button>
           <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-[#af4c2a] text-white px-6 md:px-10 py-4 font-bold uppercase tracking-wider text-xs md:text-sm hover:bg-[#8f3514] transition-all flex items-center space-x-3 shadow-lg disabled:opacity-50"
+            type="button"
+            onClick={(e) => handleSubmit(e as unknown as React.FormEvent)}
+            disabled={loading || !vettingPaid || !processingPaid}
+            title={!vettingPaid || !processingPaid ? "Pay both fees to unlock" : undefined}
+            className="bg-primary hover:bg-[#8f3514] text-white px-8 py-4 font-bold uppercase tracking-[0.2em] text-xs transition-colors flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <span>{loading ? "Submitting..." : "Submit Article"}</span>
-            {!loading && <ArrowRight size={18} />}
+            {loading ? "Submitting…" : "Submit Article"}
+            {!loading && <ArrowRight size={15} />}
           </button>
         </div>
       </footer>

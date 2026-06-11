@@ -21,6 +21,7 @@ export default function Archive() {
   const [archiveData, setArchiveData] = useState<VolumeIssue[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     fetchArchive();
@@ -59,6 +60,7 @@ export default function Archive() {
       setArchiveData(sortedArchive);
     } catch (error) {
       console.error('Error fetching archive:', error);
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -118,6 +120,15 @@ export default function Archive() {
                  <div key={i} className="h-32 bg-white border border-border/10 shadow-sm" />
                ))}
             </div>
+          ) : fetchError ? (
+            <div className="text-center py-48 bg-white border border-border/10">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-3">Archive</p>
+              <h3 className="font-headline text-2xl font-bold text-stone-900 mb-2">An error occurred</h3>
+              <p className="text-sm text-stone-500 mb-6">Couldn't fetch articles. Please check your connection and try again.</p>
+              <button onClick={() => { setFetchError(false); setLoading(true); fetchArchive(); }} className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">
+                Retry
+              </button>
+            </div>
           ) : filteredArchive.length === 0 ? (
             <div className="text-center py-48 bg-white border-2 border-dashed border-border/10 group relative overflow-hidden">
                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -134,14 +145,14 @@ export default function Archive() {
                 >
                   <div className="absolute top-0 right-0 w-32 h-full bg-stone-50 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
                   
-                  <AccordionTrigger className="px-12 py-10 md:py-16 hover:no-underline border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-stone-50">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-12 text-left relative z-10 font-headline">
+                  <AccordionTrigger className="px-5 sm:px-12 py-6 sm:py-10 md:py-16 hover:no-underline border-l-4 sm:border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-stone-50">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-4 sm:pr-12 text-left relative z-10 font-headline">
                       <div>
                         <div className="flex items-center gap-4 mb-4">
                            <div className="h-0.5 w-12 bg-primary group-hover:w-20 transition-all duration-700"></div>
                            <span className="text-[10px] uppercase tracking-[0.5em] text-foreground/30 font-black italic">Archival Record</span>
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-foreground leading-[0.85] group-hover:text-primary transition-colors">
+                        <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-foreground leading-[0.85] group-hover:text-primary transition-colors">
                           Vol. <span className="text-secondary">{volumeIssue.volume}</span> / Issue {volumeIssue.issue}
                         </h2>
                         <div className="flex items-center gap-6 mt-6">
@@ -159,10 +170,10 @@ export default function Archive() {
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-stone-50">
-                    <div className="grid grid-cols-1 gap-16">
+                  <AccordionContent className="px-4 sm:px-12 pb-8 sm:pb-16 pt-6 sm:pt-12 border-t border-border/10 relative z-10 bg-stone-50">
+                    <div className="grid grid-cols-1 gap-8 sm:gap-16">
                       {volumeIssue.articles.map((article, idx) => (
-                        <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-12 bg-white p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700">
+                        <div key={article.id} className="relative group/article flex flex-col lg:flex-row gap-6 lg:gap-12 bg-white p-6 sm:p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700">
                           {/* Article Metadata Prefix */}
                           <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 flex items-center justify-center font-headline font-black text-foreground/10 text-xl group-hover/article:bg-primary group-hover/article:text-white transition-all italic">
                              ID-{idx+1}
@@ -174,11 +185,11 @@ export default function Archive() {
                                 <span>Peer-Reviewed Article</span>
                              </div>
 
-                             <h3 className="text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors cursor-pointer">
+                             <h3 className="text-xl sm:text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors cursor-pointer">
                                {article.title}
                              </h3>
 
-                             <p className="font-body text-xl text-foreground/40 leading-snug border-l-4 border-primary/20 pl-8 italic group-hover/article:border-primary transition-colors">
+                             <p className="font-body text-base sm:text-xl text-foreground/40 leading-snug border-l-2 sm:border-l-4 border-primary/20 pl-4 sm:pl-8 italic group-hover/article:border-primary transition-colors">
                                {formatAuthors(article.authors)}
                              </p>
 
@@ -187,7 +198,7 @@ export default function Archive() {
                              </p>
                           </div>
 
-                          <div className="flex lg:flex-col gap-4 shrink-0 justify-end lg:justify-start pt-8 lg:pt-0">
+                          <div className="flex flex-row lg:flex-col gap-4 shrink-0 justify-start lg:justify-start pt-4 lg:pt-0 flex-wrap">
                              <PaperDownload
                                articleId={article.id}
                                manuscriptFileUrl={article.manuscript_file_url!}
@@ -213,10 +224,10 @@ export default function Archive() {
 
       {/* Continuity Note */}
       <ContentSection>
-        <div className="max-w-5xl mx-auto py-32 text-center border-t border-border/10 relative group">
-           <Layers size={32} className="mx-auto text-foreground/5 mb-12 group-hover:text-primary transition-colors" />
-           <h3 className="text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-8 max-w-4xl mx-auto leading-none italic">Preserving the <span className="text-primary not-italic">Scientific Legacy</span></h3>
-           <p className="text-2xl font-body text-foreground/40 italic mb-16 max-w-3xl mx-auto">Access high-impact discoveries documenting developmental transformation.</p>
+        <div className="max-w-5xl mx-auto py-16 sm:py-32 text-center border-t border-border/10 relative group">
+           <Layers size={32} className="mx-auto text-foreground/5 mb-8 sm:mb-12 group-hover:text-primary transition-colors" />
+           <h3 className="text-3xl sm:text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-6 sm:mb-8 max-w-4xl mx-auto leading-none italic">Preserving the <span className="text-primary not-italic">Scientific Legacy</span></h3>
+           <p className="text-lg sm:text-2xl font-body text-foreground/40 italic mb-8 sm:mb-16 max-w-3xl mx-auto">Access high-impact discoveries documenting developmental transformation.</p>
         </div>
       </ContentSection>
     </div>

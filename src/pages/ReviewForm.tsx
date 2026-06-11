@@ -139,7 +139,7 @@ export const ReviewForm = () => {
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
           {/* Article sidebar */}
           <div className="lg:col-span-4 space-y-12">
             <div className={cardClasses + " border-t-8 border-foreground"}>
@@ -257,7 +257,7 @@ export const ReviewForm = () => {
                       <Button
                         onClick={handleSubmit}
                         disabled={submitting || saving}
-                        className="flex-1 bg-primary hover:bg-primary/90 text-white py-10 rounded-none font-headline font-black uppercase text-xs tracking-[0.3em] group"
+                        className="flex-1 bg-primary hover:bg-primary/90 text-white py-5 sm:py-10 rounded-none font-headline font-black uppercase text-xs tracking-[0.3em] group"
                       >
                         {submitting
                           ? 'Submitting…'
@@ -268,7 +268,7 @@ export const ReviewForm = () => {
                         variant="outline"
                         onClick={() => saveReview(false)}
                         disabled={submitting || saving}
-                        className="py-10 px-12 rounded-none font-headline font-black uppercase text-[10px] tracking-widest border-border/40 hover:border-primary transition-all gap-3"
+                        className="py-5 sm:py-10 px-8 sm:px-12 rounded-none font-headline font-black uppercase text-[10px] tracking-widest border-border/40 hover:border-primary transition-all gap-3"
                       >
                         {saving ? 'Saving…' : <><Save size={14} /> Save Draft</>}
                       </Button>

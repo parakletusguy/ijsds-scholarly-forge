@@ -20,21 +20,17 @@ const ReviewerDashboard = lazy(() => import('./pages/ReviewerDashboard').then(m 
 const ReviewForm = lazy(() => import('./pages/ReviewForm').then(m => ({ default: m.ReviewForm })));
 const Publication = lazy(() => import('./pages/Publication').then(m => ({ default: m.Publication })));
 const Production = lazy(() => import('./pages/Production').then(m => ({ default: m.Production })));
-const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
 const Copyright = lazy(() => import('./pages/Copyright'));
 const EditorialBoard = lazy(() => import('./pages/EditorialBoard'));
 const SubmissionGuidelines = lazy(() => import('./pages/SubmissionGuidelines').then(m => ({ default: m.SubmissionGuidelines })));
 const PeerReview = lazy(() => import('./pages/PeerReview').then(m => ({ default: m.PeerReview })));
-const ExternalIntegrations = lazy(() => import('./pages/ExternalIntegrations').then(m => ({ default: m.ExternalIntegrations })));
-const DataManagement = lazy(() => import('./pages/DataManagement').then(m => ({ default: m.DataManagement })));
 const SubmissionDetail = lazy(() => import('./pages/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })));
 const SubmissionReviews = lazy(() => import('./pages/SubmissionReviews').then(m => ({ default: m.SubmissionReviews })));
 const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
 const RevisionSubmissionPortal = lazy(() => import('./components/revisions/RevisionSubmissionPortal').then(m => ({ default: m.RevisionSubmissionPortal })));
 const NotFound = lazy(() => import('./pages/NotFound'));
-const SystemSettings = lazy(() => import('./pages/SystemSettings').then(m => ({ default: m.SystemSettings })));
 const ManageRequests = lazy(() => import('./pages/approveRequest').then(m => ({ default: m.ManageRequests })));
 const Landing = lazy(() => import('./pages/landingPage').then(m => ({ default: m.Landing })));
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
@@ -147,15 +143,12 @@ const App = () => (
                     <Route path="/review/:reviewId" element={<PageLayout><ReviewForm /></PageLayout>} />
                     <Route path="/publication" element={<PageLayout><Publication /></PageLayout>} />
                     <Route path="/production" element={<PageLayout><Production /></PageLayout>} />
-                    <Route path="/analytics" element={<PageLayout><Analytics /></PageLayout>} />
-                    <Route path="/data-management" element={<PageLayout><DataManagement /></PageLayout>} />
                     <Route path="/profile" element={<PageLayout><Profile /></PageLayout>} />
                     <Route path="/reports" element={<PageLayout><Reports /></PageLayout>} />
                     <Route path="/submission/:submissionId/details" element={<PageLayout><SubmissionDetail /></PageLayout>} />
                     <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
                     <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
                     <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
-                    <Route path="/system-settings" element={<PageLayout><SystemSettings /></PageLayout>} />
                     <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
                     <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
                     <Route path="/admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
