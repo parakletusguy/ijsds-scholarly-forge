@@ -20,7 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
 import Paystackbtn from "@/components/paystack/paystackFunction";
 
-const VETTING_FEE_KOBO = 1025400;   // ₦10,000 net → grossed up
+const VETTING_FEE_KOBO = 1025400; // ₦10,000 net → grossed up
 const PUBLICATION_FEE_KOBO = 2599100; // ₦25,500 net → grossed up
 
 interface Author {
@@ -155,7 +155,10 @@ export const Submit = () => {
 
   const addKeyword = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
-    const parts = keywordInput.split(",").map((k) => k.trim()).filter(Boolean);
+    const parts = keywordInput
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
     if (parts.length === 0) return;
     const unique = parts.filter((p) => !keywords.includes(p));
     if (unique.length > 0) setKeywords([...keywords, ...unique]);
@@ -190,10 +193,13 @@ export const Submit = () => {
     if (!vettingPaid || !processingPaid) {
       toast({
         title: "Payment Required",
-        description: "Please pay both the vetting fee (₦10,000) and publication fee (₦25,500) before submitting.",
+        description:
+          "Please pay both the vetting fee (₦10,000) and publication fee (₦25,500) before submitting.",
         variant: "destructive",
       });
-      document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById("payment-section")
+        ?.scrollIntoView({ behavior: "smooth" });
       return;
     }
 
@@ -275,8 +281,10 @@ export const Submit = () => {
     }
   };
 
-  const fieldClass = "w-full bg-stone-100 border-0 focus:ring-0 px-4 py-4 text-sm text-stone-900 placeholder:text-stone-400 focus:bg-stone-200 transition-colors outline-none";
-  const labelClass = "text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400";
+  const fieldClass =
+    "w-full bg-stone-100 border-0 focus:ring-0 px-4 py-4 text-sm text-stone-900 placeholder:text-stone-400 focus:bg-stone-200 transition-colors outline-none";
+  const labelClass =
+    "text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400";
 
   const steps = [
     { n: "01", label: "Article", done: isStepComplete(1) },
@@ -287,13 +295,17 @@ export const Submit = () => {
     { n: "06", label: "Letter", done: coverLetter.trim().length > 50 },
   ];
 
-  const abstractWords = abstract.trim() ? abstract.trim().split(/\s+/).length : 0;
+  const abstractWords = abstract.trim()
+    ? abstract.trim().split(/\s+/).length
+    : 0;
 
   if (!user) return null;
 
   return (
     <div className="bg-[#fdf9f5] text-[#1c1c19] font-body min-h-screen pb-32">
-      <Helmet><title>Submit Manuscript — IJSDS</title></Helmet>
+      <Helmet>
+        <title>Submit Manuscript — IJSDS</title>
+      </Helmet>
 
       {/* Payment banner */}
       {(!vettingPaid || !processingPaid) && (
@@ -301,16 +313,23 @@ export const Submit = () => {
           <div className="max-w-5xl mx-auto px-6 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
             <div className="flex items-center gap-2 shrink-0">
               <AlertCircle size={13} className="text-amber-600 shrink-0" />
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-800">Payment required</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-800">
+                Payment required
+              </span>
             </div>
             <p className="text-[11px] text-amber-700 flex-1">
-              Both fees (₦10,000 vetting + ₦25,500 publication) must be paid before submitting.
+              Both fees (₦10,000 vetting + ₦25,500 publication) must be paid
+              before submitting.
               {vettingPaid && " Vetting paid."}
               {processingPaid && " Publication paid."}
             </p>
             <button
               type="button"
-              onClick={() => document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() =>
+                document
+                  .getElementById("payment-section")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="text-[9px] font-bold uppercase tracking-widest text-amber-900 underline underline-offset-2 shrink-0"
             >
               Pay now →
@@ -320,16 +339,21 @@ export const Submit = () => {
       )}
 
       <div className="max-w-5xl mx-auto px-6 md:px-10 pt-10 pb-32">
-
         {/* Header */}
         <header className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary mb-3">Manuscript Submission</p>
-            <h2 className="font-headline text-3xl sm:text-4xl font-black text-stone-900 leading-tight">Submit Your Research</h2>
+            <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary mb-3">
+              Manuscript Submission
+            </p>
+            <h2 className="font-headline text-3xl sm:text-4xl font-black text-stone-900 leading-tight">
+              Submit Your Research
+            </h2>
           </div>
           <div className="text-[9px] font-bold uppercase tracking-widest text-stone-400">
             {autoSaving && <span className="text-primary">Saving…</span>}
-            {lastSaved && !autoSaving && <span>Saved {lastSaved.toLocaleTimeString()}</span>}
+            {lastSaved && !autoSaving && (
+              <span>Saved {lastSaved.toLocaleTimeString()}</span>
+            )}
           </div>
         </header>
 
@@ -338,24 +362,40 @@ export const Submit = () => {
           <div className="flex gap-0 min-w-max">
             {steps.map((s, i) => (
               <div key={s.n} className="flex items-center">
-                <div className={`flex items-center gap-2 px-4 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-colors ${s.done ? "text-emerald-700 bg-emerald-50" : "text-stone-400 bg-stone-100"}`}>
-                  {s.done ? <CheckCircle2 size={11} className="text-emerald-500 shrink-0" /> : <span className="opacity-50">{s.n}</span>}
+                <div
+                  className={`flex items-center gap-2 px-4 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-colors ${s.done ? "text-emerald-700 bg-emerald-50" : "text-stone-400 bg-stone-100"}`}
+                >
+                  {s.done ? (
+                    <CheckCircle2
+                      size={11}
+                      className="text-emerald-500 shrink-0"
+                    />
+                  ) : (
+                    <span className="opacity-50">{s.n}</span>
+                  )}
                   <span>{s.label}</span>
                 </div>
-                {i < steps.length - 1 && <div className="w-px h-9 bg-stone-200 shrink-0" />}
+                {i < steps.length - 1 && (
+                  <div className="w-px h-9 bg-stone-200 shrink-0" />
+                )}
               </div>
             ))}
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-12">
-
           {/* ── 01 Article Details ── */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
             <div className="md:col-span-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">01</p>
-              <h3 className="font-headline text-lg font-black text-stone-900">Article Details</h3>
-              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Core metadata used for indexing and review.</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                01
+              </p>
+              <h3 className="font-headline text-lg font-black text-stone-900">
+                Article Details
+              </h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                Core metadata used for indexing and review.
+              </p>
             </div>
             <div className="md:col-span-9 space-y-6">
               <div className="space-y-1.5">
@@ -372,7 +412,9 @@ export const Submit = () => {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className={labelClass}>Abstract *</label>
-                  <span className={`text-[9px] font-bold tabular-nums ${abstractWords > 300 ? "text-red-500" : "text-stone-400"}`}>
+                  <span
+                    className={`text-[9px] font-bold tabular-nums ${abstractWords > 300 ? "text-red-500" : "text-stone-400"}`}
+                  >
                     {abstractWords}/300 words
                   </span>
                 </div>
@@ -388,7 +430,11 @@ export const Submit = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
                   <label className={labelClass}>Primary Topic</label>
-                  <select className={fieldClass} value={subjectArea} onChange={(e) => setSubjectArea(e.target.value)}>
+                  <select
+                    className={fieldClass}
+                    value={subjectArea}
+                    onChange={(e) => setSubjectArea(e.target.value)}
+                  >
                     <option>Sustainable Architecture</option>
                     <option>Digital Heritage</option>
                     <option>Urban Ecology</option>
@@ -405,18 +451,32 @@ export const Submit = () => {
                       type="text"
                       value={keywordInput}
                       onChange={(e) => setKeywordInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && (e.preventDefault(), addKeyword())
+                      }
                     />
-                    <button type="button" onClick={() => addKeyword()} className="bg-primary hover:bg-[#8f3514] text-white px-4 transition-colors shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => addKeyword()}
+                      className="bg-primary hover:bg-[#8f3514] text-white px-4 transition-colors shrink-0"
+                    >
                       <Plus size={16} />
                     </button>
                   </div>
                   {keywords.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {keywords.map((kw, i) => (
-                        <span key={i} className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-widest px-2.5 py-1">
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-widest px-2.5 py-1"
+                        >
                           {kw}
-                          <button type="button" onClick={() => removeKeyword(i)}><X size={9} /></button>
+                          <button
+                            type="button"
+                            onClick={() => removeKeyword(i)}
+                          >
+                            <X size={9} />
+                          </button>
                         </span>
                       ))}
                     </div>
@@ -431,9 +491,15 @@ export const Submit = () => {
           {/* ── 02 Manuscript File ── */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
             <div className="md:col-span-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">02</p>
-              <h3 className="font-headline text-lg font-black text-stone-900">Manuscript File</h3>
-              <p className="text-xs text-stone-400 mt-2 leading-relaxed">.doc, .docx, or .pdf — max 25 MB.</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                02
+              </p>
+              <h3 className="font-headline text-lg font-black text-stone-900">
+                Manuscript File
+              </h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                .doc, .docx, or .pdf — max 25 MB.
+              </p>
             </div>
             <div className="md:col-span-9">
               <FileUpload
@@ -441,8 +507,10 @@ export const Submit = () => {
                 folder="manuscripts"
                 autoUpload={false}
                 onFileUploaded={(file) => {
-                  if (file instanceof File) { setManuscriptFile(file); setManuscriptFileUrl(file.name); }
-                  else setManuscriptFileUrl(file);
+                  if (file instanceof File) {
+                    setManuscriptFile(file);
+                    setManuscriptFileUrl(file.name);
+                  } else setManuscriptFileUrl(file);
                 }}
                 acceptedTypes=".doc,.docx,.pdf"
                 maxSizeMB={25}
@@ -453,12 +521,23 @@ export const Submit = () => {
                     <FileText size={16} className="text-primary shrink-0" />
                     <div>
                       <p className="text-sm font-bold truncate max-w-[200px] sm:max-w-sm">
-                        {manuscriptFile ? manuscriptFile.name : manuscriptFileUrl.split("/").pop()}
+                        {manuscriptFile
+                          ? manuscriptFile.name
+                          : manuscriptFileUrl.split("/").pop()}
                       </p>
-                      <p className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Ready to submit</p>
+                      <p className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">
+                        Ready to submit
+                      </p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => { setManuscriptFileUrl(""); setManuscriptFile(null); }} className="text-stone-400 hover:text-red-500 transition-colors ml-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setManuscriptFileUrl("");
+                      setManuscriptFile(null);
+                    }}
+                    className="text-stone-400 hover:text-red-500 transition-colors ml-4"
+                  >
                     <X size={15} />
                   </button>
                 </div>
@@ -471,17 +550,32 @@ export const Submit = () => {
           {/* ── 03 Authors ── */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
             <div className="md:col-span-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">03</p>
-              <h3 className="font-headline text-lg font-black text-stone-900">Authors</h3>
-              <p className="text-xs text-stone-400 mt-2 leading-relaxed">All contributors and their affiliations.</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                03
+              </p>
+              <h3 className="font-headline text-lg font-black text-stone-900">
+                Authors
+              </h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                All contributors and their affiliations.
+              </p>
             </div>
             <div className="md:col-span-9 space-y-8">
               {authors.map((author, index) => (
-                <div key={index} className="space-y-4 pt-6 border-t border-stone-100 first:border-0 first:pt-0">
+                <div
+                  key={index}
+                  className="space-y-4 pt-6 border-t border-stone-100 first:border-0 first:pt-0"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400">Author {index + 1}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400">
+                      Author {index + 1}
+                    </span>
                     {authors.length > 1 && (
-                      <button type="button" onClick={() => removeAuthor(index)} className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-red-500 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => removeAuthor(index)}
+                        className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-red-500 transition-colors"
+                      >
                         Remove
                       </button>
                     )}
@@ -489,24 +583,61 @@ export const Submit = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className={labelClass}>Full Name *</label>
-                      <input className={fieldClass} type="text" value={author.name} onChange={(e) => updateAuthor(index, "name", e.target.value)} required />
+                      <input
+                        className={fieldClass}
+                        type="text"
+                        value={author.name}
+                        onChange={(e) =>
+                          updateAuthor(index, "name", e.target.value)
+                        }
+                        required
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Email *</label>
-                      <input className={fieldClass} type="email" value={author.email} onChange={(e) => updateAuthor(index, "email", e.target.value)} required />
+                      <input
+                        className={fieldClass}
+                        type="email"
+                        value={author.email}
+                        onChange={(e) =>
+                          updateAuthor(index, "email", e.target.value)
+                        }
+                        required
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Institutional Affiliation</label>
-                      <input className={fieldClass} type="text" value={author.affiliation} onChange={(e) => updateAuthor(index, "affiliation", e.target.value)} />
+                      <label className={labelClass}>
+                        Institutional Affiliation
+                      </label>
+                      <input
+                        className={fieldClass}
+                        type="text"
+                        value={author.affiliation}
+                        onChange={(e) =>
+                          updateAuthor(index, "affiliation", e.target.value)
+                        }
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>ORCID iD</label>
-                      <input className={fieldClass} placeholder="0000-0000-0000-0000" type="text" value={author.orcid} onChange={(e) => updateAuthor(index, "orcid", e.target.value)} />
+                      <input
+                        className={fieldClass}
+                        placeholder="0000-0000-0000-0000"
+                        type="text"
+                        value={author.orcid}
+                        onChange={(e) =>
+                          updateAuthor(index, "orcid", e.target.value)
+                        }
+                      />
                     </div>
                   </div>
                 </div>
               ))}
-              <button type="button" onClick={addAuthor} className="w-full py-4 border border-dashed border-stone-300 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 hover:text-primary hover:border-primary transition-colors flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={addAuthor}
+                className="w-full py-4 border border-dashed border-stone-300 text-[9px] font-bold uppercase tracking-[0.25em] text-stone-400 hover:text-primary hover:border-primary transition-colors flex items-center justify-center gap-2"
+              >
                 <Plus size={13} /> Add Another Author
               </button>
             </div>
@@ -517,13 +648,21 @@ export const Submit = () => {
           {/* ── 04 Corresponding Author & Ethics ── */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
             <div className="md:col-span-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">04</p>
-              <h3 className="font-headline text-lg font-black text-stone-900">Ethics & Contact</h3>
-              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Disclosures and correspondence details.</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                04
+              </p>
+              <h3 className="font-headline text-lg font-black text-stone-900">
+                Ethics & Contact
+              </h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                Disclosures and correspondence details.
+              </p>
             </div>
             <div className="md:col-span-9 space-y-6">
               <div className="space-y-1.5">
-                <label className={labelClass}>Corresponding Author Email *</label>
+                <label className={labelClass}>
+                  Corresponding Author Email *
+                </label>
                 <div className="flex items-center gap-3 bg-stone-100 px-4">
                   <ShieldCheck size={14} className="text-primary shrink-0" />
                   <input
@@ -531,7 +670,9 @@ export const Submit = () => {
                     placeholder="Primary editorial contact email"
                     type="email"
                     value={correspondingAuthorEmail}
-                    onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
+                    onChange={(e) =>
+                      setCorrespondingAuthorEmail(e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -554,7 +695,8 @@ export const Submit = () => {
                   onChange={(e) => setEthicsAgree(e.target.checked)}
                 />
                 <span className="text-sm text-stone-500 group-hover:text-stone-800 transition-colors leading-relaxed">
-                  I confirm there are no competing financial or personal interests that could influence this work.
+                  I confirm there are no competing financial or personal
+                  interests that could influence this work.
                 </span>
               </label>
             </div>
@@ -563,31 +705,80 @@ export const Submit = () => {
           <div className="h-px bg-stone-200" />
 
           {/* ── 05 Publication Fees ── */}
-          <section id="payment-section" className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+          <section
+            id="payment-section"
+            className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10"
+          >
             <div className="md:col-span-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">05</p>
-              <h3 className="font-headline text-lg font-black text-stone-900">Publication Fees</h3>
-              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Paid once before entering review. Processed securely via Paystack.</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                05
+              </p>
+              <h3 className="font-headline text-lg font-black text-stone-900">
+                Publication Fees
+              </h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                Paid once before entering review. Processed securely via
+                Paystack.
+              </p>
               <div className="mt-6">
                 <p className={labelClass}>Total due</p>
-                <p className="font-headline text-2xl font-black text-stone-900 mt-1">₦35,500</p>
+                <p className="font-headline text-2xl font-black text-stone-900 mt-1">
+                  ₦35,500
+                </p>
               </div>
             </div>
             <div className="md:col-span-9 space-y-3">
               {[
-                { label: "Manuscript Vetting", amount: "₦10,000", desc: "Editorial screening and peer-review coordination", paid: vettingPaid, kobo: VETTING_FEE_KOBO, feeType: "vetting", onPaid: (ref: string) => { vettingRef.current = ref; setVettingPaid(true); toast({ title: "Vetting Fee Paid" }); } },
-                { label: "Article Publication", amount: "₦25,500", desc: "Production, typesetting, and open-access hosting", paid: processingPaid, kobo: PUBLICATION_FEE_KOBO, feeType: "publication", onPaid: (ref: string) => { processingRef.current = ref; setProcessingPaid(true); toast({ title: "Publication Fee Paid" }); } },
+                {
+                  label: "Manuscript Vetting",
+                  amount: "₦10,000",
+                  desc: "Editorial screening and peer-review coordination",
+                  paid: vettingPaid,
+                  kobo: VETTING_FEE_KOBO,
+                  feeType: "vetting",
+                  onPaid: (ref: string) => {
+                    vettingRef.current = ref;
+                    setVettingPaid(true);
+                    toast({ title: "Vetting Fee Paid" });
+                  },
+                },
+                {
+                  label: "Article Publication",
+                  amount: "₦25,500",
+                  desc: "Production, typesetting, and open-access hosting",
+                  paid: processingPaid,
+                  kobo: PUBLICATION_FEE_KOBO,
+                  feeType: "publication",
+                  onPaid: (ref: string) => {
+                    processingRef.current = ref;
+                    setProcessingPaid(true);
+                    toast({ title: "Publication Fee Paid" });
+                  },
+                },
               ].map((fee) => (
-                <div key={fee.feeType} className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 transition-colors ${fee.paid ? "bg-emerald-50" : "bg-stone-100"}`}>
+                <div
+                  key={fee.feeType}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 transition-colors ${fee.paid ? "bg-emerald-50" : "bg-stone-100"}`}
+                >
                   <div className="flex-1 min-w-0 flex items-start gap-3">
-                    {fee.paid
-                      ? <CheckCircle2 size={15} className="text-emerald-500 mt-0.5 shrink-0" />
-                      : <div className="w-3.5 h-3.5 mt-0.5 rounded-full border-2 border-stone-300 shrink-0" />
-                    }
+                    {fee.paid ? (
+                      <CheckCircle2
+                        size={15}
+                        className="text-emerald-500 mt-0.5 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-3.5 h-3.5 mt-0.5 rounded-full border-2 border-stone-300 shrink-0" />
+                    )}
                     <div>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-500">{fee.label}</p>
-                      <p className="font-headline text-lg font-black text-stone-900">{fee.amount}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">{fee.desc}</p>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                        {fee.label}
+                      </p>
+                      <p className="font-headline text-lg font-black text-stone-900">
+                        {fee.amount}
+                      </p>
+                      <p className="text-xs text-stone-400 mt-0.5">
+                        {fee.desc}
+                      </p>
                     </div>
                   </div>
                   {fee.paid ? (
@@ -601,8 +792,16 @@ export const Submit = () => {
                         amount: fee.kobo,
                         metadata: {
                           custom_fields: [
-                            { display_name: "Fee Type", variable_name: "fee_type", value: fee.feeType },
-                            { display_name: "Submitter", variable_name: "submitter_id", value: user!.id },
+                            {
+                              display_name: "Fee Type",
+                              variable_name: "fee_type",
+                              value: fee.feeType,
+                            },
+                            {
+                              display_name: "Submitter",
+                              variable_name: "submitter_id",
+                              value: user!.id,
+                            },
                           ],
                         },
                         onSuccess: (res) => fee.onPaid(res.reference),
@@ -614,8 +813,13 @@ export const Submit = () => {
               ))}
               {vettingPaid && processingPaid && (
                 <div className="flex items-center gap-2.5 px-5 py-3 bg-emerald-50">
-                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-                  <p className="text-sm font-bold text-emerald-800">All fees paid — submission is unlocked.</p>
+                  <CheckCircle2
+                    size={14}
+                    className="text-emerald-600 shrink-0"
+                  />
+                  <p className="text-sm font-bold text-emerald-800">
+                    All fees paid — submission is unlocked.
+                  </p>
                 </div>
               )}
             </div>
@@ -626,9 +830,15 @@ export const Submit = () => {
           {/* ── 06 Cover Letter ── */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
             <div className="md:col-span-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">06</p>
-              <h3 className="font-headline text-lg font-black text-stone-900">Cover Letter</h3>
-              <p className="text-xs text-stone-400 mt-2 leading-relaxed">Contextualize your research for the editorial board.</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                06
+              </p>
+              <h3 className="font-headline text-lg font-black text-stone-900">
+                Cover Letter
+              </h3>
+              <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                Contextualize your research for the editorial board.
+              </p>
             </div>
             <div className="md:col-span-9 space-y-1.5">
               <label className={labelClass}>Letter to the Editor *</label>
@@ -642,7 +852,6 @@ export const Submit = () => {
               />
             </div>
           </section>
-
         </form>
       </div>
 
@@ -651,18 +860,30 @@ export const Submit = () => {
         <div className="hidden sm:flex items-center gap-3">
           <BookOpen size={14} className="text-stone-300" />
           <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400">
-            {autoSaving ? "Saving…" : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : "IJSDS Submission Portal"}
+            {autoSaving
+              ? "Saving…"
+              : lastSaved
+                ? `Saved ${lastSaved.toLocaleTimeString()}`
+                : "IJSDS Submission Portal"}
           </span>
         </div>
         <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-          <button type="button" onClick={saveDraft} disabled={autoSaving} className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors">
+          <button
+            type="button"
+            onClick={saveDraft}
+            disabled={autoSaving}
+            className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
+          >
             Save Draft
           </button>
           <button
-            type="button"
-            onClick={(e) => handleSubmit(e as unknown as React.FormEvent)}
+            onClick={handleSubmit}
             disabled={loading || !vettingPaid || !processingPaid}
-            title={!vettingPaid || !processingPaid ? "Pay both fees to unlock" : undefined}
+            title={
+              !vettingPaid || !processingPaid
+                ? "Pay both fees to unlock"
+                : undefined
+            }
             className="bg-primary hover:bg-[#8f3514] text-white px-8 py-4 font-bold uppercase tracking-[0.2em] text-xs transition-colors flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? "Submitting…" : "Submit Article"}
