@@ -139,7 +139,9 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     if(content == ''){  
       const fileNameUrl = url.split("/").pop(); 
       console.log(fileName); 
-      const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
+      const apiBase = import.meta.env.VITE_API_URL || "https://ijsdsbackend-429660256945.europe-southwest1.run.app";
+      const normalizedBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
+      const getHtml = await fetch(`${normalizedBase}/supabase/getFile`, {
       method: 'POST',
       headers: {"Content-Type" : "application/json"},
       body:JSON.stringify({

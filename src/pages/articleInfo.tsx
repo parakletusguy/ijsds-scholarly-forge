@@ -18,6 +18,31 @@ import { Search, BookOpen, Quote, Bookmark, Share2, ChevronLeft, Minus, Plus, Ex
 
 const JOURNAL_TITLE = "International Journal of Social Work and Development Studies";
 
+const formatCitationDate = (dateStr?: string | null) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd}`;
+  } catch {
+    return dateStr;
+  }
+};
+
+const getAbsolutePdfUrl = (url: string | null | undefined) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  const apiBase = import.meta.env.VITE_API_URL || "https://ijsdsbackend-429660256945.europe-southwest1.run.app";
+  const normalizedBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
+  const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${normalizedBase}${normalizedUrl}`;
+};
+
 export const ArticleInfo = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -113,17 +138,22 @@ export const ArticleInfo = () => {
       <Helmet>
         <title>{article.title} | IJSDS</title>
         <meta name="citation_title" content={article.title} />
-        {authors.map((a: any) => <meta key={a.name} name="citation_author" content={a.name} />)}
+        {authors.filter((a: any) => a?.name?.trim()).map((a: any) => (
+          <meta key={a.name} name="citation_author" content={a.name.trim()} />
+        ))}
         <meta name="citation_journal_title" content={JOURNAL_TITLE} />
         <meta name="citation_issn" content="3115-6940" />
         <meta name="citation_issn" content="3115-6932" />
         <meta name="citation_publisher" content={JOURNAL_TITLE} />
         <meta name="citation_volume" content={String(article.volume || "")} />
         <meta name="citation_issue" content={String(article.issue || "")} />
-        <meta name="citation_date" content={article.publication_date || ""} />
-        {article.crossrefDoi && <meta name="citation_doi" content={article.crossrefDoi} />}
+        <meta name="citation_publication_date" content={formatCitationDate(article.publication_date)} />
+        <meta name="citation_date" content={formatCitationDate(article.publication_date)} />
+        {(article.crossrefDoi || article.doi) && (
+          <meta name="citation_doi" content={article.crossrefDoi || article.doi || ""} />
+        )}
         {article.manuscript_file_url && (
-          <meta name="citation_pdf_url" content={article.manuscript_file_url} />
+          <meta name="citation_pdf_url" content={getAbsolutePdfUrl(article.manuscript_file_url)} />
         )}
         <meta name="citation_language" content="en" />
         {article.page_start && <meta name="citation_firstpage" content={String(article.page_start)} />}

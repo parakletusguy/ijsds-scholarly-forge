@@ -84,8 +84,10 @@ export const Auth = () => {
   const handleOrcidLogin = () => {
     setLoading(true);
     const client_id = "APP-GKE87FTH6QV1ZK9D"
-    const redirect = encodeURIComponent("https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/auth/orcid")
-    window.location.href = `https://orcid.org/oauth/authorize?client_id=${client_id}&response_type=code&scope=/authenticate&redirect_uri=${redirect}`
+    const apiBase = import.meta.env.VITE_API_URL || "https://ijsdsbackend-429660256945.europe-southwest1.run.app";
+    const normalizedBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
+    const redirect = encodeURIComponent(`${normalizedBase}/auth/orcid`);
+    window.location.href = `https://orcid.org/oauth/authorize?client_id=${client_id}&response_type=code&scope=/authenticate&redirect_uri=${redirect}`;
   };
 
   const inputClass = "w-full bg-stone-100 border-0 px-4 py-4 text-stone-900 placeholder:text-stone-400 focus:ring-0 focus:bg-stone-200 transition-colors text-sm font-body outline-none";

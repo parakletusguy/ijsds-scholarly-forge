@@ -393,18 +393,6 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
               {processload? 'processing...': <p className='flex'>Approve for Processing</p>}
               
             </Button>
-            {/* <Button variant="outline" disabled={loading}>
-              <FileText className="h-4 w-4 mr-2" />
-              Export Metadata
-            </Button>
-            <Button 
-              variant="outline" 
-              disabled={loading}
-              onClick={() => window.open('/external-integrations', '_blank')}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Submit to DOAJ/AJOL
-            </Button> */}
           </div>
         </CardContent>
       </Card>

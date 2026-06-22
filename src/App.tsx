@@ -121,6 +121,7 @@ const App = () => (
                     <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
                     <Route path="/articles" element={<PublicLayout><Articles /></PublicLayout>} />
                     <Route path="/article/:slug" element={<PublicLayout><ArticleInfo /></PublicLayout>} />
+                    <Route path="/articles/:slug" element={<PublicLayout><ArticleInfo /></PublicLayout>} />
                     <Route path="/archive" element={<PublicLayout><Archive /></PublicLayout>} />
                     <Route path="/archive/vol-:volume" element={<PublicLayout><VolumePage /></PublicLayout>} />
                     <Route path="/archive/vol-:volume/issue-:issue" element={<PublicLayout><IssuePage /></PublicLayout>} />

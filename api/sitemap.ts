@@ -11,7 +11,7 @@ const buildArticleSlug = (article: { title: string; doi?: string | null; id: str
 };
 
 const BASE_URL = 'https://ijsds.org';
-const API_URL = process.env.VITE_API_URL || 'https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net';
+const API_URL = process.env.VITE_API_URL || 'https://ijsdsbackend-429660256945.europe-southwest1.run.app';
 
 export default async function handler(req: any, res: any) {
   try {
