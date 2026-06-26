@@ -2,18 +2,31 @@ import { usePaystackPayment } from "react-paystack";
 
 const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string;
 
-const Paystackbtn = ({ info, onClick }: { info: {
-  email: string;
-  amount: number;
-  metadata?: { custom_fields: { display_name: string; variable_name: string; value: string }[] };
-  onSuccess: (response: { reference: string }) => void;
-  onClose: () => void;
-}, onClick?: () => void }) => {
+const Paystackbtn = ({
+  info,
+  onClick,
+}: {
+  info: {
+    email: string;
+    amount: number;
+    metadata?: {
+      custom_fields: {
+        display_name: string;
+        variable_name: string;
+        value: string;
+      }[];
+    };
+    onSuccess: (response: { reference: string }) => void;
+    onClose: () => void;
+  };
+  onClick?: () => void;
+}) => {
   const config = {
     email: info.email,
     amount: info.amount,
     publicKey,
     metadata: info.metadata,
+    subaccount: "ACCT_hsp64u9cvOn5yfh",
   };
 
   const initializePayment = usePaystackPayment(config);
@@ -24,7 +37,9 @@ const Paystackbtn = ({ info, onClick }: { info: {
       initializePayment({ onSuccess: info.onSuccess, onClose: info.onClose });
     } catch (err) {
       console.error("Paystack initialization failed:", err);
-      alert("Payment could not be initialized. Please disable any ad blocker and try again.");
+      alert(
+        "Payment could not be initialized. Please disable any ad blocker and try again.",
+      );
     }
   };
 
@@ -40,4 +55,3 @@ const Paystackbtn = ({ info, onClick }: { info: {
 };
 
 export default Paystackbtn;
-
