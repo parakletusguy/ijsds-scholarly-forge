@@ -24,6 +24,10 @@ import Paystackbtn from "@/components/paystack/paystackFunction";
 const VETTING_FEE_KOBO = 1025400; // ₦10,000 net → grossed up
 const PUBLICATION_FEE_KOBO = 2599100; // ₦25,500 net → grossed up
 
+// USD equivalents (in cents for Paystack)
+const VETTING_FEE_USD_CENTS = 1041; // $10.41
+const PUBLICATION_FEE_USD_CENTS = 2601; // $26.01
+
 interface Author {
   name: string;
   email: string;
@@ -61,6 +65,7 @@ export const Submit = () => {
   const [processingPaid, setProcessingPaid] = useState(false);
   const vettingRef = useRef<string | null>(null);
   const processingRef = useRef<string | null>(null);
+  const [paymentCurrency, setPaymentCurrency] = useState<"NGN" | "USD">("NGN");
 
   // Checks for ethics/disclosure
   const [ethicsAgree, setEthicsAgree] = useState(false);
@@ -195,7 +200,7 @@ export const Submit = () => {
       toast({
         title: "Payment Required",
         description:
-          "Please pay both the vetting fee (₦10,000) and publication fee (₦25,500) before submitting.",
+          "Please pay both the vetting fee and publication fee before submitting.",
         variant: "destructive",
       });
       document
@@ -241,16 +246,28 @@ export const Submit = () => {
       });
 
       // Verify both Paystack payments against the live API → writes fee flags to article
+      // NOTE: amount is intentionally omitted — the backend reads it directly
+      // from Paystack's own verify endpoint to prevent client-side tampering.
       const articleId = result?.article?.id;
       if (articleId) {
-        const verifyFee = (reference: string | null, amount: number, type: string) => {
+        const verifyFee = (
+          reference: string | null,
+          type: string,
+        ) => {
           if (!reference) return Promise.resolve();
-          return api.post("/api/payment/verify-payment", { reference, amount, articleId, type })
-            .catch((err) => console.error(`[payment] ${type} verify failed:`, err));
+          return api
+            .post("/api/payment/verify-payment", {
+              reference,
+              articleId,
+              type,
+            })
+            .catch((err) =>
+              console.error(`[payment] ${type} verify failed:`, err),
+            );
         };
         await Promise.all([
-          verifyFee(vettingRef.current, VETTING_FEE_KOBO, "vetting"),
-          verifyFee(processingRef.current, PUBLICATION_FEE_KOBO, "processing"),
+          verifyFee(vettingRef.current, "vetting"),
+          verifyFee(processingRef.current, "processing"),
         ]);
       }
 
@@ -728,18 +745,52 @@ export const Submit = () => {
               <div className="mt-6">
                 <p className={labelClass}>Total due</p>
                 <p className="font-headline text-2xl font-black text-stone-900 mt-1">
-                  ₦35,500
+                  {paymentCurrency === "NGN" ? "₦35,500" : "$36.42"}
                 </p>
               </div>
             </div>
             <div className="md:col-span-9 space-y-3">
+              {/* Currency Selector */}
+              <div className="flex items-center gap-2 pb-1">
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
+                  Pay in
+                </span>
+                <div className="inline-flex rounded-none border border-stone-200 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentCurrency("NGN")}
+                    className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.15em] transition-colors ${
+                      paymentCurrency === "NGN"
+                        ? "bg-primary text-white"
+                        : "bg-white text-stone-500 hover:bg-stone-50"
+                    }`}
+                  >
+                    ₦ NGN
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentCurrency("USD")}
+                    className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.15em] transition-colors border-l border-stone-200 ${
+                      paymentCurrency === "USD"
+                        ? "bg-primary text-white"
+                        : "bg-white text-stone-500 hover:bg-stone-50"
+                    }`}
+                  >
+                    $ USD
+                  </button>
+                </div>
+              </div>
+
               {[
                 {
                   label: "Manuscript Vetting",
-                  amount: "₦10,000",
+                  amount: paymentCurrency === "NGN" ? "₦10,000" : "$10.41",
                   desc: "Editorial screening and peer-review coordination",
                   paid: vettingPaid,
-                  kobo: VETTING_FEE_KOBO,
+                  kobo:
+                    paymentCurrency === "NGN"
+                      ? VETTING_FEE_KOBO
+                      : VETTING_FEE_USD_CENTS,
                   feeType: "vetting",
                   onPaid: (ref: string) => {
                     vettingRef.current = ref;
@@ -749,10 +800,13 @@ export const Submit = () => {
                 },
                 {
                   label: "Article Publication",
-                  amount: "₦25,500",
+                  amount: paymentCurrency === "NGN" ? "₦25,500" : "$26.01",
                   desc: "Production, typesetting, and open-access hosting",
                   paid: processingPaid,
-                  kobo: PUBLICATION_FEE_KOBO,
+                  kobo:
+                    paymentCurrency === "NGN"
+                      ? PUBLICATION_FEE_KOBO
+                      : PUBLICATION_FEE_USD_CENTS,
                   feeType: "publication",
                   onPaid: (ref: string) => {
                     processingRef.current = ref;
@@ -795,6 +849,7 @@ export const Submit = () => {
                       info={{
                         email: user!.email,
                         amount: fee.kobo,
+                        currency: paymentCurrency,
                         metadata: {
                           custom_fields: [
                             {
