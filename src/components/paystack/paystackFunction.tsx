@@ -26,7 +26,7 @@ const Paystackbtn = ({
     amount: info.amount,
     publicKey,
     metadata: info.metadata,
-    subaccount: "ACCT_hsp64u9cvOn5yfh",
+    subaccount: "ACCT_hsp64u9cv0n5yfh",
   };
 
   const initializePayment = usePaystackPayment(config);
