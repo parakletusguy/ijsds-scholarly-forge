@@ -9,7 +9,7 @@ const Paystackbtn = ({
   info: {
     email: string;
     amount: number;
-    currency?: "NGN" | "USD";
+    channels?: string[];
     metadata?: {
       custom_fields: {
         display_name: string;
@@ -27,8 +27,8 @@ const Paystackbtn = ({
     amount: info.amount,
     publicKey,
     metadata: info.metadata,
-    currency: info.currency || "NGN",
     subaccount: "ACCT_hsp64u9cv0n5yfh",
+    ...(info.channels ? { channels: info.channels } : {}),
   };
 
   const initializePayment = usePaystackPayment(config);

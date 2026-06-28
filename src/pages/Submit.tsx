@@ -21,12 +21,12 @@ import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
 import Paystackbtn from "@/components/paystack/paystackFunction";
 
-const VETTING_FEE_KOBO = 1025400; // ₦10,000 net → grossed up
-const PUBLICATION_FEE_KOBO = 2599100; // ₦25,500 net → grossed up
+const VETTING_FEE_LOCAL = 1025400; // ₦10,254 net → grossed up
+const PUBLICATION_FEE_LOCAL = 2599100; // ₦25,991 net → grossed up
 
-// USD equivalents (in cents for Paystack)
-const VETTING_FEE_USD_CENTS = 1041; // $10.41
-const PUBLICATION_FEE_USD_CENTS = 2601; // $26.01
+// Global Tiers (Evaluated in NGN, grossed up to cover Paystack's 3.9% + ₦100 international fee)
+const VETTING_FEE_GLOBAL = 1580000; // ₦15,800 (~$10.50 USD value)
+const PUBLICATION_FEE_GLOBAL = 3660000; // ₦36,600 (~$25.50 USD value)
 
 interface Author {
   name: string;
@@ -60,12 +60,12 @@ export const Submit = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
 
-  // Fee payment state
+  // Track Selector State: "local" or "global"
+  const [authorTrack, setAuthorTrack] = useState<"local" | "global">("local");
   const [vettingPaid, setVettingPaid] = useState(false);
   const [processingPaid, setProcessingPaid] = useState(false);
   const vettingRef = useRef<string | null>(null);
   const processingRef = useRef<string | null>(null);
-  const [paymentCurrency, setPaymentCurrency] = useState<"NGN" | "USD">("NGN");
 
   // Checks for ethics/disclosure
   const [ethicsAgree, setEthicsAgree] = useState(false);
@@ -91,6 +91,7 @@ export const Submit = () => {
     coverLetter,
     manuscriptFileUrl,
     user,
+    authorTrack,
   ]);
 
   const loadDraft = async () => {
@@ -115,6 +116,7 @@ export const Submit = () => {
         setCoverLetter(draft.coverLetter || "");
         setManuscriptFileUrl(draft.manuscriptFileUrl || "");
         setDraftId(draft.draftId || null);
+        setAuthorTrack(draft.authorTrack || "local");
         setLastSaved(draft.lastSaved ? new Date(draft.lastSaved) : null);
       }
     } catch (error) {
@@ -138,6 +140,7 @@ export const Submit = () => {
         coverLetter,
         manuscriptFileUrl,
         draftId,
+        authorTrack,
         lastSaved: new Date().toISOString(),
         userId: user.id,
       };
@@ -323,6 +326,37 @@ export const Submit = () => {
 
   if (!user) return null;
 
+  const calculatedFees = [
+    {
+      label: "Manuscript Vetting",
+      amount: authorTrack === "local" ? "₦10,000" : "₦15,800 ($10.50 Est.)",
+      desc: "Editorial screening and peer-review coordination",
+      paid: vettingPaid,
+      subunits: authorTrack === "local" ? VETTING_FEE_LOCAL : VETTING_FEE_GLOBAL,
+      channels: authorTrack === "local" ? undefined : ["card"],
+      feeType: "vetting",
+      onPaid: (ref: string) => {
+        vettingRef.current = ref;
+        setVettingPaid(true);
+        toast({ title: "Vetting Fee Paid" });
+      },
+    },
+    {
+      label: "Article Publication",
+      amount: authorTrack === "local" ? "₦25,500" : "₦36,600 ($25.50 Est.)",
+      desc: "Production, typesetting, and open-access hosting",
+      paid: processingPaid,
+      subunits: authorTrack === "local" ? PUBLICATION_FEE_LOCAL : PUBLICATION_FEE_GLOBAL,
+      channels: authorTrack === "local" ? undefined : ["card"],
+      feeType: "publication",
+      onPaid: (ref: string) => {
+        processingRef.current = ref;
+        setProcessingPaid(true);
+        toast({ title: "Publication Fee Paid" });
+      },
+    },
+  ];
+
   return (
     <div className="bg-[#fdf9f5] text-[#1c1c19] font-body min-h-screen pb-32">
       <Helmet>
@@ -340,10 +374,10 @@ export const Submit = () => {
               </span>
             </div>
             <p className="text-[11px] text-amber-700 flex-1">
-              Both fees (₦10,000 vetting + ₦25,500 publication) must be paid
-              before submitting.
-              {vettingPaid && " Vetting paid."}
-              {processingPaid && " Publication paid."}
+              Both fees must be paid before submitting. Track:{" "}
+              <strong className="uppercase">{authorTrack}</strong>
+              {vettingPaid && " — Vetting paid."}
+              {processingPaid && " — Publication paid."}
             </p>
             <button
               type="button"
@@ -739,82 +773,41 @@ export const Submit = () => {
                 Publication Fees
               </h3>
               <p className="text-xs text-stone-400 mt-2 leading-relaxed">
-                Paid once before entering review. Processed securely via
-                Paystack.
+                Processed securely via Paystack. Select appropriate billing criteria below.
               </p>
-              <div className="mt-6">
-                <p className={labelClass}>Total due</p>
-                <p className="font-headline text-2xl font-black text-stone-900 mt-1">
-                  {paymentCurrency === "NGN" ? "₦35,500" : "$36.42"}
-                </p>
-              </div>
-            </div>
-            <div className="md:col-span-9 space-y-3">
-              {/* Currency Selector */}
-              <div className="flex items-center gap-2 pb-1">
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                  Pay in
-                </span>
-                <div className="inline-flex rounded-none border border-stone-200 overflow-hidden">
+
+              <div className="mt-5 space-y-2">
+                <label className={labelClass}>Author Region</label>
+                <div className="flex bg-stone-100 p-1 rounded border border-stone-200 max-w-[220px]">
                   <button
                     type="button"
-                    onClick={() => setPaymentCurrency("NGN")}
-                    className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.15em] transition-colors ${
-                      paymentCurrency === "NGN"
-                        ? "bg-primary text-white"
-                        : "bg-white text-stone-500 hover:bg-stone-50"
-                    }`}
+                    disabled={vettingPaid || processingPaid}
+                    onClick={() => setAuthorTrack("local")}
+                    className={`flex-1 text-center py-2 text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50 ${authorTrack === "local" ? "bg-white text-stone-900 shadow-sm" : "text-stone-400 hover:text-stone-600"}`}
                   >
-                    ₦ NGN
+                    🇳🇬 Local Account
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPaymentCurrency("USD")}
-                    className={`px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.15em] transition-colors border-l border-stone-200 ${
-                      paymentCurrency === "USD"
-                        ? "bg-primary text-white"
-                        : "bg-white text-stone-500 hover:bg-stone-50"
-                    }`}
+                    disabled={vettingPaid || processingPaid}
+                    onClick={() => setAuthorTrack("global")}
+                    className={`flex-1 text-center py-2 text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50 ${authorTrack === "global" ? "bg-white text-stone-900 shadow-sm" : "text-stone-400 hover:text-stone-600"}`}
                   >
-                    $ USD
+                    🌐 Global Card
                   </button>
                 </div>
               </div>
 
-              {[
-                {
-                  label: "Manuscript Vetting",
-                  amount: paymentCurrency === "NGN" ? "₦10,000" : "$10.41",
-                  desc: "Editorial screening and peer-review coordination",
-                  paid: vettingPaid,
-                  kobo:
-                    paymentCurrency === "NGN"
-                      ? VETTING_FEE_KOBO
-                      : VETTING_FEE_USD_CENTS,
-                  feeType: "vetting",
-                  onPaid: (ref: string) => {
-                    vettingRef.current = ref;
-                    setVettingPaid(true);
-                    toast({ title: "Vetting Fee Paid" });
-                  },
-                },
-                {
-                  label: "Article Publication",
-                  amount: paymentCurrency === "NGN" ? "₦25,500" : "$26.01",
-                  desc: "Production, typesetting, and open-access hosting",
-                  paid: processingPaid,
-                  kobo:
-                    paymentCurrency === "NGN"
-                      ? PUBLICATION_FEE_KOBO
-                      : PUBLICATION_FEE_USD_CENTS,
-                  feeType: "publication",
-                  onPaid: (ref: string) => {
-                    processingRef.current = ref;
-                    setProcessingPaid(true);
-                    toast({ title: "Publication Fee Paid" });
-                  },
-                },
-              ].map((fee) => (
+              <div className="mt-6">
+                <p className={labelClass}>Total due</p>
+                <p className="font-headline text-2xl font-black text-stone-900 mt-1">
+                  {authorTrack === "local" ? "₦35,500" : "₦52,400"}
+                </p>
+              </div>
+            </div>
+
+            <div className="md:col-span-9 space-y-3">
+              {calculatedFees.map((fee) => (
                 <div
                   key={fee.feeType}
                   className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 transition-colors ${fee.paid ? "bg-emerald-50" : "bg-stone-100"}`}
@@ -848,8 +841,8 @@ export const Submit = () => {
                     <Paystackbtn
                       info={{
                         email: user!.email,
-                        amount: fee.kobo,
-                        currency: paymentCurrency,
+                        amount: fee.subunits,
+                        channels: fee.channels,
                         metadata: {
                           custom_fields: [
                             {
@@ -861,6 +854,11 @@ export const Submit = () => {
                               display_name: "Submitter",
                               variable_name: "submitter_id",
                               value: user!.id,
+                            },
+                            {
+                              display_name: "Billing Track",
+                              variable_name: "billing_track",
+                              value: authorTrack,
                             },
                           ],
                         },
