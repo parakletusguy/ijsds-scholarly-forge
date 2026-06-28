@@ -26,7 +26,7 @@ const PUBLICATION_FEE_LOCAL = 2599100; // ₦25,991 net → grossed up
 
 // Global Tiers (Evaluated in NGN, grossed up to cover Paystack's 3.9% + ₦100 international fee)
 const VETTING_FEE_GLOBAL = 1580000; // ₦15,800 (~$10.50 USD value)
-const PUBLICATION_FEE_GLOBAL = 3660000; // ₦36,600 (~$25.50 USD value)
+const PUBLICATION_FEE_GLOBAL = 4318418; // ₦43,184 (~$30.00 USD value)
 
 interface Author {
   name: string;
@@ -253,10 +253,7 @@ export const Submit = () => {
       // from Paystack's own verify endpoint to prevent client-side tampering.
       const articleId = result?.article?.id;
       if (articleId) {
-        const verifyFee = (
-          reference: string | null,
-          type: string,
-        ) => {
+        const verifyFee = (reference: string | null, type: string) => {
           if (!reference) return Promise.resolve();
           return api
             .post("/api/payment/verify-payment", {
@@ -332,7 +329,8 @@ export const Submit = () => {
       amount: authorTrack === "local" ? "₦10,000" : "₦15,800 ($10.50 Est.)",
       desc: "Editorial screening and peer-review coordination",
       paid: vettingPaid,
-      subunits: authorTrack === "local" ? VETTING_FEE_LOCAL : VETTING_FEE_GLOBAL,
+      subunits:
+        authorTrack === "local" ? VETTING_FEE_LOCAL : VETTING_FEE_GLOBAL,
       channels: authorTrack === "local" ? undefined : ["card"],
       feeType: "vetting",
       onPaid: (ref: string) => {
@@ -343,10 +341,13 @@ export const Submit = () => {
     },
     {
       label: "Article Publication",
-      amount: authorTrack === "local" ? "₦25,500" : "₦36,600 ($25.50 Est.)",
+      amount: authorTrack === "local" ? "₦25,500" : "₦43,200 ($30.00 Est.)",
       desc: "Production, typesetting, and open-access hosting",
       paid: processingPaid,
-      subunits: authorTrack === "local" ? PUBLICATION_FEE_LOCAL : PUBLICATION_FEE_GLOBAL,
+      subunits:
+        authorTrack === "local"
+          ? PUBLICATION_FEE_LOCAL
+          : PUBLICATION_FEE_GLOBAL,
       channels: authorTrack === "local" ? undefined : ["card"],
       feeType: "publication",
       onPaid: (ref: string) => {
@@ -773,7 +774,8 @@ export const Submit = () => {
                 Publication Fees
               </h3>
               <p className="text-xs text-stone-400 mt-2 leading-relaxed">
-                Processed securely via Paystack. Select appropriate billing criteria below.
+                Processed securely via Paystack. Select appropriate billing
+                criteria below.
               </p>
 
               <div className="mt-5 space-y-2">
@@ -801,7 +803,7 @@ export const Submit = () => {
               <div className="mt-6">
                 <p className={labelClass}>Total due</p>
                 <p className="font-headline text-2xl font-black text-stone-900 mt-1">
-                  {authorTrack === "local" ? "₦35,500" : "₦52,400"}
+                  {authorTrack === "local" ? "₦35,500" : "₦59,000"}
                 </p>
               </div>
             </div>
