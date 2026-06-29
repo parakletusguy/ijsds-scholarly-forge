@@ -2,7 +2,23 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/robots.txt"
+    },
+    {
+      "source": "/feed/latest-articles.xml",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/feed/latest-articles.xml"
+    },
+    {
+      "source": "/papers",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/papers"
+    },
+    {
+      "source": "/papers/:id",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/papers/:id"
     },
     {
       "source": "/((?!api/.*).*)",
