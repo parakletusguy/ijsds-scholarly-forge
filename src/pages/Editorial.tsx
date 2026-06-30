@@ -56,6 +56,16 @@ export const Editorial = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
+  // Must be before any early return to comply with Rules of Hooks
+  const allSubjects = useMemo(() => {
+    const set = new Set<string>();
+    submissions.forEach(s => {
+      const area = (s.article as any)?.subject_area;
+      if (area && area.length <= 60) set.add(area);
+    });
+    return Array.from(set).sort();
+  }, [submissions]);
+
   useEffect(() => {
     if (!loading && !user) { navigate("/auth"); return; }
     if (!loading && user && !isEditor) {
@@ -143,16 +153,6 @@ export const Editorial = () => {
   const underReviewSubmissions = submissions.filter(s => s.status === "under_review");
   const revisionSubmissions = submissions.filter(s => s.status === "revision_requested");
   const completedSubmissions = submissions.filter(s => ["accepted", "rejected", "desk_rejected"].includes(s.status));
-
-  // Collect unique subject areas — skip entries that look like article titles (>60 chars)
-  const allSubjects = useMemo(() => {
-    const set = new Set<string>();
-    submissions.forEach(s => {
-      const area = (s.article as any)?.subject_area;
-      if (area && area.length <= 60) set.add(area);
-    });
-    return Array.from(set).sort();
-  }, [submissions]);
 
   const applyFilters = (list: Submission[]) => {
     return list.filter(s => {
