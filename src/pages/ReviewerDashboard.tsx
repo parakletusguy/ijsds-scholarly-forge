@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getReviews } from '@/lib/reviewService';
-import { getSubmission } from '@/lib/submissionService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -25,6 +24,7 @@ interface ReviewWithSubmission {
   deadline_date: string | null;
   submission: {
     id: string;
+    article_id: string;
     submitted_at: string;
     article: {
       title: string;
@@ -84,17 +84,12 @@ export const ReviewerDashboard = () => {
   const fetchReviews = async () => {
     try {
       const reviewList = await getReviews();
-      const withSubmissions = await Promise.all(
-        reviewList.map(async (review) => {
-          const submission = await getSubmission(review.submission_id);
-          return { ...review, submission } as unknown as ReviewWithSubmission;
-        })
-      );
-      setReviews(withSubmissions);
+      setReviews(reviewList as unknown as ReviewWithSubmission[]);
     } catch {
       toast({ title: 'Sync Error', description: 'Failed to fetch review assignments.', variant: 'destructive' });
     } finally {
-      setLoadingReviews(false); }
+      setLoadingReviews(false);
+    }
   };
 
   if (loading || !isReviewer) return (
