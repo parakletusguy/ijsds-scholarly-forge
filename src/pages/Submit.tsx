@@ -199,18 +199,18 @@ export const Submit = () => {
       return;
     }
 
-    if (!vettingPaid || !processingPaid) {
-      toast({
-        title: "Payment Required",
-        description:
-          "Please pay both the vetting fee and publication fee before submitting.",
-        variant: "destructive",
-      });
-      document
-        .getElementById("payment-section")
-        ?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
+    // if (!vettingPaid || !processingPaid) {
+    //   toast({
+    //     title: "Payment Required",
+    //     description:
+    //       "Please pay both the vetting fee and publication fee before submitting.",
+    //     variant: "destructive",
+    //   });
+    //   document
+    //     .getElementById("payment-section")
+    //     ?.scrollIntoView({ behavior: "smooth" });
+    //   return;
+    // }
 
     if (!ethicsAgree) {
       toast({
@@ -938,7 +938,7 @@ export const Submit = () => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading || !vettingPaid || !processingPaid}
+            disabled={loading}
             title={
               !vettingPaid || !processingPaid
                 ? "Pay both fees to unlock"
