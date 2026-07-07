@@ -241,7 +241,7 @@ export const SubmissionDetail = () => {
       const { success, data } = await api.post<{
         success: boolean;
         data: { status: boolean };
-      }>("/api/verify-payment", {
+      }>("/api/payment/verify-payment", {
         reference: transactionReference,
         amount,
         articleId: submission.article.id,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -64,14 +64,19 @@ export const Submit = () => {
   const [authorTrack, setAuthorTrack] = useState<"local" | "global">("local");
   const [vettingPaid, setVettingPaid] = useState(false);
   const [processingPaid, setProcessingPaid] = useState(false);
-  const vettingRef = useRef<string | null>(null);
-  const processingRef = useRef<string | null>(null);
+  const [vettingReference, setVettingReference] = useState<string | null>(null);
+  const [processingReference, setProcessingReference] = useState<string | null>(
+    null,
+  );
 
   // Checks for ethics/disclosure
   const [ethicsAgree, setEthicsAgree] = useState(false);
 
   useEffect(() => {
-    if (user) loadDraft();
+    if (user) {
+      loadDraft();
+      reconcilePaidFees();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -92,6 +97,8 @@ export const Submit = () => {
     manuscriptFileUrl,
     user,
     authorTrack,
+    vettingPaid,
+    processingPaid,
   ]);
 
   const loadDraft = async () => {
@@ -117,6 +124,11 @@ export const Submit = () => {
         setManuscriptFileUrl(draft.manuscriptFileUrl || "");
         setDraftId(draft.draftId || null);
         setAuthorTrack(draft.authorTrack || "local");
+        // Restore payment progress so a paid fee survives page reloads
+        setVettingPaid(!!draft.vettingPaid);
+        setProcessingPaid(!!draft.processingPaid);
+        setVettingReference(draft.vettingReference || null);
+        setProcessingReference(draft.processingReference || null);
         setLastSaved(draft.lastSaved ? new Date(draft.lastSaved) : null);
       }
     } catch (error) {
@@ -141,6 +153,11 @@ export const Submit = () => {
         manuscriptFileUrl,
         draftId,
         authorTrack,
+        // Persist payment progress alongside the draft
+        vettingPaid,
+        processingPaid,
+        vettingReference,
+        processingReference,
         lastSaved: new Date().toISOString(),
         userId: user.id,
       };
@@ -153,6 +170,93 @@ export const Submit = () => {
       console.error("Error saving draft:", error);
     } finally {
       setAutoSaving(false);
+    }
+  };
+
+  /**
+   * Merge a small patch into the persisted draft immediately, without waiting
+   * for the debounced autosave. Used on payment success so a paid fee (and its
+   * Paystack reference) is durable even if the user reloads the next second.
+   */
+  const persistDraftPatch = (patch: Record<string, unknown>) => {
+    if (!user) return;
+    try {
+      const key = `article_draft_${user.id}`;
+      const existing = localStorage.getItem(key);
+      const draft = existing ? JSON.parse(existing) : {};
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          ...draft,
+          ...patch,
+          userId: user.id,
+          lastSaved: new Date().toISOString(),
+        }),
+      );
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Error persisting payment state:", error);
+    }
+  };
+
+  /**
+   * Ask the backend to reconcile fees already paid on Paystack for this user.
+   * Recovers payments whose in-browser success callback never fired, so the
+   * form restores the paid state + reference even after a crash or reload.
+   */
+  const reconcilePaidFees = async () => {
+    if (!user) return;
+    try {
+      const res = await api.get<{
+        success: boolean;
+        data: Record<
+          string,
+          { paid: boolean; reference: string; track?: "local" | "global" }
+        >;
+      }>("/api/payment/history");
+      const fees = res?.data || {};
+      if (!fees.vetting && !fees.processing) return;
+
+      // Compare against what the local draft already knew, to avoid noise
+      const draft = JSON.parse(
+        localStorage.getItem(`article_draft_${user.id}`) || "{}",
+      );
+      const patch: Record<string, unknown> = {};
+      let recovered = false;
+
+      if (fees.vetting?.reference) {
+        setVettingPaid(true);
+        setVettingReference(fees.vetting.reference);
+        patch.vettingPaid = true;
+        patch.vettingReference = fees.vetting.reference;
+        if (!draft.vettingPaid) recovered = true;
+      }
+      if (fees.processing?.reference) {
+        setProcessingPaid(true);
+        setProcessingReference(fees.processing.reference);
+        patch.processingPaid = true;
+        patch.processingReference = fees.processing.reference;
+        if (!draft.processingPaid) recovered = true;
+      }
+
+      // Lock the billing track to whatever was actually charged
+      const track = fees.vetting?.track || fees.processing?.track;
+      if (track === "local" || track === "global") {
+        setAuthorTrack(track);
+        patch.authorTrack = track;
+      }
+
+      persistDraftPatch(patch);
+      if (recovered) {
+        toast({
+          title: "Payment Restored",
+          description:
+            "We found a completed payment and restored your progress.",
+        });
+      }
+    } catch (error) {
+      // Best-effort — never block the form on reconciliation
+      console.error("[payment] reconcile failed:", error);
     }
   };
 
@@ -266,8 +370,8 @@ export const Submit = () => {
             );
         };
         await Promise.all([
-          verifyFee(vettingRef.current, "vetting"),
-          verifyFee(processingRef.current, "processing"),
+          verifyFee(vettingReference, "vetting"),
+          verifyFee(processingReference, "processing"),
         ]);
       }
 
@@ -334,8 +438,9 @@ export const Submit = () => {
       channels: authorTrack === "local" ? undefined : ["card"],
       feeType: "vetting",
       onPaid: (ref: string) => {
-        vettingRef.current = ref;
+        setVettingReference(ref);
         setVettingPaid(true);
+        persistDraftPatch({ vettingPaid: true, vettingReference: ref });
         toast({ title: "Vetting Fee Paid" });
       },
     },
@@ -351,8 +456,9 @@ export const Submit = () => {
       channels: authorTrack === "local" ? undefined : ["card"],
       feeType: "publication",
       onPaid: (ref: string) => {
-        processingRef.current = ref;
+        setProcessingReference(ref);
         setProcessingPaid(true);
+        persistDraftPatch({ processingPaid: true, processingReference: ref });
         toast({ title: "Publication Fee Paid" });
       },
     },
