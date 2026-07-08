@@ -74,7 +74,7 @@ export const ReviewForm = () => {
       toast({
         title: isSubmission ? 'Review Submitted' : 'Draft Saved',
         description: isSubmission
-          ? 'Your peer evaluation has been submitted successfully.'
+          ? 'Your review has been submitted.'
           : 'Your progress has been saved.',
       });
       if (isSubmission) navigate('/reviewer-dashboard');
@@ -85,11 +85,11 @@ export const ReviewForm = () => {
 
   const handleSubmit = () => {
     if (!recommendation) {
-      toast({ title: 'Validation Error', description: 'Please select a recommendation.', variant: 'destructive' });
+      toast({ title: 'Recommendation required', description: 'Please choose a recommendation before submitting.', variant: 'destructive' });
       return;
     }
     if (!commentsToAuthor.trim()) {
-      toast({ title: 'Validation Error', description: 'Comments to author are required.', variant: 'destructive' });
+      toast({ title: 'Feedback required', description: 'Please add your comments to the author before submitting.', variant: 'destructive' });
       return;
     }
     saveReview(true);
@@ -122,10 +122,10 @@ export const ReviewForm = () => {
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
       <PageHeader
-        title={isSubmitted ? 'Review' : 'Peer'}
-        subtitle={isSubmitted ? 'Archive' : 'Evaluation'}
-        accent="Intellectual Audit"
-        description="Provide rigorous scholarly evaluation for the manuscript. Your assessment facilitates the editorial selection of high-impact research."
+        title={isSubmitted ? 'Your' : 'Write Your'}
+        subtitle="Review"
+        accent="Peer Review"
+        description="Read the manuscript, then share your recommendation and feedback with the editors."
       />
 
       <ContentSection>
@@ -135,7 +135,7 @@ export const ReviewForm = () => {
            </Button>
            <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
               <ShieldCheck size={16} className="text-secondary" />
-              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Authorized Reviewer</span>
+              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Reviewer</span>
            </div>
         </div>
 
@@ -165,7 +165,7 @@ export const ReviewForm = () => {
                                   <span className="block text-[10px] opacity-40 italic">{a.affiliation}</span>
                                 </p>
                              </div>
-                          )) : <p className="font-body text-[10px] opacity-40 italic">Anonymized for blind review.</p>}
+                          )) : <p className="font-body text-[10px] opacity-40 italic">Hidden for blind review.</p>}
                        </div>
                     </div>
 
@@ -187,7 +187,7 @@ export const ReviewForm = () => {
             <div className={cardClasses + " flex-1"}>
                <div className="flex items-center gap-4 mb-10 pb-6 border-b border-border/20">
                   <div className="p-3 bg-primary text-white"><BookOpen className="h-5 w-5" /></div>
-                  <h2 className="text-2xl font-headline font-black uppercase tracking-tighter">Evaluation Form</h2>
+                  <h2 className="text-2xl font-headline font-black uppercase tracking-tighter">Your Review</h2>
                </div>
 
                <div className="space-y-12">

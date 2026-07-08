@@ -75,7 +75,7 @@ export const ReviewerDashboard = () => {
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }
     if (!loading && user && !isReviewer) {
-      toast({ title: 'Access Denied', description: 'Reviewer credentials required.', variant: 'destructive' });
+      toast({ title: 'Access denied', description: 'You need reviewer access to view this page.', variant: 'destructive' });
       navigate('/dashboard'); return;
     }
     if (user && isReviewer) fetchReviews();
@@ -86,7 +86,7 @@ export const ReviewerDashboard = () => {
       const reviewList = await getReviews();
       setReviews(reviewList as unknown as ReviewWithSubmission[]);
     } catch {
-      toast({ title: 'Sync Error', description: 'Failed to fetch review assignments.', variant: 'destructive' });
+      toast({ title: "Couldn't load reviews", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally {
       setLoadingReviews(false);
     }
@@ -132,7 +132,7 @@ export const ReviewerDashboard = () => {
             {completed ? (
               <span className="text-[9px] font-bold uppercase tracking-widest text-green-600 bg-green-50 border border-green-100 px-2 py-0.5 flex items-center gap-1">
                 <CheckCircle2 size={10} />
-                {review.recommendation || 'Finalized'}
+                {review.recommendation || 'Done'}
               </span>
             ) : (
               <DeadlineBadge deadline={review.deadline_date} />
@@ -178,11 +178,11 @@ export const ReviewerDashboard = () => {
                 <>
                   <Button onClick={() => navigate(`/review/${review.id}`)}
                     className="h-8 text-[10px] font-bold uppercase tracking-widest bg-primary text-white hover:bg-stone-900 rounded-none gap-1.5">
-                    Begin Evaluation <ArrowRight size={12} />
+                    Start Review <ArrowRight size={12} />
                   </Button>
                   <Button variant="outline" onClick={() => navigate(`/reviewerSubmission/${review.submission_id}/details`)}
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
-                    View Dossier
+                    View Details
                   </Button>
                 </>
               ) : (
@@ -220,22 +220,22 @@ export const ReviewerDashboard = () => {
   return (
     <div className="pb-24 bg-stone-50 min-h-screen">
       <PageHeader
-        title="Evaluator"
-        subtitle="Command"
-        accent="Peer Review Hub"
-        description="Manage your assigned manuscripts and provide expert scholarly evaluation."
+        title="Your"
+        subtitle="Reviews"
+        accent="Peer Review"
+        description="Review the papers assigned to you and share your feedback."
       />
 
       <ContentSection>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <Button onClick={() => navigate(-1)} variant="outline"
             className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 h-10 border-primary/20 hover:border-primary">
-            <ArrowLeft className="h-4 w-4" /> Return to Command
+            <ArrowLeft className="h-4 w-4" /> Back
           </Button>
           <div className="flex items-center gap-3 bg-white/50 px-4 py-2 border border-border/20">
             <ShieldCheck size={14} className="text-secondary" />
             <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">
-              Credentialed Evaluator
+              Reviewer
             </span>
           </div>
         </div>
@@ -260,8 +260,8 @@ export const ReviewerDashboard = () => {
         <Tabs defaultValue="pending" className="space-y-6" onValueChange={() => setExpandedId(null)}>
           <TabsList className="bg-white border border-border/20 p-1.5 rounded-none h-auto flex shadow-sm">
             {[
-              { val: 'pending', label: 'Pending Assessment', count: pendingReviews.length },
-              { val: 'completed', label: 'Archival', count: completedReviews.length },
+              { val: 'pending', label: 'To Review', count: pendingReviews.length },
+              { val: 'completed', label: 'Completed', count: completedReviews.length },
             ].map(tab => (
               <TabsTrigger key={tab.val} value={tab.val}
                 className="rounded-none py-2.5 px-6 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-2 grow">
@@ -276,7 +276,7 @@ export const ReviewerDashboard = () => {
           <TabsContent value="pending" className="mt-0 space-y-0">
             <FilterBar count={filter(pendingReviews).length} total={pendingReviews.length} />
             {loadingReviews ? (
-              <div className="py-12 text-center text-stone-400 text-[10px] font-bold uppercase tracking-widest">Synchronizing assignments...</div>
+              <div className="py-12 text-center text-stone-400 text-[10px] font-bold uppercase tracking-widest">Loading your reviews...</div>
             ) : filter(pendingReviews).length === 0 ? (
               <div className="py-16 text-center text-stone-400 text-xs font-bold uppercase tracking-widest border border-dashed border-stone-200">
                 {searchQuery ? 'No results match your search.' : 'No pending reviews. All clear.'}

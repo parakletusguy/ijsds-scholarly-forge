@@ -52,7 +52,7 @@ export const ReviewAssignment = () => {
       setSubmission(submissionData as unknown as Submission);
       setReviewers(reviewersData);
     } catch (error: any) {
-      toast({ title: 'Sync Error', description: 'Failed to access assignment registries.', variant: 'destructive' });
+      toast({ title: "Couldn't load page", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally { setLoadingData(false); }
   };
 
@@ -63,7 +63,7 @@ export const ReviewAssignment = () => {
 
   const assignReviewers = async () => {
     if (selectedReviewers.length === 0) {
-      toast({ title: 'Validation Warning', description: 'At least one evaluator must be selected.' });
+      toast({ title: 'Select a reviewer', description: 'Please select at least one reviewer.' });
       return;
     }
 
@@ -79,10 +79,10 @@ export const ReviewAssignment = () => {
         )
       );
 
-      toast({ title: 'Assignment Success', description: `${selectedReviewers.length} evaluators assigned to the workflow.` });
+      toast({ title: 'Reviewers assigned', description: `${selectedReviewers.length} reviewer(s) assigned.` });
       navigate('/editorial');
     } catch (error: any) {
-      toast({ title: 'Command Refused', description: 'Failed to finalize evaluator assignments.', variant: 'destructive' });
+      toast({ title: "Couldn't assign reviewers", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally { setAssigning(false); }
   };
 
@@ -99,41 +99,41 @@ export const ReviewAssignment = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/5 p-4 text-center">
        <div className="p-8 bg-white border border-border/40 shadow-xl max-w-md">
           <BookOpen className="h-12 w-12 text-primary mx-auto mb-6" />
-          <h2 className="text-2xl font-headline font-black uppercase tracking-tight mb-4">Submission Lost</h2>
-          <p className="font-body text-foreground/40 mb-8 italic">The manuscript record you are attempting to assign is no longer synchronizing.</p>
-          <Button onClick={() => navigate('/editorial')} className="w-full bg-foreground text-white rounded-none py-6 font-headline font-black uppercase text-[10px] tracking-widest">Return to Command Hub</Button>
+          <h2 className="text-2xl font-headline font-black uppercase tracking-tight mb-4">Submission not found</h2>
+          <p className="font-body text-foreground/40 mb-8 italic">We couldn't find this submission. It may have been removed.</p>
+          <Button onClick={() => navigate('/editorial')} className="w-full bg-foreground text-white rounded-none py-6 font-headline font-black uppercase text-[10px] tracking-widest">Back to Dashboard</Button>
        </div>
     </div>
   );
 
   return (
     <div className="pb-32 bg-secondary/5 min-h-screen">
-      <PageHeader 
-        title="Evaluator" 
-        subtitle="Selection" 
-        accent="Resource Allocation"
-        description="Strategically assign peer evaluators to the manuscript dossier. Ensure domain expertise and institutional diversity within the review panel."
+      <PageHeader
+        title="Assign"
+        subtitle="Reviewers"
+        accent="Peer Review"
+        description="Choose one or more reviewers for this submission."
       />
 
       <ContentSection>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
            <Button onClick={() => navigate('/editorial')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Return to Command
+              <ArrowLeft className="h-4 w-4" /> Back
            </Button>
-           
+
            <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
               <UserCheck size={16} className="text-secondary" />
-              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Authorized Assignment Authorization</span>
+              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Editor</span>
            </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
-          {/* Submission Dossier Summary */}
+          {/* Submission summary */}
           <div className="lg:col-span-4 space-y-12">
             <div className={cardClasses + " border-t-8 border-foreground"}>
                <div className="absolute top-0 right-0 w-24 h-24 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
                <div className="relative z-10">
-                  <span className={labelClasses}>Active Manuscript</span>
+                  <span className={labelClasses}>Manuscript</span>
                   <h3 className="text-2xl font-headline font-black uppercase tracking-tight mb-6 leading-tight group-hover:text-primary transition-colors">{submission.article.title}</h3>
                   
                   {submission.article.subject_area && (
@@ -143,37 +143,37 @@ export const ReviewAssignment = () => {
                   )}
 
                   <div className="pt-8 border-t border-border/20">
-                    <span className={labelClasses}>Core Abstract</span>
+                    <span className={labelClasses}>Abstract</span>
                     <p className="font-body text-foreground/50 text-sm leading-relaxed italic line-clamp-6">{submission.article.abstract}</p>
                   </div>
                </div>
             </div>
 
             <div className={cardClasses + " bg-foreground text-white"}>
-               <h4 className="font-headline font-black text-[10px] uppercase tracking-widest text-white/40 mb-6 flex items-center gap-2"><Activity size={12} /> Resource Status</h4>
+               <h4 className="font-headline font-black text-[10px] uppercase tracking-widest text-white/40 mb-6 flex items-center gap-2"><Activity size={12} /> Summary</h4>
                <div className="flex items-center justify-between">
-                  <span className="font-body text-sm italic text-white/60">Selected Evaluators</span>
+                  <span className="font-body text-sm italic text-white/60">Reviewers selected</span>
                   <span className="font-headline font-black text-3xl text-secondary">{selectedReviewers.length}</span>
                </div>
             </div>
           </div>
 
-          {/* Evaluator Selection Area */}
+          {/* Reviewer selection */}
           <div className="lg:col-span-8 flex flex-col">
             <div className={cardClasses + " flex-1"}>
                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10 pb-6 border-b border-border/20">
                   <div className="flex items-center gap-4">
                      <div className="p-3 bg-primary text-white"><Users className="h-5 w-5" /></div>
-                     <h2 className="text-xl sm:text-2xl font-headline font-black uppercase tracking-tighter">Evaluator Registry</h2>
+                     <h2 className="text-xl sm:text-2xl font-headline font-black uppercase tracking-tighter">Reviewers</h2>
                   </div>
                   <div className="relative w-full sm:w-64">
                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/20" />
-                     <input type="text" placeholder="Search Registries..." className="bg-muted/30 border border-border/10 rounded-none h-12 pl-12 pr-4 font-headline uppercase text-[10px] tracking-widest w-full focus:border-primary outline-none transition-all" />
+                     <input type="text" placeholder="Search reviewers..." className="bg-muted/30 border border-border/10 rounded-none h-12 pl-12 pr-4 font-headline uppercase text-[10px] tracking-widest w-full focus:border-primary outline-none transition-all" />
                   </div>
                </div>
 
                {reviewers.length === 0 ? (
-                  <div className="py-24 text-center opacity-40 italic font-body">No qualified evaluators synchronized with this domain.</div>
+                  <div className="py-24 text-center opacity-40 italic font-body">No reviewers available.</div>
                ) : (
                   <div className="space-y-6">
                     {reviewers.map((reviewer) => (
@@ -199,7 +199,7 @@ export const ReviewAssignment = () => {
                              <p className="font-body text-xs text-foreground/40 line-clamp-2 italic leading-relaxed border-l-2 border-border/20 pl-4">{reviewer.bio}</p>
                            )}
                          </div>
-                         <Button variant="ghost" className="hidden md:flex font-headline font-black uppercase text-[9px] tracking-widest text-foreground/20 hover:text-primary gap-2 p-0">Detailed Dossier <ChevronRight size={12} /></Button>
+                         <Button variant="ghost" className="hidden md:flex font-headline font-black uppercase text-[9px] tracking-widest text-foreground/20 hover:text-primary gap-2 p-0">View Profile <ChevronRight size={12} /></Button>
                       </div>
                     ))}
                   </div>
@@ -212,14 +212,14 @@ export const ReviewAssignment = () => {
                        disabled={selectedReviewers.length === 0 || assigning}
                        className="flex-1 bg-primary hover:bg-secondary text-white py-8 rounded-none font-headline font-black uppercase text-xs tracking-[0.2em] transition-all"
                      >
-                        {assigning ? 'Synchronizing Assignments...' : `Authorize ${selectedReviewers.length} Evaluator(s)`}
+                        {assigning ? 'Assigning...' : `Assign ${selectedReviewers.length} reviewer(s)`}
                      </Button>
-                     <Button 
-                       variant="outline" 
+                     <Button
+                       variant="outline"
                        onClick={() => navigate('/editorial')}
                        className="py-8 px-12 rounded-none font-headline font-black uppercase text-[10px] tracking-widest border-border/40 hover:border-primary transition-all"
                      >
-                        Abort Assignment
+                        Cancel
                      </Button>
                   </div>
                )}
