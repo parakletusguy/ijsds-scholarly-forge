@@ -71,6 +71,7 @@ export const updateReview = async (
     comments_to_editor: string;
     conflict_of_interest_declared: boolean;
     conflict_of_interest_details: string;
+    submit: boolean;
   }>,
 ): Promise<Review> => {
   const res = await api.patch<SingleResponse>(`/api/reviews/${id}`, updates);

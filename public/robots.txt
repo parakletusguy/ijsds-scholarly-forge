@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Allow: /papers/
 
-Sitemap: https://ijsds.org/sitemap.xml
+Sitemap: https://www.ijsds.org/sitemap.xml

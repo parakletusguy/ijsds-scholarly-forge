@@ -70,6 +70,7 @@ export const ReviewForm = () => {
         recommendation,
         comments_to_author: commentsToAuthor,
         comments_to_editor: commentsToEditor,
+        submit: isSubmission,
       });
       toast({
         title: isSubmission ? 'Review Submitted' : 'Draft Saved',

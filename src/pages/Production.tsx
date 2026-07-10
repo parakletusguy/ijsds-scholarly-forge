@@ -23,17 +23,22 @@ import type { Article } from '@/lib/articleService';
 
 
 export const Production = () => {
-  const { user } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const isEditor = !!(profile?.is_editor || profile?.is_admin);
 
   useEffect(() => {
-    if (user) {
-      fetchProductionArticles();
+    if (!authLoading && !user) { navigate('/auth'); return; }
+    if (!authLoading && user && !isEditor) {
+      toast({ title: 'Access Denied', description: 'Editor credentials required.', variant: 'destructive' });
+      navigate('/dashboard'); return;
     }
-  }, [user]);
+    if (user && isEditor) fetchProductionArticles();
+  }, [user, profile, authLoading]);
 
   const fetchProductionArticles = async () => {
     try {
@@ -75,9 +80,7 @@ export const Production = () => {
     return 'Unknown Author';
   };
 
-  const navigate = useNavigate()
-
-  if (loading) {
+  if (authLoading || loading || !isEditor) {
     return (
       <div className="min-h-screen ">
         <main className="container mx-auto px-4 py-8">
