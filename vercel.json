@@ -21,6 +21,14 @@
       "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/papers/:id"
     },
     {
+      "source": "/article/:slug",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/article/:slug"
+    },
+    {
+      "source": "/articles/:slug",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/articles/:slug"
+    },
+    {
       "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }
