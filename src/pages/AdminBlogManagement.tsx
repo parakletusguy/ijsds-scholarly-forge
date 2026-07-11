@@ -17,7 +17,7 @@ export const AdminBlogManagement = () => {
     if (authLoading) return;
     if (!profile) { navigate('/auth'); return; }
     if (!profile.is_admin && !profile.is_editor) {
-      toast({ title: 'Access Denied', description: 'Editor credentials required.', variant: 'destructive' });
+      toast({ title: 'Access denied', description: 'You need editor access to view this page.', variant: 'destructive' });
       navigate('/dashboard');
       return;
     }

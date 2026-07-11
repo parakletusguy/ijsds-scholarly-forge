@@ -21,22 +21,22 @@ export const AuthCallback = () => {
         if (profile) {
           refreshAuth(profile);
           toast({
-            title: "Registry Access Granted",
-            description: "Institutional session established via ORCID.",
+            title: "Signed in",
+            description: "You're signed in with ORCID.",
           });
           navigate('/dashboard');
         } else {
           setError("Failed to retrieve profile data.");
           toast({
-            title: "Access Denied",
-            description: "We could not synchronize your scholarly profile.",
+            title: "Sign-in failed",
+            description: "We couldn't load your profile. Please try again.",
             variant: "destructive"
           });
           navigate('/auth');
         }
       }).catch(err => {
         console.error("Auth callback error:", err);
-        setError("An error occurred during synchronization.");
+        setError("Something went wrong while signing you in.");
         navigate('/auth');
       });
     } else {
@@ -49,10 +49,10 @@ export const AuthCallback = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#fffdfa] font-body">
       <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-8"></div>
       <h2 className="font-headline text-2xl font-bold text-stone-900 tracking-tight mb-2">
-        {error ? "Synchronization Failed" : "Establishing Secure Session"}
+        {error ? "Sign-in failed" : "Signing you in"}
       </h2>
       <p className="text-stone-400 text-xs font-bold uppercase tracking-[0.2em]">
-        {error ? error : "Attaching to Sovereign Registry Hub..."}
+        {error ? error : "Just a moment..."}
       </p>
     </div>
   );

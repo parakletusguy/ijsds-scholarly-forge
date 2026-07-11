@@ -4,9 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { getSubmission } from '@/lib/submissionService';
 import { getReviews } from '@/lib/reviewService';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, FileText, Clock, CheckCircle2, AlertCircle, ShieldCheck, BookOpen, GraduationCap, Info, User, Calendar, MessageSquare, ClipboardList, Activity } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, AlertCircle, FileText, Info, User, Calendar, MessageSquare } from 'lucide-react';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface Review {
@@ -32,6 +31,15 @@ interface Submission {
   };
 }
 
+const label = 'text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400';
+
+const reviewState = (review: Review) => {
+  if (review.submitted_at) return { label: 'Done', style: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: <CheckCircle2 size={12} /> };
+  if (review.invitation_status === 'pending') return { label: 'Awaiting reply', style: 'bg-amber-50 text-amber-700 border-amber-200', icon: <Clock size={12} /> };
+  if (review.invitation_status === 'declined') return { label: 'Declined', style: 'bg-red-50 text-red-700 border-red-200', icon: <AlertCircle size={12} /> };
+  return { label: 'Invited', style: 'bg-blue-50 text-blue-700 border-blue-200', icon: <FileText size={12} /> };
+};
+
 export const SubmissionReviews = () => {
   const { submissionId } = useParams();
   const { user, profile, loading } = useAuth();
@@ -44,7 +52,7 @@ export const SubmissionReviews = () => {
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }
     if (!loading && user && !isEditor) {
-      toast({ title: 'Access Denied', description: 'Institutional credentials required.', variant: 'destructive' });
+      toast({ title: 'Access denied', description: 'You need editor access to view this page.', variant: 'destructive' });
       navigate('/dashboard'); return;
     }
     if (user && isEditor && submissionId) fetchData();
@@ -59,159 +67,130 @@ export const SubmissionReviews = () => {
       setSubmission(submissionData as unknown as Submission);
       setReviews(reviewsData as unknown as Review[]);
     } catch (error: any) {
-      toast({ title: 'Sync Error', description: 'Failed to access review registries.', variant: 'destructive' });
+      toast({ title: "Couldn't load reviews", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally { setLoadingData(false); }
   };
 
-  const getReviewStatus = (review: Review) => {
-    if (review.submitted_at) return { status: 'completed', label: 'Finalized', color: 'bg-green-500/10 text-green-600 border-green-500/20' };
-    if (review.invitation_status === 'pending') return { status: 'pending', label: 'Awaiting', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20' };
-    if (review.invitation_status === 'declined') return { status: 'declined', label: 'Declined', color: 'bg-red-500/10 text-red-600 border-red-500/20' };
-    return { status: 'invited', label: 'Invited', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' };
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle2 size={14} />;
-      case 'pending': return <Clock size={14} />;
-      case 'declined': return <AlertCircle size={14} />;
-      default: return <FileText size={14} />;
-    }
-  };
-
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
-  const labelClasses = "font-headline font-black text-[10px] uppercase tracking-widest text-foreground/40 mb-4 block";
-
   if (loading || !isEditor || loadingData) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   if (!submission) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/5 p-4 text-center">
-       <div className="p-8 bg-white border border-border/40 shadow-xl max-w-md">
-          <BookOpen className="h-12 w-12 text-primary mx-auto mb-6" />
-          <h2 className="text-2xl font-headline font-black uppercase tracking-tight mb-4">Registry Lost</h2>
-          <p className="font-body text-foreground/40 mb-8 italic">The manuscript record you are attempting to audit is no longer synchronizing.</p>
-          <Button onClick={() => navigate('/editorial')} className="w-full bg-foreground text-white rounded-none py-6 font-headline font-black uppercase text-[10px] tracking-widest">Return to Command Hub</Button>
-       </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-6 text-center">
+      <div className="bg-white border border-stone-200 p-10 max-w-md">
+        <Info className="h-8 w-8 text-primary mx-auto mb-5" />
+        <h2 className="font-headline text-2xl text-stone-900 mb-2">Submission not found</h2>
+        <p className="text-sm text-stone-500 mb-8">We couldn't find this submission. It may have been removed.</p>
+        <Button onClick={() => navigate('/editorial')} className="w-full bg-primary hover:bg-[#7a2d11] text-white rounded-none h-11 text-xs font-bold uppercase tracking-widest">
+          Back to dashboard
+        </Button>
+      </div>
     </div>
   );
 
+  const completed = reviews.filter(r => r.submitted_at).length;
+
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
-      <PageHeader 
-        title="Review" 
-        subtitle="Audit" 
-        accent="Protocol Tracking"
-        description="Monitor the evaluation heartbeat of the journal. Audit reviewer responsiveness, temporal deadlines, and expert recommendations for active manuscripts."
+    <div className="min-h-screen bg-stone-50 pb-24">
+      <PageHeader
+        title="Reviews"
+        subtitle="for this submission"
+        accent="Editor"
+        description="See who is reviewing this paper and what they recommended."
       />
 
-      <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-           <Button onClick={() => navigate(-1)} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Return to Command
-           </Button>
-           
-           <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
-              <ShieldCheck size={16} className="text-secondary" />
-              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Authorized Intelligence Access</span>
-           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
-          {/* Submission summary sidebar */}
-          <div className="lg:col-span-4 space-y-12">
-            <div className={cardClasses + " border-t-8 border-foreground"}>
-               <div className="absolute top-0 right-0 w-24 h-24 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-               <div className="relative z-10">
-                  <span className={labelClasses}>Active Manuscript</span>
-                  <h3 className="text-2xl font-headline font-black uppercase tracking-tight mb-6 leading-tight group-hover:text-primary transition-colors">{submission.article.title}</h3>
-                  <div className="pt-8 border-t border-border/20">
-                    <span className={labelClasses}>Core Abstract</span>
-                    <p className="font-body text-foreground/40 text-sm leading-relaxed italic line-clamp-6">{submission.article.abstract}</p>
-                  </div>
-               </div>
-            </div>
-
-            <div className={cardClasses + " bg-foreground text-white"}>
-               <h4 className="font-headline font-black text-[10px] uppercase tracking-widest text-white/40 mb-6 flex items-center gap-2"><Activity size={12} /> Audit Statistics</h4>
-               <div className="flex items-center justify-between">
-                  <span className="font-body text-sm italic text-white/60">Assigned Evaluators</span>
-                  <span className="font-headline font-black text-3xl text-secondary">{reviews.length}</span>
-               </div>
-            </div>
-          </div>
-
-          {/* Reviews Audit Table */}
-          <div className="lg:col-span-8 flex flex-col">
-            <div className={cardClasses + " flex-1"}>
-               <div className="flex items-center gap-4 mb-10 pb-6 border-b border-border/20">
-                  <div className="p-3 bg-primary text-white"><ClipboardList className="h-5 w-5" /></div>
-                  <h2 className="text-2xl font-headline font-black uppercase tracking-tighter">Evaluation Registry</h2>
-               </div>
-
-               {reviews.length === 0 ? (
-                  <div className="py-24 text-center opacity-40 italic font-body">No evaluations currently synchronized with this manuscript dossier.</div>
-               ) : (
-                  <div className="space-y-8">
-                    {reviews.map((review) => {
-                      const status = getReviewStatus(review);
-                      return (
-                        <div key={review.id} className="border border-border/10 p-8 hover:border-primary/20 transition-all bg-muted/5 group">
-                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                              <div className="flex items-center gap-4">
-                                 <div className="p-3 bg-white text-foreground/30 group-hover:text-primary transition-colors"><User size={16} /></div>
-                                 <div>
-                                    <h4 className="font-headline font-black uppercase text-sm tracking-tight">{review.reviewer?.full_name || "Anonymized Evaluator"}</h4>
-                                    <p className="font-body text-[10px] text-foreground/40 italic">{review.reviewer?.email || "confidential@registry.ijsds.org"}</p>
-                                 </div>
-                              </div>
-                              <Badge variant="outline" className={`rounded-none font-headline font-bold uppercase text-[9px] tracking-widest px-4 py-2 border-2 ${status.color} flex items-center gap-2`}>
-                                 {getStatusIcon(status.status)} {status.label}
-                              </Badge>
-                           </div>
-                           
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-border/10">
-                              <div className="space-y-4">
-                                 <div className="flex items-center gap-3 text-foreground/30 font-headline font-black uppercase text-[9px] tracking-widest">
-                                    <Calendar size={12} /> Temporal Markers
-                                 </div>
-                                 <div className="space-y-1">
-                                    <p className="text-xs font-body italic text-foreground/60">Finalized: <span className="font-bold text-foreground not-italic">{review.submitted_at ? new Date(review.submitted_at).toLocaleDateString() : 'Awaiting'}</span></p>
-                                    <p className="text-xs font-body italic text-foreground/60">Deadline: <span className="font-bold text-foreground not-italic">{review.deadline_date ? new Date(review.deadline_date).toLocaleDateString() : 'N/A'}</span></p>
-                                 </div>
-                              </div>
-                              
-                              {review.submitted_at && (
-                                <div className="space-y-4">
-                                   <div className="flex items-center gap-3 text-foreground/30 font-headline font-black uppercase text-[9px] tracking-widest">
-                                      <GraduationCap size={12} /> Expert Verdict
-                                   </div>
-                                   <Badge className="bg-foreground text-white rounded-none font-headline font-bold text-[10px] py-1 px-3 uppercase tracking-widest">{review.recommendation}</Badge>
-                                </div>
-                              )}
-                           </div>
-
-                           {review.submitted_at && review.comments_to_editor && (
-                              <div className="mt-8 pt-8 border-t border-border/10 bg-secondary/5 p-6 relative">
-                                 <div className="absolute top-0 right-0 p-4 opacity-10"><MessageSquare size={32} /></div>
-                                 <span className="font-headline font-black text-[9px] uppercase tracking-widest text-secondary flex items-center gap-2 mb-4">Confidential Editorial Directive</span>
-                                 <p className="font-body text-xs text-foreground/70 italic leading-relaxed">{review.comments_to_editor}</p>
-                              </div>
-                           )}
+      <ContentSection dark>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Main: reviews list */}
+          <div className="lg:col-span-2 space-y-4">
+            {reviews.length === 0 ? (
+              <div className="bg-white border border-stone-200 py-20 text-center">
+                <p className="text-sm text-stone-400">No reviewers assigned yet.</p>
+              </div>
+            ) : (
+              reviews.map((review) => {
+                const st = reviewState(review);
+                return (
+                  <div key={review.id} className="bg-white border border-stone-200 p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 bg-stone-100 flex items-center justify-center shrink-0">
+                          <User size={16} className="text-stone-500" />
                         </div>
-                      );
-                    })}
-                  </div>
-               )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-stone-800 truncate">{review.reviewer?.full_name || 'Reviewer'}</p>
+                          {review.reviewer?.email && (
+                            <p className="text-xs text-stone-400 truncate">{review.reviewer.email}</p>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] shrink-0 ${st.style}`}>
+                        {st.icon} {st.label}
+                      </span>
+                    </div>
 
-               <div className="mt-12 pt-8 border-t border-border/20 flex justify-end">
-                  <Button onClick={() => navigate('/editorial')} className="bg-foreground text-white rounded-none font-headline font-black uppercase text-[10px] px-12 py-6 h-auto tracking-widest hover:bg-primary transition-all">Synchronize Command Dashboard</Button>
-               </div>
+                    <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-stone-100">
+                      <div>
+                        <p className={label}>Submitted</p>
+                        <p className="text-sm text-stone-700 mt-1 flex items-center gap-1.5">
+                          <Calendar size={13} className="text-stone-400" />
+                          {review.submitted_at ? new Date(review.submitted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className={label}>Deadline</p>
+                        <p className="text-sm text-stone-700 mt-1 flex items-center gap-1.5">
+                          <Clock size={13} className="text-stone-400" />
+                          {review.deadline_date ? new Date(review.deadline_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not set'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {review.submitted_at && review.recommendation && (
+                      <div className="mt-4">
+                        <p className={label}>Recommendation</p>
+                        <span className="inline-block mt-1.5 bg-stone-900 text-white px-3 py-1 text-[11px] font-bold uppercase tracking-widest">
+                          {review.recommendation.replace('_', ' ')}
+                        </span>
+                      </div>
+                    )}
+
+                    {review.submitted_at && review.comments_to_editor && (
+                      <div className="mt-4 pt-4 border-t border-stone-100">
+                        <p className={`${label} flex items-center gap-1.5`}><MessageSquare size={12} /> Confidential note to editor</p>
+                        <p className="text-sm text-stone-600 italic leading-relaxed mt-2">{review.comments_to_editor}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+
+            <div className="pt-2">
+              <Button onClick={() => navigate('/editorial')} variant="outline"
+                className="rounded-none h-10 text-[10px] font-bold uppercase tracking-widest border-stone-200 hover:border-primary gap-2">
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to dashboard
+              </Button>
             </div>
           </div>
+
+          {/* Sidebar: submission summary */}
+          <aside className="space-y-6">
+            <div className="bg-white border border-stone-200 p-6">
+              <p className={`${label} pb-4 mb-4 border-b border-stone-100`}>Manuscript</p>
+              <h3 className="font-headline text-lg text-stone-900 leading-snug">{submission.article.title}</h3>
+              {submission.article.abstract && (
+                <p className="text-sm text-stone-500 leading-relaxed mt-4 line-clamp-6">{submission.article.abstract}</p>
+              )}
+            </div>
+
+            <div className="bg-white border border-stone-200 p-6 flex items-center justify-between">
+              <span className="text-sm text-stone-500">Reviews complete</span>
+              <span className="font-headline text-2xl text-stone-900 tabular-nums">{completed}<span className="text-stone-300">/{reviews.length}</span></span>
+            </div>
+          </aside>
         </div>
       </ContentSection>
     </div>

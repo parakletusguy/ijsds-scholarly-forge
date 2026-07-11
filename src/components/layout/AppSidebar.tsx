@@ -91,8 +91,8 @@ export const AppSidebar = () => {
   ];
 
   const adminNav: NavItemDef[] = [
-    { title: "Registration Requests", url: "/requests", icon: Building2 },
-    { title: "Scholarly Archive", url: "/archive", icon: Archive },
+    { title: "Requests", url: "/requests", icon: Building2 },
+    { title: "Archive", url: "/archive", icon: Archive },
   ];
 
   const buildNavSections = (): NavSection[] => {
@@ -103,11 +103,11 @@ export const AppSidebar = () => {
     sections.push({ label: "Author Tools", items: authorNav });
 
     if (userRole.is_reviewer || userRole.is_editor || userRole.is_admin) {
-      sections.push({ label: "Reviewer Hub", items: reviewerNav });
+      sections.push({ label: "Reviewer", items: reviewerNav });
     }
 
     if (userRole.is_editor || userRole.is_admin) {
-      sections.push({ label: "Editorial Board", items: editorNav });
+      sections.push({ label: "Editorial", items: editorNav });
     }
 
     if (userRole.is_admin) {

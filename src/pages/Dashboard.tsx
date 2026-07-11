@@ -271,9 +271,9 @@ export const Dashboard = () => {
         {/* Registry Continuity & Efficiency */}
         <section className="hidden md:block">
           <div className="bg-stone-100 p-10 h-full border-t border-primary/10">
-            <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">Submission Status</h4>
+            <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">How It Works</h4>
             <p className="text-stone-500 max-w-md mx-auto italic font-body text-lg">
-              Submissions follow the highest editorial standards for multidisciplinary research and development.
+              Every submission goes through the same clear, three-step process.
             </p>
             
             <div className="space-y-12 relative">
@@ -281,22 +281,22 @@ export const Dashboard = () => {
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-stone-100"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 01: Submission</h6>
-                <p className="text-xl text-stone-200 opacity-90 leading-relaxed mb-12">
-                  Join a network of excellence dedicated to the scientific advancement of social work and sustainable development across the African continent.
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Step 1: Submit</h6>
+                <p className="text-[10px] text-stone-400 leading-relaxed">
+                  Upload your manuscript and submit it for editorial screening.
                 </p>
               </div>
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-stone-300 border-4 border-stone-100"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 02: Peer Evaluation</h6>
-                <p className="text-[10px] text-stone-400 leading-relaxed">Double-blind review by the expert Scholarly Committee.</p>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Step 2: Peer Review</h6>
+                <p className="text-[10px] text-stone-400 leading-relaxed">Double-blind review by our expert reviewers.</p>
               </div>
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-stone-300 border-4 border-stone-100"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Phase 03: Publication</h6>
-                <p className="text-[10px] text-stone-400 leading-relaxed">Archival timestamping and institutional registry entry.</p>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Step 3: Publication</h6>
+                <p className="text-[10px] text-stone-400 leading-relaxed">Your article is published, permanently archived, and citable.</p>
               </div>
             </div>
 

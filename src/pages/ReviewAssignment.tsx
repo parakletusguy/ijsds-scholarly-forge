@@ -37,6 +37,7 @@ export const ReviewAssignment = () => {
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [assigning, setAssigning] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }
@@ -86,145 +87,130 @@ export const ReviewAssignment = () => {
     } finally { setAssigning(false); }
   };
 
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
-  const labelClasses = "font-headline font-black text-[10px] uppercase tracking-widest text-foreground/40 mb-4 block";
+  const label = "text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400";
 
   if (loading || loadingData) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   if (!submission) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/5 p-4 text-center">
-       <div className="p-8 bg-white border border-border/40 shadow-xl max-w-md">
-          <BookOpen className="h-12 w-12 text-primary mx-auto mb-6" />
-          <h2 className="text-2xl font-headline font-black uppercase tracking-tight mb-4">Submission not found</h2>
-          <p className="font-body text-foreground/40 mb-8 italic">We couldn't find this submission. It may have been removed.</p>
-          <Button onClick={() => navigate('/editorial')} className="w-full bg-foreground text-white rounded-none py-6 font-headline font-black uppercase text-[10px] tracking-widest">Back to Dashboard</Button>
-       </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-6 text-center">
+      <div className="bg-white border border-stone-200 p-10 max-w-md">
+        <BookOpen className="h-8 w-8 text-primary mx-auto mb-5" />
+        <h2 className="font-headline text-2xl text-stone-900 mb-2">Submission not found</h2>
+        <p className="text-sm text-stone-500 mb-8">We couldn't find this submission. It may have been removed.</p>
+        <Button onClick={() => navigate('/editorial')} className="w-full bg-primary hover:bg-[#7a2d11] text-white rounded-none h-11 text-xs font-bold uppercase tracking-widest">Back to dashboard</Button>
+      </div>
     </div>
   );
 
+  const filtered = reviewers.filter(r => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return r.full_name?.toLowerCase().includes(q) || r.affiliation?.toLowerCase().includes(q);
+  });
+
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
+    <div className="min-h-screen bg-stone-50 pb-24">
       <PageHeader
         title="Assign"
         subtitle="Reviewers"
-        accent="Peer Review"
+        accent="Editor"
         description="Choose one or more reviewers for this submission."
       />
 
-      <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-           <Button onClick={() => navigate('/editorial')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Back
-           </Button>
-
-           <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
-              <UserCheck size={16} className="text-secondary" />
-              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Editor</span>
-           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
-          {/* Submission summary */}
-          <div className="lg:col-span-4 space-y-12">
-            <div className={cardClasses + " border-t-8 border-foreground"}>
-               <div className="absolute top-0 right-0 w-24 h-24 bg-muted/20" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}></div>
-               <div className="relative z-10">
-                  <span className={labelClasses}>Manuscript</span>
-                  <h3 className="text-2xl font-headline font-black uppercase tracking-tight mb-6 leading-tight group-hover:text-primary transition-colors">{submission.article.title}</h3>
-                  
-                  {submission.article.subject_area && (
-                    <div className="inline-flex items-center gap-3 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 font-headline font-black uppercase text-[10px] tracking-widest mb-10">
-                       <GraduationCap size={14} /> {submission.article.subject_area}
-                    </div>
-                  )}
-
-                  <div className="pt-8 border-t border-border/20">
-                    <span className={labelClasses}>Abstract</span>
-                    <p className="font-body text-foreground/50 text-sm leading-relaxed italic line-clamp-6">{submission.article.abstract}</p>
-                  </div>
-               </div>
-            </div>
-
-            <div className={cardClasses + " bg-foreground text-white"}>
-               <h4 className="font-headline font-black text-[10px] uppercase tracking-widest text-white/40 mb-6 flex items-center gap-2"><Activity size={12} /> Summary</h4>
-               <div className="flex items-center justify-between">
-                  <span className="font-body text-sm italic text-white/60">Reviewers selected</span>
-                  <span className="font-headline font-black text-3xl text-secondary">{selectedReviewers.length}</span>
-               </div>
-            </div>
-          </div>
-
+      <ContentSection dark>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Reviewer selection */}
-          <div className="lg:col-span-8 flex flex-col">
-            <div className={cardClasses + " flex-1"}>
-               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10 pb-6 border-b border-border/20">
-                  <div className="flex items-center gap-4">
-                     <div className="p-3 bg-primary text-white"><Users className="h-5 w-5" /></div>
-                     <h2 className="text-xl sm:text-2xl font-headline font-black uppercase tracking-tighter">Reviewers</h2>
-                  </div>
-                  <div className="relative w-full sm:w-64">
-                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/20" />
-                     <input type="text" placeholder="Search reviewers..." className="bg-muted/30 border border-border/10 rounded-none h-12 pl-12 pr-4 font-headline uppercase text-[10px] tracking-widest w-full focus:border-primary outline-none transition-all" />
-                  </div>
-               </div>
-
-               {reviewers.length === 0 ? (
-                  <div className="py-24 text-center opacity-40 italic font-body">No reviewers available.</div>
-               ) : (
-                  <div className="space-y-6">
-                    {reviewers.map((reviewer) => (
-                      <div key={reviewer.id} className={`flex items-start gap-4 p-5 sm:p-8 border hover:border-primary/20 transition-all group ${selectedReviewers.includes(reviewer.id) ? 'bg-primary/5 border-primary/20' : 'bg-muted/10 border-border/10'}`}>
-                         <Checkbox
-                           checked={selectedReviewers.includes(reviewer.id)}
-                           onCheckedChange={(checked) => handleReviewerSelection(reviewer.id, checked as boolean)}
-                           className="h-6 w-6 rounded-none border-foreground/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                         />
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <h4 className="font-headline font-black uppercase text-sm tracking-tight group-hover:text-primary transition-colors">{reviewer.full_name}</h4>
-                              <div className="flex items-center gap-2 text-foreground/30 font-body text-[11px] italic">
-                                 <Mail size={12} /> {reviewer.email}
-                              </div>
-                           </div>
-                           
-                           {reviewer.affiliation && (
-                             <p className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40 mb-3 flex items-center gap-2"><GraduationCap size={10} /> {reviewer.affiliation}</p>
-                           )}
-                           
-                           {reviewer.bio && (
-                             <p className="font-body text-xs text-foreground/40 line-clamp-2 italic leading-relaxed border-l-2 border-border/20 pl-4">{reviewer.bio}</p>
-                           )}
-                         </div>
-                         <Button variant="ghost" className="hidden md:flex font-headline font-black uppercase text-[9px] tracking-widest text-foreground/20 hover:text-primary gap-2 p-0">View Profile <ChevronRight size={12} /></Button>
-                      </div>
-                    ))}
-                  </div>
-               )}
-
-               {reviewers.length > 0 && (
-                  <div className="mt-12 pt-8 border-t border-border/20 flex flex-col md:flex-row gap-6">
-                     <Button 
-                       onClick={assignReviewers} 
-                       disabled={selectedReviewers.length === 0 || assigning}
-                       className="flex-1 bg-primary hover:bg-secondary text-white py-8 rounded-none font-headline font-black uppercase text-xs tracking-[0.2em] transition-all"
-                     >
-                        {assigning ? 'Assigning...' : `Assign ${selectedReviewers.length} reviewer(s)`}
-                     </Button>
-                     <Button
-                       variant="outline"
-                       onClick={() => navigate('/editorial')}
-                       className="py-8 px-12 rounded-none font-headline font-black uppercase text-[10px] tracking-widest border-border/40 hover:border-primary transition-all"
-                     >
-                        Cancel
-                     </Button>
-                  </div>
-               )}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search reviewers by name or affiliation..."
+                className="w-full bg-white border border-stone-200 rounded-none h-11 pl-10 pr-4 text-sm focus:border-primary outline-none transition-colors"
+              />
             </div>
+
+            {filtered.length === 0 ? (
+              <div className="bg-white border border-stone-200 py-16 text-center">
+                <p className="text-sm text-stone-400">{reviewers.length === 0 ? 'No reviewers available.' : 'No reviewers match your search.'}</p>
+              </div>
+            ) : (
+              filtered.map((reviewer) => {
+                const selected = selectedReviewers.includes(reviewer.id);
+                return (
+                  <label
+                    key={reviewer.id}
+                    htmlFor={`rev-${reviewer.id}`}
+                    className={`flex items-start gap-4 p-5 bg-white border cursor-pointer transition-colors ${selected ? 'border-primary bg-primary/5' : 'border-stone-200 hover:border-stone-300'}`}
+                  >
+                    <Checkbox
+                      id={`rev-${reviewer.id}`}
+                      checked={selected}
+                      onCheckedChange={(checked) => handleReviewerSelection(reviewer.id, checked as boolean)}
+                      className="mt-0.5 rounded-none border-stone-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-stone-800">{reviewer.full_name}</p>
+                      <p className="text-xs text-stone-400 flex items-center gap-1.5 mt-0.5">
+                        <Mail size={11} className="shrink-0" /> {reviewer.email}
+                      </p>
+                      {reviewer.affiliation && (
+                        <p className="text-xs text-stone-500 flex items-center gap-1.5 mt-1">
+                          <GraduationCap size={12} className="shrink-0 text-stone-400" /> {reviewer.affiliation}
+                        </p>
+                      )}
+                      {reviewer.bio && (
+                        <p className="text-xs text-stone-500 leading-relaxed mt-2 line-clamp-2">{reviewer.bio}</p>
+                      )}
+                    </div>
+                  </label>
+                );
+              })
+            )}
           </div>
+
+          {/* Submission summary + action */}
+          <aside className="space-y-6">
+            <div className="bg-white border border-stone-200 p-6">
+              <p className={`${label} pb-4 mb-4 border-b border-stone-100`}>Manuscript</p>
+              <h3 className="font-headline text-lg text-stone-900 leading-snug">{submission.article.title}</h3>
+              {submission.article.subject_area && (
+                <p className="mt-3 text-xs font-medium uppercase tracking-widest text-primary">{submission.article.subject_area}</p>
+              )}
+              {submission.article.abstract && (
+                <p className="text-sm text-stone-500 leading-relaxed mt-4 line-clamp-5">{submission.article.abstract}</p>
+              )}
+            </div>
+
+            <div className="bg-white border border-stone-200 p-6">
+              <div className="flex items-center justify-between mb-5">
+                <span className="text-sm text-stone-500">Reviewers selected</span>
+                <span className="font-headline text-2xl text-stone-900 tabular-nums">{selectedReviewers.length}</span>
+              </div>
+              <div className="space-y-2">
+                <Button
+                  onClick={assignReviewers}
+                  disabled={selectedReviewers.length === 0 || assigning}
+                  className="w-full bg-primary hover:bg-[#7a2d11] text-white h-11 rounded-none text-xs font-bold uppercase tracking-widest disabled:opacity-40"
+                >
+                  {assigning ? 'Assigning...' : `Assign ${selectedReviewers.length || ''} reviewer${selectedReviewers.length === 1 ? '' : 's'}`.trim()}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/editorial')}
+                  className="w-full h-11 rounded-none text-[10px] font-bold uppercase tracking-widest border-stone-200 hover:border-primary"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </aside>
         </div>
       </ContentSection>
     </div>

@@ -49,60 +49,58 @@ export default function VolumePage() {
     : '';
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+    <div className="pb-24 bg-stone-50 min-h-screen font-body">
       <Helmet>
         <title>Volume {volume} | IJSDS Archive</title>
-        <meta name="description" content={`Browse issues and articles in Volume ${volume} of the International Journal On Social Work and Development Studies.`} />
+        <meta name="description" content={`Browse issues and articles in Volume ${volume} of the International Journal of Social Work and Development Studies.`} />
         <meta name="robots" content="index, follow" />
       </Helmet>
 
-      <PageHeader 
+      <PageHeader
         title={`Volume ${volume}`}
         subtitle="Archive"
         accent={publicationYear ? `Published in ${publicationYear}` : ''}
-        description={`Explore the scholarly records published in Volume ${volume}.`}
+        description={`Browse the issues published in Volume ${volume}.`}
       />
 
-      <ContentSection>
+      <ContentSection dark>
         <div className="max-w-4xl mx-auto">
-          <div className="mb-12">
-            <Link to="/archive" className="flex items-center gap-2 text-primary hover:underline font-bold text-sm uppercase tracking-widest">
-              <ArrowLeft size={16} /> Back to Full Archive
+          <div className="mb-8">
+            <Link to="/archive" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors">
+              <ArrowLeft size={14} /> Back to full archive
             </Link>
           </div>
 
           {loading ? (
             <div className="flex justify-center py-24">
-              <LoadingSpinner size="lg" text="Loading volume records..." />
+              <LoadingSpinner size="lg" text="Loading issues..." />
             </div>
           ) : sortedIssues.length === 0 ? (
-            <div className="text-center py-24 bg-white border border-border/10 shadow-sm">
-              <h3 className="text-2xl font-headline text-foreground/40 italic">No issues found in this volume.</h3>
+            <div className="text-center py-20 bg-white border border-stone-200">
+              <h3 className="font-headline text-xl text-stone-500">No issues in this volume yet.</h3>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {sortedIssues.map((issueNum) => (
-                <Link 
+                <Link
                   key={issueNum}
                   to={`/archive/vol-${volume}/issue-${issueNum}`}
-                  className="bg-white p-10 border border-border/10 hover:border-primary shadow-sm hover:shadow-xl transition-all duration-300 group"
+                  className="bg-white p-6 border border-stone-200 hover:border-primary transition-colors group"
                 >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 bg-primary/5 rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
-                      <BookOpen size={24} className="text-primary group-hover:text-white" />
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="w-10 h-10 bg-primary/10 text-primary flex items-center justify-center">
+                      <BookOpen size={18} />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/30">
-                      {issuesMap[issueNum].length} Articles
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                      {issuesMap[issueNum].length} {issuesMap[issueNum].length === 1 ? 'article' : 'articles'}
                     </span>
                   </div>
-                  
-                  <h2 className="text-3xl font-headline font-black uppercase tracking-tight text-foreground group-hover:text-primary transition-colors">
+                  <h2 className="font-headline text-2xl text-stone-900 group-hover:text-primary transition-colors">
                     Issue {issueNum}
                   </h2>
-                  
-                  <div className="mt-8 flex items-center text-xs font-bold uppercase tracking-widest text-primary gap-2">
-                    <Layers size={14} /> Browse Articles
-                  </div>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-stone-400 group-hover:text-primary transition-colors">
+                    <Layers size={13} /> Browse articles
+                  </span>
                 </Link>
               ))}
             </div>

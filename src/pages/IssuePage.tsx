@@ -42,7 +42,7 @@ export default function IssuePage() {
     : '';
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen font-body">
+    <div className="pb-24 bg-stone-50 min-h-screen font-body">
       <Helmet>
         <title>Volume {volume}, Issue {issue} | IJSDS Archive</title>
         <meta name="description" content={`Table of Contents for Volume ${volume}, Issue ${issue} of the International Journal On Social Work and Development Studies.`} />
@@ -56,86 +56,58 @@ export default function IssuePage() {
         title={`Issue ${issue}`}
         subtitle={`Volume ${volume}`}
         accent={publicationYear ? `Published in ${publicationYear}` : 'Table of Contents'}
-        description={`Explore the scholarly records published in Volume ${volume}, Issue ${issue}.`}
+        description={`Articles published in Volume ${volume}, Issue ${issue}.`}
       />
 
-      <ContentSection>
+      <ContentSection dark>
         <div className="max-w-5xl mx-auto">
-          <div className="mb-12">
-            <Link to={`/archive/vol-${volume}`} className="flex items-center gap-2 text-primary hover:underline font-bold text-sm uppercase tracking-widest">
-              <ArrowLeft size={16} /> Back to Volume {volume}
+          <div className="mb-8">
+            <Link to={`/archive/vol-${volume}`} className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors">
+              <ArrowLeft size={14} /> Back to Volume {volume}
             </Link>
           </div>
 
           {loading ? (
             <div className="flex justify-center py-24">
-              <LoadingSpinner size="lg" text="Loading issue records..." />
+              <LoadingSpinner size="lg" text="Loading articles..." />
             </div>
           ) : articles.length === 0 ? (
-            <div className="text-center py-24 bg-white border border-border/10 shadow-sm">
-              <h3 className="text-2xl font-headline text-foreground/40 italic">No articles found in this issue.</h3>
+            <div className="text-center py-20 bg-white border border-stone-200">
+              <h3 className="font-headline text-xl text-stone-500">No articles in this issue yet.</h3>
             </div>
           ) : (
-            <div className="space-y-8">
-              {articles.map((article, idx) => (
-                <div key={article.id} className="bg-white p-8 md:p-12 border border-border/10 shadow-sm hover:shadow-xl transition-all duration-500 relative group">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 flex items-center justify-center font-headline font-black text-foreground/10 text-xl group-hover:bg-primary group-hover:text-white transition-all italic">
-                    {idx + 1}
-                  </div>
-                  
-                  <div className="flex flex-col md:flex-row gap-8">
-                    <div className="flex-grow space-y-4 pr-16">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                        {article.subject_area || 'Research Article'}
-                      </span>
-                      
-                      <h3 className="text-2xl md:text-3xl font-headline font-black leading-snug">
-                        <Link to={`/article/${buildArticleSlug(article)}`} className="hover:text-primary transition-colors">
-                          {article.title}
-                        </Link>
-                      </h3>
-                      
-                      <p className="text-foreground/60 font-body text-lg italic border-l-2 border-primary/20 pl-4">
-                        {formatAuthors(article.authors)}
-                      </p>
-                      
-                      {article.page_start && article.page_end && (
-                        <p className="text-sm text-foreground/50">
-                          Pages {article.page_start} - {article.page_end}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="flex flex-col gap-4 shrink-0 justify-center border-t md:border-t-0 md:border-l border-border/10 pt-6 md:pt-0 md:pl-8">
-                      <Link 
-                        to={`/article/${buildArticleSlug(article)}`}
-                        className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors"
-                      >
-                        <BookOpen size={16} /> Read Abstract
+            <div className="space-y-4">
+              {articles.map((article) => (
+                <div key={article.id} className="bg-white border border-stone-200 p-6 md:p-8 flex flex-col md:flex-row gap-6">
+                  <div className="flex-grow min-w-0">
+                    {article.subject_area && (
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{article.subject_area}</span>
+                    )}
+                    <h3 className="font-headline text-xl md:text-2xl text-stone-900 leading-snug mt-1.5">
+                      <Link to={`/article/${buildArticleSlug(article)}`} className="hover:text-primary transition-colors">
+                        {article.title}
                       </Link>
-                      
-                      {article.manuscript_file_url && (
-                        <a 
-                          href={article.manuscript_file_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary hover:text-primary/70 transition-colors"
-                        >
-                          <Download size={16} /> PDF Download
-                        </a>
-                      )}
-                      
-                      {article.doi && (
-                        <a 
-                          href={`https://doi.org/${article.doi}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-foreground/40 hover:text-primary transition-colors"
-                        >
-                          <ExternalLink size={14} /> {article.doi}
-                        </a>
-                      )}
-                    </div>
+                    </h3>
+                    <p className="text-sm text-stone-500 mt-2">{formatAuthors(article.authors)}</p>
+                    {article.page_start && article.page_end && (
+                      <p className="text-xs text-stone-400 mt-1">Pages {article.page_start}–{article.page_end}</p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-row md:flex-col gap-x-6 gap-y-3 shrink-0 md:border-l md:border-stone-100 md:pl-6 pt-4 md:pt-0 border-t md:border-t-0 border-stone-100 flex-wrap">
+                    <Link to={`/article/${buildArticleSlug(article)}`} className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-stone-700 hover:text-primary transition-colors">
+                      <BookOpen size={14} /> Read
+                    </Link>
+                    {article.manuscript_file_url && (
+                      <a href={article.manuscript_file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity">
+                        <Download size={14} /> PDF
+                      </a>
+                    )}
+                    {article.doi && (
+                      <a href={`https://doi.org/${article.doi}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors">
+                        <ExternalLink size={12} /> DOI
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}

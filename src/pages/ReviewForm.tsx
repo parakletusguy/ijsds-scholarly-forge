@@ -96,32 +96,37 @@ export const ReviewForm = () => {
     saveReview(true);
   };
 
-  const cardClasses = "bg-white p-10 border border-border/40 shadow-sm relative overflow-hidden group";
-  const labelClasses = "font-headline font-black text-[10px] uppercase tracking-widest text-foreground/40 mb-4 block";
-  const inputClasses = "bg-muted/10 border-border/60 rounded-none focus:border-primary transition-all font-body h-auto py-4";
+  const label = "text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400";
+  const inputClasses = "bg-stone-50 border border-stone-200 rounded-none focus:border-primary focus-visible:ring-0 transition-colors font-body h-auto py-3";
 
   if (loading || loadingData) return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary/5">
-       <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   if (!review) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/5 p-4 text-center">
-       <div className="p-8 bg-white border border-border/40 shadow-xl max-w-md">
-          <Info className="h-12 w-12 text-primary mx-auto mb-6" />
-          <h2 className="text-2xl font-headline font-black uppercase tracking-tight mb-4">Review Not Found</h2>
-          <p className="font-body text-foreground/40 mb-8 italic">This review assignment could not be loaded.</p>
-          <Button onClick={() => navigate(-1)} className="w-full bg-foreground text-white rounded-none py-6 font-headline font-black uppercase text-[10px] tracking-widest">Return to Dashboard</Button>
-       </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-6 text-center">
+      <div className="bg-white border border-stone-200 p-10 max-w-md">
+        <Info className="h-8 w-8 text-primary mx-auto mb-5" />
+        <h2 className="font-headline text-2xl text-stone-900 mb-2">Review not found</h2>
+        <p className="text-sm text-stone-500 mb-8">We couldn't load this review. It may have been removed.</p>
+        <Button onClick={() => navigate(-1)} className="w-full bg-primary hover:bg-[#7a2d11] text-white rounded-none h-11 text-xs font-bold uppercase tracking-widest">Back to dashboard</Button>
+      </div>
     </div>
   );
 
   const isSubmitted = !!review.submitted_at;
   const art = review.submission.article;
+  const options = [
+    { val: 'accept',          label: 'Accept',          icon: <CheckCircle2 size={14} /> },
+    { val: 'minor_revisions', label: 'Minor revisions', icon: <Activity size={14} /> },
+    { val: 'major_revisions', label: 'Major revisions', icon: <AlertCircle size={14} /> },
+    { val: 'reject',          label: 'Reject',          icon: <AlertCircle size={14} /> },
+  ];
 
   return (
-    <div className="pb-32 bg-secondary/5 min-h-screen">
+    <div className="min-h-screen bg-stone-50 pb-24">
       <PageHeader
         title={isSubmitted ? 'Your' : 'Write Your'}
         subtitle="Review"
@@ -129,166 +134,134 @@ export const ReviewForm = () => {
         description="Read the manuscript, then share your recommendation and feedback with the editors."
       />
 
-      <ContentSection>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-           <Button onClick={() => navigate('/reviewer-dashboard')} variant="outline" className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 py-6 border-primary/20 hover:border-primary transition-all">
-              <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-           </Button>
-           <div className="flex items-center gap-4 bg-white/50 p-4 border border-border/20">
-              <ShieldCheck size={16} className="text-secondary" />
-              <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">Reviewer</span>
-           </div>
-        </div>
+      <ContentSection dark>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Review form */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white border border-stone-200 p-6 md:p-8">
+              <h2 className="font-headline text-xl text-stone-900 mb-6 pb-4 border-b border-stone-100">Your Review</h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
-          {/* Article sidebar */}
-          <div className="lg:col-span-4 space-y-12">
-            <div className={cardClasses + " border-t-8 border-foreground"}>
-               <div className="relative z-10">
-                  <span className={labelClasses}>Manuscript</span>
-                  <h3 className="text-2xl font-headline font-black uppercase tracking-tight mb-6 leading-tight group-hover:text-primary transition-colors">{art.title}</h3>
-
-                  {art.subject_area && (
-                    <div className="inline-flex items-center gap-3 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 font-headline font-black uppercase text-[10px] tracking-widest mb-10">
-                       <GraduationCap size={14} /> {art.subject_area}
-                    </div>
-                  )}
-
-                  <div className="pt-8 border-t border-border/20 space-y-6">
-                    <div>
-                       <span className={labelClasses}>Authors</span>
-                       <div className="space-y-4">
-                          {art.authors && Array.isArray(art.authors) ? art.authors.map((a: any, i: number) => (
-                             <div key={i} className="flex items-start gap-3">
-                                <div className="p-1.5 bg-muted text-foreground/30"><User size={12} /></div>
-                                <p className="font-body text-xs text-foreground/60 leading-tight">
-                                  {a.name}
-                                  <span className="block text-[10px] opacity-40 italic">{a.affiliation}</span>
-                                </p>
-                             </div>
-                          )) : <p className="font-body text-[10px] opacity-40 italic">Hidden for blind review.</p>}
-                       </div>
-                    </div>
-
-                    <div>
-                       <span className={labelClasses}>Payment Status</span>
-                       <PaymentStatusBadge vettingFee={art.vetting_fee} processingFee={art.processing_fee} showLabels={false} />
-                    </div>
-                  </div>
-               </div>
-            </div>
-
-            <div className="border-t-4 border-foreground pt-4">
-               <ReviewerFileManager articleId={art.id} submissionId={review.submission_id} />
-            </div>
-          </div>
-
-          {/* Assessment form */}
-          <div className="lg:col-span-8 flex flex-col">
-            <div className={cardClasses + " flex-1"}>
-               <div className="flex items-center gap-4 mb-10 pb-6 border-b border-border/20">
-                  <div className="p-3 bg-primary text-white"><BookOpen className="h-5 w-5" /></div>
-                  <h2 className="text-2xl font-headline font-black uppercase tracking-tighter">Your Review</h2>
-               </div>
-
-               <div className="space-y-12">
-                  {/* Recommendation */}
-                  <div className="bg-muted/5 p-8 border border-border/10">
-                    <Label className="text-xs font-headline font-black uppercase tracking-widest mb-6 flex items-center gap-2 text-foreground/40">
-                      <CheckCircle2 size={12} className="text-primary" /> Recommendation *
-                    </Label>
-                    <RadioGroup
-                      value={recommendation}
-                      onValueChange={setRecommendation}
-                      disabled={isSubmitted}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              {/* Recommendation */}
+              <div className="mb-8">
+                <Label className={`${label} flex items-center gap-1.5 mb-4`}>Recommendation *</Label>
+                <RadioGroup
+                  value={recommendation}
+                  onValueChange={setRecommendation}
+                  disabled={isSubmitted}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                >
+                  {options.map((opt) => (
+                    <label
+                      key={opt.val}
+                      htmlFor={opt.val}
+                      className={`flex items-center gap-3 p-4 border cursor-pointer transition-colors ${recommendation === opt.val ? 'bg-primary/5 border-primary' : 'bg-white border-stone-200 hover:border-stone-300'} ${isSubmitted ? 'cursor-default opacity-70' : ''}`}
                     >
-                      {[
-                        { val: 'accept',          label: 'Accept',          icon: <CheckCircle2 size={14} /> },
-                        { val: 'minor_revisions', label: 'Minor Revisions', icon: <Activity size={14} /> },
-                        { val: 'major_revisions', label: 'Major Revisions', icon: <AlertCircle size={14} /> },
-                        { val: 'reject',          label: 'Reject',          icon: <AlertCircle size={14} /> },
-                      ].map((opt) => (
-                        <div key={opt.val} className={`flex items-center space-x-4 p-6 border transition-all cursor-pointer ${recommendation === opt.val ? 'bg-primary/5 border-primary shadow-sm' : 'bg-white border-border/20'}`}>
-                          <RadioGroupItem value={opt.val} id={opt.val} className="border-foreground/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-                          <Label htmlFor={opt.val} className="font-headline font-black uppercase text-[10px] tracking-widest flex items-center gap-2 cursor-pointer grow">
-                            {opt.icon} {opt.label}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
+                      <RadioGroupItem value={opt.val} id={opt.val} className="border-stone-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
+                      <span className="text-sm font-medium text-stone-800 flex items-center gap-2">{opt.icon} {opt.label}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
 
-                  {/* Comments to author */}
+              {/* Comments to author */}
+              <div className="mb-8">
+                <Label htmlFor="comments-author" className={`${label} block mb-1.5`}>Comments to author *</Label>
+                <p className="text-xs text-stone-400 mb-3">Shared with the author.</p>
+                <Textarea
+                  id="comments-author"
+                  placeholder="Provide detailed feedback for the author…"
+                  value={commentsToAuthor}
+                  onChange={(e) => setCommentsToAuthor(e.target.value)}
+                  disabled={isSubmitted}
+                  rows={10}
+                  className={inputClasses}
+                />
+              </div>
+
+              {/* Confidential comments to editor */}
+              <div>
+                <Label htmlFor="comments-editor" className={`${label} block mb-1.5`}>Confidential note to editor</Label>
+                <p className="text-xs text-stone-400 mb-3">Visible to editors only, not the author.</p>
+                <Textarea
+                  id="comments-editor"
+                  placeholder="Optional notes for the editors…"
+                  value={commentsToEditor}
+                  onChange={(e) => setCommentsToEditor(e.target.value)}
+                  disabled={isSubmitted}
+                  rows={5}
+                  className={inputClasses}
+                />
+              </div>
+
+              {!isSubmitted ? (
+                <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-stone-100">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={submitting || saving}
+                    className="flex-1 bg-primary hover:bg-[#7a2d11] text-white h-12 rounded-none text-xs font-bold uppercase tracking-widest gap-2"
+                  >
+                    {submitting ? 'Submitting…' : <>Submit Review <Send size={14} /></>}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => saveReview(false)}
+                    disabled={submitting || saving}
+                    className="h-12 px-8 rounded-none text-[10px] font-bold uppercase tracking-widest border-stone-200 hover:border-primary gap-2"
+                  >
+                    {saving ? 'Saving…' : <><Save size={14} /> Save draft</>}
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between bg-emerald-50 -mx-6 md:-mx-8 -mb-6 md:-mb-8 px-6 md:px-8 py-5">
                   <div>
-                    <Label htmlFor="comments-author" className="text-xs font-headline font-black uppercase tracking-widest mb-4 block text-foreground/40">
-                      Comments to Author *
-                    </Label>
-                    <p className="font-body text-[11px] text-foreground/30 italic mb-4">This feedback will be shared with the author.</p>
-                    <Textarea
-                      id="comments-author"
-                      placeholder="Provide detailed feedback for the author…"
-                      value={commentsToAuthor}
-                      onChange={(e) => setCommentsToAuthor(e.target.value)}
-                      disabled={isSubmitted}
-                      rows={12}
-                      className={inputClasses}
-                    />
+                    <p className={label}>Review submitted</p>
+                    <p className="text-sm text-stone-700 mt-1">
+                      {new Date(review.submitted_at!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {recommendation && <span className="ml-2 font-semibold">· {recommendation.replace('_', ' ')}</span>}
+                    </p>
                   </div>
-
-                  {/* Confidential comments to editor */}
-                  <div>
-                    <Label htmlFor="comments-editor" className="text-xs font-headline font-black uppercase tracking-widest mb-4 block text-foreground/40">
-                      Confidential Comments to Editor
-                    </Label>
-                    <p className="font-body text-[11px] text-foreground/30 italic mb-4">Strictly confidential — visible to editors only.</p>
-                    <Textarea
-                      id="comments-editor"
-                      placeholder="Optional notes for the editorial team…"
-                      value={commentsToEditor}
-                      onChange={(e) => setCommentsToEditor(e.target.value)}
-                      disabled={isSubmitted}
-                      rows={6}
-                      className={inputClasses}
-                    />
-                  </div>
-
-                  {!isSubmitted ? (
-                    <div className="flex flex-col md:flex-row gap-6 pt-8 border-t border-border/20">
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={submitting || saving}
-                        className="flex-1 bg-primary hover:bg-primary/90 text-white py-5 sm:py-10 rounded-none font-headline font-black uppercase text-xs tracking-[0.3em] group"
-                      >
-                        {submitting
-                          ? 'Submitting…'
-                          : <span className="flex items-center gap-4">Submit Review <Send size={14} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" /></span>
-                        }
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => saveReview(false)}
-                        disabled={submitting || saving}
-                        className="py-5 sm:py-10 px-8 sm:px-12 rounded-none font-headline font-black uppercase text-[10px] tracking-widest border-border/40 hover:border-primary transition-all gap-3"
-                      >
-                        {saving ? 'Saving…' : <><Save size={14} /> Save Draft</>}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="pt-10 border-t border-border/20 bg-secondary/5 p-8 flex items-center justify-between">
-                       <div>
-                          <p className="font-headline font-black text-[10px] uppercase tracking-widest text-foreground/30 mb-2">Review Submitted</p>
-                          <p className="font-body text-sm italic">
-                            Submitted on {new Date(review.submitted_at!).toLocaleDateString()}
-                            {recommendation && <span className="ml-4 font-headline font-bold not-italic uppercase text-[10px] tracking-wider">· {recommendation.replace('_', ' ')}</span>}
-                          </p>
-                       </div>
-                       <div className="p-4 bg-white border border-border/10 text-primary shadow-sm"><CheckCircle2 size={24} /></div>
-                    </div>
-                  )}
-               </div>
+                  <CheckCircle2 size={22} className="text-emerald-600 shrink-0" />
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Manuscript sidebar */}
+          <aside className="space-y-6">
+            <div className="bg-white border border-stone-200 p-6">
+              <p className={`${label} pb-4 mb-4 border-b border-stone-100`}>Manuscript</p>
+              <h3 className="font-headline text-lg text-stone-900 leading-snug">{art.title}</h3>
+              {art.subject_area && (
+                <p className="mt-3 text-xs font-medium uppercase tracking-widest text-primary">{art.subject_area}</p>
+              )}
+
+              <div className="mt-5 pt-5 border-t border-stone-100">
+                <p className={`${label} mb-3`}>Authors</p>
+                {art.authors && Array.isArray(art.authors) && art.authors.length > 0 ? (
+                  <ul className="space-y-2.5">
+                    {art.authors.map((a: any, i: number) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <User size={13} className="text-stone-400 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-sm text-stone-700 leading-tight">{a.name}</p>
+                          {a.affiliation && <p className="text-xs text-stone-400">{a.affiliation}</p>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-stone-400 italic">Hidden for blind review.</p>
+                )}
+              </div>
+
+              <div className="mt-5 pt-5 border-t border-stone-100">
+                <p className={`${label} mb-3`}>Payment status</p>
+                <PaymentStatusBadge vettingFee={art.vetting_fee} processingFee={art.processing_fee} showLabels={false} />
+              </div>
+            </div>
+
+            <ReviewerFileManager articleId={art.id} submissionId={review.submission_id} />
+          </aside>
         </div>
       </ContentSection>
     </div>

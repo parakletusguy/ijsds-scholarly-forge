@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ExternalLink, Globe, BookOpen } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { PageHeader } from '@/components/layout/PageElements';
 
 export const Indexing = () => {
   return (
@@ -11,20 +11,12 @@ export const Indexing = () => {
         <meta name="description" content="Discover how IJSDS ensures global visibility through NJOL, CrossRef, and Google Scholar indexing." />
       </Helmet>
 
-      {/* Minimalist Header */}
-      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
-            ← Back to Home
-          </Link>
-          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
-            Indexing & <span className="italic text-primary">Visibility</span>
-          </h1>
-          <p className="mt-4 text-stone-500 text-sm leading-relaxed max-w-xl">
-            We ensure your research reaches the global scholarly community through strategic partnerships with established hosting and indexing platforms.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title="Indexing"
+        subtitle="& Visibility"
+        accent="Discoverability"
+        description="We help your research reach readers worldwide through established hosting and indexing platforms."
+      />
 
       <main className="max-w-5xl mx-auto px-8 py-16 space-y-20">
 
@@ -115,7 +107,7 @@ export const Indexing = () => {
             <div className="space-y-4">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Bibliographic Data</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
-                Standardized metadata is exported in BitTeX and RIS formats to all major citation managers including Zotero, Mendeley, and EndNote.
+                Standardized metadata is exported in BibTeX and RIS formats to all major citation managers including Zotero, Mendeley, and EndNote.
               </p>
             </div>
             <div className="space-y-4">

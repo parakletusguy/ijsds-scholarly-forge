@@ -97,8 +97,8 @@ export const Auth = () => {
   return (
     <div className="min-h-[calc(100vh-60px)] bg-[#fdf9f5] font-body antialiased">
       <Helmet>
-        <title>Institutional Access — IJSDS</title>
-        <meta name="description" content="Secure entry portal for authors, reviewers, and editors of the International Journal of Social Work and Development Studies." />
+        <title>Sign In — IJSDS</title>
+        <meta name="description" content="Sign in for authors, reviewers, and editors of the International Journal of Social Work and Development Studies." />
       </Helmet>
 
       <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
@@ -107,7 +107,7 @@ export const Auth = () => {
           {/* Left: masthead column */}
           <div className="md:col-span-4 md:pt-4">
             <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-primary mb-5">
-              {mode === 'signin' ? 'Institutional Access' : mode === 'signup' ? 'New Registration' : 'Password Recovery'}
+              {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
             </p>
             <h2 className="font-headline text-4xl sm:text-5xl font-black text-stone-900 leading-[0.95] tracking-tight mb-6">
               {modeLabel}
@@ -207,7 +207,7 @@ export const Auth = () => {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? 'Authorizing...' : modeLabel}
+                  {loading ? 'Please wait...' : modeLabel}
                   {!loading && <ArrowRight size={14} />}
                 </button>
               </div>

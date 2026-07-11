@@ -30,6 +30,7 @@ interface ReviewWithSubmission {
       title: string;
       abstract: string;
       subject_area: string;
+      status?: string;
       corresponding_author_email: string;
       manuscript_file_url: string;
       vetting_fee: boolean;
@@ -84,7 +85,11 @@ export const ReviewerDashboard = () => {
   const fetchReviews = async () => {
     try {
       const reviewList = await getReviews();
-      setReviews(reviewList as unknown as ReviewWithSubmission[]);
+      // Published articles drop off the reviewer's dashboard (also enforced server-side)
+      const active = (reviewList as unknown as ReviewWithSubmission[]).filter(
+        (r) => r.submission?.article?.status !== 'published'
+      );
+      setReviews(active);
     } catch {
       toast({ title: "Couldn't load reviews", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally {

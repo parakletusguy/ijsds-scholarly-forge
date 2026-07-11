@@ -111,58 +111,47 @@ export default function Archive() {
     return matchesVol || matchesIssue || matchesYear || matchesArticle;
   });
   return (
-    <div className="pb-32 bg-stone-50 min-h-screen font-body">
+    <div className="pb-24 bg-stone-50 min-h-screen font-body">
       <Helmet>
         <title>Archive — IJSDS</title>
         <meta
           name="description"
-          content="Browse the complete digital archive of IJSDS research articles grouped by Volume and Issue."
+          content="Browse all published IJSDS research articles by volume and issue."
         />
       </Helmet>
 
       <PageHeader
         title="Journal"
         subtitle="Archive"
-        accent="Historical Records"
-        description="The complete historical record of IJSDS publications, documenting the evolution of multidisciplinary development scholarship."
+        accent="All Issues"
+        description="Browse every published article, grouped by volume and issue."
       />
 
-      <ContentSection>
-        <div className="max-w-6xl mx-auto">
-          {/* Search Bar */}
-          <div className="mb-16 relative">
-            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-              <Search size={18} className="text-secondary/40" />
-            </div>
+      <ContentSection dark>
+        <div className="max-w-5xl mx-auto">
+          {/* Search */}
+          <div className="mb-10 relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
             <input
               type="text"
               placeholder="Search volumes, issues, or article titles..."
-              className="w-full bg-white border border-stone-100 py-6 pl-16 pr-8 text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all shadow-sm"
+              className="w-full bg-white border border-stone-200 h-12 pl-10 pr-4 text-sm focus:border-primary outline-none transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {loading ? (
-            <div className="space-y-12 animate-pulse">
+            <div className="space-y-4 animate-pulse">
               {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-32 bg-white border border-border/10 shadow-sm"
-                />
+                <div key={i} className="h-24 bg-white border border-stone-200" />
               ))}
             </div>
           ) : fetchError ? (
-            <div className="text-center py-48 bg-white border border-border/10">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-3">
-                Archive
-              </p>
-              <h3 className="font-headline text-2xl font-bold text-stone-900 mb-2">
-                An error occurred
-              </h3>
+            <div className="text-center py-24 bg-white border border-stone-200">
+              <h3 className="font-headline text-2xl text-stone-900 mb-2">Something went wrong</h3>
               <p className="text-sm text-stone-500 mb-6">
-                Couldn't fetch articles. Please check your connection and try
-                again.
+                We couldn't load the articles. Please check your connection and try again.
               </p>
               <button
                 onClick={() => {
@@ -176,14 +165,10 @@ export default function Archive() {
               </button>
             </div>
           ) : filteredArchive.length === 0 ? (
-            <div className="text-center py-48 bg-white border-2 border-dashed border-border/10 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <Database
-                size={64}
-                className="mx-auto text-foreground/10 mb-8 group-hover:rotate-12 transition-transform"
-              />
-              <h3 className="text-3xl font-headline font-black text-foreground/20 uppercase tracking-[0.3em] relative z-10 italic">
-                No records found
+            <div className="text-center py-24 bg-white border border-dashed border-stone-200">
+              <BookOpen size={40} className="mx-auto text-stone-300 mb-4" />
+              <h3 className="font-headline text-xl text-stone-500">
+                {searchQuery ? "No results match your search." : "No published issues yet."}
               </h3>
             </div>
           ) : (
@@ -194,96 +179,60 @@ export default function Archive() {
                   ? [`${filteredArchive[0].volume}-${filteredArchive[0].issue}`]
                   : []
               }
-              className="space-y-12"
+              className="space-y-4"
             >
               {filteredArchive.map((volumeIssue) => (
                 <AccordionItem
                   key={`${volumeIssue.volume}-${volumeIssue.issue}`}
                   value={`${volumeIssue.volume}-${volumeIssue.issue}`}
-                  className="border-none bg-white shadow-sm hover:shadow-md transition-all duration-700 group relative overflow-hidden"
+                  className="border border-stone-200 bg-white"
                 >
-                  <div
-                    className="absolute top-0 right-0 w-32 h-full bg-stone-50 -mr-16 group-hover:mr-0 transition-all duration-1000 -z-0"
-                    style={{ clipPath: "polygon(100% 0, 0 0, 100% 100%)" }}
-                  ></div>
-
-                  <AccordionTrigger className="px-5 sm:px-12 py-6 sm:py-10 md:py-16 hover:no-underline border-l-4 sm:border-l-8 border-transparent hover:border-primary transition-all data-[state=open]:border-primary data-[state=open]:bg-stone-50">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-4 sm:pr-12 text-left relative z-10 font-headline">
-                      <div>
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="h-0.5 w-12 bg-primary group-hover:w-20 transition-all duration-700"></div>
-                          <span className="text-[10px] uppercase tracking-[0.5em] text-foreground/30 font-black italic">
-                            Archival Record
-                          </span>
-                        </div>
-                        <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-foreground leading-[0.85] group-hover:text-primary transition-colors">
-                          Vol.{" "}
-                          <span className="text-secondary">
-                            {volumeIssue.volume}
-                          </span>{" "}
-                          / Issue {volumeIssue.issue}
-                        </h2>
-                        <div className="flex items-center gap-6 mt-6">
-                          <Badge className="bg-foreground text-white px-4 py-1.5 font-headline text-[10px] font-black uppercase tracking-widest rounded-none shadow-md">
-                            Published: {volumeIssue.year}
-                          </Badge>
-                          <div className="flex items-center gap-2">
-                            <Layers size={14} className="text-secondary" />
-                            <span className="text-foreground/40 text-[11px] font-bold uppercase tracking-widest italic">
-                              {volumeIssue.articles.length} Articles
-                            </span>
-                          </div>
-                        </div>
+                  <AccordionTrigger className="px-6 py-5 hover:no-underline data-[state=open]:border-b data-[state=open]:border-stone-100">
+                    <div className="flex items-center justify-between w-full pr-4 text-left gap-4">
+                      <h2 className="font-headline text-xl sm:text-2xl text-stone-900">
+                        Volume {volumeIssue.volume}
+                        <span className="text-stone-400"> · Issue {volumeIssue.issue}</span>
+                      </h2>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="hidden sm:flex items-center gap-1.5 text-xs text-stone-400">
+                          <Calendar size={13} /> {volumeIssue.year}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 bg-stone-100 px-2.5 py-1">
+                          {volumeIssue.articles.length} {volumeIssue.articles.length === 1 ? "article" : "articles"}
+                        </span>
                       </div>
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-12 pb-16 pt-12 border-t border-border/10 relative z-10 bg-stone-50">
-                    <div className="mb-12 flex flex-wrap gap-6 border-b border-border/10 pb-6">
-                      <Link
-                        to={`/archive/vol-${volumeIssue.volume}`}
-                        className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:underline"
-                      >
-                        <Database size={16} /> View Volume {volumeIssue.volume}
+                  <AccordionContent className="px-6 pb-6 pt-2 bg-stone-50/50">
+                    <div className="flex flex-wrap gap-5 pb-5 mb-5 border-b border-stone-100">
+                      <Link to={`/archive/vol-${volumeIssue.volume}`} className="text-[11px] font-bold uppercase tracking-widest text-primary hover:underline">
+                        View volume {volumeIssue.volume}
                       </Link>
-                      <Link
-                        to={`/archive/vol-${volumeIssue.volume}/issue-${volumeIssue.issue}`}
-                        className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:underline"
-                      >
-                        <Layers size={16} /> View Issue {volumeIssue.issue}
+                      <Link to={`/archive/vol-${volumeIssue.volume}/issue-${volumeIssue.issue}`} className="text-[11px] font-bold uppercase tracking-widest text-primary hover:underline">
+                        View issue {volumeIssue.issue}
                       </Link>
                     </div>
-                    <div className="grid grid-cols-1 gap-16">
-                      {volumeIssue.articles.map((article, idx) => (
+
+                    <div className="space-y-4">
+                      {volumeIssue.articles.map((article) => (
                         <div
                           key={article.id}
-                          className="relative group/article flex flex-col lg:flex-row gap-6 lg:gap-12 bg-white p-6 sm:p-12 shadow-sm border border-border/10 hover:shadow-sm transition-all duration-700"
+                          className="flex flex-col lg:flex-row gap-4 lg:gap-6 bg-white p-5 border border-stone-200"
                         >
-                          {/* Article Metadata Prefix */}
-                          <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 flex items-center justify-center font-headline font-black text-foreground/10 text-xl group-hover/article:bg-primary group-hover/article:text-white transition-all italic">
-                            ID-{idx + 1}
+                          <div className="flex-grow min-w-0">
+                            <Link to={`/article/${buildArticleSlug(article)}`} className="block">
+                              <h3 className="font-headline text-lg sm:text-xl text-stone-900 leading-snug hover:text-primary transition-colors">
+                                {article.title}
+                              </h3>
+                            </Link>
+                            <p className="text-sm text-stone-500 mt-1.5">{formatAuthors(article.authors)}</p>
+                            {article.abstract && (
+                              <p className="text-sm text-stone-500 leading-relaxed mt-3 line-clamp-2">{article.abstract}</p>
+                            )}
                           </div>
 
-                          <div className="flex-grow space-y-6">
-                            <div className="flex items-center gap-4 font-headline font-black text-[9px] uppercase tracking-[0.4em] text-foreground/30 italic">
-                              <History size={12} className="text-primary" />
-                              <span>Peer-Reviewed Article</span>
-                            </div>
-
-                            <h3 className="text-xl sm:text-3xl font-black font-headline uppercase tracking-tighter leading-tight group-hover/article:text-primary transition-colors cursor-pointer">
-                              {article.title}
-                            </h3>
-
-                            <p className="font-body text-base sm:text-xl text-foreground/40 leading-snug border-l-2 sm:border-l-4 border-primary/20 pl-4 sm:pl-8 italic group-hover/article:border-primary transition-colors">
-                              {formatAuthors(article.authors)}
-                            </p>
-
-                            <p className="font-body text-lg text-foreground/50 leading-relaxed max-w-4xl line-clamp-2">
-                              {article.abstract}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-row lg:flex-col gap-4 shrink-0 justify-start lg:justify-start pt-4 lg:pt-0 flex-wrap">
+                          <div className="flex flex-row lg:flex-col gap-2 shrink-0">
                             <PaperDownload
                               articleId={article.id}
                               manuscriptFileUrl={article.manuscript_file_url!}
@@ -291,9 +240,9 @@ export default function Archive() {
                             />
                             <Link
                               to={`/article/${buildArticleSlug(article)}`}
-                              className="relative border-2 border-foreground text-foreground p-6 font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:bg-foreground hover:text-white transition-all flex items-center gap-4 rounded-none h-auto bg-white"
+                              className="inline-flex items-center gap-1.5 border border-stone-200 hover:border-primary text-stone-700 px-4 h-9 text-[10px] font-bold uppercase tracking-widest transition-colors"
                             >
-                              <Search size={18} /> View Details
+                              View <ArrowRight size={13} />
                             </Link>
                           </div>
                         </div>
@@ -304,24 +253,6 @@ export default function Archive() {
               ))}
             </Accordion>
           )}
-        </div>
-      </ContentSection>
-
-      {/* Continuity Note */}
-      <ContentSection>
-        <div className="max-w-5xl mx-auto py-16 sm:py-32 text-center border-t border-border/10 relative group">
-          <Layers
-            size={32}
-            className="mx-auto text-foreground/5 mb-8 sm:mb-12 group-hover:text-primary transition-colors"
-          />
-          <h3 className="text-3xl sm:text-4xl md:text-6xl font-black font-headline uppercase tracking-tighter mb-6 sm:mb-8 max-w-4xl mx-auto leading-none italic">
-            Preserving the{" "}
-            <span className="text-primary not-italic">Scientific Legacy</span>
-          </h3>
-          <p className="text-lg sm:text-2xl font-body text-foreground/40 italic mb-8 sm:mb-16 max-w-3xl mx-auto">
-            Access high-impact discoveries documenting developmental
-            transformation.
-          </p>
         </div>
       </ContentSection>
     </div>

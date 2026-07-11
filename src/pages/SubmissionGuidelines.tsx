@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import { PageHeader } from '@/components/layout/PageElements';
 
 export const SubmissionGuidelines = () => {
   return (
@@ -10,19 +11,12 @@ export const SubmissionGuidelines = () => {
         <meta name="description" content="How to prepare and submit your manuscript to IJSDS — formatting, structure, and what to expect." />
       </Helmet>
 
-      <header className="pt-20 pb-12 px-8 border-b border-stone-100 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors mb-4 inline-block">
-            ← Home
-          </Link>
-          <h1 className="text-3xl font-headline font-light tracking-tight text-stone-900">
-            Submission <span className="italic text-primary">Guidelines</span>
-          </h1>
-          <p className="mt-3 text-stone-500 text-sm leading-relaxed max-w-xl">
-            Everything you need to prepare and submit your manuscript. Follow these instructions to ensure your work moves smoothly through editorial review.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title="Submission"
+        subtitle="Guidelines"
+        accent="For Authors"
+        description="Everything you need to prepare and submit your manuscript, so your work moves smoothly through review."
+      />
 
       <main className="max-w-3xl mx-auto px-8 py-16 space-y-12">
 

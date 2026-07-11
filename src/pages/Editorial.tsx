@@ -69,7 +69,7 @@ export const Editorial = () => {
   useEffect(() => {
     if (!loading && !user) { navigate("/auth"); return; }
     if (!loading && user && !isEditor) {
-      toast({ title: "Access Denied", description: "Institutional credentials required.", variant: "destructive" });
+      toast({ title: "Access denied", description: "You need editor access to view this page.", variant: "destructive" });
       navigate("/dashboard"); return;
     }
     if (user && isEditor) fetchSubmissions();
@@ -80,7 +80,7 @@ export const Editorial = () => {
       const data = await getSubmissions();
       setSubmissions(data || []);
     } catch (error: any) {
-      toast({ title: "Sync Error", description: error.message || "Failed to fetch editorial records.", variant: "destructive" });
+      toast({ title: "Couldn't load submissions", description: error.message || "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
       setLoadingSubmissions(false);
     }
@@ -280,7 +280,7 @@ export const Editorial = () => {
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                   <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/details`)}
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
-                    View Dossier
+                    View Details
                   </Button>
                   <div className="ml-auto">
                     <RejectSubmissionDialog submissionId={submission.id} articleId={submission.article_id} onReject={fetchSubmissions} />
@@ -313,7 +313,7 @@ export const Editorial = () => {
                 <>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/details`)}
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
-                    View Dossier
+                    View Details
                   </Button>
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                 </>
@@ -322,7 +322,7 @@ export const Editorial = () => {
                 <>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/details`)}
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
-                    Registry Details
+                    Details
                   </Button>
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
                   {submission.status === "accepted" && (
@@ -384,22 +384,22 @@ export const Editorial = () => {
   return (
     <div className="pb-24 bg-stone-50 min-h-screen">
       <PageHeader
-        title="Curation Hub"
-        subtitle="Editorial Oversight"
-        accent="Volume 2026 Management"
-        description="Oversee peer evaluation, manage decision workflows, and curate the scholarly record."
+        title="Editorial"
+        subtitle="Dashboard"
+        accent="Editor"
+        description="Manage peer review, make decisions, and publish articles."
       />
 
       <ContentSection>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <Button onClick={() => navigate(-1)} variant="outline"
             className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 h-10 border-primary/20 hover:border-primary">
-            <ArrowLeft className="h-4 w-4" /> Exit Command Hub
+            <ArrowLeft className="h-4 w-4" /> Back
           </Button>
           <div className="flex items-center gap-3 bg-white/50 px-4 py-2 border border-border/20">
             <ShieldAlert size={14} className="text-secondary" />
             <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">
-              Authorized Editorial Access
+              Editor
             </span>
           </div>
         </div>

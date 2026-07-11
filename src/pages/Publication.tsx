@@ -58,7 +58,7 @@ export const Publication = () => {
     if (profile?.is_editor || profile?.is_admin) {
       setIsAdmin(true);
     } else if (profile) {
-      toast({ title: "Access Denied", description: "You don't have permission to access this page.", variant: "destructive" });
+      toast({ title: "Access denied", description: "You need editor access to view this page.", variant: "destructive" });
       navigate('/dashboard');
     }
   }, [user, profile, authLoading]);

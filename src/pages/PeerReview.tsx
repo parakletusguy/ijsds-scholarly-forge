@@ -29,7 +29,7 @@ export const PeerReview = () => {
         <div className="space-y-10 text-stone-700 leading-[1.85] text-[15px]">
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
-              Double-Blind Protocol
+Double-Blind Review
             </h2>
             <p>
               IJSDS adheres to a strict double-blind peer review process. This means that both the reviewer and author identities are concealed from each other throughout the review process. 

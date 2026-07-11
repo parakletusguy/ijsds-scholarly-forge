@@ -34,7 +34,7 @@ export const Production = () => {
   useEffect(() => {
     if (!authLoading && !user) { navigate('/auth'); return; }
     if (!authLoading && user && !isEditor) {
-      toast({ title: 'Access Denied', description: 'Editor credentials required.', variant: 'destructive' });
+      toast({ title: 'Access denied', description: 'You need editor access to view this page.', variant: 'destructive' });
       navigate('/dashboard'); return;
     }
     if (user && isEditor) fetchProductionArticles();
