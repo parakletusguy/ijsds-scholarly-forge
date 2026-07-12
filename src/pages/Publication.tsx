@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
+import { ArticleAuthorsEditor } from '@/components/production/ArticleAuthorsEditor';
 import { DOIManager } from '@/components/production/DOIManager';
 
 
@@ -29,6 +30,7 @@ interface Article {
   submission_date: string;
   corresponding_author_email: string;
   doi?: string;
+  crossrefDoi?: string | null;
   volume?: number;
   issue?: number;
   page_start?: number;
@@ -91,22 +93,14 @@ export const Publication = () => {
         getPublishedArticles()
       ]);
 
-      // Fetch submission IDs for each article (using supabase directly for this metadata lookup for now)
-      const enrichWithSubmission = async (article: Article) => {
-        const { data: submission } = await supabase
-          .from('submissions')
-          .select('id')
-          .eq('article_id', article.id)
-          .single();
-        
-        return {
-          ...article,
-          submission_id: submission?.id
-        };
-      };
+      // The backend returns the article's latest submission — use it directly
+      const withSubmissionId = (article: any): Article => ({
+        ...article,
+        submission_id: article.submission_id ?? article.submissions?.[0]?.id,
+      });
 
-      const enrichedProcessed = await Promise.all(processedData.map(enrichWithSubmission));
-      const enrichedPublished = await Promise.all(publishedData.map(enrichWithSubmission));
+      const enrichedProcessed = processedData.map(withSubmissionId);
+      const enrichedPublished = publishedData.map(withSubmissionId);
 
       setProcessed(enrichedProcessed);
       setPublished(enrichedPublished);
@@ -374,50 +368,57 @@ export const Publication = () => {
                           <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
                             {article.status}
                           </Badge>
-                          {article.submission_id && (
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <FileUp className="h-4 w-4 mr-2" />
-                                  Manage Files
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle>Manage Article Files</DialogTitle>
-                                  <DialogDescription>
-                                    Upload new versions or view file history for this published article
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <Tabs defaultValue="files" className="w-full">
-                                  <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="files">File Management</TabsTrigger>
-                                    <TabsTrigger value="doi">
-                                      DOI Management
-                                      {!article.crossrefDoi && (
-                                        <Badge variant="destructive" className="ml-2 h-5">
-                                          <AlertTriangle className="h-3 w-3 mr-1" />
-                                          No CrossRef DOI
-                                        </Badge>
-                                      )}
-                                    </TabsTrigger>
-                                  </TabsList>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <FileUp className="h-4 w-4 mr-2" />
+                                Manage
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Manage Article</DialogTitle>
+                                <DialogDescription>
+                                  Update files, authors, or the DOI for this published article
+                                </DialogDescription>
+                              </DialogHeader>
+                              <Tabs defaultValue={article.submission_id ? 'files' : 'authors'} className="w-full">
+                                <TabsList className={`grid w-full ${article.submission_id ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                                  {article.submission_id && <TabsTrigger value="files">Files</TabsTrigger>}
+                                  <TabsTrigger value="authors">Authors</TabsTrigger>
+                                  <TabsTrigger value="doi">
+                                    DOI
+                                    {!article.crossrefDoi && (
+                                      <Badge variant="destructive" className="ml-2 h-5">
+                                        <AlertTriangle className="h-3 w-3 mr-1" />
+                                        No DOI
+                                      </Badge>
+                                    )}
+                                  </TabsTrigger>
+                                </TabsList>
+                                {article.submission_id && (
                                   <TabsContent value="files">
                                     <EditorFileManager
                                       articleId={article.id}
                                       submissionId={article.submission_id}
                                     />
                                   </TabsContent>
-                                  <TabsContent value="doi">
-                                    <DOIManager
-                                      article={article}
-                                      onUpdate={fetchAcceptedArticles}
-                                    />
-                                  </TabsContent>
-                                </Tabs>
-                              </DialogContent>
-                            </Dialog>
-                          )}
+                                )}
+                                <TabsContent value="authors">
+                                  <ArticleAuthorsEditor
+                                    article={article as any}
+                                    onUpdate={fetchAcceptedArticles}
+                                  />
+                                </TabsContent>
+                                <TabsContent value="doi">
+                                  <DOIManager
+                                    article={article}
+                                    onUpdate={fetchAcceptedArticles}
+                                  />
+                                </TabsContent>
+                              </Tabs>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
