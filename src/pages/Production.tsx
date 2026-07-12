@@ -13,7 +13,8 @@ import { TypesettingIntegration } from '@/components/production/TypesettingInteg
 import { PDFGeneration } from '@/components/production/PDFGeneration';
 import { IssueCompilation } from '@/components/production/IssueCompilation';
 import { DOIManager } from '@/components/production/DOIManager';
-import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft, Link } from 'lucide-react';
+import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft, Link, Users } from 'lucide-react';
+import { ArticleAuthorsEditor } from '@/components/production/ArticleAuthorsEditor';
 import { AutomatedReviewerMatchingInterface } from '@/components/workflow/AutomatedReviewerMatchingInterface';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -163,10 +164,14 @@ export const Production = () => {
           <div className="lg:col-span-2">
             {selectedArticle ? (
               <Tabs defaultValue="editing" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-3 h-auto">
+                <TabsList className="grid w-full grid-cols-4 h-auto">
                   <TabsTrigger value="editing" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                     <Edit3 className="h-4 w-4 shrink-0" />
                     <span>Edit</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="authors" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+                    <Users className="h-4 w-4 shrink-0" />
+                    <span>Authors</span>
                   </TabsTrigger>
                   <TabsTrigger value="doi" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                     <Link className="h-4 w-4 shrink-0" />
@@ -179,8 +184,15 @@ export const Production = () => {
                 </TabsList>
 
                 <TabsContent value="editing">
-                  <CopyeditingTools 
-                    article={selectedArticle} 
+                  <CopyeditingTools
+                    article={selectedArticle}
+                    onUpdate={fetchProductionArticles}
+                  />
+                </TabsContent>
+
+                <TabsContent value="authors">
+                  <ArticleAuthorsEditor
+                    article={selectedArticle}
                     onUpdate={fetchProductionArticles}
                   />
                 </TabsContent>

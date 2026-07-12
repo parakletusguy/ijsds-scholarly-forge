@@ -140,6 +140,7 @@ export const updateArticle = async (
     title: string;
     abstract: string;
     keywords: string[];
+    authors: ArticleAuthor[];
     doi: string;
     status: string;
     volume: number;
@@ -147,6 +148,8 @@ export const updateArticle = async (
     page_start: number;
     page_end: number;
     subject_area: string;
+    funding_info: string | null;
+    conflicts_of_interest: string | null;
     publication_date: string;
     vetting_fee: boolean;
     processing_fee: boolean;
