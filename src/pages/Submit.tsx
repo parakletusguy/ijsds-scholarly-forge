@@ -521,7 +521,7 @@ export const Submit = () => {
         </header>
 
         {/* Step progress */}
-        <div className="mb-12 overflow-x-auto -mx-6 px-6">
+        <div className="mb-12 overflow-x-auto no-scrollbar -mx-6 px-6">
           <div className="flex gap-0 min-w-max">
             {steps.map((s, i) => (
               <div key={s.n} className="flex items-center">

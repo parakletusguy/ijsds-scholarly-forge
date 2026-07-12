@@ -113,6 +113,15 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Keep a row swipeable on small screens without showing scrollbar chrome */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .geometric-accent {
     background-image: radial-gradient(#8f3514 0.5px, transparent 0.5px);
     background-size: 24px 24px;

@@ -423,7 +423,7 @@ export const Editorial = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={v => { setActiveTab(v); setExpandedId(null); }} className="space-y-6">
-          <div className="overflow-x-auto -mx-1 px-1">
+          <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
           <TabsList className="bg-white border border-border/20 p-1.5 rounded-none h-auto flex min-w-max shadow-sm w-full">
             {[
               { val: "pending", label: "Pending", count: pendingSubmissions.length },

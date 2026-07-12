@@ -169,17 +169,29 @@ export const Dashboard = () => {
         {/* Manuscript Management List */}
         <section>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-stone-100 gap-4">
-            <h4 className="font-headline text-xl italic">Recent Manuscripts</h4>
-            <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
-               {['all', 'submitted', 'under_review', 'accepted', 'rejected'].map(stat => (
-                 <button 
-                   key={stat}
-                   onClick={() => setStatusFilter(stat)}
-                   className={`text-[10px] uppercase tracking-widest px-3 py-1.5 transition-all whitespace-nowrap ${statusFilter === stat ? 'bg-primary text-white font-bold' : 'text-stone-400 hover:text-primary'}`}
-                 >
-                   {stat === 'all' ? 'All' : formatStatus(stat)}
-                 </button>
-               ))}
+            <h4 className="font-headline text-xl text-stone-900">Recent Manuscripts</h4>
+            <div className="flex flex-wrap items-center gap-1.5">
+               {['all', 'submitted', 'under_review', 'accepted', 'rejected'].map(stat => {
+                 const count = stat === 'all'
+                   ? submissions.length
+                   : submissions.filter(s => s.status === stat).length;
+                 const active = statusFilter === stat;
+                 return (
+                   <button
+                     key={stat}
+                     onClick={() => setStatusFilter(stat)}
+                     aria-pressed={active}
+                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 border transition-colors whitespace-nowrap ${
+                       active
+                         ? 'bg-primary text-white border-primary'
+                         : 'bg-white text-stone-500 border-stone-200 hover:border-primary hover:text-primary'
+                     }`}
+                   >
+                     {stat === 'all' ? 'All' : formatStatus(stat)}
+                     <span className={active ? 'ml-1.5 opacity-70' : 'ml-1.5 text-stone-400'}>{count}</span>
+                   </button>
+                 );
+               })}
             </div>
           </div>
           
