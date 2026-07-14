@@ -57,11 +57,22 @@ export default defineConfig(({ mode }) => ({
         plugins: ["babel-plugin-macros"],
       },
     }),
-    VitePWA({ 
+    VitePWA({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'],
-        maximumFileSizeToCacheInBytes: 10000000 
+        maximumFileSizeToCacheInBytes: 10000000,
+        // These paths are reverse-proxied to the backend (server-rendered article
+        // pages for Google Scholar, sitemap, robots, RSS). Without this denylist the
+        // service worker answers them with the cached SPA shell, which has no
+        // /papers route and renders a 404 — so anyone arriving from Scholar with the
+        // worker installed never reaches the real page.
+        navigateFallbackDenylist: [
+          /^\/papers(\/|$)/,
+          /^\/sitemap\.xml$/,
+          /^\/robots\.txt$/,
+          /^\/feed(\/|$)/,
+        ],
       }
     }),
     mode === 'development' &&
