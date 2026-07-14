@@ -222,16 +222,16 @@ export const ArticleInfo = () => {
             </div>
 
             {/* Title */}
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-stone-900 mb-10 tracking-tight">
+            <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl leading-tight text-stone-900 mb-6 tracking-tight">
               {article.title}
             </h1>
 
             {/* Authors & Affiliations */}
-            <div className="flex flex-col gap-6 mb-12">
-              <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <div className="flex flex-col gap-4 mb-8">
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
                 {authors.map((author: any, idx: number) => (
                   <div key={idx} className="group cursor-pointer">
-                    <span className="font-semibold text-lg border-b border-transparent group-hover:border-primary transition-colors">
+                    <span className="font-semibold text-base border-b border-transparent group-hover:border-primary transition-colors">
                       {author.name}
                     </span>
                     <sup className="text-primary font-bold">{idx + 1}{idx === 0 && article.corresponding_author_email ? '*' : ''}</sup>
@@ -250,9 +250,9 @@ export const ArticleInfo = () => {
               </div>
             </div>
 
-            {/* Prominent Download Button */}
+            {/* Download Button */}
             {article.manuscript_file_url && (
-              <div className="mb-12">
+              <div className="mb-8">
                 <a
                   href={article.manuscript_file_url}
                   onClick={(e) => {
@@ -261,28 +261,25 @@ export const ArticleInfo = () => {
                   }}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-primary text-white rounded-none border border-transparent hover:border-primary px-8 py-5 font-headline font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-white hover:text-primary transition-all shadow-xl shadow-primary/10 inline-flex"
+                  className="bg-primary text-white rounded-none border border-primary hover:bg-white hover:text-primary px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] items-center gap-2.5 transition-colors inline-flex"
                 >
-                  <BookOpen className="w-5 h-5" />
-                  Download Full-Text Manuscript
+                  <BookOpen className="w-4 h-4" />
+                  Download Full Text
                 </a>
               </div>
             )}
 
-            {/* Abstract Container */}
-            <div className="bg-stone-100 p-6 sm:p-10 lg:p-14 mb-16 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-5">
-                <BookOpen className="w-32 h-32" />
-              </div>
-              <h2 className="font-headline text-2xl mb-6 text-primary italic">Abstract</h2>
-              <p className="font-body text-lg leading-relaxed text-stone-500 font-light">
+            {/* Abstract */}
+            <div className="bg-stone-100 p-6 sm:p-8 mb-10">
+              <h2 className="font-headline text-xl mb-4 text-primary">Abstract</h2>
+              <p className="font-body text-[15px] leading-relaxed text-stone-600 max-w-[68ch]">
                 {article.abstract}
               </p>
               {article.keywords && article.keywords.length > 0 && (
-                <div className="mt-8 pt-8 border-t border-stone-200 flex flex-wrap gap-3 items-center">
-                  <span className="text-xs font-bold text-stone-500 uppercase tracking-widest mr-2">Keywords:</span>
+                <div className="mt-6 pt-6 border-t border-stone-200 flex flex-wrap gap-2 items-center">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mr-1">Keywords</span>
                   {article.keywords.map(kw => (
-                    <span key={kw} className="px-3 py-1 bg-stone-100 text-xs text-stone-500">
+                    <span key={kw} className="px-2.5 py-1 bg-white border border-stone-200 text-xs text-stone-600">
                       {kw}
                     </span>
                   ))}
@@ -329,24 +326,24 @@ export const ArticleInfo = () => {
             <div className="lg:sticky lg:top-24 space-y-8 lg:space-y-12">
 
               {/* Actions Card */}
-              <div className="bg-white border border-stone-100 p-8">
-                <div className="flex flex-col gap-4">
+              <div className="bg-white border border-stone-200 p-6">
+                <div className="flex flex-col gap-2.5">
                   <PaperDownload
                     articleId={article.id}
                     manuscriptFileUrl={article.manuscript_file_url}
                     title={article.title}
-                    className="w-full py-4 bg-primary text-white font-bold flex items-center justify-center gap-3 transition-all"
+                    className="w-full py-3 bg-primary text-white text-sm font-semibold flex items-center justify-center gap-2.5 transition-colors"
                   />
                   <button
                     onClick={handleBibTeXDownload}
-                    className="w-full py-4 border border-stone-200 text-primary font-bold flex items-center justify-center gap-3 hover:bg-primary/5 transition-all text-sm"
+                    className="w-full py-3 border border-stone-200 text-primary text-sm font-semibold flex items-center justify-center gap-2.5 hover:bg-primary/5 transition-colors"
                   >
                     <Quote className="w-4 h-4" />
-                    Cite This Article
+                    Cite this article
                   </button>
                 </div>
 
-                <div className="mt-8 space-y-4 border-t border-stone-100 pt-8">
+                <div className="mt-6 space-y-3 border-t border-stone-100 pt-6">
                   {pubDate && (
                     <div className="flex justify-between text-sm items-center">
                       <span className="text-stone-500">Published</span>
