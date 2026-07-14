@@ -1,10 +1,14 @@
 const slugify = (text: string) =>
   text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-const buildArticleSlug = (article: { title: string; doi?: string | null; id: string }) => {
+// Must stay in sync with buildArticleSlug in src/lib/articleSlug.ts — the app
+// prefers crossrefDoi, so the sitemap has to as well or it emits URLs that
+// don't match the real article pages.
+const buildArticleSlug = (article: { title: string; doi?: string | null; crossrefDoi?: string | null; id: string }) => {
   const titleSlug = slugify(article.title);
-  if (article.doi) {
-    const doiSlug = article.doi.replace(/\//g, '-');
+  const activeDoi = article.crossrefDoi || article.doi;
+  if (activeDoi) {
+    const doiSlug = activeDoi.replace(/\//g, '-');
     return `${titleSlug}+${doiSlug}`;
   }
   return article.id;
