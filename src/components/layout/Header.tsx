@@ -54,6 +54,7 @@ export const Header = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Articles", path: "/articles" },
+    { name: "Editorial Board", path: "/editorial-board" },
     { name: "Blog", path: "/blog" },
     { name: "About", path: "/about" },
     { name: "Indexing", path: "/indexing" },

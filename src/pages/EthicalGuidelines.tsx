@@ -134,10 +134,10 @@ export const EthicalGuidelines = () => {
               party — including authors, reviewers, editors, or readers. If you become aware of 
               potential misconduct, please contact the editorial office in confidence at{' '}
               <a
-                href="mailto:editor.ijsds@gmail.com"
+                href="mailto:editor@ijsds.org"
                 className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
               >
-                editor.ijsds@gmail.com
+                editor@ijsds.org
               </a>.
             </p>
             <p className="mt-4">
@@ -197,10 +197,10 @@ export const EthicalGuidelines = () => {
               <p>Editor-in-Chief, IJSDS</p>
               <p>
                 <a
-                  href="mailto:editor.ijsds@gmail.com"
+                  href="mailto:editor@ijsds.org"
                   className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
                 >
-                  editor.ijsds@gmail.com
+                  editor@ijsds.org
                 </a>
               </p>
               <p className="pt-1 text-stone-400 text-xs">

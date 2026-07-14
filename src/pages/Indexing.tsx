@@ -127,7 +127,7 @@ export const Indexing = () => {
           </h2>
           <div className="pt-4 flex flex-col items-center">
             <a 
-              href="mailto:editor.ijsds@gmail.com" 
+              href="mailto:editor@ijsds.org" 
               className="text-[10px] font-black uppercase tracking-[0.3em] bg-stone-900 text-white px-8 py-4 hover:bg-primary transition-all"
             >
               Contact Editorial Office

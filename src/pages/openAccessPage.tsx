@@ -116,10 +116,10 @@ export default function OpenAccessPage() {
               submission. Waiver requests are assessed on a case-by-case basis and are handled with discretion. 
               Send your request to{' '}
               <a
-                href="mailto:editor.ijsds@gmail.com"
+                href="mailto:editor@ijsds.org"
                 className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
               >
-                editor.ijsds@gmail.com
+                editor@ijsds.org
               </a>.
             </p>
           </section>
@@ -161,10 +161,10 @@ export default function OpenAccessPage() {
               <p>Editor-in-Chief, IJSDS</p>
               <p>
                 <a
-                  href="mailto:editor.ijsds@gmail.com"
+                  href="mailto:editor@ijsds.org"
                   className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
                 >
-                  editor.ijsds@gmail.com
+                  editor@ijsds.org
                 </a>
               </p>
               <p className="pt-1 text-stone-400 text-xs">

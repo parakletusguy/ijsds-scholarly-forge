@@ -136,7 +136,7 @@ export const SubmissionGuidelines = () => {
             </Link>
           </div>
           <p className="text-xs text-stone-400 pt-1">
-            Questions? Email <a href="mailto:editor.ijsds@gmail.com" className="text-primary hover:underline">editor.ijsds@gmail.com</a>
+            Questions? Email <a href="mailto:editor@ijsds.org" className="text-primary hover:underline">editor@ijsds.org</a>
           </p>
         </section>
 

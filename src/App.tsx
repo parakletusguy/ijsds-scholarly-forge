@@ -24,6 +24,7 @@ const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Pro
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
 const Copyright = lazy(() => import('./pages/Copyright'));
 const EditorialBoard = lazy(() => import('./pages/EditorialBoard'));
+const JournalInformation = lazy(() => import('./pages/JournalInformation'));
 const SubmissionGuidelines = lazy(() => import('./pages/SubmissionGuidelines').then(m => ({ default: m.SubmissionGuidelines })));
 const PeerReview = lazy(() => import('./pages/PeerReview').then(m => ({ default: m.PeerReview })));
 const SubmissionDetail = lazy(() => import('./pages/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })));
@@ -166,7 +167,8 @@ const App = () => (
                     <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
                     <Route path="/admin/register" element={<Navigate to="/auth?mode=signup" replace />} />
 
-                    <Route path="/editorial-board" element={<Navigate to="/about" replace />} />
+                    <Route path="/editorial-board" element={<PublicLayout><EditorialBoard /></PublicLayout>} />
+                    <Route path="/journal-information" element={<PublicLayout><JournalInformation /></PublicLayout>} />
                     <Route path="/submission-guidelines" element={<PublicLayout><SubmissionGuidelines /></PublicLayout>} />
                     <Route path="/peer-review" element={<PublicLayout><PeerReview /></PublicLayout>} />
 

@@ -32,7 +32,7 @@ export const PreservationPolicy = () => {
               Protecting Scholarly Work
             </h2>
             <p>
-              IJSDS takes seriously its responsibility to keep published research available for the long term. Our preservation system ensures every article remains intact and accessible. We use multiple backup systems and partner with international preservation services to protect against data loss in all scenarios.
+              IJSDS takes seriously its responsibility to keep published research available for the long term. Every article remains intact and accessible through redundant storage, permanent identifiers, and independent copies held outside our own platform.
             </p>
           </section>
 
@@ -41,10 +41,14 @@ export const PreservationPolicy = () => {
               How We Preserve Your Research
             </h2>
             <ul className="list-disc pl-5 mt-4 space-y-4">
-              <li><strong>International Archives:</strong> We work with CLOCKSS and Portico — trusted global archives — to ensure your published articles are safely stored and can always be recovered if our platform has issues.</li>
-              <li><strong>Permanent Links (DOIs):</strong> Every article receives a Digital Object Identifier (DOI) — a permanent web link that never breaks, ensuring your research can always be found and cited correctly.</li>
-              <li><strong>Self-Archiving Welcome:</strong> Authors are encouraged to upload their published articles to their institution's own repository. This creates an additional independent copy that further protects the work.</li>
+              <li><strong>Permanent Links (DOIs):</strong> Every article receives a Crossref-registered Digital Object Identifier (DOI) — a permanent link that continues to resolve even if an article moves, so your research can always be found and cited correctly.</li>
+              <li><strong>Institutional Repository:</strong> Published articles are deposited with the Rivers State University institutional repository, providing an independent copy held outside the journal's own infrastructure.</li>
+              <li><strong>Self-Archiving Welcome:</strong> Our CC BY 4.0 licence permits authors to deposit the published version in their own institutional or subject repository, creating further independent copies.</li>
+              <li><strong>Redundant Storage:</strong> Article files and metadata are held in geographically distributed storage with automated daily backups and file integrity checks.</li>
             </ul>
+            <p className="mt-4 text-sm text-stone-500">
+              IJSDS is working towards participation in a long-term preservation service (such as CLOCKSS, Portico, or the PKP Preservation Network). This page will be updated once that enrolment is complete.
+            </p>
           </section>
 
           <section>

@@ -89,7 +89,7 @@ export const PlagiarismPolicy = () => {
               Report Suspected Plagiarism
             </h2>
             <p>
-              All reports are handled in strict confidence by our editorial team and investigated thoroughly with appropriate action taken. To report suspected plagiarism, please contact <a href="mailto:editor.ijsds@gmail.com" className="text-primary underline underline-offset-4">editor.ijsds@gmail.com</a>.
+              All reports are handled in strict confidence by our editorial team and investigated thoroughly with appropriate action taken. To report suspected plagiarism, please contact <a href="mailto:editor@ijsds.org" className="text-primary underline underline-offset-4">editor@ijsds.org</a>.
             </p>
           </section>
         </div>

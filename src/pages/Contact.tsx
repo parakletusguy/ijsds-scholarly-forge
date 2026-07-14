@@ -67,8 +67,8 @@ export const Contact = () => (
           icon={Mail}
           label="Email"
           title="Editorial Office"
-          href="mailto:editor.ijsds@gmail.com"
-          linkText="editor.ijsds@gmail.com"
+          href="mailto:editor@ijsds.org"
+          linkText="editor@ijsds.org"
           description="For manuscript submissions and general editorial inquiries."
         />
         <ContactCard

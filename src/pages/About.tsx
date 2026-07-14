@@ -243,7 +243,7 @@ export const About = () => {
               <ArrowRight size={12} />
             </button>
             <p className="text-xs text-stone-400">
-              Questions? <a href="mailto:editor.ijsds@gmail.com" className="text-primary hover:underline">editor.ijsds@gmail.com</a>
+              Questions? <a href="mailto:editor@ijsds.org" className="text-primary hover:underline">editor@ijsds.org</a>
             </p>
           </div>
         </section>

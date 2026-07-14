@@ -34,6 +34,7 @@ export const Footer = () => {
             <ul className="space-y-3 font-body text-sm">
               <li><Link className={linkClass} to="/">Home</Link></li>
               <li><Link className={linkClass} to="/about">About</Link></li>
+              <li><Link className={linkClass} to="/editorial-board">Editorial Board</Link></li>
               <li><Link className={linkClass} to="/articles">Articles</Link></li>
               <li><Link className={linkClass} to="/blog">Blog</Link></li>
               <li><Link className={linkClass} to="/partners">Partners</Link></li>
@@ -46,6 +47,7 @@ export const Footer = () => {
           <div>
             <h4 className={headingClass}>Policies</h4>
             <ul className="space-y-3 font-body text-sm">
+              <li><Link className={linkClass} to="/journal-information">Journal Information</Link></li>
               <li><Link className={linkClass} to="/openAccess">Open Access</Link></li>
               <li><Link className={linkClass} to="/ethical-guidelines">Ethical Guidelines</Link></li>
               <li><Link className={linkClass} to="/peer-review">Peer Review</Link></li>
