@@ -14,7 +14,7 @@
     },
     {
       "source": "/article/:slug",
-      "destination": "/api/article?slug=:slug"
+      "destination": "/api/article/:slug"
     },
     {
       "source": "/papers",

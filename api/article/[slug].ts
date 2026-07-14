@@ -126,7 +126,12 @@ const buildMetaTags = (article: any, slug: string) => {
 };
 
 export default async function handler(req: any, res: any) {
-  const slug = String(req.query?.slug ?? '');
+  // Slugs carry a literal "+" (title+doi). Served as a path segment that is safe,
+  // but if anything ever routes this through a query string the "+" decodes to a
+  // space — which would silently strip the DOI and emit a page with no citation
+  // tags. Restore it rather than fail quietly.
+  const slug = String(req.query?.slug ?? '').replace(/ /g, '+');
+
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const shellUrl = `https://${host}/index.html`;
 
