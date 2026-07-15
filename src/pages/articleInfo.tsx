@@ -50,7 +50,6 @@ export const ArticleInfo = () => {
   const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [fontSize, setFontSize] = useState(1.125); // rem
 
   useEffect(() => {
     if (slug) {
@@ -134,7 +133,7 @@ export const ArticleInfo = () => {
   ].filter(Boolean).join(' • ');
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-body selection:bg-primary/10 selection:text-primary">
+    <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-body selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>{article.title} | IJSDS</title>
         <meta name="citation_title" content={article.title} />
@@ -410,38 +409,6 @@ export const ArticleInfo = () => {
           </aside>
         </div>
       </main>
-
-      {/* Floating Reading Mode Bar */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 bg-white/90 backdrop-blur-sm border border-stone-200 px-6 py-3 shadow-xl hidden md:flex items-center gap-6">
-        <div className="flex items-center gap-3 pr-6 border-r border-stone-200">
-          <BookOpen className="w-4 h-4 text-primary" />
-          <span className="text-xs font-bold text-stone-900 whitespace-nowrap">Reading Mode</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setFontSize(p => Math.max(0.9, p - 0.1))}
-            className="p-2 hover:bg-stone-100 text-stone-500 transition-all"
-            title="Decrease Font Size"
-          >
-            <Minus className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setFontSize(p => Math.min(1.5, p + 0.1))}
-            className="p-2 hover:bg-stone-100 text-stone-500 transition-all"
-            title="Increase Font Size"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleBibTeXDownload}
-            className="bg-primary/10 text-primary text-[10px] font-extrabold uppercase px-4 py-1.5 hover:bg-primary hover:text-white transition-all"
-          >
-            Quick Cite
-          </button>
-        </div>
-      </div>
-
-
     </div>
   );
 };

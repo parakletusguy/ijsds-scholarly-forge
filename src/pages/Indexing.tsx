@@ -1,141 +1,157 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ExternalLink, Globe, BookOpen } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageElements';
+import { ExternalLink, Globe, BookOpen, Rss, Database, Layers } from 'lucide-react';
+import { PageHeader, ContentSection } from '@/components/layout/PageElements';
+
+type Entry = {
+  name: string;
+  status: string;
+  desc: string;
+  href: string;
+  linkLabel: string;
+  logo?: string;
+  icon?: React.ReactNode;
+};
+
+const ENTRIES: Entry[] = [
+  {
+    name: 'Crossref',
+    status: 'Member',
+    logo: 'https://res.cloudinary.com/drh4ma3hj/image/upload/v1778758989/Crossref-Logo_krmzqx.jpg',
+    desc: 'IJSDS is a Crossref member. Every article is assigned a Crossref-registered DOI, enabling citation tracking, reference linking, and discovery across tens of thousands of member publishers worldwide.',
+    href: 'https://www.crossref.org/',
+    linkLabel: 'crossref.org',
+  },
+  {
+    name: 'Google Scholar',
+    status: 'Indexed',
+    logo: 'https://res.cloudinary.com/drh4ma3hj/image/upload/v1778759110/google-scholar4372_knlsib.jpg',
+    desc: 'Every article page exposes full citation metadata for Google Scholar. Articles are indexed as Scholar crawls them, making each paper discoverable and its citations tracked over time.',
+    href: 'https://scholar.google.com/',
+    linkLabel: 'scholar.google.com',
+  },
+  {
+    name: 'Nigerian Journals Online',
+    status: 'Host',
+    logo: '/assets/indexing/njol_logo.png',
+    desc: 'The NJOL platform provides professional hosting infrastructure for Nigerian scholarly journals, supporting regional discovery and long-term access.',
+    href: 'https://www.nigerianjournalsonline.com',
+    linkLabel: 'Visit platform',
+  },
+  {
+    name: 'OAI-PMH',
+    status: 'Enabled',
+    icon: <Rss size={22} />,
+    desc: 'IJSDS exposes a standards-compliant OAI-PMH metadata feed, the protocol scholarly aggregators use to harvest records. This is what makes the journal machine-discoverable by the services below.',
+    href: 'https://www.ijsds.org/oai?verb=Identify',
+    linkLabel: 'View OAI feed',
+  },
+  {
+    name: 'BASE',
+    status: 'Harvestable',
+    icon: <Database size={22} />,
+    desc: 'The Bielefeld Academic Search Engine is one of the largest indexes of open-access content. It can harvest IJSDS records through our OAI-PMH feed.',
+    href: 'https://www.base-search.net/',
+    linkLabel: 'base-search.net',
+  },
+  {
+    name: 'CORE',
+    status: 'Harvestable',
+    icon: <Layers size={22} />,
+    desc: 'CORE aggregates open-access research from repositories and journals globally. IJSDS metadata is available to CORE through the same OAI-PMH feed.',
+    href: 'https://core.ac.uk/',
+    linkLabel: 'core.ac.uk',
+  },
+];
 
 export const Indexing = () => {
   return (
-    <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
+    <div className="min-h-screen bg-stone-50 font-body text-stone-900 pb-24">
       <Helmet>
         <title>Indexing & Visibility — IJSDS</title>
-        <meta name="description" content="Discover how IJSDS ensures global visibility through NJOL, CrossRef, and Google Scholar indexing." />
+        <meta name="description" content="How IJSDS makes research discoverable — Crossref DOIs, Google Scholar, an OAI-PMH feed, and harvesting by BASE and CORE." />
       </Helmet>
 
       <PageHeader
         title="Indexing"
         subtitle="& Visibility"
         accent="Discoverability"
-        description="We help your research reach readers worldwide through established hosting and indexing platforms."
+        description="How we make your research discoverable — through persistent identifiers, open metadata, and established indexing services."
       />
 
-      <main className="max-w-5xl mx-auto px-8 py-16 space-y-20">
-
-        {/* core repositories */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          {/* NJOL */}
-          <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-            <img
-              src="/assets/indexing/njol_logo.png"
-              alt="NJOL Logo"
-              className="w-full max-w-[200px] h-16 object-contain mb-6"
-            />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
-                <Globe size={14} className="text-indigo-900" />
+      <ContentSection dark>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {ENTRIES.map((e) => (
+              <div key={e.name} className="bg-white border border-stone-200 p-6 flex flex-col">
+                <div className="flex items-center justify-between mb-5">
+                  {e.logo ? (
+                    <img src={e.logo} alt={`${e.name} logo`} className="h-9 max-w-[150px] object-contain" />
+                  ) : (
+                    <div className="w-11 h-11 bg-primary/10 text-primary flex items-center justify-center">
+                      {e.icon}
+                    </div>
+                  )}
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 bg-stone-100 px-2 py-1">
+                    {e.status}
+                  </span>
+                </div>
+                <h2 className="font-headline text-lg text-stone-900 mb-2">{e.name}</h2>
+                <p className="text-sm text-stone-500 leading-relaxed flex-1">{e.desc}</p>
+                <a
+                  href={e.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity"
+                >
+                  {e.linkLabel} <ExternalLink size={11} />
+                </a>
               </div>
-              <h2 className="text-sm font-bold tracking-tight uppercase text-stone-800">NJOL Hosting</h2>
-            </div>
-            <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1">
-              The <span className="font-semibold text-stone-700">Nigerian Journals Online</span> platform hosts our journal locally, providing professional infrastructure for Nigerian academic works and ensuring indexing in Google Scholar for regional and global reach.
-            </p>
-            <a
-              href="https://www.nigerianjournalsonline.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-900 hover:opacity-70 transition-opacity mt-auto"
-            >
-              Visit Platform <ExternalLink size={10} />
-            </a>
+            ))}
           </div>
 
-          {/* Crossref */}
-          <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-            <img
-              src="https://res.cloudinary.com/drh4ma3hj/image/upload/v1778758989/Crossref-Logo_krmzqx.jpg"
-              alt="Crossref Logo"
-              className="w-full max-w-[180px] h-16 object-contain mb-6"
-            />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
-                <ExternalLink size={14} className="text-primary" />
-              </div>
-              <h2 className="text-sm font-bold tracking-tight uppercase text-stone-800">Crossref DOI Registry</h2>
-            </div>
-            <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1">
-              IJSDS is a <span className="font-semibold text-stone-700">Crossref</span> member, the official DOI registration agency for scholarly publishing. Every article receives a Crossref-registered DOI, enabling citation tracking, reference linking, and discovery across 24,000+ member publishers in 166 countries.
-            </p>
-            <a
-              href="https://www.crossref.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-70 transition-opacity mt-auto"
-            >
-              Crossref.org <ExternalLink size={10} />
-            </a>
-          </div>
-
-          {/* Google Scholar */}
-          <div className="bg-white p-8 border border-stone-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-            <img
-              src="https://res.cloudinary.com/drh4ma3hj/image/upload/v1778759110/google-scholar4372_knlsib.jpg"
-              alt="Google Scholar Logo"
-              className="w-full max-w-[200px] h-16 object-contain mb-6"
-            />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                <BookOpen size={14} className="text-blue-600" />
-              </div>
-              <h2 className="text-sm font-bold tracking-tight uppercase text-stone-800">Google Scholar</h2>
-            </div>
-            <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1">
-              All IJSDS articles are indexed in <span className="font-semibold text-stone-700">Google Scholar</span>, the world's most widely used academic search engine. This ensures every published article is freely discoverable by researchers, students, and institutions globally — and automatically tracked for citations and author metrics.
-            </p>
-            <a
-              href="https://scholar.google.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:opacity-70 transition-opacity mt-auto"
-            >
-              Google Scholar <ExternalLink size={10} />
-            </a>
-          </div>
-        </section>
-
-        {/* Visibility Tools */}
-        <section className="pt-16 border-t border-stone-100">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12">
-            <div className="space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Bibliographic Data</h3>
-              <p className="text-sm text-stone-600 leading-relaxed">
-                Standardized metadata is exported in BibTeX and RIS formats to all major citation managers including Zotero, Mendeley, and EndNote.
+          {/* Metadata practices */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div className="bg-white border border-stone-200 p-6">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-3 flex items-center gap-2">
+                <BookOpen size={13} /> Citation data
+              </h3>
+              <p className="text-sm text-stone-500 leading-relaxed">
+                Each article exposes machine-readable citation metadata (Highwire and Dublin Core) and can be
+                exported in BibTeX and RIS for Zotero, Mendeley, and EndNote.
               </p>
             </div>
-            <div className="space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Digital Identity</h3>
-              <p className="text-sm text-stone-600 leading-relaxed">
-                We advocate for persistent author identity. Every submission is linked to the author's ORCID iD to ensure accurate citation tracking over time.
+            <div className="bg-white border border-stone-200 p-6">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-3 flex items-center gap-2">
+                <Globe size={13} /> Author identity
+              </h3>
+              <p className="text-sm text-stone-500 leading-relaxed">
+                Authors are linked to their ORCID iD, giving each contributor a persistent identifier that keeps
+                citation and authorship records accurate over time.
               </p>
             </div>
           </div>
-        </section>
 
-        {/* Editorial Support */}
-        <section className="bg-white border border-stone-100 p-10 md:p-12 text-center space-y-6">
-          <p className="text-stone-400 text-xs uppercase tracking-widest font-bold">Inquiries</p>
-          <h2 className="text-xl font-headline italic tracking-tight text-stone-800">
-            "We are committed to the global distribution of knowledge."
-          </h2>
-          <div className="pt-4 flex flex-col items-center">
-            <a 
-              href="mailto:editor@ijsds.org" 
-              className="text-[10px] font-black uppercase tracking-[0.3em] bg-stone-900 text-white px-8 py-4 hover:bg-primary transition-all"
+          {/* Honest trajectory note */}
+          <p className="mt-6 text-sm text-stone-500 leading-relaxed max-w-2xl">
+            IJSDS is actively pursuing inclusion in the Directory of Open Access Journals (DOAJ) and Scopus. This
+            page is updated as each listing is confirmed.
+          </p>
+
+          <div className="mt-8 bg-white border border-stone-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-headline text-lg text-stone-900">Questions about indexing?</p>
+              <p className="text-sm text-stone-500 mt-0.5">We're happy to help authors and libraries with metadata or harvesting.</p>
+            </div>
+            <a
+              href="mailto:editor@ijsds.org"
+              className="shrink-0 inline-flex items-center justify-center bg-primary hover:bg-[#7a2d11] text-white px-6 h-11 text-[10px] font-bold uppercase tracking-widest transition-colors"
             >
-              Contact Editorial Office
+              Contact the editorial office
             </a>
           </div>
-        </section>
-
-      </main>
+        </div>
+      </ContentSection>
     </div>
   );
 };

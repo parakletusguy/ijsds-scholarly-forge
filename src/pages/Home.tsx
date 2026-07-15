@@ -200,7 +200,7 @@ export const Home = () => {
                 {/* Large featured article */}
                 {featured && (
                   <div
-                    className="lg:col-span-8 group cursor-pointer border-l-4 sm:border-l-8 border-primary pl-4 sm:pl-8 py-4 bg-primary/5 hover:bg-primary/80 transition-all"
+                    className="lg:col-span-8 group cursor-pointer bg-white border border-stone-200 hover:border-primary transition-colors p-6 sm:p-8"
                     onClick={() =>
                       navigate(`/article/${buildArticleSlug(featured)}`)
                     }
@@ -213,10 +213,10 @@ export const Home = () => {
                         {estimateReadTime(featured.abstract || "")}
                       </span>
                     </div>
-                    <h3 className="font-headline text-2xl sm:text-4xl mb-4 leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="font-headline text-xl sm:text-2xl mb-3 leading-snug text-stone-900 group-hover:text-primary transition-colors">
                       {featured.title}
                     </h3>
-                    <p className="text-stone-500 mb-6 line-clamp-3 leading-relaxed">
+                    <p className="text-sm text-stone-500 mb-5 line-clamp-3 leading-relaxed">
                       {featured.abstract}
                     </p>
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
@@ -272,7 +272,7 @@ export const Home = () => {
                       <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 block">
                         {rest[0].subject_area || "Field Report"}
                       </span>
-                      <h3 className="font-headline text-xl md:text-2xl leading-snug mb-4 md:mb-6 group-hover:text-primary transition-colors">
+                      <h3 className="font-headline text-lg md:text-xl leading-snug mb-4 md:mb-6 group-hover:text-primary transition-colors line-clamp-3">
                         {rest[0].title}
                       </h3>
                       <p className="text-sm text-stone-500 mb-6 line-clamp-4 leading-relaxed">

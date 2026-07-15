@@ -13,6 +13,10 @@
       "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/feed/latest-articles.xml"
     },
     {
+      "source": "/oai",
+      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/api/oai"
+    },
+    {
       "source": "/article/:slug",
       "destination": "/api/article/:slug"
     },
