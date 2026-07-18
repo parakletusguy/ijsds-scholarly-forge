@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmission } from "@/lib/submissionService";
+import { getReviews, type Review } from "@/lib/reviewService";
 import { deleteArticle } from "@/lib/articleService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ export const SubmissionDetail = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [vet, setvet] = useState(false);
   const [processing, setprocessing] = useState(false);
@@ -142,6 +144,14 @@ export const SubmissionDetail = () => {
     try {
       const data = await getSubmission(submissionId!);
       setSubmission(data as any);
+      // Completed reviewer feedback for this submission (author sees anonymised,
+      // author-facing fields only; the backend enforces this).
+      try {
+        const reviewData = await getReviews({ submission_id: submissionId! });
+        setReviews((reviewData || []).filter((r) => r.submitted_at));
+      } catch {
+        /* reviews are non-critical to the page */
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -151,6 +161,24 @@ export const SubmissionDetail = () => {
       navigate("/dashboard");
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const formatRecommendation = (rec: string) =>
+    rec.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const recommendationColor = (rec?: string | null) => {
+    switch (rec) {
+      case "accept":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "minor_revisions":
+        return "bg-amber-100 text-amber-800 border-amber-200";
+      case "major_revisions":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "reject":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -477,6 +505,56 @@ export const SubmissionDetail = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Reviewer Feedback */}
+            {reviews.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Reviewer Feedback
+                    <Badge variant="secondary" className="ml-1">{reviews.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {reviews.map((review, index) => (
+                    <div key={review.id} className="border border-border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <span className="text-sm font-semibold">Reviewer {index + 1}</span>
+                        {review.recommendation && (
+                          <Badge variant="outline" className={recommendationColor(review.recommendation)}>
+                            {formatRecommendation(review.recommendation)}
+                          </Badge>
+                        )}
+                      </div>
+                      {review.comments_to_author ? (
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                          {review.comments_to_author}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">
+                          No written comments were provided.
+                        </p>
+                      )}
+                      {review.submitted_at && (
+                        <p className="text-xs text-muted-foreground">
+                          Submitted{" "}
+                          {new Date(review.submitted_at).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Reviewer identities are kept confidential. The editorial team considers all
+                    reviews before reaching a final decision.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* File Management */}
             <SubmissionFileManager

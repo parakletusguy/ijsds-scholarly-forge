@@ -1044,7 +1044,7 @@ export const Submit = () => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading || !vettingPaid || !processingPaid}
+            disabled={loading}
             title={
               !vettingPaid || !processingPaid
                 ? "Pay both fees to unlock"
