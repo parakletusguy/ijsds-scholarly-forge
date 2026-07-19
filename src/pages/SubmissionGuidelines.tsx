@@ -92,12 +92,12 @@ export const SubmissionGuidelines = () => {
         <section className="space-y-4">
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Ethical Requirements</h2>
           <div className="bg-white border border-stone-100 p-6 text-sm text-stone-600 leading-relaxed space-y-3">
-            <p>All submissions must meet the following requirements:</p>
+            <p>All submissions must meet the following requirements. A missing declaration will have your manuscript returned before review.</p>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li>Research involving human participants must have ethics board approval. State this clearly in the method section.</li>
-              <li>Authors must declare any conflicts of interest.</li>
+              <li>Research involving human participants must state ethics-board approval clearly in the Method section, with the approval reference. If your national context does not require formal approval for your study type, say so and describe the ethical oversight in place instead.</li>
+              <li>Declare any conflict of interest. If none exists, include a statement to that effect — a <em>missing</em> statement, not just a declared conflict, is a compliance failure.</li>
               <li>All manuscripts are screened for plagiarism before review.</li>
-              <li>Use of AI writing tools must be disclosed in the manuscript.</li>
+              <li>Disclose any AI writing tools used (e.g. ChatGPT, Claude, Gemini, Grammarly's AI features), stating which tool and for what purpose. AI assistance is permitted; undisclosed use identified later is treated as a transparency breach.</li>
             </ul>
           </div>
         </section>
@@ -138,6 +138,13 @@ export const SubmissionGuidelines = () => {
           <p className="text-xs text-stone-400 pt-1">
             Questions? Email <a href="mailto:editor@ijsds.org" className="text-primary hover:underline">editor@ijsds.org</a>
           </p>
+        </section>
+
+        {/* Related reading */}
+        <section className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-bold uppercase tracking-widest">
+          <Link to="/author-guide" className="text-stone-500 hover:text-primary">What happens after you submit →</Link>
+          <Link to="/ai-policy" className="text-stone-500 hover:text-primary">AI Use &amp; Disclosure Policy →</Link>
+          <Link to="/peer-review" className="text-stone-500 hover:text-primary">Peer Review Policy →</Link>
         </section>
 
       </main>

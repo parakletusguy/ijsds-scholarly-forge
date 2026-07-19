@@ -52,6 +52,7 @@ export const Footer = () => {
               <li><Link className={linkClass} to="/ethical-guidelines">Ethical Guidelines</Link></li>
               <li><Link className={linkClass} to="/peer-review">Peer Review</Link></li>
               <li><Link className={linkClass} to="/plagiarism-policy">Plagiarism Policy</Link></li>
+              <li><Link className={linkClass} to="/ai-policy">AI Use &amp; Disclosure</Link></li>
               <li><Link className={linkClass} to="/preservation-policy">Preservation Policy</Link></li>
               <li><Link className={linkClass} to="/copyright">Copyright</Link></li>
             </ul>
@@ -63,6 +64,7 @@ export const Footer = () => {
             <ul className="space-y-3 font-body text-sm">
               <li><Link className={linkClass} to="/submit">Submit Manuscript</Link></li>
               <li><Link className={linkClass} to="/submission-guidelines">Submission Guidelines</Link></li>
+              <li><Link className={linkClass} to="/author-guide">Author Guide</Link></li>
               <li><Link className={linkClass} to="/orcidGuide">ORCID Guide</Link></li>
               <li><Link className={linkClass} to="/auth">Sign In / Register</Link></li>
             </ul>

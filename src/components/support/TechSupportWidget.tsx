@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -36,6 +37,10 @@ const CATEGORIES = [
 export const TechSupportWidget = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { pathname } = useLocation();
+  // Pages with a fixed bottom action bar need the launcher lifted so it does
+  // not sit on top of that bar's primary button (e.g. "Submit Article").
+  const hasBottomBar = pathname === "/submit";
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -157,7 +162,7 @@ export const TechSupportWidget = () => {
       {/* ── Floating Trigger Button ──────────────────────────── */}
       <DialogTrigger asChild>
         <button
-          className="fixed bottom-6 right-6 z-50 group flex items-center gap-3 bg-primary text-white pl-5 pr-6 py-3.5 shadow-2xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-300 rounded-full"
+          className={`fixed ${hasBottomBar ? "bottom-24" : "bottom-6"} right-6 z-40 group flex items-center gap-3 bg-primary text-white p-3.5 sm:pl-5 sm:pr-6 shadow-2xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-300 rounded-full`}
           aria-label="Open tech support"
         >
           <LifeBuoy className="h-5 w-5 group-hover:rotate-[20deg] transition-transform duration-300" />

@@ -65,6 +65,7 @@ export const createSubmission = async (body: {
   submission_type?: string;
   funding_info?: string | null;
   conflicts_of_interest?: string | null;
+  ai_consent?: boolean | null;
   file?: File;
 }): Promise<CreateResponse['data']> => {
   const formData = new FormData();

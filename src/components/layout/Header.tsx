@@ -212,6 +212,29 @@ export const Header = () => {
                 {link.name}
               </Link>
             ))}
+            {user && (
+              <div className="pt-4 space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 truncate">{user.email}</p>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }}
+                  className="w-full flex items-center gap-3 text-left text-sm font-bold uppercase tracking-widest text-stone-600 min-h-11 py-3"
+                >
+                  <Zap size={15} /> Dashboard
+                </button>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); navigate("/profile"); }}
+                  className="w-full flex items-center gap-3 text-left text-sm font-bold uppercase tracking-widest text-stone-600 min-h-11 py-3"
+                >
+                  <User size={15} /> Profile
+                </button>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
+                  className="w-full flex items-center gap-3 text-left text-sm font-bold uppercase tracking-widest text-red-600 min-h-11 py-3"
+                >
+                  <LogOut size={15} /> Sign Out
+                </button>
+              </div>
+            )}
             {!user && (
               <div className="pt-6 space-y-4">
                 <button

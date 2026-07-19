@@ -71,6 +71,9 @@ export const Submit = () => {
 
   // Checks for ethics/disclosure
   const [ethicsAgree, setEthicsAgree] = useState(false);
+  // AI Use & Disclosure choice: true = consent to AI assistance, false = prefer
+  // manual editorial checks, null = not yet chosen (a choice is required).
+  const [aiConsent, setAiConsent] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -325,6 +328,18 @@ export const Submit = () => {
       return;
     }
 
+    if (aiConsent === null) {
+      toast({
+        title: "One more step",
+        description: "Please choose an AI-assistance option before submitting.",
+        variant: "destructive",
+      });
+      document
+        .getElementById("ai-consent-section")
+        ?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
     if (!title.trim() || !abstract.trim() || !manuscriptFileUrl) {
       toast({
         title: "Validation Failed",
@@ -349,6 +364,7 @@ export const Submit = () => {
         submission_type: "new",
         funding_info: fundingInfo || null,
         conflicts_of_interest: conflictsOfInterest || null,
+        ai_consent: aiConsent,
         file: manuscriptFile || undefined,
       });
 
@@ -862,6 +878,64 @@ export const Submit = () => {
                   interests that could influence this work.
                 </span>
               </label>
+
+              {/* AI Use & Disclosure — required choice */}
+              <div id="ai-consent-section" className="border border-stone-200 bg-stone-50 p-5 space-y-4">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+                    AI-Assisted Editorial Support — Your Choice
+                  </p>
+                  <Link
+                    to="/ai-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary underline underline-offset-2"
+                  >
+                    Read the full policy →
+                  </Link>
+                </div>
+
+                <p className="text-xs text-stone-500 leading-relaxed">
+                  IJSDS uses AI tools only for limited, specific tasks: checking manuscript
+                  formatting, verifying that cited sources are accurately represented, and
+                  reviewing language for clarity. These tools do not assess the scholarly merit
+                  of your work, and take no part in decisions to accept, reject, or request
+                  revisions — those are made entirely by human editors and reviewers. AI is
+                  accessed only under commercial terms that contractually prohibit your
+                  manuscript from being used to train AI models. Please choose one option below.
+                </p>
+
+                <div className="space-y-2">
+                  <label className={`flex items-start gap-3 cursor-pointer p-3 border transition-colors ${aiConsent === true ? "border-primary bg-primary/5" : "border-stone-200 bg-white hover:border-stone-300"}`}>
+                    <input
+                      type="radio"
+                      name="ai-consent"
+                      className="mt-0.5 shrink-0 accent-[#8f3514]"
+                      checked={aiConsent === true}
+                      onChange={() => setAiConsent(true)}
+                    />
+                    <span className="text-sm text-stone-600 leading-relaxed">
+                      I consent to AI-assisted formatting and citation-verification support as
+                      described above and in the full AI Use &amp; Disclosure Policy.
+                    </span>
+                  </label>
+
+                  <label className={`flex items-start gap-3 cursor-pointer p-3 border transition-colors ${aiConsent === false ? "border-primary bg-primary/5" : "border-stone-200 bg-white hover:border-stone-300"}`}>
+                    <input
+                      type="radio"
+                      name="ai-consent"
+                      className="mt-0.5 shrink-0 accent-[#8f3514]"
+                      checked={aiConsent === false}
+                      onChange={() => setAiConsent(false)}
+                    />
+                    <span className="text-sm text-stone-600 leading-relaxed">
+                      I prefer these checks be performed manually by editorial staff. I understand
+                      this may extend the formatting and citation-verification stage, and does not
+                      affect how my manuscript's scholarly content is evaluated.
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -1038,7 +1112,7 @@ export const Submit = () => {
             type="button"
             onClick={saveDraft}
             disabled={autoSaving}
-            className="text-[9px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors"
+            className="min-h-11 px-3 text-[11px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors"
           >
             Save Draft
           </button>

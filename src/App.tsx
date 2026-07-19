@@ -47,6 +47,8 @@ const PartnersAdmin = lazy(() => import('./components/partners/PartnersAdmin').t
 const ReviewerDetail = lazy(() => import('./pages/reviewersDetails').then(m => ({ default: m.ReviewerDetail })));
 const OpenAccessPage = lazy(() => import('./pages/openAccessPage'));
 const PlagiarismPolicy = lazy(() => import('./pages/PlagiarismPolicy').then(m => ({ default: m.PlagiarismPolicy })));
+const AiPolicy = lazy(() => import('./pages/AiPolicy').then(m => ({ default: m.AiPolicy })));
+const AuthorGuide = lazy(() => import('./pages/AuthorGuide').then(m => ({ default: m.AuthorGuide })));
 const PreservationPolicy = lazy(() => import('./pages/PreservationPolicy').then(m => ({ default: m.PreservationPolicy })));
 const Archive = lazy(() => import('./pages/Archive'));
 const VolumePage = lazy(() => import('./pages/VolumePage'));
@@ -76,7 +78,7 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen flex w-full">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
-        <header className="fixed top-0 right-0 left-0 md:left-72 h-20 bg-[#fdf9f5]/80 backdrop-blur-md flex justify-between items-center px-12 z-40 border-b-[0.5px] border-[#ddc0b8]/15">
+        <header className="fixed top-0 right-0 left-0 md:left-72 h-20 bg-[#fdf9f5]/80 backdrop-blur-md flex justify-between items-center px-4 sm:px-6 md:px-12 z-40 border-b-[0.5px] border-[#ddc0b8]/15">
           <div className="flex items-center gap-4">
             <SidebarTrigger />
             <Link to={"/openAccess"} className="ml-4 md:ml-8">
@@ -131,6 +133,8 @@ const App = () => (
                     <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
                     <Route path="/openAccess" element={<PublicLayout><OpenAccessPage /></PublicLayout>} />
                     <Route path="/plagiarism-policy" element={<PublicLayout><PlagiarismPolicy /></PublicLayout>} />
+                    <Route path="/ai-policy" element={<PublicLayout><AiPolicy /></PublicLayout>} />
+                    <Route path="/author-guide" element={<PublicLayout><AuthorGuide /></PublicLayout>} />
                     <Route path="/ethical-guidelines" element={<PublicLayout><EthicalGuidelines /></PublicLayout>} />
                     <Route path="/preservation-policy" element={<PublicLayout><PreservationPolicy /></PublicLayout>} />
                     <Route path="/indexing" element={<PublicLayout><Indexing /></PublicLayout>} />
