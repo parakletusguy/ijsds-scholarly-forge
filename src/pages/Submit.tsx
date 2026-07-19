@@ -1118,7 +1118,7 @@ export const Submit = () => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || !vettingPaid || !processingPaid}
             title={
               !vettingPaid || !processingPaid
                 ? "Pay both fees to unlock"
@@ -1126,7 +1126,7 @@ export const Submit = () => {
             }
             className="bg-primary hover:bg-[#8f3514] text-white px-8 py-4 font-bold uppercase tracking-[0.2em] text-xs transition-colors flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {loading ? "Submitting…" : "Submit Article"}
+            {loading ? "Submitting…" : !vettingPaid || !processingPaid ? "Pay Fees to Submit" : "Submit Article"}
             {!loading && <ArrowRight size={15} />}
           </button>
         </div>
