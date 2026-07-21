@@ -311,6 +311,8 @@ export const Editorial = () => {
               )}
               {tab === "revision" && (
                 <>
+                  <ApproveSubmissionDialog submissionId={submission.id} onApprove={fetchSubmissions} articleId={submission.article_id} />
+                  <RejectSubmissionDialog submissionId={submission.id} articleId={submission.article_id} onReject={fetchSubmissions} />
                   <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/details`)}
                     className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
                     View Details

@@ -34,6 +34,12 @@ export const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close the mobile menu before navigating, so it never lingers after a tap.
+  const handleNav = (path: string) => {
+    setMobileMenuOpen(false);
+    navigate(path);
+  };
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
@@ -201,65 +207,84 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-stone-100 p-8 space-y-6 animate-in slide-in-from-top-10 duration-500">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block w-full text-left text-sm font-bold uppercase tracking-widest py-3 border-b border-stone-50 ${isActive(link.path) ? "text-primary" : "text-stone-500"}`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            {user && (
-              <div className="pt-4 space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 truncate">{user.email}</p>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }}
-                  className="w-full flex items-center gap-3 text-left text-sm font-bold uppercase tracking-widest text-stone-600 min-h-11 py-3"
-                >
-                  <Zap size={15} /> Dashboard
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); navigate("/profile"); }}
-                  className="w-full flex items-center gap-3 text-left text-sm font-bold uppercase tracking-widest text-stone-600 min-h-11 py-3"
-                >
-                  <User size={15} /> Profile
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
-                  className="w-full flex items-center gap-3 text-left text-sm font-bold uppercase tracking-widest text-red-600 min-h-11 py-3"
-                >
-                  <LogOut size={15} /> Sign Out
-                </button>
+          <>
+            {/* Backdrop — tap anywhere to close */}
+            <div
+              className="md:hidden fixed inset-0 top-0 bg-black/25 z-40"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+            <div className="md:hidden relative z-50 bg-white border-t border-stone-100 shadow-xl max-h-[calc(100vh-6rem)] overflow-y-auto animate-in slide-in-from-top-4 duration-300">
+              <div className="p-6 space-y-6">
+                {/* Account / auth — placed first so it is always visible */}
+                {user ? (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 truncate mb-2 px-2">
+                      {user.email}
+                    </p>
+                    <button
+                      onClick={() => handleNav("/dashboard")}
+                      className="w-full flex items-center gap-3 min-h-11 px-2 text-sm font-bold uppercase tracking-widest text-stone-700 hover:bg-stone-50 transition-colors"
+                    >
+                      <Zap size={16} className="text-primary" /> Dashboard
+                    </button>
+                    <button
+                      onClick={() => handleNav("/profile")}
+                      className="w-full flex items-center gap-3 min-h-11 px-2 text-sm font-bold uppercase tracking-widest text-stone-700 hover:bg-stone-50 transition-colors"
+                    >
+                      <User size={16} className="text-primary" /> Profile
+                    </button>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
+                      className="w-full flex items-center gap-3 min-h-11 px-2 text-sm font-bold uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={16} /> Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => handleNav("/auth")}
+                        className="min-h-12 text-[11px] font-bold uppercase tracking-widest text-stone-700 border border-stone-300 hover:border-primary hover:text-primary transition-colors"
+                      >
+                        Log In
+                      </button>
+                      <button
+                        onClick={() => handleNav("/auth?mode=signup")}
+                        className="min-h-12 text-[11px] font-bold uppercase tracking-widest bg-primary text-white hover:bg-[#7a2d11] transition-colors"
+                      >
+                        Sign Up
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleNav("/auth?reason=submit")}
+                      className="w-full min-h-12 bg-stone-900 text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-primary transition-colors"
+                    >
+                      Submit Manuscript
+                    </button>
+                  </div>
+                )}
+
+                <div className="h-px bg-stone-100" />
+
+                {/* Navigation links */}
+                <nav className="flex flex-col">
+                  {navLinks.map((link) => (
+                    <button
+                      key={link.path}
+                      onClick={() => handleNav(link.path)}
+                      className={`w-full text-left min-h-11 px-2 text-sm font-bold uppercase tracking-widest border-b border-stone-50 transition-colors ${
+                        isActive(link.path) ? "text-primary" : "text-stone-500 hover:text-primary"
+                      }`}
+                    >
+                      {link.name}
+                    </button>
+                  ))}
+                </nav>
               </div>
-            )}
-            {!user && (
-              <div className="pt-6 space-y-4">
-                <button
-                  onClick={() => navigate("/auth?reason=submit")}
-                  className="w-full bg-primary text-white py-5 text-[11px] font-bold uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all"
-                >
-                  Submit Manuscript
-                </button>
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => navigate("/auth")}
-                    className="w-full text-center text-[10px] font-bold uppercase tracking-widest text-stone-500 py-4 border border-stone-200"
-                  >
-                    Log In
-                  </button>
-                  <button
-                    onClick={() => navigate("/auth")}
-                    className="w-full bg-stone-900 text-white py-4 text-[10px] font-bold uppercase tracking-widest"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          </>
         )}
       </nav>
     </header>

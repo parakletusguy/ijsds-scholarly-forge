@@ -71,9 +71,9 @@ export const Submit = () => {
 
   // Checks for ethics/disclosure
   const [ethicsAgree, setEthicsAgree] = useState(false);
-  // AI Use & Disclosure choice: true = consent to AI assistance, false = prefer
-  // manual editorial checks, null = not yet chosen (a choice is required).
-  const [aiConsent, setAiConsent] = useState<boolean | null>(null);
+  // AI Use & Disclosure: consent is mandatory to submit. There is no opt-out —
+  // authors who cannot consent should not submit.
+  const [aiConsent, setAiConsent] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -328,10 +328,11 @@ export const Submit = () => {
       return;
     }
 
-    if (aiConsent === null) {
+    if (!aiConsent) {
       toast({
-        title: "One more step",
-        description: "Please choose an AI-assistance option before submitting.",
+        title: "Consent Required",
+        description:
+          "You must consent to AI-assisted editorial support to submit.",
         variant: "destructive",
       });
       document
@@ -880,10 +881,13 @@ export const Submit = () => {
               </label>
 
               {/* AI Use & Disclosure — required choice */}
-              <div id="ai-consent-section" className="border border-stone-200 bg-stone-50 p-5 space-y-4">
+              <div
+                id="ai-consent-section"
+                className="border border-stone-200 bg-stone-50 p-5 space-y-4"
+              >
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
-                    AI-Assisted Editorial Support — Your Choice
+                    AI-Assisted Editorial Support — Required
                   </p>
                   <Link
                     to="/ai-policy"
@@ -896,45 +900,32 @@ export const Submit = () => {
                 </div>
 
                 <p className="text-xs text-stone-500 leading-relaxed">
-                  IJSDS uses AI tools only for limited, specific tasks: checking manuscript
-                  formatting, verifying that cited sources are accurately represented, and
-                  reviewing language for clarity. These tools do not assess the scholarly merit
-                  of your work, and take no part in decisions to accept, reject, or request
-                  revisions — those are made entirely by human editors and reviewers. AI is
-                  accessed only under commercial terms that contractually prohibit your
-                  manuscript from being used to train AI models. Please choose one option below.
+                  IJSDS uses AI tools only for limited, specific tasks: checking
+                  manuscript formatting, verifying that cited sources are
+                  accurately represented, and reviewing language for clarity.
+                  These tools do not assess the scholarly merit of your work,
+                  and take no part in decisions to accept, reject, or request
+                  revisions — those are made entirely by human editors and
+                  reviewers. AI is accessed only under commercial terms that
+                  contractually prohibit your manuscript from being used to
+                  train AI models. Consent is required to submit.
                 </p>
 
-                <div className="space-y-2">
-                  <label className={`flex items-start gap-3 cursor-pointer p-3 border transition-colors ${aiConsent === true ? "border-primary bg-primary/5" : "border-stone-200 bg-white hover:border-stone-300"}`}>
-                    <input
-                      type="radio"
-                      name="ai-consent"
-                      className="mt-0.5 shrink-0 accent-[#8f3514]"
-                      checked={aiConsent === true}
-                      onChange={() => setAiConsent(true)}
-                    />
-                    <span className="text-sm text-stone-600 leading-relaxed">
-                      I consent to AI-assisted formatting and citation-verification support as
-                      described above and in the full AI Use &amp; Disclosure Policy.
-                    </span>
-                  </label>
-
-                  <label className={`flex items-start gap-3 cursor-pointer p-3 border transition-colors ${aiConsent === false ? "border-primary bg-primary/5" : "border-stone-200 bg-white hover:border-stone-300"}`}>
-                    <input
-                      type="radio"
-                      name="ai-consent"
-                      className="mt-0.5 shrink-0 accent-[#8f3514]"
-                      checked={aiConsent === false}
-                      onChange={() => setAiConsent(false)}
-                    />
-                    <span className="text-sm text-stone-600 leading-relaxed">
-                      I prefer these checks be performed manually by editorial staff. I understand
-                      this may extend the formatting and citation-verification stage, and does not
-                      affect how my manuscript's scholarly content is evaluated.
-                    </span>
-                  </label>
-                </div>
+                <label
+                  className={`flex items-start gap-3 cursor-pointer p-3 border transition-colors ${aiConsent ? "border-primary bg-primary/5" : "border-stone-200 bg-white hover:border-stone-300"}`}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 shrink-0 accent-[#8f3514]"
+                    checked={aiConsent}
+                    onChange={(e) => setAiConsent(e.target.checked)}
+                  />
+                  <span className="text-sm text-stone-600 leading-relaxed">
+                    I consent to AI-assisted formatting and
+                    citation-verification support as described above and in the
+                    full AI Use &amp; Disclosure Policy.
+                  </span>
+                </label>
               </div>
             </div>
           </section>
@@ -1126,7 +1117,11 @@ export const Submit = () => {
             }
             className="bg-primary hover:bg-[#8f3514] text-white px-8 py-4 font-bold uppercase tracking-[0.2em] text-xs transition-colors flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {loading ? "Submitting…" : !vettingPaid || !processingPaid ? "Pay Fees to Submit" : "Submit Article"}
+            {loading
+              ? "Submitting…"
+              : !vettingPaid || !processingPaid
+                ? "Pay Fees to Submit"
+                : "Submit Article"}
             {!loading && <ArrowRight size={15} />}
           </button>
         </div>
