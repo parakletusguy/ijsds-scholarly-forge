@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmission } from "@/lib/submissionService";
 import { getReviews, type Review } from "@/lib/reviewService";
-import { deleteArticle } from "@/lib/articleService";
+import { deleteArticle, updateArticle } from "@/lib/articleService";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,8 @@ import {
 } from "@/components/submission/paystackDialogBox";
 import { SubmissionFileManager } from "@/components/submission/SubmissionFileManager";
 import { EditorFileManager } from "@/components/editor/EditorFileManager";
+import { ArticleAuthorsEditor } from "@/components/production/ArticleAuthorsEditor";
+import type { Article } from "@/lib/articleService";
 import ReceiptDown from "@/components/receiptGeneration/receiptDownload";
 import { SendRecieptMail } from "@/lib/emailService";
 import { uploadPdf } from "@/lib/cloudinary";
@@ -81,6 +84,10 @@ export const SubmissionDetail = () => {
   const isEditor = !!(profile?.is_editor || profile?.is_admin);
   const [crossrefLoading, setCrossrefLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editingAuthors, setEditingAuthors] = useState(false);
+  const [editingAbstract, setEditingAbstract] = useState(false);
+  const [abstractDraft, setAbstractDraft] = useState("");
+  const [savingAbstract, setSavingAbstract] = useState(false);
 
   const isSubmitter = user?.id === submission?.submitter_id;
   const canDelete = isEditor || (isSubmitter && submission?.status === 'submitted');
@@ -99,6 +106,42 @@ export const SubmissionDetail = () => {
         variant: "destructive",
       });
       setDeleting(false);
+    }
+  };
+
+  const startEditingAbstract = () => {
+    setAbstractDraft(submission?.article.abstract || "");
+    setEditingAbstract(true);
+  };
+
+  const saveAbstract = async () => {
+    if (!submission?.article.id) return;
+    const cleaned = abstractDraft.trim();
+    if (!cleaned) {
+      toast({
+        title: "Abstract required",
+        description: "The abstract cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSavingAbstract(true);
+    try {
+      await updateArticle(submission.article.id, { abstract: cleaned });
+      toast({
+        title: "Abstract saved",
+        description: "The abstract has been updated.",
+      });
+      setEditingAbstract(false);
+      fetchSubmissionDetails();
+    } catch (err: any) {
+      toast({
+        title: "Couldn't save abstract",
+        description: err?.message ?? "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingAbstract(false);
     }
   };
 
@@ -454,35 +497,148 @@ export const SubmissionDetail = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-lg mb-2">Abstract</h4>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {submission.article.abstract}
-                  </p>
+                  {isEditor && editingAbstract ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-lg">Edit Abstract</h4>
+                      </div>
+                      <Textarea
+                        value={abstractDraft}
+                        onChange={(e) => setAbstractDraft(e.target.value)}
+                        rows={8}
+                        placeholder="Enter the article abstract…"
+                        className="leading-relaxed"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingAbstract(false)}
+                          disabled={savingAbstract}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={saveAbstract}
+                          disabled={savingAbstract}
+                        >
+                          {savingAbstract ? "Saving…" : "Save abstract"}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-lg">Abstract</h4>
+                        {isEditor && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={startEditingAbstract}
+                          >
+                            Edit Abstract
+                          </Button>
+                        )}
+                      </div>
+                      <p
+                        onClick={isEditor ? startEditingAbstract : undefined}
+                        title={isEditor ? "Click to edit abstract" : undefined}
+                        className={`text-muted-foreground leading-relaxed ${
+                          isEditor
+                            ? "cursor-pointer hover:bg-muted/60 rounded-sm px-2 py-1 -mx-2 transition-colors"
+                            : ""
+                        }`}
+                      >
+                        {submission.article.abstract || (
+                          isEditor ? "No abstract yet — click to add one." : ""
+                        )}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-lg mb-2">Authors</h4>
-                  {submission.article.authors &&
-                  Array.isArray(submission.article.authors) ? (
+                  {isEditor && editingAuthors ? (
                     <div className="space-y-2">
-                      {submission.article.authors.map(
-                        (author: any, index: number) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span>{author.name}</span>
-                            {author.affiliation && (
-                              <span className="text-muted-foreground">
-                                ({author.affiliation})
-                              </span>
-                            )}
-                          </div>
-                        ),
-                      )}
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-lg">Edit Authors</h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingAuthors(false)}
+                        >
+                          Done
+                        </Button>
+                      </div>
+                      <ArticleAuthorsEditor
+                        article={submission.article as unknown as Article}
+                        onUpdate={() => {
+                          fetchSubmissionDetails();
+                          setEditingAuthors(false);
+                        }}
+                      />
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">
-                      No author information available
-                    </p>
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-lg">Authors</h4>
+                        {isEditor && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingAuthors(true)}
+                          >
+                            Edit Authors
+                          </Button>
+                        )}
+                      </div>
+                      {submission.article.authors &&
+                      Array.isArray(submission.article.authors) &&
+                      submission.article.authors.length > 0 ? (
+                        <div className="space-y-2">
+                          {submission.article.authors.map(
+                            (author: any, index: number) => (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={
+                                  isEditor
+                                    ? () => setEditingAuthors(true)
+                                    : undefined
+                                }
+                                className={`flex items-center gap-2 w-full text-left ${
+                                  isEditor
+                                    ? "cursor-pointer hover:bg-muted/60 rounded-sm px-2 py-1 -mx-2 transition-colors"
+                                    : "cursor-default"
+                                }`}
+                                title={isEditor ? "Click to edit authors" : undefined}
+                              >
+                                <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span>{author.name}</span>
+                                {author.affiliation && (
+                                  <span className="text-muted-foreground">
+                                    ({author.affiliation})
+                                  </span>
+                                )}
+                              </button>
+                            ),
+                          )}
+                        </div>
+                      ) : isEditor ? (
+                        <button
+                          type="button"
+                          onClick={() => setEditingAuthors(true)}
+                          className="text-primary hover:underline text-sm"
+                        >
+                          No authors yet — add authors
+                        </button>
+                      ) : (
+                        <p className="text-muted-foreground">
+                          No author information available
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
 
