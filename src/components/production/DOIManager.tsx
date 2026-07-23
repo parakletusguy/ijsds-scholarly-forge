@@ -108,6 +108,8 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
   const isPolling =
     jobStatus && (jobStatus.state === "waiting" || jobStatus.state === "delayed" || jobStatus.state === "active");
 
+  const hasIssueAssignment = !!article.volume && !!article.issue;
+
   return (
     <div className="space-y-0 divide-y divide-stone-100">
 
@@ -135,7 +137,9 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
         ) : (
           <div className="flex items-center gap-2 text-stone-500 text-sm">
             <AlertCircle size={14} className="text-stone-300 shrink-0" />
-            Not yet assigned — CrossRef registration is triggered automatically when an article is accepted.
+            {hasIssueAssignment
+              ? "Not yet assigned — use Register with CrossRef below."
+              : "Not yet assigned — a DOI requires Volume and Issue first. Assign them in the Issues tab and click \"Approve for Processing\"; registration is triggered automatically at that point."}
           </div>
         )}
       </div>
@@ -167,12 +171,13 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
         <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Actions</p>
 
         <div className="flex flex-wrap gap-3">
-          {/* Register (only if no DOI yet) */}
+          {/* Register (only if no DOI yet, and only once Volume/Issue exist) */}
           {!article.doi && (
             <button
               onClick={handleRegister}
-              disabled={registering || !!isPolling}
-              className="inline-flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-40 active:scale-[0.98]"
+              disabled={registering || !!isPolling || !hasIssueAssignment}
+              title={!hasIssueAssignment ? "Assign Volume and Issue in the Issues tab first" : undefined}
+              className="inline-flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               {registering || isPolling
                 ? <Loader2 size={12} className="animate-spin" />
@@ -209,7 +214,9 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
         <p className="text-[10px] text-stone-400 leading-relaxed">
           {article.doi
             ? "Use Redeposit to correct metadata (title, authors, volume) after the DOI is already assigned."
-            : "Registration is automatic on acceptance. Use this only if the job did not run or needs to be re-triggered."}
+            : hasIssueAssignment
+              ? "Registration is triggered automatically when processing is approved in the Issues tab. Use this only if that job did not run or needs to be re-triggered."
+              : "Registration is disabled until Volume and Issue are assigned — a DOI cannot be minted without them."}
         </p>
       </div>
 

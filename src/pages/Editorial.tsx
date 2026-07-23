@@ -3,7 +3,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { getSubmissions, type Submission } from "@/lib/submissionService";
 import { createEditorialDecision } from "@/lib/editorialService";
 import { updateArticle, deleteArticle } from "@/lib/articleService";
-import { crossrefRedeposit, crossrefRegister } from "@/lib/crossrefService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -86,37 +85,9 @@ export const Editorial = () => {
     }
   };
 
-  const updateDOIVersion = async (_submissionId: string, articleId: string) => {
-    try {
-      await crossrefRedeposit(articleId);
-      toast({ title: "Redeposit Queued", description: "Updated metadata is being sent to CrossRef." });
-      fetchSubmissions();
-    } catch (error: any) {
-      toast({ title: "Redeposit Failed", description: error.message || "Failed to redeposit metadata.", variant: "destructive" });
-    }
-  };
-
-  const registerDOI = async (articleId: string) => {
-    try {
-      await crossrefRegister(articleId);
-      toast({ title: "Registration Queued", description: "CrossRef DOI registration has been triggered." });
-      fetchSubmissions();
-    } catch (error: any) {
-      const msg: string = error?.message ?? "";
-      if (msg.toLowerCase().includes("already has crossref doi") || msg.toLowerCase().includes("already has a doi")) {
-        // Article is already registered — redeposit instead
-        try {
-          await crossrefRedeposit(articleId);
-          toast({ title: "Redeposit Queued", description: "CrossRef DOI already exists — metadata update has been sent." });
-          fetchSubmissions();
-        } catch (rdErr: any) {
-          toast({ title: "Redeposit Failed", description: rdErr?.message || "Failed to redeposit.", variant: "destructive" });
-        }
-      } else {
-        toast({ title: "Registration Failed", description: msg || "Failed to queue DOI registration.", variant: "destructive" });
-      }
-    }
-  };
+  // DOI registration now lives entirely in the Production workflow (see
+  // IssueCompilation.tsx), triggered once Volume/Issue are assigned — not
+  // here at editorial acceptance, since volume/issue don't exist yet.
 
   const handleDelete = async (articleId: string) => {
     try {
@@ -293,20 +264,9 @@ export const Editorial = () => {
                   <RevisionRequestDialog submissionId={submission.id} submissionTitle={art.title || ""} authorEmail={art.corresponding_author_email || ""} authorName={submission.submitter?.full_name || ""} onRequest={fetchSubmissions} />
                   <RejectSubmissionDialog submissionId={submission.id} articleId={submission.article_id} onReject={fetchSubmissions} />
                   <Button size="sm" variant="outline" onClick={() => navigate(`/submission/${submission.id}/reviews`)}
-                    className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary">
+                    className="h-8 text-[10px] rounded-none border-stone-200 hover:border-primary ml-auto">
                     Audit Reviews
                   </Button>
-                  {art.crossrefDoi ? (
-                    <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
-                      className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
-                      <RefreshCw size={11} /> Redeposit
-                    </Button>
-                  ) : (
-                    <Button size="sm" variant="ghost" onClick={() => registerDOI(art.id)}
-                      className="h-8 text-[9px] rounded-none text-amber-700 gap-1.5 hover:bg-amber-50 ml-auto">
-                      <RefreshCw size={11} /> Register CrossRef
-                    </Button>
-                  )}
                 </>
               )}
               {tab === "revision" && (
@@ -327,18 +287,10 @@ export const Editorial = () => {
                     Details
                   </Button>
                   <PaperDownload articleId={submission.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
-                  {submission.status === "accepted" && (
-                    art.crossrefDoi ? (
-                      <Button size="sm" variant="ghost" onClick={() => updateDOIVersion(submission.id, art.id)}
-                        className="h-8 text-[9px] rounded-none text-primary gap-1.5 hover:bg-primary/5 ml-auto">
-                        <RefreshCw size={11} /> Redeposit
-                      </Button>
-                    ) : (
-                      <Button size="sm" variant="ghost" onClick={() => registerDOI(art.id)}
-                        className="h-8 text-[9px] rounded-none text-amber-700 gap-1.5 hover:bg-amber-50 ml-auto">
-                        <RefreshCw size={11} /> Sync CrossRef
-                      </Button>
-                    )
+                  {submission.status === "accepted" && !art.crossrefDoi && (
+                    <span className="ml-auto text-[9px] font-bold uppercase tracking-widest text-stone-400">
+                      Assign Volume/Issue in Production to register DOI
+                    </span>
                   )}
                 </>
               )}

@@ -133,6 +133,15 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
   };
 
   const approveProcessing = async () => {
+    if (!issueInfo.volume || !issueInfo.issue) {
+      toast({
+        title: "Volume and Issue required",
+        description: "A DOI can only be requested once the article has a Volume and Issue assigned.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setProcessLoad(true)
     try {
       await approveForProcessing(article.id, {
@@ -142,11 +151,14 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
         page_end: issueArticles.find(a => a.id === article.id)?.pageEnd,
       });
 
+      // Volume/Issue are now fixed. The backend triggers CrossRef DOI
+      // registration automatically as part of this same status update (see
+      // articles.service.js updateArticle) — no separate client call needed.
       toast({
         title: "Success",
-        description: "Article approved for processing",
+        description: "Article approved for processing. CrossRef registration has started automatically.",
       });
-      
+
       onUpdate();
     } catch (error) {
       console.error('Error processing:', error);
