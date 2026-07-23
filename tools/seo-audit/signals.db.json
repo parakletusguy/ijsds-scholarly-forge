@@ -1,0 +1,424 @@
+{
+  "http://localhost:4173/": {
+    "url": "http://localhost:4173/",
+    "pageType": "home",
+    "computedAt": "2026-07-23T08:11:55.858Z",
+    "gate": {
+      "pass": false,
+      "checks": [
+        {
+          "id": "status_200",
+          "label": "Returns 200 to a bot UA with JS disabled",
+          "pass": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "id": "robots_allow",
+          "label": "Not blocked by robots.txt",
+          "pass": true
+        },
+        {
+          "id": "no_noindex",
+          "label": "No noindex directive present",
+          "pass": true
+        },
+        {
+          "id": "canonical_self",
+          "label": "Canonical resolves to self",
+          "pass": false,
+          "detail": "No <link rel=\"canonical\"> present"
+        }
+      ]
+    },
+    "factors": {
+      "render": {
+        "score": 0.5,
+        "evidence": [
+          "<title> present (68 chars)",
+          "<h1> missing or empty in raw HTML",
+          "meta description present (201 chars)",
+          "Body text in raw HTML: only 0 chars (need 200) — content likely requires JS to render"
+        ]
+      },
+      "cwv": {
+        "score": 0,
+        "unmeasured": true,
+        "evidence": [
+          "Not computed — wire in PageSpeed Insights API or Lighthouse CI against a deployed URL"
+        ]
+      },
+      "schema": {
+        "score": 0,
+        "evidence": [
+          "Found 1 JSON-LD block(s): Periodical",
+          "No block with @type \"Organization\" found for a home page"
+        ]
+      },
+      "semantic": {
+        "score": 0.25,
+        "evidence": [
+          "Found 0 <h1> elements (want exactly 1)",
+          "No <h2> section headings found",
+          "No <main> or <article> landmark element"
+        ]
+      },
+      "answer": {
+        "score": 1,
+        "evidence": [
+          "Opening content length is 201 chars (in the 120-300 sweet spot)",
+          "No throat-clearing opener detected",
+          "First paragraph reads as self-contained"
+        ]
+      },
+      "entity": {
+        "score": 0.6666666666666666,
+        "evidence": [
+          "Organization name matches canonical entity: \"International Journal of Social Work and Development Studies\"",
+          "No og:site_name meta tag present",
+          "CANONICAL_ENTITY.sameAs is empty in entity.config.ts — add sibling profile URLs to enable this check"
+        ]
+      },
+      "authority": {
+        "score": 0,
+        "unmeasured": true,
+        "evidence": [
+          "Not computed — needs an external backlink data source (Search Console, Ahrefs, Semrush)"
+        ]
+      },
+      "freshness": {
+        "score": 0,
+        "evidence": [
+          "No publication/modified date found in meta tags or JSON-LD"
+        ]
+      },
+      "aicrawl": {
+        "score": 1,
+        "evidence": [
+          "All 5 tracked AI crawlers are allowed"
+        ]
+      }
+    },
+    "score": 0,
+    "breakdown": [
+      {
+        "factor": "render",
+        "weight": 0.20547945205479448,
+        "score": 0.5,
+        "contribution": 0.10273972602739724
+      },
+      {
+        "factor": "schema",
+        "weight": 0.20547945205479448,
+        "score": 0,
+        "contribution": 0
+      },
+      {
+        "factor": "semantic",
+        "weight": 0.136986301369863,
+        "score": 0.25,
+        "contribution": 0.03424657534246575
+      },
+      {
+        "factor": "answer",
+        "weight": 0.1095890410958904,
+        "score": 1,
+        "contribution": 0.1095890410958904
+      },
+      {
+        "factor": "entity",
+        "weight": 0.273972602739726,
+        "score": 0.6666666666666666,
+        "contribution": 0.182648401826484
+      },
+      {
+        "factor": "freshness",
+        "weight": 0.0684931506849315,
+        "score": 0,
+        "contribution": 0
+      }
+    ],
+    "httpStatus": 200,
+    "htmlBytes": 4169
+  },
+  "http://localhost:4173/articles": {
+    "url": "http://localhost:4173/articles",
+    "pageType": "listing",
+    "computedAt": "2026-07-23T08:11:55.891Z",
+    "gate": {
+      "pass": false,
+      "checks": [
+        {
+          "id": "status_200",
+          "label": "Returns 200 to a bot UA with JS disabled",
+          "pass": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "id": "robots_allow",
+          "label": "Not blocked by robots.txt",
+          "pass": true
+        },
+        {
+          "id": "no_noindex",
+          "label": "No noindex directive present",
+          "pass": true
+        },
+        {
+          "id": "canonical_self",
+          "label": "Canonical resolves to self",
+          "pass": false,
+          "detail": "No <link rel=\"canonical\"> present"
+        }
+      ]
+    },
+    "factors": {
+      "render": {
+        "score": 0.5,
+        "evidence": [
+          "<title> present (68 chars)",
+          "<h1> missing or empty in raw HTML",
+          "meta description present (201 chars)",
+          "Body text in raw HTML: only 0 chars (need 200) — content likely requires JS to render"
+        ]
+      },
+      "cwv": {
+        "score": 0,
+        "unmeasured": true,
+        "evidence": [
+          "Not computed — wire in PageSpeed Insights API or Lighthouse CI against a deployed URL"
+        ]
+      },
+      "schema": {
+        "score": 1,
+        "evidence": [
+          "Found 1 JSON-LD block(s): Periodical"
+        ]
+      },
+      "semantic": {
+        "score": 0.25,
+        "evidence": [
+          "Found 0 <h1> elements (want exactly 1)",
+          "No <h2> section headings found",
+          "No <main> or <article> landmark element"
+        ]
+      },
+      "answer": {
+        "score": 1,
+        "evidence": [
+          "Opening content length is 201 chars (in the 120-300 sweet spot)",
+          "No throat-clearing opener detected",
+          "First paragraph reads as self-contained"
+        ]
+      },
+      "entity": {
+        "score": 0.6666666666666666,
+        "evidence": [
+          "Organization name matches canonical entity: \"International Journal of Social Work and Development Studies\"",
+          "No og:site_name meta tag present",
+          "CANONICAL_ENTITY.sameAs is empty in entity.config.ts — add sibling profile URLs to enable this check"
+        ]
+      },
+      "authority": {
+        "score": 0,
+        "unmeasured": true,
+        "evidence": [
+          "Not computed — needs an external backlink data source (Search Console, Ahrefs, Semrush)"
+        ]
+      },
+      "freshness": {
+        "score": 0,
+        "evidence": [
+          "No publication/modified date found in meta tags or JSON-LD"
+        ]
+      },
+      "aicrawl": {
+        "score": 1,
+        "evidence": [
+          "All 5 tracked AI crawlers are allowed"
+        ]
+      }
+    },
+    "score": 0,
+    "breakdown": [
+      {
+        "factor": "render",
+        "weight": 0.3205128205128205,
+        "score": 0.5,
+        "contribution": 0.16025641025641024
+      },
+      {
+        "factor": "schema",
+        "weight": 0.10256410256410256,
+        "score": 1,
+        "contribution": 0.10256410256410256
+      },
+      {
+        "factor": "semantic",
+        "weight": 0.1923076923076923,
+        "score": 0.25,
+        "contribution": 0.04807692307692307
+      },
+      {
+        "factor": "answer",
+        "weight": 0.12820512820512822,
+        "score": 1,
+        "contribution": 0.12820512820512822
+      },
+      {
+        "factor": "entity",
+        "weight": 0.06410256410256411,
+        "score": 0.6666666666666666,
+        "contribution": 0.042735042735042736
+      },
+      {
+        "factor": "freshness",
+        "weight": 0.1923076923076923,
+        "score": 0,
+        "contribution": 0
+      }
+    ],
+    "httpStatus": 200,
+    "htmlBytes": 4169
+  },
+  "http://localhost:4173/article/REPLACE-WITH-REAL-SLUG": {
+    "url": "http://localhost:4173/article/REPLACE-WITH-REAL-SLUG",
+    "pageType": "article",
+    "computedAt": "2026-07-23T08:11:55.903Z",
+    "gate": {
+      "pass": false,
+      "checks": [
+        {
+          "id": "status_200",
+          "label": "Returns 200 to a bot UA with JS disabled",
+          "pass": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "id": "robots_allow",
+          "label": "Not blocked by robots.txt",
+          "pass": true
+        },
+        {
+          "id": "no_noindex",
+          "label": "No noindex directive present",
+          "pass": true
+        },
+        {
+          "id": "canonical_self",
+          "label": "Canonical resolves to self",
+          "pass": false,
+          "detail": "No <link rel=\"canonical\"> present"
+        }
+      ]
+    },
+    "factors": {
+      "render": {
+        "score": 0.5,
+        "evidence": [
+          "<title> present (68 chars)",
+          "<h1> missing or empty in raw HTML",
+          "meta description present (201 chars)",
+          "Body text in raw HTML: only 0 chars (need 600) — content likely requires JS to render"
+        ]
+      },
+      "cwv": {
+        "score": 0,
+        "unmeasured": true,
+        "evidence": [
+          "Not computed — wire in PageSpeed Insights API or Lighthouse CI against a deployed URL"
+        ]
+      },
+      "schema": {
+        "score": 0,
+        "evidence": [
+          "Found 1 JSON-LD block(s): Periodical",
+          "No block with @type \"ScholarlyArticle\" found for a article page"
+        ]
+      },
+      "semantic": {
+        "score": 0.25,
+        "evidence": [
+          "Found 0 <h1> elements (want exactly 1)",
+          "No <h2> section headings found",
+          "No <main> or <article> landmark element"
+        ]
+      },
+      "answer": {
+        "score": 1,
+        "evidence": [
+          "Opening content length is 201 chars (in the 120-300 sweet spot)",
+          "No throat-clearing opener detected",
+          "First paragraph reads as self-contained"
+        ]
+      },
+      "entity": {
+        "score": 0.6666666666666666,
+        "evidence": [
+          "Organization name matches canonical entity: \"International Journal of Social Work and Development Studies\"",
+          "No og:site_name meta tag present",
+          "CANONICAL_ENTITY.sameAs is empty in entity.config.ts — add sibling profile URLs to enable this check"
+        ]
+      },
+      "authority": {
+        "score": 0,
+        "unmeasured": true,
+        "evidence": [
+          "Not computed — needs an external backlink data source (Search Console, Ahrefs, Semrush)"
+        ]
+      },
+      "freshness": {
+        "score": 0,
+        "evidence": [
+          "No publication/modified date found in meta tags or JSON-LD"
+        ]
+      },
+      "aicrawl": {
+        "score": 1,
+        "evidence": [
+          "All 5 tracked AI crawlers are allowed"
+        ]
+      }
+    },
+    "score": 0,
+    "breakdown": [
+      {
+        "factor": "render",
+        "weight": 0.25,
+        "score": 0.5,
+        "contribution": 0.125
+      },
+      {
+        "factor": "schema",
+        "weight": 0.22499999999999998,
+        "score": 0,
+        "contribution": 0
+      },
+      {
+        "factor": "semantic",
+        "weight": 0.15,
+        "score": 0.25,
+        "contribution": 0.0375
+      },
+      {
+        "factor": "answer",
+        "weight": 0.22499999999999998,
+        "score": 1,
+        "contribution": 0.22499999999999998
+      },
+      {
+        "factor": "entity",
+        "weight": 0.08750000000000001,
+        "score": 0.6666666666666666,
+        "contribution": 0.058333333333333334
+      },
+      {
+        "factor": "freshness",
+        "weight": 0.0625,
+        "score": 0,
+        "contribution": 0
+      }
+    ],
+    "httpStatus": 200,
+    "htmlBytes": 4169
+  }
+}
