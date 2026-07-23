@@ -136,6 +136,10 @@ export const ArticleInfo = () => {
     <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-body selection:bg-primary/10 selection:text-primary">
       <Helmet>
         <title>{article.title} | IJSDS</title>
+        {/* Two route patterns (/article/:slug and /articles/:slug) render this
+            page — always canonicalize to the singular form so they aren't
+            treated as duplicate content. */}
+        <link rel="canonical" href={`https://ijsds.org/article/${slug}`} />
         <meta name="citation_title" content={article.title} />
         {authors.filter((a: any) => a?.name?.trim()).map((a: any) => (
           <meta key={a.name} name="citation_author" content={a.name.trim()} />
