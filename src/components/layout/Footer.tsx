@@ -9,8 +9,8 @@ export const Footer = () => {
 
   return (
     <footer className="bg-[#f7f3ef] border-t-2 border-[#8f3514]/10 mt-32">
-      <div className="max-w-7xl mx-auto px-12 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12">
 
           {/* Brand */}
           <div className="md:col-span-1 space-y-5">
@@ -74,7 +74,7 @@ export const Footer = () => {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-[#8f3514]/5 px-12 py-7">
+      <div className="border-t border-[#8f3514]/5 px-4 sm:px-8 md:px-12 py-7">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-body text-xs text-[#1c1c19]/40">
             © {year} International Journal of Social Work and Development Studies (IJSDS). All rights reserved.

@@ -78,7 +78,7 @@ export const Home = () => {
   return (
     <div className="min-h-screen bg-stone-50 selection:bg-orange-100 selection:text-primary">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <header className="relative flex items-center overflow-hidden bg-stone-50 pt-12 pb-16 md:pt-16 md:pb-20">
+      <header className="relative flex items-center overflow-hidden bg-stone-50 pt-8 pb-12 sm:pt-10 sm:pb-14 md:pt-16 md:pb-20">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -88,11 +88,11 @@ export const Home = () => {
             opacity: 0.08,
           }}
         />
-        <div className="container mx-auto px-8 relative z-10 text-center max-w-5xl">
+        <div className="container mx-auto px-4 sm:px-8 relative z-10 text-center max-w-5xl">
           <span className="text-primary tracking-[0.4em] font-bold text-[10px] mb-8 inline-block uppercase">
             Established 2025 · Open Access · Peer Reviewed
           </span>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-light leading-[1.1] tracking-tight text-stone-900 mb-6 md:mb-10">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-headline font-light leading-[1.1] tracking-tight text-stone-900 mb-6 md:mb-10 break-words">
             Amplifying African Voices through{" "}
             <span className="italic text-primary">Rigorous Research.</span>
           </h1>
@@ -141,9 +141,9 @@ export const Home = () => {
       </header>
 
       {/* ── Current Issues — Editorial Grid ──────────────────────────────── */}
-      <section className="py-32 bg-stone-50">
+      <section className="py-16 sm:py-24 md:py-32 bg-stone-50">
         <div className="container mx-auto px-4 sm:px-8">
-          <div className="flex justify-between items-end mb-16">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-10 sm:mb-16">
             <div>
               <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
                 Recent Publications
@@ -154,7 +154,7 @@ export const Home = () => {
             </div>
             <Link
               to="/articles"
-              className="group flex items-center gap-2 text-primary font-bold text-sm border-b border-primary/30 pb-1 hover:border-primary transition-colors"
+              className="group flex items-center gap-2 text-primary font-bold text-sm border-b border-primary/30 pb-1 hover:border-primary transition-colors self-start sm:self-auto"
             >
               View Full Archive
               <ArrowRight
@@ -356,9 +356,9 @@ export const Home = () => {
 
       {/* ── Recent Blog Posts ────────────────────────────────────────────── */}
       {recentPosts.length > 0 && (
-        <section className="py-24 bg-white border-t border-stone-100">
+        <section className="py-12 sm:py-16 md:py-24 bg-white border-t border-stone-100">
           <div className="container mx-auto px-4 sm:px-8">
-            <div className="flex justify-between items-end mb-12">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8 sm:mb-12">
               <div>
                 <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-3 block">
                   From the Blog
@@ -379,7 +379,7 @@ export const Home = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {recentPosts.map((post) => (
                 <div
                   key={post.id}
@@ -425,7 +425,7 @@ export const Home = () => {
       )}
 
       {/* ── Editorial Spotlight ──────────────────────────────────────────── */}
-      <section className="py-32 bg-stone-200 relative overflow-hidden">
+      <section className="py-16 sm:py-24 md:py-32 bg-stone-200 relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -435,8 +435,8 @@ export const Home = () => {
             opacity: 0.05,
           }}
         />
-        <div className="container mx-auto px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-10 items-center gap-20">
+        <div className="container mx-auto px-4 sm:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-10 items-center gap-10 sm:gap-14 lg:gap-20">
             <div className="lg:col-span-4 order-2 lg:order-1">
               <div className="aspect-[3/4] bg-stone-100 overflow-hidden relative group">
                 <img
@@ -447,7 +447,7 @@ export const Home = () => {
               </div>
             </div>
             <div className="lg:col-span-6 order-1 lg:order-2">
-              <div className="bg-stone-50 p-12 relative overflow-hidden group/card">
+              <div className="bg-stone-50 p-6 sm:p-8 lg:p-12 relative overflow-hidden group/card">
                 <img
                   src={logo}
                   alt="IJSDS Logo"
@@ -456,7 +456,7 @@ export const Home = () => {
                 <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">
                   "
                 </span>
-                <blockquote className="font-headline text-2xl md:text-3xl lg:text-4xl leading-snug text-stone-900 mb-8 md:mb-10 font-light">
+                <blockquote className="font-headline text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-snug text-stone-900 mb-6 sm:mb-8 md:mb-10 font-light">
                   Research is not just an academic exercise — it is how we shape
                   the future. Through our journal, we give African scholars the
                   platform they deserve to lead global conversations.
@@ -483,7 +483,7 @@ export const Home = () => {
       </section>
 
       {/* ── Submission CTA ───────────────────────────────────────────────── */}
-      <section className="py-24 bg-primary text-white">
+      <section className="py-12 sm:py-16 md:py-24 bg-primary text-white">
         <div className="container mx-auto px-4 sm:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
@@ -526,9 +526,9 @@ export const Home = () => {
       </section>
 
       {/* ── Impact Stats ─────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white border-t border-primary/5">
+      <section className="py-12 sm:py-16 md:py-24 bg-white border-t border-primary/5">
         <div className="container mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 text-center md:text-left">
             {[
               {
                 icon: Globe,
@@ -552,7 +552,7 @@ export const Home = () => {
               },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label} className="group">
-                <div className="text-5xl font-headline text-primary mb-3 flex items-center justify-center md:justify-start gap-3">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-headline text-primary mb-3 flex items-center justify-center md:justify-start gap-3">
                   <Icon
                     size={28}
                     className="opacity-20 group-hover:opacity-60 transition-opacity"
@@ -569,7 +569,7 @@ export const Home = () => {
       </section>
 
       {/* ── Why Choose IJSDS ─────────────────────────────────────────────── */}
-      <section className="py-32 bg-stone-50">
+      <section className="py-16 sm:py-24 md:py-32 bg-stone-50">
         <div className="container mx-auto px-4 sm:px-8">
           <div className="mb-20 max-w-2xl">
             <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
@@ -584,7 +584,7 @@ export const Home = () => {
               work and development.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-16">
             {[
               {
                 icon: Globe,

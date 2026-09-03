@@ -22,14 +22,14 @@ interface PublicLayoutProps {
 export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, hideHeader, hideFooter, noCanonical }) => {
   const location = useLocation();
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50">
+    <div className="min-h-screen flex flex-col bg-stone-50 w-full overflow-x-hidden">
       {!noCanonical && (
         <Helmet>
           <link rel="canonical" href={`${SITE_ORIGIN}${location.pathname}`} />
         </Helmet>
       )}
       {!hideHeader && <Header />}
-      <main className="flex-1">
+      <main className="flex-1 w-full overflow-x-hidden">
         {children}
       </main>
       {!hideFooter && <Footer />}

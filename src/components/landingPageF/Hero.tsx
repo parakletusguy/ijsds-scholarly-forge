@@ -12,7 +12,7 @@ const Container = styled.div`
 
 const OpacityOverlay = tw.div`z-10 absolute w-[100%] h-[106%] inset-0 bg-[#FBE5B6] opacity-30`;
 
-const HeroContainer = tw.div`z-20 absolute h-full`;
+const HeroContainer = tw.div`z-20 absolute h-full w-full`;
 
 const Heading = styled.h1`
   ${tw`text-3xl text-center lg:text-left sm:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-100 leading-none`}
@@ -40,9 +40,8 @@ export const Hero = () => {
   return (
     <Container className="h-screen overflow-hidden">
       <OpacityOverlay className="w-[100%]" />
-      <HeroContainer className="z-10">
-        <div className=" h-full flex flex-col items-center justify-center backdrop-blur-[4px] p-4 lg:p-8">
-          <img src="" alt="" />
+      <HeroContainer className="z-20">
+        <div className=" h-full flex flex-col items-center justify-center backdrop-blur-[4px] p-4 sm:p-6 lg:p-8">
           <div className="w-full sm:w-11/12 md:w-3/4 lg:w-3/5 xl:w-[80%] text-center px-4">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold leading-tight">
               <span className="block mb-2">IJSDS</span>

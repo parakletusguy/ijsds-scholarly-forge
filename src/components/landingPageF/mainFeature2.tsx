@@ -28,7 +28,7 @@ const Heading = tw(
 const Description = tw.p`mt-4 text-center md:text-left text-sm md:text-base lg:text-lg font-medium leading-relaxed text-secondary`;
 
 const Features = tw.div`mt-8 max-w-sm mx-auto md:mx-0`;
-const Feature = tw.div`mt-8 flex items-start flex-col md:flex-row`;
+const Feature = tw.div`mt-8 flex items-center md:items-start flex-col md:flex-row`;
 
 const FeatureIconContainer = styled.div`
   ${tw`mx-auto inline-block border border-primary text-center rounded-full p-2 flex-shrink-0`}

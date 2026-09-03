@@ -73,7 +73,7 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* ── ISSN Top Bar ────────────────────────────────────────────────── */}
-      <div className="bg-stone-900 text-stone-400 py-1.5 px-4 md:px-8 text-[11px] md:text-[10px] font-bold tracking-[0.2em] uppercase flex justify-between items-center">
+      <div className="bg-stone-900 text-stone-400 py-1.5 px-4 sm:px-6 lg:px-8 text-[11px] md:text-[10px] font-bold tracking-[0.15em] uppercase flex justify-between items-center w-full overflow-hidden">
         <div className="flex gap-4 md:gap-6 items-center">
           <span>ISSN: 3115-6940</span>
           <span className="hidden xs:inline text-[9px] md:text-[10px] opacity-40">|</span>
@@ -91,29 +91,29 @@ export const Header = () => {
 
       {/* ── Main Navigation ──────────────────────────────────────────────── */}
       <nav
-        className={`bg-white/90 backdrop-blur-md transition-all duration-700 ${isScrolled ? "py-0.5 shadow-sm" : "py-1"}`}
+        className={`bg-white/90 backdrop-blur-md transition-all duration-700 w-full ${isScrolled ? "py-0.5 shadow-sm" : "py-1"}`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex justify-between items-center">
-          <div className="flex items-center gap-4 sm:gap-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center w-full">
+          <div className="flex items-center gap-3 sm:gap-4 xl:gap-8 min-w-0">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-2 group"
+              className="flex items-center gap-2 group shrink-0"
             >
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="w-40 sm:w-48 md:w-60 lg:w-[260px] h-auto object-contain -my-2 sm:-my-3 md:-my-5 lg:-my-7 -ml-2 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
+                className="w-36 sm:w-44 xl:w-52 h-auto object-contain -my-2 sm:-my-3 lg:-my-5 -ml-1 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
               />
             </button>
 
-            <div className="hidden md:flex gap-6 lg:gap-8 items-center">
+            <div className="hidden xl:flex gap-3 2xl:gap-5 items-center">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-[10px] font-medium uppercase tracking-[0.25em] transition-all duration-500 whitespace-nowrap ${
+                  className={`text-[10px] xl:text-[11px] font-medium uppercase tracking-[0.1em] 2xl:tracking-[0.18em] transition-all duration-300 whitespace-nowrap ${
                     isActive(link.path)
-                      ? "text-primary border-b border-primary/40 pb-0.5"
+                      ? "text-primary border-b border-primary/40 pb-0.5 font-bold"
                       : "text-stone-400 hover:text-primary"
                   }`}
                 >
@@ -123,14 +123,14 @@ export const Header = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
 
             {loading ? (
               <div className="h-10 w-24 bg-stone-100 animate-pulse rounded" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-stone-50 border border-stone-200 hover:border-primary transition-all group font-headline whitespace-nowrap">
+                  <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-stone-50 border border-stone-200 hover:border-primary transition-all group font-headline whitespace-nowrap">
                     <User
                       size={16}
                       className="text-stone-400 group-hover:text-primary"
@@ -176,16 +176,16 @@ export const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => navigate("/auth")}
-                  className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors px-4 py-2 whitespace-nowrap"
+                  className="text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-primary transition-colors px-2 sm:px-3 py-1.5 whitespace-nowrap"
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => navigate("/auth?reason=submit")}
-                  className="hidden md:block bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 border border-transparent whitespace-nowrap"
+                  className="hidden sm:block bg-primary text-white px-3 sm:px-4 xl:px-6 py-2 xl:py-2.5 text-[10px] font-bold uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/10 border border-transparent whitespace-nowrap"
                 >
                   Submit Manuscript
                 </button>
@@ -193,8 +193,9 @@ export const Header = () => {
             ) }
 
             <button
-              className="md:hidden"
+              className="xl:hidden p-1.5 text-stone-900 hover:text-primary transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? (
                 <X size={24} className="text-stone-900" />
@@ -210,11 +211,11 @@ export const Header = () => {
           <>
             {/* Backdrop — tap anywhere to close */}
             <div
-              className="md:hidden fixed inset-0 top-0 bg-black/25 z-40"
+              className="xl:hidden fixed inset-0 top-0 bg-black/25 z-40"
               onClick={() => setMobileMenuOpen(false)}
               aria-hidden="true"
             />
-            <div className="md:hidden relative z-50 bg-white border-t border-stone-100 shadow-xl max-h-[calc(100vh-6rem)] overflow-y-auto animate-in slide-in-from-top-4 duration-300">
+            <div className="xl:hidden relative z-50 bg-white border-t border-stone-100 shadow-xl max-h-[calc(100vh-6rem)] overflow-y-auto animate-in slide-in-from-top-4 duration-300">
               <div className="p-6 space-y-6">
                 {/* Account / auth — placed first so it is always visible */}
                 {user ? (
