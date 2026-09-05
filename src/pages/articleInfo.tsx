@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { 
@@ -37,7 +37,7 @@ const getAbsolutePdfUrl = (url: string | null | undefined) => {
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
-  const apiBase = import.meta.env.VITE_API_URL || "https://ijsdsbackend-429660256945.europe-southwest1.run.app";
+  const apiBase = import.meta.env.VITE_API_URL || "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net";
   const normalizedBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
   const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
   return `${normalizedBase}${normalizedUrl}`;
@@ -72,6 +72,16 @@ export const ArticleInfo = () => {
       // 2. If no DOI found or lookup returned nothing, treat slug as a UUID
       if (!currentArticle) {
         currentArticle = await getArticle(slug!);
+      }
+
+      // 3. Ensure full details (including file_versions) are present
+      if (currentArticle?.id && (!currentArticle.file_versions || currentArticle.file_versions.length === 0)) {
+        try {
+          const detail = await getArticle(currentArticle.id);
+          if (detail) currentArticle = detail;
+        } catch {
+          // Keep currentArticle as-is
+        }
       }
 
       setArticle(currentArticle);
@@ -132,6 +142,21 @@ export const ArticleInfo = () => {
     pubDate,
   ].filter(Boolean).join(' • ');
 
+  const resolvedPdfUrl = useMemo(() => {
+    if (!article) return null;
+    if (Array.isArray(article.file_versions) && article.file_versions.length > 0) {
+      const published = article.file_versions.find(
+        (f: any) =>
+          !f.is_archived &&
+          (f.file_type === "application/pdf" || String(f.file_url || "").toLowerCase().includes(".pdf"))
+      );
+      if (published?.file_url) return published.file_url;
+    }
+    const raw = String(article.manuscript_file_url || "");
+    if (raw.toLowerCase().includes(".pdf")) return raw;
+    return null;
+  }, [article]);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-body selection:bg-primary/10 selection:text-primary">
       <Helmet>
@@ -155,8 +180,8 @@ export const ArticleInfo = () => {
         {(article.crossrefDoi || article.doi) && (
           <meta name="citation_doi" content={article.crossrefDoi || article.doi || ""} />
         )}
-        {article.manuscript_file_url && (
-          <meta name="citation_pdf_url" content={getAbsolutePdfUrl(article.manuscript_file_url)} />
+        {resolvedPdfUrl && (
+          <meta name="citation_pdf_url" content={`https://ijsds.org/api/pdf/${article.id}.pdf`} />
         )}
         <meta name="citation_language" content="en" />
         {article.page_start && <meta name="citation_firstpage" content={String(article.page_start)} />}
@@ -254,13 +279,13 @@ export const ArticleInfo = () => {
             </div>
 
             {/* Download Button */}
-            {article.manuscript_file_url && (
+            {resolvedPdfUrl && (
               <div className="mb-8">
                 <a
-                  href={article.manuscript_file_url}
+                  href={`/api/pdf/${article.id}.pdf`}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleFileDownload(article.manuscript_file_url!, article.title, article.id);
+                    handleFileDownload(`/api/pdf/${article.id}.pdf`, article.title, article.id);
                   }}
                   target="_blank"
                   rel="noopener noreferrer"

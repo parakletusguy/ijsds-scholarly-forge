@@ -1,5 +1,13 @@
 User-agent: *
 Allow: /
 Allow: /papers/
+Allow: /api/pdf/
+Allow: /article/
+
+User-agent: Googlebot
+Allow: /
+Allow: /papers/
+Allow: /api/pdf/
+Allow: /article/
 
 Sitemap: https://www.ijsds.org/sitemap.xml

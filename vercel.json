@@ -5,28 +5,28 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/robots.txt",
-      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/robots.txt"
-    },
-    {
       "source": "/feed/latest-articles.xml",
-      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/feed/latest-articles.xml"
+      "destination": "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net/feed/latest-articles.xml"
     },
     {
       "source": "/oai",
-      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/api/oai"
+      "destination": "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net/api/oai"
     },
     {
       "source": "/article/:slug",
       "destination": "/api/article/:slug"
     },
     {
+      "source": "/api/pdf/:id",
+      "destination": "/api/pdf/:id"
+    },
+    {
       "source": "/papers",
-      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/papers"
+      "destination": "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net/papers"
     },
     {
       "source": "/papers/:id",
-      "destination": "https://ijsdsbackend-429660256945.europe-southwest1.run.app/papers/:id"
+      "destination": "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net/papers/:id"
     },
     {
       "source": "/((?!api/.*).*)",

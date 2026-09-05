@@ -72,6 +72,8 @@ export default defineConfig(({ mode }) => ({
           /^\/sitemap\.xml$/,
           /^\/robots\.txt$/,
           /^\/feed(\/|$)/,
+          /^\/api(\/|$)/,
+          /^\/article(\/|$)/,
         ],
       }
     }),

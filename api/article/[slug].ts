@@ -8,7 +8,7 @@
 
 const API_URL =
   process.env.VITE_API_URL ||
-  'https://ijsdsbackend-429660256945.europe-southwest1.run.app';
+  'https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net';
 
 const SITE_URL = 'https://www.ijsds.org';
 const JOURNAL_TITLE = 'International Journal of Social Work and Development Studies';
@@ -47,28 +47,48 @@ const formatScholarDate = (value: unknown) => {
   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
 };
 
-const absolutePdfUrl = (article: any): string | null => {
-  const raw = article?.manuscript_file_url;
-  if (!raw) return null;
-  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-  return `${API_URL}/${raw.replace(/^\//, '')}`;
+const hasValidPdf = (article: any): boolean => {
+  if (!article) return false;
+  if (Array.isArray(article.file_versions) && article.file_versions.length > 0) {
+    const publishedPdf = article.file_versions.find(
+      (f: any) =>
+        !f.is_archived &&
+        (f.file_type === 'application/pdf' || String(f.file_url || '').toLowerCase().includes('.pdf')),
+    );
+    if (publishedPdf?.file_url) return true;
+  }
+  const raw = String(article.manuscript_file_url || '');
+  return raw.toLowerCase().includes('.pdf');
 };
 
 const fetchArticle = async (slug: string) => {
   const doi = extractDoiFromSlug(slug);
 
   if (doi) {
-    const res = await fetch(`${API_URL}/api/articles?doi=${encodeURIComponent(doi)}`);
-    const body = await res.json();
-    const found = body?.success ? body.data?.[0] : null;
-    if (found) return found;
+    try {
+      const res = await fetch(`${API_URL}/api/articles?doi=${encodeURIComponent(doi)}`);
+      const body = await res.json();
+      const found = body?.success ? body.data?.[0] : null;
+      if (found) {
+        if (!found.file_versions && found.id) {
+          try {
+            const detailRes = await fetch(`${API_URL}/api/articles/${found.id}`);
+            const detailBody = await detailRes.json();
+            if (detailBody?.success && detailBody.data) return detailBody.data;
+          } catch {}
+        }
+        return found;
+      }
+    } catch {}
   }
 
   // Slugs without a DOI fall back to the bare article UUID
   if (/^[0-9a-f-]{36}$/i.test(slug)) {
-    const res = await fetch(`${API_URL}/api/articles/${slug}`);
-    const body = await res.json();
-    if (body?.success) return body.data;
+    try {
+      const res = await fetch(`${API_URL}/api/articles/${slug}`);
+      const body = await res.json();
+      if (body?.success) return body.data;
+    } catch {}
   }
 
   return null;
@@ -78,9 +98,10 @@ const buildMetaTags = (article: any, slug: string) => {
   const canonical = `${SITE_URL}/article/${slug}`;
   const authors = normalizeAuthors(article.authors);
   const doi = article.crossrefDoi || article.doi;
-  const pdfUrl = absolutePdfUrl(article);
   const pubDate = formatScholarDate(article.publication_date ?? article.created_at);
   const abstract = String(article.abstract ?? '').replace(/\s+/g, ' ').trim();
+  const pdfAvailable = hasValidPdf(article);
+  const sameDomainPdfUrl = pdfAvailable ? `${SITE_URL}/api/pdf/${article.id}.pdf` : null;
 
   const tags: string[] = [
     `<title>${esc(article.title)} - IJSDS</title>`,
@@ -110,7 +131,7 @@ const buildMetaTags = (article: any, slug: string) => {
   if (article.issue) tags.push(`<meta name="citation_issue" content="${esc(article.issue)}">`);
   if (article.page_start) tags.push(`<meta name="citation_firstpage" content="${esc(article.page_start)}">`);
   if (article.page_end) tags.push(`<meta name="citation_lastpage" content="${esc(article.page_end)}">`);
-  if (pdfUrl) tags.push(`<meta name="citation_pdf_url" content="${esc(pdfUrl)}">`);
+  if (sameDomainPdfUrl) tags.push(`<meta name="citation_pdf_url" content="${esc(sameDomainPdfUrl)}">`);
 
   // Dublin Core
   tags.push(
