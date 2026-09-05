@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
-import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle, FileUp } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle, FileUp, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,6 +19,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
 import { ArticleAuthorsEditor } from '@/components/production/ArticleAuthorsEditor';
 import { DOIManager } from '@/components/production/DOIManager';
+import { DOAJExportManager } from '@/components/production/DOAJExportManager';
+import { downloadDoajXml } from '@/lib/doajService';
 
 
 interface Article {
@@ -353,6 +355,24 @@ export const Publication = () => {
 
             <TabsContent value='published'>
               <div className="space-y-4">
+                {published && published.length > 0 && (
+                  <div className="flex items-center justify-between p-3 bg-stone-50 border border-stone-200 rounded-lg">
+                    <div>
+                      <p className="text-xs font-semibold text-stone-800">DOAJ Export & Indexing</p>
+                      <p className="text-[11px] text-stone-500">Batch export all published articles into DOAJ Native XML for indexing deposit</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadDoajXml(published as any)}
+                      className="text-xs gap-1.5"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Download All DOAJ XML ({published.length})
+                    </Button>
+                  </div>
+                )}
+
                 {published.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
                     No published articles found
@@ -375,15 +395,15 @@ export const Publication = () => {
                                 Manage
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                            <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>Manage Article</DialogTitle>
                                 <DialogDescription>
-                                  Update files, authors, or the DOI for this published article
+                                  Update files, authors, DOI, or export metadata to DOAJ
                                 </DialogDescription>
                               </DialogHeader>
                               <Tabs defaultValue={article.submission_id ? 'files' : 'authors'} className="w-full">
-                                <TabsList className={`grid w-full ${article.submission_id ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                                <TabsList className={`grid w-full ${article.submission_id ? 'grid-cols-4' : 'grid-cols-3'}`}>
                                   {article.submission_id && <TabsTrigger value="files">Files</TabsTrigger>}
                                   <TabsTrigger value="authors">Authors</TabsTrigger>
                                   <TabsTrigger value="doi">
@@ -395,6 +415,7 @@ export const Publication = () => {
                                       </Badge>
                                     )}
                                   </TabsTrigger>
+                                  <TabsTrigger value="doaj">DOAJ</TabsTrigger>
                                 </TabsList>
                                 {article.submission_id && (
                                   <TabsContent value="files">
@@ -413,6 +434,12 @@ export const Publication = () => {
                                 <TabsContent value="doi">
                                   <DOIManager
                                     article={article}
+                                    onUpdate={fetchAcceptedArticles}
+                                  />
+                                </TabsContent>
+                                <TabsContent value="doaj">
+                                  <DOAJExportManager
+                                    article={article as any}
                                     onUpdate={fetchAcceptedArticles}
                                   />
                                 </TabsContent>

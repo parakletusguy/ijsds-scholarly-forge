@@ -31,18 +31,45 @@ export default function OpenAccessPage() {
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
               What Open Access Means
             </h2>
+            <div className="bg-white border border-stone-200 p-6 mb-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-3">
+                BOAI-Compliant Open Access Statement
+              </p>
+              <p className="text-stone-800 leading-[1.85]">
+                This is an open access journal, meaning that all content is freely available without charge
+                to the user or their institution. Users are allowed to read, download, copy, distribute,
+                print, search, or link to the full texts of the articles, or use them for any other lawful
+                purpose, without asking prior permission from the publisher or the author. This is in
+                accordance with the{' '}
+                <a
+                  href="https://www.budapestopenaccessinitiative.org/read/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
+                >
+                  BOAI definition of open access
+                </a>.
+              </p>
+            </div>
             <p>
-              Open access means that published research is made freely and permanently available online, 
-              with no barriers such as subscriptions, registration fees, or paywalls. Anyone — whether a student 
-              in a rural university, a policymaker, or a practitioner — can read, download, and use our 
-              published articles without cost.
+              All articles are made available immediately upon publication — there are no embargo
+              periods, no registration requirements, and no paywalls. Anyone — whether a student in a
+              rural university, a policymaker, or a practitioner — can access and use our published
+              research without restriction.
             </p>
             <p className="mt-4">
               IJSDS publishes all its articles under the{' '}
-              <span className="font-semibold text-stone-900">Creative Commons Attribution 4.0 International (CC BY 4.0)</span>{' '}
-              license. Under this license, readers are free to share and redistribute the material in any medium or 
-              format, and to adapt, remix, or build upon it for any purpose — provided they give appropriate credit 
-              to the original authors and indicate if changes were made.
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-semibold underline underline-offset-4 hover:text-primary/70 transition-colors"
+              >
+                Creative Commons Attribution 4.0 International License (CC BY 4.0)
+              </a>.{' '}
+              Under this license, users are free to copy, distribute, display, and perform the work,
+              as well as make derivative works and commercial uses, provided the original author and
+              source are credited.
             </p>
           </section>
 

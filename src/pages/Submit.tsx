@@ -74,6 +74,9 @@ export const Submit = () => {
   // AI Use & Disclosure: consent is mandatory to submit. There is no opt-out —
   // authors who cannot consent should not submit.
   const [aiConsent, setAiConsent] = useState(false);
+  // Copyright & Licensing: DOAJ requires the submission agreement to match the
+  // journal's copyright policy. Authors must explicitly agree to CC BY 4.0.
+  const [copyrightAgree, setCopyrightAgree] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -337,6 +340,19 @@ export const Submit = () => {
       });
       document
         .getElementById("ai-consent-section")
+        ?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    if (!copyrightAgree) {
+      toast({
+        title: "Copyright Agreement Required",
+        description:
+          "You must agree to the copyright and licensing terms (CC BY 4.0) to submit.",
+        variant: "destructive",
+      });
+      document
+        .getElementById("copyright-consent-section")
         ?.scrollIntoView({ behavior: "smooth" });
       return;
     }
@@ -924,6 +940,56 @@ export const Submit = () => {
                     I consent to AI-assisted formatting and
                     citation-verification support as described above and in the
                     full AI Use &amp; Disclosure Policy.
+                  </span>
+                </label>
+              </div>
+
+              {/* Copyright & Licensing Agreement — required for DOAJ compliance */}
+              <div
+                id="copyright-consent-section"
+                className="border border-stone-200 bg-stone-50 p-5 space-y-4"
+              >
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+                    Copyright &amp; Licensing Agreement — Required
+                  </p>
+                  <Link
+                    to="/copyright"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary underline underline-offset-2"
+                  >
+                    Read the full policy →
+                  </Link>
+                </div>
+
+                <p className="text-xs text-stone-500 leading-relaxed">
+                  IJSDS publishes all articles under the Creative Commons Attribution
+                  4.0 International License (CC BY 4.0). Authors retain full copyright
+                  and grant the journal right of first publication. No copyright
+                  transfer is required.
+                </p>
+
+                <label
+                  className={`flex items-start gap-3 cursor-pointer p-3 border transition-colors ${copyrightAgree ? "border-primary bg-primary/5" : "border-stone-200 bg-white hover:border-stone-300"}`}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 shrink-0 accent-[#8f3514]"
+                    checked={copyrightAgree}
+                    onChange={(e) => setCopyrightAgree(e.target.checked)}
+                  />
+                  <span className="text-sm text-stone-600 leading-relaxed">
+                    I confirm that this is original work, that I retain copyright, and
+                    that upon acceptance this article will be published under a{' '}
+                    <a
+                      href="https://creativecommons.org/licenses/by/4.0/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary font-medium underline underline-offset-2"
+                    >
+                      Creative Commons Attribution 4.0 International License (CC BY 4.0)
+                    </a>, granting IJSDS the right of first publication.
                   </span>
                 </label>
               </div>

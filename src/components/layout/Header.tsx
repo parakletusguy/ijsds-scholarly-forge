@@ -63,6 +63,7 @@ export const Header = () => {
     { name: "Editorial Board", path: "/editorial-board" },
     { name: "Blog", path: "/blog" },
     { name: "About", path: "/about" },
+    { name: "Open Access", path: "/openAccess" },
     { name: "Indexing", path: "/indexing" },
     { name: "Partners", path: "/partners" },
     { name: "Contact", path: "/contact" },

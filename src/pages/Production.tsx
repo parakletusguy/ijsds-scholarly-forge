@@ -13,7 +13,8 @@ import { TypesettingIntegration } from '@/components/production/TypesettingInteg
 import { PDFGeneration } from '@/components/production/PDFGeneration';
 import { IssueCompilation } from '@/components/production/IssueCompilation';
 import { DOIManager } from '@/components/production/DOIManager';
-import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft, Link, Users } from 'lucide-react';
+import { DOAJExportManager } from '@/components/production/DOAJExportManager';
+import { FileText, Edit3, Eye, Layout, Download, BookOpen, ArrowLeft, Link, Users, Globe } from 'lucide-react';
 import { ArticleAuthorsEditor } from '@/components/production/ArticleAuthorsEditor';
 import { AutomatedReviewerMatchingInterface } from '@/components/workflow/AutomatedReviewerMatchingInterface';
 import { useNavigate } from 'react-router-dom';
@@ -164,7 +165,7 @@ export const Production = () => {
           <div className="lg:col-span-2">
             {selectedArticle ? (
               <Tabs defaultValue="editing" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-4 h-auto">
+                <TabsList className="grid w-full grid-cols-5 h-auto">
                   <TabsTrigger value="editing" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                     <Edit3 className="h-4 w-4 shrink-0" />
                     <span>Edit</span>
@@ -180,6 +181,10 @@ export const Production = () => {
                   <TabsTrigger value="issues" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                     <BookOpen className="h-4 w-4 shrink-0" />
                     <span>Issues</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="doaj" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+                    <Globe className="h-4 w-4 shrink-0" />
+                    <span>DOAJ</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -207,6 +212,13 @@ export const Production = () => {
                 <TabsContent value="issues">
                   <IssueCompilation 
                     article={selectedArticle} 
+                    onUpdate={fetchProductionArticles}
+                  />
+                </TabsContent>
+
+                <TabsContent value="doaj">
+                  <DOAJExportManager
+                    article={selectedArticle}
                     onUpdate={fetchProductionArticles}
                   />
                 </TabsContent>

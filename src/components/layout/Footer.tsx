@@ -77,7 +77,8 @@ export const Footer = () => {
       <div className="border-t border-[#8f3514]/5 px-4 sm:px-8 md:px-12 py-7">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-body text-xs text-[#1c1c19]/40">
-            © {year} International Journal of Social Work and Development Studies (IJSDS). All rights reserved.
+            © {year} The Author(s). Published by IJSDS. Licensed under{' '}
+            <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">CC BY 4.0</a>.
           </p>
           <div className="flex items-center gap-6 opacity-30">
             <ShieldCheck size={18} />

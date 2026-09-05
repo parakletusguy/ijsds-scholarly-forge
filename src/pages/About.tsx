@@ -153,6 +153,53 @@ export const About = () => {
           </div>
         </section>
 
+        {/* Open Access Policy — required by DOAJ on the About page */}
+        <section id="open-access" className="bg-white border border-stone-100 p-8 md:p-12 space-y-6">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3 block">Journal Policy</span>
+            <h2 className="text-2xl font-headline font-light tracking-tight text-stone-900">
+              Open <span className="italic text-primary">Access</span> Policy
+            </h2>
+          </div>
+          <div className="bg-stone-50 border border-stone-200 p-6">
+            <p className="text-sm text-stone-700 leading-relaxed">
+              This is an open access journal, meaning that all content is freely available without charge
+              to the user or their institution. Users are allowed to read, download, copy, distribute,
+              print, search, or link to the full texts of the articles, or use them for any other lawful
+              purpose, without asking prior permission from the publisher or the author. This is in
+              accordance with the{' '}
+              <a
+                href="https://www.budapestopenaccessinitiative.org/read/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-medium underline underline-offset-4 hover:text-primary/70 transition-colors"
+              >
+                BOAI definition of open access
+              </a>.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">License</p>
+              <p className="text-sm font-bold text-stone-900">CC BY 4.0</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Copyright</p>
+              <p className="text-sm font-bold text-stone-900">Retained by Authors</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Embargo</p>
+              <p className="text-sm font-bold text-stone-900">None — Immediate</p>
+            </div>
+          </div>
+          <Link
+            to="/openAccess"
+            className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity"
+          >
+            Read the full Open Access policy <ArrowRight size={12} />
+          </Link>
+        </section>
+
         {/* Editorial Board */}
         <section id="editorial" className="space-y-12">
           <div>

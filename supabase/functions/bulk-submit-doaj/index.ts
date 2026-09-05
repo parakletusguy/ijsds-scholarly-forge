@@ -97,6 +97,33 @@ serve(async (req) => {
     });
   }
 });
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+const ORCID_REGEX = /^\d{4}-\d{4}-\d{4}-[\dX]{4}$/;
+
+function stripHtml(input?: string | null): string {
+  if (!input) return "";
+  return input
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function sanitizeAffiliation(affiliation?: string | null): string {
+  if (!affiliation) return "";
+  return stripHtml(affiliation.replace(EMAIL_REGEX, "").trim().replace(/\s{2,}/g, " "));
+}
+
+function normalizeOrcid(orcid?: string | null): string | undefined {
+  if (!orcid || !orcid.trim()) return undefined;
+  const clean = orcid.trim().replace(/^https?:\/\/orcid\.org\//i, "").trim();
+  return ORCID_REGEX.test(clean) ? `https://orcid.org/${clean}` : undefined;
+}
 
 function formatDOAJMetadata(article: any) {
   const authors = Array.isArray(article.authors) 
@@ -105,37 +132,73 @@ function formatDOAJMetadata(article: any) {
       ? [{ name: article.authors }]
       : [{ name: 'Unknown Author' }];
 
+  const pubDate = new Date(article.publication_date || article.created_at || Date.now());
+  const cleanAuthors = authors.map((author: any) => {
+    const rawName = typeof author === 'string'
+      ? author
+      : `${author.firstName || ''} ${author.lastName || ''}`.trim() || author.name || 'Author';
+
+    const cleanAff = sanitizeAffiliation(author.affiliation);
+    const orcid = normalizeOrcid(author.orcid || author.orcid_id);
+
+    return {
+      name: stripHtml(rawName),
+      affiliation: cleanAff || undefined,
+      orcid_id: orcid,
+      // NO EMAIL: DOAJ strictly forbids author emails in metadata payloads
+    };
+  });
+
+  const identifiers: Array<{ type: string; id: string }> = [
+    { type: "pissn", id: "3115-6940" },
+    { type: "eissn", id: "3115-6932" },
+  ];
+
+  if (article.doi) {
+    identifiers.unshift({ type: "doi", id: article.doi });
+  }
+
+  const fullTextUrl = article.manuscript_file_url || `https://ijsds.org/articles/${article.slug || article.id}`;
+  const keywords = Array.isArray(article.keywords)
+    ? article.keywords.map((k: string) => stripHtml(k)).filter(Boolean)
+    : [];
+
   return {
+    admin: {
+      in_doaj: true,
+    },
     bibjson: {
-      title: article.title,
-      author: authors.map((author: any) => ({
-        name: typeof author === 'string' ? author : `${author.firstName || ''} ${author.lastName || ''}`.trim(),
-        affiliation: author.affiliation || ''
-      })),
-      abstract: article.abstract,
-      keywords: article.keywords || [],
-      identifier: [
-        {
-          type: "doi",
-          id: article.doi
-        }
-      ],
+      title: stripHtml(article.title),
+      author: cleanAuthors,
+      abstract: stripHtml(article.abstract || ''),
+      keywords: keywords,
+      identifier: identifiers,
       link: [
         {
           type: "fulltext",
-          url: article.manuscript_file_url || ''
+          url: fullTextUrl,
+          content_type: "application/pdf"
         }
       ],
-      year: new Date(article.publication_date || article.created_at).getFullYear().toString(),
-      month: (new Date(article.publication_date || article.created_at).getMonth() + 1).toString(),
+      year: pubDate.getFullYear().toString(),
+      month: (pubDate.getMonth() + 1).toString(),
+      start_page: article.page_start ? article.page_start.toString() : undefined,
+      end_page: article.page_end ? article.page_end.toString() : undefined,
       journal: {
-        title: "International Journal of Social and Data Sciences",
-        country: "US",
-        language: ["en"],
+        title: "International Journal of Social Work and Development Studies",
+        publisher: "International Journal of Social Work and Development Studies",
+        country: "NG",
+        volume: article.volume ? article.volume.toString() : undefined,
+        number: article.issue ? article.issue.toString() : undefined,
+        issns: ["3115-6940", "3115-6932"],
+        language: ["EN"],
         license: [
           {
             type: "CC BY",
-            url: "https://creativecommons.org/licenses/by/4.0/"
+            title: "CC BY",
+            url: "https://creativecommons.org/licenses/by/4.0/",
+            version: "4.0",
+            open_access: true
           }
         ]
       }

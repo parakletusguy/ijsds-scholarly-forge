@@ -116,11 +116,16 @@ const buildMetaTags = (article: any, slug: string) => {
   tags.push(
     `<meta name="DC.title" content="${esc(article.title)}">`,
     `<meta name="DC.creator" content="${esc(authors.map((a) => [a.last, a.first].filter(Boolean).join(', ')).join('; '))}">`,
-    `<meta name="DC.publisher" content="IJSDS Publishing">`,
+    `<meta name="DC.publisher" content="${esc(JOURNAL_TITLE)}">`,
     `<meta name="DC.type" content="Text">`,
     `<meta name="DC.language" content="en">`,
-    `<meta name="DC.rights" content="Creative Commons Attribution 4.0">`,
+    `<meta name="DC.rights" content="Creative Commons Attribution 4.0 International">`,
+    `<meta name="DC.rights.uri" content="https://creativecommons.org/licenses/by/4.0/">`,
+    `<meta name="DC.rights.holder" content="The Author(s)">`,
   );
+
+  if (pubDate) tags.push(`<meta name="DC.date" content="${esc(pubDate)}">`);
+  if (doi) tags.push(`<meta name="DC.identifier" content="https://doi.org/${esc(doi)}">`);
 
   return tags.join('\n    ');
 };
