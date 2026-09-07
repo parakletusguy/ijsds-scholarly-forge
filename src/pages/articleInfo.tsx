@@ -189,7 +189,7 @@ export const ArticleInfo = () => {
         {/* Two route patterns (/article/:slug and /articles/:slug) render this
             page — always canonicalize to the singular form so they aren't
             treated as duplicate content. */}
-        <link rel="canonical" href={`https://ijsds.org/article/${slug}`} />
+        <link rel="canonical" href={`https://www.ijsds.org/article/${slug}`} />
         <meta name="citation_title" content={article.title} />
         {authors.filter((a: any) => a?.name?.trim()).map((a: any) => (
           <meta key={a.name} name="citation_author" content={a.name.trim()} />
@@ -206,12 +206,12 @@ export const ArticleInfo = () => {
           <meta name="citation_doi" content={article.crossrefDoi || article.doi || ""} />
         )}
         {resolvedPdfUrl && (
-          <meta name="citation_pdf_url" content={`https://ijsds.org/api/pdf/${article.id}.pdf`} />
+          <meta name="citation_pdf_url" content={`https://www.ijsds.org/api/pdf/${article.id}.pdf`} />
         )}
         <meta name="citation_language" content="en" />
         {article.page_start && <meta name="citation_firstpage" content={String(article.page_start)} />}
         {article.page_end && <meta name="citation_lastpage" content={String(article.page_end)} />}
-        <meta name="citation_abstract_html_url" content={`https://ijsds.org/article/${slug}`} />
+        <meta name="citation_abstract_html_url" content={`https://www.ijsds.org/article/${slug}`} />
         <meta name="robots" content="index, follow" />
         <meta property="og:title" content={article.title} />
         <meta property="og:description" content={article.abstract || ''} />

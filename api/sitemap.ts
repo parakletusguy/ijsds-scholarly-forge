@@ -14,7 +14,7 @@ const buildArticleSlug = (article: { title: string; doi?: string | null; crossre
   return article.id;
 };
 
-const BASE_URL = 'https://ijsds.org';
+const BASE_URL = 'https://www.ijsds.org';
 const API_URL = process.env.VITE_API_URL || 'https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net';
 
 export default async function handler(req: any, res: any) {
