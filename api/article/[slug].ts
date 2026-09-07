@@ -64,31 +64,60 @@ const hasValidPdf = (article: any): boolean => {
 const fetchArticle = async (slug: string) => {
   const doi = extractDoiFromSlug(slug);
 
+  let found: any = null;
+
   if (doi) {
     try {
       const res = await fetch(`${API_URL}/api/articles?doi=${encodeURIComponent(doi)}`);
       const body = await res.json();
-      const found = body?.success ? body.data?.[0] : null;
-      if (found) {
-        if (!found.file_versions && found.id) {
-          try {
-            const detailRes = await fetch(`${API_URL}/api/articles/${found.id}`);
-            const detailBody = await detailRes.json();
-            if (detailBody?.success && detailBody.data) return detailBody.data;
-          } catch {}
-        }
-        return found;
-      }
+      if (body?.success && body.data?.length > 0) found = body.data[0];
     } catch {}
   }
 
+  // Check if slug contains full UUID
+  if (!found) {
+    const uuidMatch = slug.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+    if (uuidMatch) {
+      try {
+        const res = await fetch(`${API_URL}/api/articles/${uuidMatch[1]}`);
+        const body = await res.json();
+        if (body?.success && body.data) found = body.data;
+      } catch {}
+    }
+  }
+
+  // Check if slug ends with an 8-char hex prefix
+  if (!found) {
+    const shortIdMatch = slug.match(/([0-9a-f]{8})$/i);
+    if (shortIdMatch) {
+      try {
+        const res = await fetch(`${API_URL}/api/articles?status=published`);
+        const body = await res.json();
+        if (body?.success && Array.isArray(body.data)) {
+          found = body.data.find((a: any) => a.id?.toLowerCase().startsWith(shortIdMatch[1].toLowerCase()));
+        }
+      } catch {}
+    }
+  }
+
   // Slugs without a DOI fall back to the bare article UUID
-  if (/^[0-9a-f-]{36}$/i.test(slug)) {
+  if (!found && /^[0-9a-f-]{36}$/i.test(slug)) {
     try {
       const res = await fetch(`${API_URL}/api/articles/${slug}`);
       const body = await res.json();
-      if (body?.success) return body.data;
+      if (body?.success) found = body.data;
     } catch {}
+  }
+
+  if (found) {
+    if (!found.file_versions && found.id) {
+      try {
+        const detailRes = await fetch(`${API_URL}/api/articles/${found.id}`);
+        const detailBody = await detailRes.json();
+        if (detailBody?.success && detailBody.data) return detailBody.data;
+      } catch {}
+    }
+    return found;
   }
 
   return null;

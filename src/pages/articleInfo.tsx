@@ -80,16 +80,41 @@ export const ArticleInfo = () => {
       // 1. Try to extract a DOI from the slug (e.g. "some-title-10.5281-zenodo.123456")
       const doi = extractDoiFromSlug(slug!);
       if (doi) {
-        const results = await getArticles({ doi });
-        if (results.length > 0) currentArticle = results[0];
+        try {
+          const results = await getArticles({ doi });
+          if (results.length > 0) currentArticle = results[0];
+        } catch {}
       }
 
-      // 2. If no DOI found or lookup returned nothing, treat slug as a UUID
+      // 2. Check if slug contains a full 36-char UUID
       if (!currentArticle) {
-        currentArticle = await getArticle(slug!);
+        const uuidMatch = slug!.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+        if (uuidMatch) {
+          try {
+            currentArticle = await getArticle(uuidMatch[1]);
+          } catch {}
+        }
       }
 
-      // 3. Ensure full details (including file_versions) are present
+      // 3. Check if slug ends with an 8-char hex prefix (e.g. 10.67007-ijsds-2026-f796bd43)
+      if (!currentArticle) {
+        const shortIdMatch = slug!.match(/([0-9a-f]{8})$/i);
+        if (shortIdMatch) {
+          try {
+            const all = await getArticles({ status: 'published' });
+            currentArticle = all.find(a => a.id.toLowerCase().startsWith(shortIdMatch[1].toLowerCase())) || null;
+          } catch {}
+        }
+      }
+
+      // 4. Fallback: treat slug directly as identifier
+      if (!currentArticle) {
+        try {
+          currentArticle = await getArticle(slug!);
+        } catch {}
+      }
+
+      // 5. Ensure full details (including file_versions) are present
       if (currentArticle?.id && (!currentArticle.file_versions || currentArticle.file_versions.length === 0)) {
         try {
           const detail = await getArticle(currentArticle.id);
