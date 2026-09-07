@@ -51,6 +51,21 @@ export const ArticleInfo = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
+  const resolvedPdfUrl = useMemo(() => {
+    if (!article) return null;
+    if (Array.isArray(article.file_versions) && article.file_versions.length > 0) {
+      const published = article.file_versions.find(
+        (f: any) =>
+          !f.is_archived &&
+          (f.file_type === "application/pdf" || String(f.file_url || "").toLowerCase().includes(".pdf"))
+      );
+      if (published?.file_url) return published.file_url;
+    }
+    const raw = String(article.manuscript_file_url || "");
+    if (raw.toLowerCase().includes(".pdf")) return raw;
+    return null;
+  }, [article]);
+
   useEffect(() => {
     if (slug) {
       fetchData();
@@ -141,21 +156,6 @@ export const ArticleInfo = () => {
     article.issue ? `Issue ${article.issue}` : null,
     pubDate,
   ].filter(Boolean).join(' • ');
-
-  const resolvedPdfUrl = useMemo(() => {
-    if (!article) return null;
-    if (Array.isArray(article.file_versions) && article.file_versions.length > 0) {
-      const published = article.file_versions.find(
-        (f: any) =>
-          !f.is_archived &&
-          (f.file_type === "application/pdf" || String(f.file_url || "").toLowerCase().includes(".pdf"))
-      );
-      if (published?.file_url) return published.file_url;
-    }
-    const raw = String(article.manuscript_file_url || "");
-    if (raw.toLowerCase().includes(".pdf")) return raw;
-    return null;
-  }, [article]);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-body selection:bg-primary/10 selection:text-primary">
