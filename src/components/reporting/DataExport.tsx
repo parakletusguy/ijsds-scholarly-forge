@@ -9,6 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Download, FileText, Table, Calendar, Database, ShieldCheck, Activity, GraduationCap, ChevronRight, Hash, Send } from 'lucide-react';
 
+import { exportPlatformData } from '@/lib/indexingService';
+
 interface ExportOptions {
   format: 'csv' | 'excel' | 'pdf';
   dataType: 'submissions' | 'reviews' | 'articles' | 'users';
@@ -34,6 +36,26 @@ export const DataExport = () => {
   const handleExport = async () => {
     setExporting(true);
     try {
+      try {
+        const res = await exportPlatformData(options.dataType, options.format);
+        if (res) {
+          const content = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
+          const blob = new Blob([content], { type: options.format === 'csv' ? 'text/csv' : 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `export-${options.dataType}-${new Date().toISOString().split('T')[0]}.${options.format}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          toast({ title: "Archive Extracted", description: "Scholarly data has been successfully exported." });
+          return;
+        }
+      } catch (serviceErr) {
+        console.warn("REST export endpoint unavailable, trying edge function fallback:", serviceErr);
+      }
+
       const response = await supabase.functions.invoke('export-data', {
         body: { options },
       });

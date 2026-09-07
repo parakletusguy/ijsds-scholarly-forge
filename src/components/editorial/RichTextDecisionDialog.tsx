@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
+import { createEditorialDecision } from '@/lib/editorialService';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { api } from '@/lib/apiClient';
@@ -43,64 +43,11 @@ export const RichTextDecisionDialog = ({
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Get submission to find article_id
-      const { data: submission, error: fetchError } = await supabase
-        .from('submissions')
-        .select('article_id')
-        .eq('id', submissionId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Update submission status
-      const newStatus = type === 'accept' ? 'accepted' : 'rejected';
-      const { error: submissionError } = await supabase
-        .from('submissions')
-        .update({ 
-          status: newStatus,
-          ...(type === 'accept' && {
-            approved_by_editor: true,
-            approved_at: new Date().toISOString(),
-            approved_by: user.id,
-          })
-        })
-        .eq('id', submissionId);
-
-      if (submissionError) throw submissionError;
-
-      // Update article status
-      if (submission?.article_id) {
-        const { error: articleError } = await supabase
-          .from('articles')
-          .update({ status: newStatus })
-          .eq('id', submission.article_id);
-
-        if (articleError) throw articleError;
-      }
-
-      // Create editorial decision record
-      const { error: decisionError } = await supabase
-        .from('editorial_decisions')
-        .insert({
-          submission_id: submissionId,
-          decision_type: type,
-          decision_rationale: comments.trim(),
-          editor_id: user.id,
-        });
-
-      if (decisionError) throw decisionError;
-
-      // Automatically trigger DOI generation if accepted
-      if (type === 'accept' && submission?.article_id) {
-        try {
-          await api.post('/api/doi/generate', { article_id: submission.article_id });
-        } catch (doiError) {
-          console.error('Failed to auto-generate DOI:', doiError);
-        }
-      }
+      await createEditorialDecision({
+        submission_id: submissionId,
+        decision_type: type,
+        decision_rationale: comments.trim(),
+      });
 
       toast({
         title: 'Decision Recorded',
@@ -111,11 +58,11 @@ export const RichTextDecisionDialog = ({
       setComments('');
       setPriority('normal');
       onDecision();
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error ${type}ing submission:`, error);
       toast({
         title: 'Error',
-        description: `Failed to ${type} submission. Please try again.`,
+        description: error?.message || `Failed to ${type} submission. Please try again.`,
         variant: 'destructive',
       });
     } finally {

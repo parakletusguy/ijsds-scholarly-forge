@@ -1,34 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import {
+  getDiscussions,
+  createDiscussion,
+  getDiscussionMessages,
+  postDiscussionMessage,
+  type DiscussionThread as DiscussionThreadType,
+  type DiscussionMessage as DiscussionMessageType,
+} from '@/lib/discussionService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { MessageCircle, Send, User } from 'lucide-react';
 import { format } from 'date-fns';
-
-interface DiscussionMessage {
-  id: string;
-  content: string;
-  author_id: string;
-  created_at: string;
-  author?: {
-    full_name: string;
-    email: string;
-  };
-}
-
-interface DiscussionThread {
-  id: string;
-  title: string;
-  submission_id: string;
-  created_by: string;
-  created_at: string;
-  messages?: DiscussionMessage[];
-}
 
 interface DiscussionThreadProps {
   submissionId: string;
@@ -38,9 +24,9 @@ interface DiscussionThreadProps {
 export const DiscussionThread = ({ submissionId, userRole = 'author' }: DiscussionThreadProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [threads, setThreads] = useState<DiscussionThread[]>([]);
-  const [selectedThread, setSelectedThread] = useState<DiscussionThread | null>(null);
-  const [messages, setMessages] = useState<DiscussionMessage[]>([]);
+  const [threads, setThreads] = useState<DiscussionThreadType[]>([]);
+  const [selectedThread, setSelectedThread] = useState<DiscussionThreadType | null>(null);
+  const [messages, setMessages] = useState<DiscussionMessageType[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [newThreadTitle, setNewThreadTitle] = useState('');
   const [showNewThread, setShowNewThread] = useState(false);
@@ -59,13 +45,7 @@ export const DiscussionThread = ({ submissionId, userRole = 'author' }: Discussi
 
   const fetchDiscussionThreads = async () => {
     try {
-      const { data, error } = await supabase
-        .from('discussion_threads')
-        .select('*')
-        .eq('submission_id', submissionId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await getDiscussions(submissionId);
       setThreads(data || []);
     } catch (error) {
       console.error('Error fetching discussion threads:', error);
@@ -76,13 +56,7 @@ export const DiscussionThread = ({ submissionId, userRole = 'author' }: Discussi
 
   const fetchMessages = async (threadId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('discussion_messages')
-        .select('*')
-        .eq('thread_id', threadId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
+      const data = await getDiscussionMessages(threadId);
       setMessages(data || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -94,17 +68,10 @@ export const DiscussionThread = ({ submissionId, userRole = 'author' }: Discussi
 
     setSending(true);
     try {
-      const { data, error } = await supabase
-        .from('discussion_threads')
-        .insert({
-          title: newThreadTitle,
-          submission_id: submissionId,
-          created_by: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const thread = await createDiscussion({
+        title: newThreadTitle,
+        submission_id: submissionId,
+      });
 
       toast({
         title: "Success",
@@ -114,7 +81,7 @@ export const DiscussionThread = ({ submissionId, userRole = 'author' }: Discussi
       setNewThreadTitle('');
       setShowNewThread(false);
       fetchDiscussionThreads();
-      setSelectedThread(data);
+      setSelectedThread(thread);
     } catch (error) {
       console.error('Error creating thread:', error);
       toast({
@@ -132,15 +99,7 @@ export const DiscussionThread = ({ submissionId, userRole = 'author' }: Discussi
 
     setSending(true);
     try {
-      const { error } = await supabase
-        .from('discussion_messages')
-        .insert({
-          thread_id: selectedThread.id,
-          content: newMessage,
-          author_id: user.id,
-        });
-
-      if (error) throw error;
+      await postDiscussionMessage(selectedThread.id, newMessage);
 
       setNewMessage('');
       fetchMessages(selectedThread.id);

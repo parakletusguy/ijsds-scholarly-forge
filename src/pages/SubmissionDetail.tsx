@@ -315,7 +315,7 @@ export const SubmissionDetail = () => {
       }>("/api/payment/verify-payment", {
         reference: transactionReference,
         amount,
-        articleId: submission.article.id,
+        articleId: submission!.article.id,
         type,
       });
       if (!success) throw new Error("Server error during payment verification");
@@ -329,22 +329,27 @@ export const SubmissionDetail = () => {
       const { amount: amountLabel, label: typeLabel } =
         feeLabels[type] ?? feeLabels.vetting;
 
-      const blob = await ReceiptDown({
-        name: submission.submitter.full_name,
-        amount: amountLabel,
-        type: typeLabel,
-        reference: transactionReference,
-      });
-      const receiptUrl = await uploadPdf(blob);
+      try {
+        const blob = await ReceiptDown({
+          name: submission!.submitter.full_name,
+          amount: amountLabel,
+          type: typeLabel,
+          reference: transactionReference,
+        });
+        const receiptUrl = await uploadPdf(blob);
 
-      // Use the receipt email template (distinct from backend's payment-confirmed email)
-      await SendRecieptMail(
-        user.id,
-        submission.submitter.full_name,
-        submission.article.title,
-        receiptUrl,
-        typeLabel,
-      );
+        if (user) {
+          await SendRecieptMail(
+            user.id,
+            submission!.submitter.full_name,
+            submission!.article.title,
+            receiptUrl,
+            typeLabel,
+          );
+        }
+      } catch (receiptErr) {
+        console.warn("Receipt generation/email warning:", receiptErr);
+      }
 
       toast({
         title: "Payment Successful",
@@ -379,17 +384,14 @@ export const SubmissionDetail = () => {
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2">Submission Not Found</h2>
-            <div className="relative py-3">
-              <Button
-                variant="outline"
-                onClick={() => navigate(-1)}
-                className="mb-4 absolute top-1 left-3"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </div>
+            <h2 className="text-2xl font-bold mb-4">Submission Not Found</h2>
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
           </div>
         </main>
       </div>
@@ -398,17 +400,15 @@ export const SubmissionDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="relative py-3">
+      <main className="flex-1 container mx-auto px-4 py-8">
         <Button
           variant="outline"
           onClick={() => navigate(-1)}
-          className="mb-4 absolute top-1 left-3"
+          className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-      </div>
-      <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">

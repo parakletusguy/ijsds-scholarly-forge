@@ -119,74 +119,76 @@ export const AdminBlogManagement = () => {
               )}
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-stone-100 bg-stone-50">
-                  <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400">Title</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400 hidden md:table-cell">Category</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400 hidden sm:table-cell">Status</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400 hidden lg:table-cell">Date</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-50">
-                {filteredPosts.map(post => (
-                  <tr key={post.id} className="hover:bg-stone-50/60 transition-colors group">
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-stone-900 line-clamp-1 max-w-xs group-hover:text-primary transition-colors">
-                        {post.title}
-                      </p>
-                      {post.author?.full_name && (
-                        <p className="text-xs text-stone-400 mt-0.5">{post.author.full_name}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 hidden md:table-cell">
-                      {post.category
-                        ? <span className="text-xs text-stone-500">{post.category}</span>
-                        : <span className="text-xs text-stone-300">—</span>}
-                    </td>
-                    <td className="px-4 py-4 hidden sm:table-cell">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 ${
-                        post.status === 'published'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-stone-100 text-stone-500'
-                      }`}>
-                        {post.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 hidden lg:table-cell text-xs text-stone-400">
-                      {formatDateDisplay(post.status === 'published' ? post.published_at : post.created_at)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => navigate(`/blog/${post.slug}`)}
-                          disabled={post.status !== 'published'}
-                          className="p-2 text-stone-400 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          title="View"
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/admin/blogs/edit/${post.id}`)}
-                          className="p-2 text-stone-400 hover:text-primary transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(post.id)}
-                          className="p-2 text-stone-400 hover:text-red-500 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-stone-100 bg-stone-50">
+                    <th className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400">Title</th>
+                    <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400 hidden md:table-cell">Category</th>
+                    <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400 hidden sm:table-cell">Status</th>
+                    <th className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-400 hidden lg:table-cell">Date</th>
+                    <th className="px-4 py-3" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-stone-50">
+                  {filteredPosts.map(post => (
+                    <tr key={post.id} className="hover:bg-stone-50/60 transition-colors group">
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-stone-900 line-clamp-1 max-w-xs group-hover:text-primary transition-colors">
+                          {post.title}
+                        </p>
+                        {post.author?.full_name && (
+                          <p className="text-xs text-stone-400 mt-0.5">{post.author.full_name}</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 hidden md:table-cell">
+                        {post.category
+                          ? <span className="text-xs text-stone-500">{post.category}</span>
+                          : <span className="text-xs text-stone-300">—</span>}
+                      </td>
+                      <td className="px-4 py-4 hidden sm:table-cell">
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 ${
+                          post.status === 'published'
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-stone-100 text-stone-500'
+                        }`}>
+                          {post.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 hidden lg:table-cell text-xs text-stone-400">
+                        {formatDateDisplay(post.status === 'published' ? post.published_at : post.created_at)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => navigate(`/blog/${post.slug}`)}
+                            disabled={post.status !== 'published'}
+                            className="p-2 text-stone-400 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            title="View"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/admin/blogs/edit/${post.id}`)}
+                            className="p-2 text-stone-400 hover:text-primary transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(post.id)}
+                            className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 

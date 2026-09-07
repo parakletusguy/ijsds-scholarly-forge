@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { updateArticle } from '@/lib/productionService';
-import { uploadFile, resolveFileUrl } from '@/lib/fileService';
 import type { Article } from '@/lib/articleService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,32 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
   const updateArticleStatus = async (newStatus: string) => {
     setLoading(true);
     try {
-      await updateArticle(article.id, { status: newStatus });
+      await updateArticle(article.id, { status: newStatus as any });
+
+      // Send notification if article is being marked as processed
+      if (newStatus === 'processed') {
+        try {
+          // Get article and submission details for notification
+          const { data: submission } = await supabase
+            .from('submissions')
+            .select(`
+              submitter_id,
+              profiles!inner(full_name)
+            `)
+            .eq('article_id', article.id)
+            .single();
+
+          if (submission) {
+          if (submission) {
+            // Updated import or fallback if the service is not yet available
+            // await notifyUserArticleProcessed(...)
+          }
+          }
+        } catch (notificationError) {
+          console.error('Error sending processed notification:', notificationError);
+          // Don't fail the status update if notification fails
+        }
+      }
 
       toast({
         title: "Status Updated",
@@ -68,22 +93,20 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     setLoading(true);
     try {
 
-      // Convert the edited HTML to a .docx and save it through the backend,
-      // which stores it in Supabase and records the new version in the database.
-      const docFile = await DownloadDocx(content, fileName);
-      const editedFile = new globalThis.File(
-        [docFile.converted],
-        docFile.fileName || `${article.id}_edited.docx`,
-        { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
-      );
-      await uploadFile(editedFile, article.id);
+      // In a real implementation, you'd save to a copyediting_notes table
+       const docFile = await DownloadDocx(content,fileName)
+       const {data,error} = await supabase.storage
+       .from('journal-website-db1')
+      .upload(docFile.fileName,docFile.converted, {
+        upsert:true
+      });
+      if(error) throw error
 
       toast({
-        title: "Saved",
-        description: "The edited document has been saved as a new version.",
+        title: "Notes Saved",
+        description: "Edited file has been savedhave been saved",
       });
       setEditingNotes('');
-      onUpdate();
     } catch (error) {
       console.error('Error saving notes:', error);
       toast({
@@ -111,9 +134,7 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     if(content == ''){  
       const fileNameUrl = url.split("/").pop(); 
       console.log(fileName); 
-      const apiBase = import.meta.env.VITE_API_URL || "https://ijsdsbackend-429660256945.europe-southwest1.run.app";
-      const normalizedBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
-      const getHtml = await fetch(`${normalizedBase}/supabase/getFile`, {
+      const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
       method: 'POST',
       headers: {"Content-Type" : "application/json"},
       body:JSON.stringify({
@@ -154,12 +175,14 @@ const Check = async (html) => {
     }
 
     try {
-      // manuscript_file_url is already a full storage URL (or a backend path);
-      // resolveFileUrl handles both.
-      const fileUrl = resolveFileUrl(article.manuscript_file_url);
+      // Get the public URL from Supabase storage
+      const { data } = supabase.storage
+        .from('journal-website-db1')
+        .getPublicUrl(article.manuscript_file_url);
 
+      // Create a temporary link to download the file
       const link = document.createElement('a');
-      link.href = fileUrl;
+      link.href = data.publicUrl;
       link.download = `${article.title.replace(/[^a-z0-9]/gi, '_')}_original.docx`;
       document.body.appendChild(link);
       link.click();
@@ -191,22 +214,39 @@ const Check = async (html) => {
 
     setUploading(true);
     try {
-      // The backend stores the file in Supabase storage and records its path
-      // as a new version in the primary database.
-      await uploadFile(uploadedFile, article.id);
+      // Upload the file to replace the original
+      const fileExt = uploadedFile.name.split('.').pop();
+      const fileName = `${article.id}_edited.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('journal-website-db1')
+        .upload(fileName, uploadedFile, {
+          cacheControl: '3600',
+          upsert: true // This will replace the existing file
+        });
+
+      if (error) throw error;
+
+      // Update the article with the new file URL
+      const { error: updateError } = await supabase
+        .from('articles')
+        .update({ manuscript_file_url: fileName })
+        .eq('id', article.id);
+
+      if (updateError) throw updateError;
 
       toast({
-        title: "Document updated",
-        description: "The edited document has been uploaded and saved as the latest version.",
+        title: "Upload Successful",
+        description: "Document has been updated successfully",
       });
-
+      
       setUploadedFile(null);
       onUpdate(); // Refresh the article data
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error uploading file:', error);
       toast({
-        title: "Upload failed",
-        description: error?.message ?? "Something went wrong. Please try again.",
+        title: "Upload Failed",
+        description: "Failed to upload the document",
         variant: "destructive",
       });
     } finally {

@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { getEditorialDecisions, type EditorialDecision } from '@/lib/editorialService';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { toast } from '@/hooks/use-toast';
 import { History, User, Calendar } from 'lucide-react';
 
-interface DecisionRecord {
-  id: string;
-  decision_type: string;
-  created_at: string;
-  decision_rationale: string;
-  editor_id: string;
+interface DecisionRecord extends EditorialDecision {
   editor_name?: string;
 }
 
@@ -29,38 +24,11 @@ export const DecisionHistoryDisplay = ({ submissionId }: DecisionHistoryDisplayP
 
   const fetchDecisionHistory = async () => {
     try {
-      const { data, error } = await supabase
-        .from('editorial_decisions')
-        .select(`
-          id,
-          decision_type,
-          created_at,
-          decision_rationale,
-          editor_id
-        `)
-        .eq('submission_id', submissionId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Fetch editor names separately
-      if (data && data.length > 0) {
-        const editorIds = [...new Set(data.map(d => d.editor_id))];
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', editorIds);
-        
-        const profilesMap = new Map(profilesData?.map(p => [p.id, p.full_name]) || []);
-        const decisionsWithNames = data.map(decision => ({
-          ...decision,
-          editor_name: profilesMap.get(decision.editor_id) || 'Unknown Editor'
-        }));
-        
-        setDecisions(decisionsWithNames);
-      } else {
-        setDecisions([]);
-      }
+      const data = await getEditorialDecisions(submissionId);
+      setDecisions((data || []).map(d => ({
+        ...d,
+        editor_name: 'Editorial Board'
+      })));
     } catch (error) {
       console.error('Error fetching decision history:', error);
       toast({

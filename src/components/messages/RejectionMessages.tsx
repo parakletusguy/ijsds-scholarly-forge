@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getRejectionMessages, type RejectionMessage } from '@/lib/editorialService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-
-interface RejectionMessage {
-  id: string;
-  message: string;
-  suggested_corrections: string | null;
-  created_at: string;
-}
 
 interface RejectionMessagesProps {
   submissionId: string;
@@ -26,20 +19,10 @@ export const RejectionMessages = ({ submissionId }: RejectionMessagesProps) => {
 
   const fetchRejectionMessages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('rejection_messages')
-        .select('*')
-        .eq('submission_id', submissionId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching rejection messages:', error);
-        return;
-      }
-
+      const data = await getRejectionMessages(submissionId);
       setMessages(data || []);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching rejection messages:', error);
     } finally {
       setLoading(false);
     }

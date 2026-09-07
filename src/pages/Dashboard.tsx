@@ -118,7 +118,7 @@ export const Dashboard = () => {
   const acceptedSubmissions = submissions.filter(s => s.status === 'accepted').length;
 
   return (
-    <div className="max-w-[1400px] mx-auto px-8 md:px-12 py-16 animate-fade-in-up">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 animate-fade-in-up">
       {/* Welcome Header */}
       <header className="mb-16">
         <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Account Dashboard</p>
