@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 
-const SITE_ORIGIN = 'https://ijsds.org';
+const SITE_ORIGIN = 'https://www.ijsds.org';
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, hideHeader
     <div className="min-h-screen flex flex-col bg-stone-50 w-full overflow-x-hidden">
       {!noCanonical && (
         <Helmet>
-          <link rel="canonical" href={`${SITE_ORIGIN}${location.pathname}`} />
+          <link rel="canonical" href={`${SITE_ORIGIN}${location.pathname === "/" ? "/" : location.pathname.replace(/\/+$/, "")}`} />
         </Helmet>
       )}
       {!hideHeader && <Header />}

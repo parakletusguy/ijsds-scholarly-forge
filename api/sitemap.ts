@@ -24,21 +24,29 @@ export default async function handler(req: any, res: any) {
     const result = await response.json();
     const articles = result.success ? result.data : [];
 
-    // 2. Define static routes
+    // 2. Define static routes with explicit priorities and change frequencies
     const staticRoutes = [
-      '',
-      '/articles',
-      '/archive',
-      '/about',
-      '/blog',
-      '/partners',
-      '/contact',
-      '/openAccess',
-      '/plagiarism-policy',
-      '/preservation-policy',
-      '/indexing',
-      '/copyright',
-      '/orcidGuide',
+      { path: '/', priority: '1.0', changefreq: 'daily' },
+      { path: '/papers', priority: '1.0', changefreq: 'daily' },
+      { path: '/articles', priority: '0.9', changefreq: 'daily' },
+      { path: '/archive', priority: '0.8', changefreq: 'weekly' },
+      { path: '/about', priority: '0.8', changefreq: 'monthly' },
+      { path: '/editorial-board', priority: '0.8', changefreq: 'monthly' },
+      { path: '/journal-information', priority: '0.8', changefreq: 'monthly' },
+      { path: '/submission-guidelines', priority: '0.8', changefreq: 'monthly' },
+      { path: '/peer-review', priority: '0.8', changefreq: 'monthly' },
+      { path: '/author-guide', priority: '0.8', changefreq: 'monthly' },
+      { path: '/openAccess', priority: '0.8', changefreq: 'monthly' },
+      { path: '/indexing', priority: '0.8', changefreq: 'monthly' },
+      { path: '/plagiarism-policy', priority: '0.7', changefreq: 'monthly' },
+      { path: '/ai-policy', priority: '0.7', changefreq: 'monthly' },
+      { path: '/ethical-guidelines', priority: '0.7', changefreq: 'monthly' },
+      { path: '/preservation-policy', priority: '0.7', changefreq: 'monthly' },
+      { path: '/copyright', priority: '0.7', changefreq: 'monthly' },
+      { path: '/partners', priority: '0.7', changefreq: 'monthly' },
+      { path: '/contact', priority: '0.7', changefreq: 'monthly' },
+      { path: '/blog', priority: '0.7', changefreq: 'weekly' },
+      { path: '/orcidGuide', priority: '0.7', changefreq: 'monthly' },
     ];
 
     // Identify unique Volume/Issue combinations
@@ -49,18 +57,19 @@ export default async function handler(req: any, res: any) {
       }
     });
 
-    const staticLastMod = '2025-01-01'; // Fixed date for static routes
+    const staticLastMod = '2026-09-17';
 
     // 3. Build XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
     // Static routes
-    staticRoutes.forEach(route => {
+    staticRoutes.forEach(({ path, priority, changefreq }) => {
+      const loc = path === '/' ? `${BASE_URL}/` : `${BASE_URL}${path}`;
       xml += `  <url>
-    <loc>${BASE_URL}${route}</loc>
+    <loc>${loc}</loc>
     <lastmod>${staticLastMod}</lastmod>
-    <changefreq>${route === '' || route === '/articles' ? 'daily' : 'monthly'}</changefreq>
-    <priority>${route === '' ? '1.0' : '0.8'}</priority>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
   </url>\n`;
     });
 
@@ -74,19 +83,16 @@ export default async function handler(req: any, res: any) {
   </url>\n`;
     });
 
-    // Article URLs and PDF URLs
+    // Article URLs
     articles.forEach((article: any) => {
       const lastMod = article.publication_date ? article.publication_date.split('T')[0] : staticLastMod;
       
-      // Article HTML page
       xml += `  <url>
     <loc>${BASE_URL}/article/${buildArticleSlug(article)}</loc>
     <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>\n`;
-
-
     });
 
     xml += `</urlset>`;
@@ -101,6 +107,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${BASE_URL}/</loc><priority>1.0</priority></url>
+  <url><loc>${BASE_URL}/papers</loc><priority>1.0</priority></url>
   <url><loc>${BASE_URL}/articles</loc><priority>0.9</priority></url>
 </urlset>`);
   }

@@ -1,10 +1,8 @@
-// Server-renders the <head> of the article page.
+// Server-renders the <head> of the article page for Google Scholar and search bots.
 //
-// Google Scholar's crawler does not execute JavaScript, so it cannot read the
-// citation metadata from the React app. This function serves the normal SPA
-// shell with the Highwire Press / Dublin Core tags injected into <head>, so
-// crawlers read the tags from raw HTML while humans still get the full React UI
-// at the same URL. No cloaking: both are served identical bytes.
+// Google Scholar's crawler does not execute JavaScript, so it cannot read citation
+// metadata from the React app. This function serves the normal SPA shell with Highwire Press
+// and Dublin Core tags injected into <head>, so crawlers read raw HTML tags.
 
 const API_URL =
   process.env.VITE_API_URL ||
@@ -12,35 +10,124 @@ const API_URL =
 
 const SITE_URL = 'https://www.ijsds.org';
 const JOURNAL_TITLE = 'International Journal of Social Work and Development Studies';
+const PUBLISHER = 'Rivers State University';
 
+/**
+ * Escapes characters for HTML attribute values enclosed in double quotes.
+ * NOTE: Single quote/apostrophe (') is intentionally NOT escaped to &apos;
+ * because Google Scholar indexes the literal attribute value string, and
+ * escaping &apos; breaks title and author string matching.
+ */
 const esc = (value: unknown) =>
-  String(value ?? '').replace(
-    /[<>&'"]/g,
-    (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c] as string,
-  );
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-// Mirrors extractDoiFromSlug in src/lib/articleSlug.ts
-const extractDoiFromSlug = (slug: string): string | null => {
-  const parts = slug.split('+');
-  if (parts.length < 2) return null;
-  const potentialDoi = parts.slice(1).join('+');
-  if (/^10\.\d{4,}/.test(potentialDoi)) return potentialDoi.replace('-', '/');
-  return null;
+/**
+ * Strips academic credentials, degrees, and honorary prefixes from an author name.
+ */
+const cleanDegreeAndTitles = (name: unknown): string => {
+  if (!name) return '';
+  return String(name)
+    .replace(/\s*\((?:PhD|Ph\.D\.|MSc|M\.Sc\.|BSc|B\.Sc\.|MD|Esq\.|BL)\)/gi, '')
+    .replace(/\b(?:Dr\.|Prof\.|Professor|Engr\.|Rev\.|Mr\.|Mrs\.|Ms\.)\s+/gi, '')
+    .replace(/,\s*(?:PhD|Ph\.D\.|MSc|M\.Sc\.|BSc|B\.Sc\.|MD|Esq\.|BL)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[,\s]+$/, '')
+    .trim();
 };
 
-const normalizeAuthors = (authors: unknown): Array<{ first: string; last: string; affiliation: string }> => {
-  if (!Array.isArray(authors)) return [];
-  return authors.map((a: any) => {
-    if (typeof a === 'string') return { first: '', last: a, affiliation: '' };
-    return {
-      first: a?.firstName ?? a?.first_name ?? a?.given ?? '',
-      last: a?.lastName ?? a?.last_name ?? a?.family ?? a?.surname ?? a?.name ?? '',
-      affiliation: a?.affiliation ?? '',
-    };
-  });
+/**
+ * Cleans titles for Google Scholar: unescapes HTML entities, normalizes spacing,
+ * and fixes ALL-CAPS titles.
+ */
+const cleanTitleForScholar = (title: unknown): string => {
+  if (!title) return '';
+  let cleaned = String(title)
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // If title is ALL CAPS, convert to title case
+  const letters = cleaned.replace(/[^a-zA-Z]/g, '');
+  if (letters.length > 5 && letters === letters.toUpperCase()) {
+    cleaned = cleaned
+      .toLowerCase()
+      .split(' ')
+      .map((w) => (w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+      .join(' ');
+  }
+
+  return cleaned;
 };
 
-const formatScholarDate = (value: unknown) => {
+/**
+ * Formats author names into Highwire Press standard: "LastName, FirstName"
+ * Strips titles and ensures zero trailing commas.
+ */
+interface FormattedAuthor {
+  formattedName: string;
+  affiliation: string;
+}
+
+const formatAuthorsForScholar = (rawAuthors: unknown): FormattedAuthor[] => {
+  if (!rawAuthors) return [];
+  const authorsList = Array.isArray(rawAuthors) ? rawAuthors : [rawAuthors];
+
+  return authorsList
+    .map((author: any) => {
+      let rawName = '';
+      let affiliation = '';
+
+      if (typeof author === 'string') {
+        rawName = author;
+      } else if (typeof author === 'object' && author !== null) {
+        affiliation = String(author.affiliation ?? author.institution ?? '').trim();
+        const firstName = String(author.firstName ?? author.first_name ?? author.given ?? '').trim();
+        const lastName = String(author.lastName ?? author.last_name ?? author.family ?? author.surname ?? '').trim();
+
+        if (firstName && lastName) {
+          rawName = `${lastName}, ${firstName}`;
+        } else if (lastName && !firstName) {
+          rawName = lastName;
+        } else if (author.name) {
+          rawName = String(author.name).trim();
+        }
+      }
+
+      let cleaned = cleanDegreeAndTitles(rawName);
+      if (!cleaned) return null;
+
+      let formattedName = cleaned;
+      if (cleaned.includes(',')) {
+        const parts = cleaned.split(',').map((p) => p.trim()).filter(Boolean);
+        formattedName = parts.join(', ');
+      } else {
+        const parts = cleaned.split(/\s+/).filter(Boolean);
+        if (parts.length >= 2) {
+          const last = parts[parts.length - 1];
+          const firstRest = parts.slice(0, -1).join(' ');
+          formattedName = `${last}, ${firstRest}`;
+        }
+      }
+
+      // Guard against trailing commas
+      formattedName = formattedName.replace(/[,\s]+$/, '').trim();
+
+      return {
+        formattedName,
+        affiliation,
+      };
+    })
+    .filter((a): a is FormattedAuthor => a !== null && a.formattedName.length > 0);
+};
+
+const formatScholarDate = (value: unknown): string => {
   if (!value) return '';
   const d = new Date(value as string);
   if (Number.isNaN(d.getTime())) return '';
@@ -61,20 +148,33 @@ const hasValidPdf = (article: any): boolean => {
   return raw.toLowerCase().includes('.pdf');
 };
 
+const extractDoiFromSlug = (slug: string): string | null => {
+  const parts = slug.split('+');
+  if (parts.length < 2) return null;
+  const potentialDoi = parts.slice(1).join('+');
+  if (/^10\.\d{4,}/.test(potentialDoi)) {
+    return potentialDoi.replace('-', '/');
+  }
+  return null;
+};
+
 const fetchArticle = async (slug: string) => {
   const doi = extractDoiFromSlug(slug);
 
   let found: any = null;
 
+  // 1. Try finding by DOI query
   if (doi) {
     try {
       const res = await fetch(`${API_URL}/api/articles?doi=${encodeURIComponent(doi)}`);
       const body = await res.json();
-      if (body?.success && body.data?.length > 0) found = body.data[0];
+      if (body?.success && Array.isArray(body.data) && body.data.length > 0) {
+        found = body.data[0];
+      }
     } catch {}
   }
 
-  // Check if slug contains full UUID
+  // 2. Try UUID in slug
   if (!found) {
     const uuidMatch = slug.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
     if (uuidMatch) {
@@ -86,46 +186,39 @@ const fetchArticle = async (slug: string) => {
     }
   }
 
-  // Check if slug ends with an 8-char hex prefix
+  // 3. Fallback: Search all published articles if DOI or slug didn't match immediately
   if (!found) {
-    const shortIdMatch = slug.match(/([0-9a-f]{8})$/i);
-    if (shortIdMatch) {
-      try {
-        const res = await fetch(`${API_URL}/api/articles?status=published`);
-        const body = await res.json();
-        if (body?.success && Array.isArray(body.data)) {
-          found = body.data.find((a: any) => a.id?.toLowerCase().startsWith(shortIdMatch[1].toLowerCase()));
-        }
-      } catch {}
-    }
-  }
-
-  // Slugs without a DOI fall back to the bare article UUID
-  if (!found && /^[0-9a-f-]{36}$/i.test(slug)) {
     try {
-      const res = await fetch(`${API_URL}/api/articles/${slug}`);
+      const res = await fetch(`${API_URL}/api/articles?status=published`);
       const body = await res.json();
-      if (body?.success) found = body.data;
+      if (body?.success && Array.isArray(body.data)) {
+        found = body.data.find((a: any) => {
+          if (doi && (a.crossrefDoi === doi || a.doi === doi)) return true;
+          if (a.id && slug.includes(a.id)) return true;
+          const cleanSlugTitle = slug.split('+')[0];
+          const articleTitleSlug = String(a.title ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          return cleanSlugTitle === articleTitleSlug;
+        });
+      }
     } catch {}
   }
 
-  if (found) {
-    if (!found.file_versions && found.id) {
-      try {
-        const detailRes = await fetch(`${API_URL}/api/articles/${found.id}`);
-        const detailBody = await detailRes.json();
-        if (detailBody?.success && detailBody.data) return detailBody.data;
-      } catch {}
-    }
-    return found;
+  // If found but missing file_versions, fetch full article detail
+  if (found && !found.file_versions && found.id) {
+    try {
+      const detailRes = await fetch(`${API_URL}/api/articles/${found.id}`);
+      const detailBody = await detailRes.json();
+      if (detailBody?.success && detailBody.data) return detailBody.data;
+    } catch {}
   }
 
-  return null;
+  return found;
 };
 
 const buildMetaTags = (article: any, slug: string) => {
   const canonical = `${SITE_URL}/article/${slug}`;
-  const authors = normalizeAuthors(article.authors);
+  const cleanTitle = cleanTitleForScholar(article.title);
+  const authors = formatAuthorsForScholar(article.authors);
   const doi = article.crossrefDoi || article.doi;
   const pubDate = formatScholarDate(article.publication_date ?? article.created_at);
   const abstract = String(article.abstract ?? '').replace(/\s+/g, ' ').trim();
@@ -133,16 +226,17 @@ const buildMetaTags = (article: any, slug: string) => {
   const sameDomainPdfUrl = pdfAvailable ? `${SITE_URL}/api/pdf/${article.id}.pdf` : null;
 
   const tags: string[] = [
-    `<title>${esc(article.title)} - IJSDS</title>`,
+    `<title>${esc(cleanTitle)} - IJSDS</title>`,
     `<link rel="canonical" href="${esc(canonical)}">`,
     `<meta name="description" content="${esc(abstract.slice(0, 160))}">`,
 
-    // Highwire Press — what Google Scholar reads
-    `<meta name="citation_title" content="${esc(article.title)}">`,
+    // Highwire Press / Google Scholar standard tags
+    `<meta name="citation_title" content="${esc(cleanTitle)}">`,
     `<meta name="citation_journal_title" content="${esc(JOURNAL_TITLE)}">`,
     `<meta name="citation_journal_abbrev" content="IJSDS">`,
     `<meta name="citation_issn" content="3115-6932">`,
-    `<meta name="citation_publisher" content="IJSDS Publishing">`,
+    `<meta name="citation_issn" content="3115-6940">`,
+    `<meta name="citation_publisher" content="${esc(PUBLISHER)}">`,
     `<meta name="citation_language" content="en">`,
     `<meta name="citation_abstract_html_url" content="${esc(canonical)}">`,
   ];
@@ -150,9 +244,10 @@ const buildMetaTags = (article: any, slug: string) => {
   if (pubDate) tags.push(`<meta name="citation_publication_date" content="${esc(pubDate)}">`);
 
   for (const a of authors) {
-    const name = [a.last, a.first].filter(Boolean).join(', ');
-    if (name) tags.push(`<meta name="citation_author" content="${esc(name)}">`);
-    if (a.affiliation) tags.push(`<meta name="citation_author_institution" content="${esc(a.affiliation)}">`);
+    tags.push(`<meta name="citation_author" content="${esc(a.formattedName)}">`);
+    if (a.affiliation) {
+      tags.push(`<meta name="citation_author_institution" content="${esc(a.affiliation)}">`);
+    }
   }
 
   if (doi) tags.push(`<meta name="citation_doi" content="${esc(doi)}">`);
@@ -164,9 +259,9 @@ const buildMetaTags = (article: any, slug: string) => {
 
   // Dublin Core
   tags.push(
-    `<meta name="DC.title" content="${esc(article.title)}">`,
-    `<meta name="DC.creator" content="${esc(authors.map((a) => [a.last, a.first].filter(Boolean).join(', ')).join('; '))}">`,
-    `<meta name="DC.publisher" content="${esc(JOURNAL_TITLE)}">`,
+    `<meta name="DC.title" content="${esc(cleanTitle)}">`,
+    `<meta name="DC.creator" content="${esc(authors.map((a) => a.formattedName).join('; '))}">`,
+    `<meta name="DC.publisher" content="${esc(PUBLISHER)}">`,
     `<meta name="DC.type" content="Text">`,
     `<meta name="DC.language" content="en">`,
     `<meta name="DC.rights" content="Creative Commons Attribution 4.0 International">`,
@@ -181,30 +276,26 @@ const buildMetaTags = (article: any, slug: string) => {
 };
 
 export default async function handler(req: any, res: any) {
-  // Slugs carry a literal "+" (title+doi). Served as a path segment that is safe,
-  // but if anything ever routes this through a query string the "+" decodes to a
-  // space — which would silently strip the DOI and emit a page with no citation
-  // tags. Restore it rather than fail quietly.
   const slug = String(req.query?.slug ?? '').replace(/ /g, '+');
 
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const shellUrl = `https://${host}/index.html`;
 
   try {
-    // Always fetch the real SPA shell so the app keeps booting normally.
     const shellRes = await fetch(shellUrl);
     let html = await shellRes.text();
 
     const article = await fetchArticle(slug);
 
     if (article) {
-      // Drop the build's static <title> so ours is the only one.
+      // Drop any static <title> from index.html
       html = html.replace(/<title>.*?<\/title>/i, '');
+      // Drop default homepage canonical from index.html
+      html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, '');
+      // Inject accurate SSR meta tags
       html = html.replace('</head>', `    ${buildMetaTags(article, slug)}\n  </head>`);
       res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
     } else {
-      // Unknown slug: serve the shell untouched and let the SPA render its own
-      // not-found view. Never 500 — a crawler seeing 500 will drop the URL.
       res.setHeader('Cache-Control', 'no-store');
     }
 
@@ -212,7 +303,6 @@ export default async function handler(req: any, res: any) {
     return res.status(200).send(html);
   } catch (error) {
     console.error('[api/article] failed to render', slug, error);
-    // Degrade to a redirect rather than an error page.
     res.setHeader('Location', `${SITE_URL}/articles`);
     return res.status(302).end();
   }
