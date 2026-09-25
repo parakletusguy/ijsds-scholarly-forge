@@ -215,8 +215,17 @@ const fetchArticle = async (slug: string) => {
   return found;
 };
 
-const buildMetaTags = (article: any, slug: string) => {
-  const canonical = `${SITE_URL}/article/${slug}`;
+// Must stay in sync with buildArticleSlug in src/lib/articleSlug.ts and api/sitemap.ts
+const buildArticleSlug = (article: any) => {
+  const titleSlug = String(article.title ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const activeDoi = article.crossrefDoi || article.doi;
+  return activeDoi ? `${titleSlug}+${activeDoi.replace(/\//g, '-')}` : article.id;
+};
+
+const buildMetaTags = (article: any) => {
+  // Canonical comes from the article data, not the requested slug, so variant
+  // URLs (UUID, old title slugs) all point at the single sitemap URL.
+  const canonical = `${SITE_URL}/article/${buildArticleSlug(article)}`;
   const cleanTitle = cleanTitleForScholar(article.title);
   const authors = formatAuthorsForScholar(article.authors);
   const doi = article.crossrefDoi || article.doi;
@@ -275,6 +284,52 @@ const buildMetaTags = (article: any, slug: string) => {
   return tags.join('\n    ');
 };
 
+/**
+ * Visible article content placed inside #root. Google Scholar does not run
+ * JavaScript and requires the title, authors and full abstract to be visible in
+ * the HTML body (meta tags alone are not enough). React's createRoot().render()
+ * replaces this markup on load, so browsers still get the normal SPA page.
+ */
+const buildBodyHtml = (article: any) => {
+  const cleanTitle = cleanTitleForScholar(article.title);
+  const authors = formatAuthorsForScholar(article.authors);
+  const doi = article.crossrefDoi || article.doi;
+  const pubDate = formatScholarDate(article.publication_date ?? article.created_at);
+  const abstract = String(article.abstract ?? '').replace(/\s+/g, ' ').trim();
+  const keywords = Array.isArray(article.keywords) ? article.keywords.filter(Boolean) : [];
+  const pdfUrl = hasValidPdf(article) ? `${SITE_URL}/api/pdf/${article.id}.pdf` : null;
+
+  // "Last, First" -> "First Last" for human-readable display
+  const displayName = (formatted: string) => {
+    const [last, ...rest] = formatted.split(',').map((p) => p.trim());
+    return rest.length ? `${rest.join(' ')} ${last}` : last;
+  };
+
+  const citation = [
+    JOURNAL_TITLE,
+    article.volume ? `Vol. ${article.volume}` : '',
+    article.issue ? `No. ${article.issue}` : '',
+    pubDate ? pubDate.slice(0, 4) : '',
+  ].filter(Boolean).join(', ');
+
+  const authorsHtml = authors
+    .map((a) => `${esc(displayName(a.formattedName))}${a.affiliation ? ` <small>(${esc(a.affiliation)})</small>` : ''}`)
+    .join(', ');
+
+  return [
+    '<article class="scholar-ssr">',
+    `<h1>${esc(cleanTitle)}</h1>`,
+    authorsHtml && `<p class="authors">${authorsHtml}</p>`,
+    `<p class="citation">${esc(citation)}</p>`,
+    pubDate && `<p>Published: ${esc(pubDate)}</p>`,
+    doi && `<p>DOI: <a href="https://doi.org/${esc(doi)}">https://doi.org/${esc(doi)}</a></p>`,
+    abstract && `<h2>Abstract</h2><p class="abstract">${esc(abstract)}</p>`,
+    keywords.length > 0 && `<p>Keywords: ${esc(keywords.join(', '))}</p>`,
+    pdfUrl && `<p><a href="${esc(pdfUrl)}">Download full text (PDF)</a></p>`,
+    '</article>',
+  ].filter(Boolean).join('\n      ');
+};
+
 export default async function handler(req: any, res: any) {
   const slug = String(req.query?.slug ?? '').replace(/ /g, '+');
 
@@ -293,7 +348,9 @@ export default async function handler(req: any, res: any) {
       // Drop default homepage canonical from index.html
       html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, '');
       // Inject accurate SSR meta tags
-      html = html.replace('</head>', `    ${buildMetaTags(article, slug)}\n  </head>`);
+      html = html.replace('</head>', `    ${buildMetaTags(article)}\n  </head>`);
+      // Visible title/authors/abstract for non-JS crawlers (replaced by React on load)
+      html = html.replace(/<div id=["']root["']>/i, (m) => `${m}\n      ${buildBodyHtml(article)}`);
       res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
     } else {
       res.setHeader('Cache-Control', 'no-store');

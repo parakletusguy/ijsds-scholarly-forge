@@ -39,13 +39,18 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
     description: '',
     publishDate: new Date().toISOString().split('T')[0]
   });
-  const [issueArticles, setIssueArticles] = useState([
+  // Page numbers stay empty until the editor enters them. Defaulting to a
+  // placeholder range gets saved to the DB and published as citation metadata.
+  const [issueArticles, setIssueArticles] = useState<Array<{
+    id: string; title: string; authors: any;
+    pageStart?: number; pageEnd?: number; order: number; status: string;
+  }>>([
     { 
       id: article.id, 
       title: article.title, 
       authors: article.authors,
-      pageStart: article.page_start || 1,
-      pageEnd: article.page_end || 15,
+      pageStart: article.page_start ?? undefined,
+      pageEnd: article.page_end ?? undefined,
       order: 1,
       status: 'included'
     }
@@ -55,7 +60,12 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
     setIssueInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const updateArticlePages = (articleId: string, pageStart: number, pageEnd: number) => {
+  const parsePage = (value: string) => {
+    const n = parseInt(value, 10);
+    return Number.isNaN(n) ? undefined : n;
+  };
+
+  const updateArticlePages = (articleId: string, pageStart?: number, pageEnd?: number) => {
     setIssueArticles(prev =>
       prev.map(article =>
         article.id === articleId
@@ -107,7 +117,9 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
     const toc = issueArticles
       .sort((a, b) => a.order - b.order)
       .map(article => 
-        `${article.title} ... ${article.pageStart}-${article.pageEnd}`
+        article.pageStart && article.pageEnd
+          ? `${article.title} ... ${article.pageStart}-${article.pageEnd}`
+          : article.title
       )
       .join('\n');
 
@@ -288,10 +300,10 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
                     <label className="text-xs font-medium mb-1 block">Start Page</label>
                     <Input
                       type="number"
-                      value={issueArticle.pageStart}
+                      value={issueArticle.pageStart ?? ''}
                       onChange={(e) => updateArticlePages(
                         issueArticle.id, 
-                        parseInt(e.target.value), 
+                        parsePage(e.target.value), 
                         issueArticle.pageEnd
                       )}
                       min="1"
@@ -302,13 +314,13 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
                     <label className="text-xs font-medium mb-1 block">End Page</label>
                     <Input
                       type="number"
-                      value={issueArticle.pageEnd}
+                      value={issueArticle.pageEnd ?? ''}
                       onChange={(e) => updateArticlePages(
                         issueArticle.id, 
                         issueArticle.pageStart, 
-                        parseInt(e.target.value)
+                        parsePage(e.target.value)
                       )}
-                      min={issueArticle.pageStart}
+                      min={issueArticle.pageStart ?? 1}
                       className="text-xs"
                     />
                   </div>
@@ -377,7 +389,9 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
                       </p>
                     </div>
                     <div className="text-sm font-medium ml-4">
-                      {issueArticle.pageStart}-{issueArticle.pageEnd}
+                      {issueArticle.pageStart && issueArticle.pageEnd
+                        ? `${issueArticle.pageStart}-${issueArticle.pageEnd}`
+                        : '—'}
                     </div>
                   </div>
                 ))}
