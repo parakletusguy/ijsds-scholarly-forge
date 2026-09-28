@@ -2,8 +2,10 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageElements';
+import { useAuth } from '@/hooks/useAuth';
 
 export const SubmissionGuidelines = () => {
+  const { user } = useAuth();
   return (
     <div className="pb-32 bg-stone-50 min-h-screen font-body text-stone-900">
       <Helmet>
@@ -128,7 +130,7 @@ export const SubmissionGuidelines = () => {
           <h3 className="text-sm font-bold text-stone-900">Ready to submit?</h3>
           <p className="text-sm text-stone-500">Make sure your manuscript is formatted correctly before you begin. Once submitted, your work will be checked against our scope and ethical guidelines before being sent for peer review.</p>
           <div className="flex flex-wrap gap-3 pt-1">
-            <Link to="/submit" className="inline-flex items-center gap-2 bg-stone-900 text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors active:scale-[0.98]">
+            <Link to={user ? "/submit" : "/auth?reason=submit"} className="inline-flex items-center gap-2 bg-stone-900 text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors active:scale-[0.98]">
               Submit Manuscript
             </Link>
             <Link to="/auth" className="inline-flex items-center gap-2 border border-stone-200 text-stone-700 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:border-primary hover:text-primary transition-colors active:scale-[0.98]">

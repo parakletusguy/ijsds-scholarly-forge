@@ -9,9 +9,10 @@ import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 export const Auth = () => {
   const [searchParams] = useSearchParams();
-  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
-  const isConfirmed = searchParams.get('confirmed') === 'true';
   const reason = searchParams.get('reason');
+  const redirectUrl = searchParams.get('redirect') || (reason === 'submit' ? '/submit' : '/');
+  const initialMode = searchParams.get('mode') === 'signup' || reason === 'submit' ? 'signup' : 'signin';
+  const isConfirmed = searchParams.get('confirmed') === 'true';
   
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot-password'>(initialMode);
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export const Auth = () => {
   const { user, refreshAuth } = useAuth();
 
   useEffect(() => {
-    if (user) navigate('/');
+    if (user) navigate(redirectUrl);
     if (isConfirmed) {
       toast({ title: 'Verified', description: 'Account confirmed. You may now sign in.' });
     }
@@ -36,7 +37,7 @@ export const Auth = () => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
     return () => clearTimeout(timer);
-  }, [user, navigate, isConfirmed]);
+  }, [user, navigate, isConfirmed, redirectUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +63,7 @@ export const Auth = () => {
             else await sendWelcomeEmail(data.profile.id, fullName, email);
           } catch (err) { console.error('Email error:', err); }
           toast({ title: 'Success', description: 'Account created. Welcome to IJSDS.' });
-          navigate('/');
+          navigate(redirectUrl);
         }
       } else {
         const { data, error } = await signIn(email, password);
@@ -71,7 +72,7 @@ export const Auth = () => {
         } else {
           refreshAuth(data.profile);
           toast({ title: 'Signed in successfully' });
-          navigate('/');
+          navigate(redirectUrl);
         }
       }
     } catch (error) {
@@ -136,9 +137,9 @@ export const Auth = () => {
           <div ref={formRef} className="md:col-span-7 md:col-start-6">
             {reason === 'submit' && (
               <div className="mb-8 p-4 bg-primary/5 border border-primary/20">
-                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Submission Requirement</p>
-                <p className="text-xs text-stone-500 leading-relaxed">
-                  Sign in or create an account to submit and track manuscripts through peer review.
+                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Author Registration Required</p>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Please sign up for an author account or log in to submit your manuscript and track it through peer review.
                 </p>
               </div>
             )}

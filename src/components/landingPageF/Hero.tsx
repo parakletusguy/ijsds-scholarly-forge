@@ -56,7 +56,7 @@ export const Hero = () => {
                 Browse Articles
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" className="" variant="outline" onClick={() => navigate(user ? '/submit' : '/auth')}>
+              <Button size="lg" className="" variant="outline" onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}>
                 {user ? 'Submit Article' : 'Submit Your Research'}
               </Button>
             </div>

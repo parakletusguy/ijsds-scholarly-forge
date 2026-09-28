@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
 import Paystackbtn from "@/components/paystack/paystackFunction";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const VETTING_FEE_LOCAL = 1025400; // ₦10,254 net → grossed up
 const PUBLICATION_FEE_LOCAL = 2599100; // ₦25,991 net → grossed up
@@ -36,7 +37,7 @@ interface Author {
 }
 
 export const Submit = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -79,11 +80,15 @@ export const Submit = () => {
   const [copyrightAgree, setCopyrightAgree] = useState(false);
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth?reason=submit");
+      return;
+    }
     if (user) {
       loadDraft();
       reconcilePaidFees();
     }
-  }, [user]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (user && (title || abstract || keywords.length > 0)) {
@@ -496,6 +501,18 @@ export const Submit = () => {
       },
     },
   ];
+
+  if (authLoading) {
+    return (
+      <div className="bg-[#fdf9f5] min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Verifying author session..." />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="bg-[#fdf9f5] text-[#1c1c19] font-body min-h-screen pb-32">

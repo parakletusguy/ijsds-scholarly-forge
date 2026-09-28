@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle, Info, Globe } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 // Editorial Board Images
 import mina from "../images/editors/Mina.jpeg";
@@ -17,6 +18,7 @@ import daniel from "../images/editors/daniel.jpeg";
 
 export const About = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -283,7 +285,7 @@ export const About = () => {
 
           <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-stone-100">
             <button
-              onClick={() => navigate("/submit")}
+              onClick={() => navigate(user ? "/submit" : "/auth?reason=submit")}
               className="inline-flex items-center gap-2 bg-stone-900 text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-primary transition-colors active:scale-[0.98]"
             >
               Submit Manuscript

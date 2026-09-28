@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Globe, ShieldCheck, Layers } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
 
 const linkClass = "text-[#1c1c19]/60 hover:text-[#af4c2a] transition-colors";
 const headingClass = "font-bold text-xs uppercase tracking-widest mb-5 text-primary";
 
 export const Footer = () => {
+  const { user } = useAuth();
   const year = new Date().getFullYear();
 
   return (
@@ -62,7 +64,7 @@ export const Footer = () => {
           <div>
             <h4 className={headingClass}>For Authors</h4>
             <ul className="space-y-3 font-body text-sm">
-              <li><Link className={linkClass} to="/submit">Submit Manuscript</Link></li>
+              <li><Link className={linkClass} to={user ? "/submit" : "/auth?reason=submit"}>Submit Manuscript</Link></li>
               <li><Link className={linkClass} to="/submission-guidelines">Submission Guidelines</Link></li>
               <li><Link className={linkClass} to="/author-guide">Author Guide</Link></li>
               <li><Link className={linkClass} to="/orcidGuide">ORCID Guide</Link></li>

@@ -98,7 +98,7 @@ export const Home = () => {
                 Browse All Research
               </button>
               <button
-                onClick={() => navigate(user ? '/submit' : '/auth')}
+                onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}
                 className="border-2 border-stone-300 text-stone-900 px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
               >
                 Submit Manuscript
@@ -142,7 +142,7 @@ export const Home = () => {
                 "No articles published yet. Be the first to contribute."
               </p>
               <button
-                onClick={() => navigate(user ? '/submit' : '/auth')}
+                onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}
                 className="mt-8 bg-primary text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-primary/90 transition-all"
               >
                 Submit Research
@@ -419,7 +419,7 @@ export const Home = () => {
                 </div>
               ))}
               <button
-                onClick={() => navigate(user ? '/submit' : '/auth')}
+                onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}
                 className="mt-4 bg-white text-primary px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-white/90 transition-all w-full md:w-auto self-start"
               >
                 Submit Your Research
