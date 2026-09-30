@@ -77,6 +77,9 @@ export const EditBlogPost = () => {
       toast({ title: 'Title and content are required.', variant: 'destructive' });
       return;
     }
+    if (formData.status === 'published' && !confirm('Publish this post to the public IJSDS website now?')) {
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -143,7 +146,7 @@ export const EditBlogPost = () => {
               className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               <Save size={13} />
-              {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
+              {saving ? 'Saving...' : formData.status === 'published' ? (isEditing ? 'Update & Publish' : 'Publish') : (isEditing ? 'Update Draft' : 'Save Draft')}
             </button>
           </div>
         </div>

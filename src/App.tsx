@@ -58,6 +58,7 @@ const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Con
 const EthicalGuidelines = lazy(() => import('./pages/EthicalGuidelines').then(m => ({ default: m.EthicalGuidelines })));
 const AdminBlogManagement = lazy(() => import('./pages/AdminBlogManagement').then(m => ({ default: m.AdminBlogManagement })));
 const EditBlogPost = lazy(() => import('./pages/EditBlogPost').then(m => ({ default: m.EditBlogPost })));
+const ImportNewsletterBlog = lazy(() => import('./pages/ImportNewsletterBlog').then(m => ({ default: m.ImportNewsletterBlog })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
@@ -167,6 +168,8 @@ const App = () => (
                     <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
                     <Route path="/admin/blog/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
                     <Route path="/admin/blogs/new" element={<PageLayout><EditBlogPost /></PageLayout>} />
+                    <Route path="/admin/blog/import" element={<PageLayout><ImportNewsletterBlog /></PageLayout>} />
+                    <Route path="/admin/blogs/import" element={<PageLayout><ImportNewsletterBlog /></PageLayout>} />
                     <Route path="/admin/blog/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
                     <Route path="/admin/blogs/edit/:id" element={<PageLayout><EditBlogPost /></PageLayout>} />
                     <Route path="/admin/register" element={<Navigate to="/auth?mode=signup" replace />} />

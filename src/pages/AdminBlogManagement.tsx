@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, Search, ArrowLeft, FileText } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, Search, ArrowLeft, FileText, FileUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -75,12 +75,20 @@ export const AdminBlogManagement = () => {
             <span className="text-stone-200">/</span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-stone-600">Blog Posts</span>
           </div>
-          <button
-            onClick={() => navigate('/admin/blogs/new')}
-            className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors"
-          >
-            <Plus size={13} /> New Post
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/admin/blogs/import')}
+              className="flex items-center gap-2 border border-primary/30 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/5 transition-colors"
+            >
+              <FileUp size={13} /> Import Newsletter
+            </button>
+            <button
+              onClick={() => navigate('/admin/blogs/new')}
+              className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors"
+            >
+              <Plus size={13} /> New Post
+            </button>
+          </div>
         </div>
       </div>
 
