@@ -22,7 +22,7 @@ The importer:
 
 - extracts the newsletter's main article body;
 - takes the article title and lead as the post title and excerpt;
-- preserves safe semantic content, images, and links;
+- preserves safe semantic content, images, links, and the approved newsletter visual components (kicker, evidence callout, checklist, and CTA band);
 - removes the standalone page shell, source styles, draft label, duplicated headline, and source byline;
 - assigns `Announcements` and `newsletter` as editable starting metadata; and
 - saves only with `status: draft`.
