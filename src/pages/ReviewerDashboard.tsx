@@ -14,6 +14,8 @@ import {
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
+import { ReviewerReferralCard } from '@/components/ijsds2/ReviewerReferralCard';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReviewWithSubmission {
   id: string;
@@ -71,6 +73,8 @@ export const ReviewerDashboard = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [walletBalance, setWalletBalance] = useState<number>(0);
   const isReviewer = !!profile?.is_reviewer;
 
   useEffect(() => {
@@ -90,6 +94,25 @@ export const ReviewerDashboard = () => {
         (r) => r.submission?.article?.status !== 'published'
       );
       setReviews(active);
+
+      if (user) {
+        try {
+          const { data: revProfile } = await supabase
+            .from('reviewer_profiles' as any)
+            .select('referral_code, wallet_balance_naira')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (revProfile) {
+            setReferralCode((revProfile as any).referral_code);
+            setWalletBalance(Number((revProfile as any).wallet_balance_naira || 0));
+          } else {
+            setReferralCode(`IJSDS-REV-${user.id.slice(0, 5).toUpperCase()}`);
+          }
+        } catch {
+          setReferralCode(`IJSDS-REV-${user.id.slice(0, 5).toUpperCase()}`);
+        }
+      }
     } catch {
       toast({ title: "Couldn't load reviews", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally {
@@ -244,6 +267,15 @@ export const ReviewerDashboard = () => {
             </span>
           </div>
         </div>
+
+        {referralCode && (
+          <div className="mb-8">
+            <ReviewerReferralCard
+              referralCode={referralCode}
+              walletBalanceNaira={walletBalance}
+            />
+          </div>
+        )}
 
         {/* Stats strip */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-100 border border-stone-100 mb-8">

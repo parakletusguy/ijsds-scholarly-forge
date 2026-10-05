@@ -6,10 +6,9 @@ export const VettingDialog = ({ userData, vet, setvet }) => {
     <Dialog onOpenChange={setvet} open={vet}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Pay Vetting Fee</DialogTitle>
+          <DialogTitle>Pay Gate 1 Evaluation Fee</DialogTitle>
           <DialogDescription>
-            A vetting fee of ₦10,000 is required to begin the editorial review
-            of your manuscript. Click "Pay Now" to proceed securely via Paystack.
+            An initial evaluation fee of ₦5,000 is required to initiate Stage 2 integrity screening and verification of your manuscript. Click "Pay Now" to proceed securely via Paystack.
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center justify-between pt-2">
@@ -32,10 +31,9 @@ export const ProcessinFeeDialog = ({ processing, setprocessing, userData }) => {
     <Dialog onOpenChange={setprocessing} open={processing}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Pay Publication Fee</DialogTitle>
+          <DialogTitle>Pay Gate 2 Publication Fee (APC)</DialogTitle>
           <DialogDescription>
-            A publication fee of ₦25,500 is required to proceed to publication.
-            Upon successful payment your article will be scheduled for production.
+            A Gate 2 publication fee (APC) of ₦25,500 is required to advance to the upcoming 28th monthly batch release and Crossref DOI registration.
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center justify-between pt-2">

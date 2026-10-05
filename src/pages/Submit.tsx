@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   X,
@@ -13,6 +13,7 @@ import {
   PenTool,
   CreditCard,
   AlertCircle,
+  Gift,
 } from "lucide-react";
 import { createSubmission } from "@/lib/submissionService";
 import { api } from "@/lib/apiClient";
@@ -21,13 +22,15 @@ import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
 import Paystackbtn from "@/components/paystack/paystackFunction";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { BatchReleaseBanner } from "@/components/ijsds2/BatchReleaseBanner";
+import { validateReferralCode, IJSDS2_FINANCIALS } from "@/lib/ijsds2/paymentService";
 
-const VETTING_FEE_LOCAL = 1025400; // ₦10,254 net → grossed up
-const PUBLICATION_FEE_LOCAL = 2599100; // ₦25,991 net → grossed up
-
-// Global Tiers (Evaluated in NGN, grossed up to cover Paystack's 3.9% + ₦100 international fee)
-const VETTING_FEE_GLOBAL = 1580000; // ₦15,800 (~$10.50 USD value)
-const PUBLICATION_FEE_GLOBAL = 4318418; // ₦43,184 (~$30.00 USD value)
+// IJSDS 2.0 Two-Tier Payment Model (PRD v2.4.0-PROD)
+// Gate 1: ₦5,000 net evaluation fee grossed up to cover Paystack (1.5% + ₦100)
+const GATE1_FEE_LOCAL = 517800; // ₦5,178 (517,800 kobo)
+const GATE1_FEE_GLOBAL = 1580000; // ~$10.50 USD value in kobo
+const GATE2_FEE_LOCAL = 2599100; // ₦25,991 (2,599,100 kobo) collected post-audit
+const GATE2_FEE_GLOBAL = 4318418; // ~$30.00 USD value
 
 interface Author {
   name: string;
@@ -78,6 +81,36 @@ export const Submit = () => {
   // Copyright & Licensing: DOAJ requires the submission agreement to match the
   // journal's copyright policy. Authors must explicitly agree to CC BY 4.0.
   const [copyrightAgree, setCopyrightAgree] = useState(false);
+
+  // Reviewer referral code
+  const [searchParams] = useSearchParams();
+  const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
+  const [referralValid, setReferralValid] = useState<boolean | null>(null);
+  const [referralChecking, setReferralChecking] = useState(false);
+
+  useEffect(() => {
+    const code = searchParams.get("ref");
+    if (code) {
+      setReferralCode(code);
+      checkReferral(code);
+    }
+  }, [searchParams]);
+
+  const checkReferral = async (code: string) => {
+    if (!code.trim()) {
+      setReferralValid(null);
+      return;
+    }
+    setReferralChecking(true);
+    try {
+      const res = await validateReferralCode(code);
+      setReferralValid(res.valid);
+    } catch {
+      setReferralValid(false);
+    } finally {
+      setReferralChecking(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -314,11 +347,11 @@ export const Submit = () => {
       return;
     }
 
-    if (!vettingPaid || !processingPaid) {
+    if (!vettingPaid) {
       toast({
-        title: "Payment Required",
+        title: "Gate 1 Payment Required",
         description:
-          "Please pay both the vetting fee and publication fee before submitting.",
+          "Please pay the Gate 1 Evaluation Fee (₦5,000) before submitting.",
         variant: "destructive",
       });
       document
@@ -382,35 +415,27 @@ export const Submit = () => {
         corresponding_author_email: correspondingAuthorEmail,
         subject_area: subjectArea,
         cover_letter: coverLetter,
-        reviewer_suggestions: "",
+        reviewer_suggestions: referralCode ? `Reviewer Referral: ${referralCode}` : "",
         submission_type: "new",
         funding_info: fundingInfo || null,
         conflicts_of_interest: conflictsOfInterest || null,
         ai_consent: aiConsent,
         file: manuscriptFile || undefined,
-      });
+        ...(referralCode ? { referral_code: referralCode } : {}),
+      } as any);
 
-      // Verify both Paystack payments against the live API → writes fee flags to article
-      // NOTE: amount is intentionally omitted — the backend reads it directly
-      // from Paystack's own verify endpoint to prevent client-side tampering.
+      // Verify Gate 1 Evaluation Fee against the live API
       const articleId = result?.article?.id;
-      if (articleId) {
-        const verifyFee = (reference: string | null, type: string) => {
-          if (!reference) return Promise.resolve();
-          return api
-            .post("/api/payment/verify-payment", {
-              reference,
-              articleId,
-              type,
-            })
-            .catch((err) =>
-              console.error(`[payment] ${type} verify failed:`, err),
-            );
-        };
-        await Promise.all([
-          verifyFee(vettingReference, "vetting"),
-          verifyFee(processingReference, "processing"),
-        ]);
+      if (articleId && vettingReference) {
+        await api
+          .post("/api/payment/verify-payment", {
+            reference: vettingReference,
+            articleId,
+            type: "vetting",
+          })
+          .catch((err) =>
+            console.error("[payment] Gate 1 verify failed:", err),
+          );
       }
 
       clearDraft();
@@ -439,7 +464,9 @@ export const Submit = () => {
       case 3:
         return authors.every((a) => a.name && a.email && a.affiliation);
       case 4:
-        return ethicsAgree && vettingPaid && processingPaid;
+        return ethicsAgree && copyrightAgree && aiConsent;
+      case 5:
+        return vettingPaid;
       default:
         return false;
     }
@@ -455,7 +482,7 @@ export const Submit = () => {
     { n: "02", label: "Manuscript", done: isStepComplete(2) },
     { n: "03", label: "Authors", done: isStepComplete(3) },
     { n: "04", label: "Ethics", done: isStepComplete(4) },
-    { n: "05", label: "Fees", done: vettingPaid && processingPaid },
+    { n: "05", label: "Gate 1 Fee", done: vettingPaid },
     { n: "06", label: "Letter", done: coverLetter.trim().length > 50 },
   ];
 
@@ -467,38 +494,35 @@ export const Submit = () => {
 
   const calculatedFees = [
     {
-      label: "Manuscript Vetting",
-      amount: authorTrack === "local" ? "₦10,000" : "₦15,800 ($10.50 Est.)",
-      desc: "Editorial screening and peer-review coordination",
+      label: "Gate 1: Evaluation & Pre-Screening Fee",
+      amount: authorTrack === "local" ? "₦5,000" : "₦15,800 ($10.50 Est.)",
+      desc: "Mandatory fee covering the 24-hour Stage 2 Research Integrity Audit, plagiarism scan, AI-risk scoring, and citation validation.",
       paid: vettingPaid,
+      deferred: false,
       subunits:
-        authorTrack === "local" ? VETTING_FEE_LOCAL : VETTING_FEE_GLOBAL,
+        authorTrack === "local" ? GATE1_FEE_LOCAL : GATE1_FEE_GLOBAL,
       channels: authorTrack === "local" ? undefined : ["card"],
       feeType: "vetting",
       onPaid: (ref: string) => {
         setVettingReference(ref);
         setVettingPaid(true);
         persistDraftPatch({ vettingPaid: true, vettingReference: ref });
-        toast({ title: "Vetting Fee Paid" });
+        toast({ title: "Gate 1 Evaluation Fee Paid" });
       },
     },
     {
-      label: "Article Publication",
+      label: "Gate 2: Publication & Processing Charge (APC)",
       amount: authorTrack === "local" ? "₦25,500" : "₦43,200 ($30.00 Est.)",
-      desc: "Production, typesetting, and open-access hosting",
-      paid: processingPaid,
+      desc: "Unlocked and payable ONLY after clearing the Stage 2 Research Integrity Audit. Advances manuscript to peer review and 28th-day batch release.",
+      paid: false,
+      deferred: true,
       subunits:
         authorTrack === "local"
-          ? PUBLICATION_FEE_LOCAL
-          : PUBLICATION_FEE_GLOBAL,
+          ? GATE2_FEE_LOCAL
+          : GATE2_FEE_GLOBAL,
       channels: authorTrack === "local" ? undefined : ["card"],
       feeType: "publication",
-      onPaid: (ref: string) => {
-        setProcessingReference(ref);
-        setProcessingPaid(true);
-        persistDraftPatch({ processingPaid: true, processingReference: ref });
-        toast({ title: "Publication Fee Paid" });
-      },
+      onPaid: () => {},
     },
   ];
 
@@ -520,21 +544,24 @@ export const Submit = () => {
         <title>Submit Manuscript — IJSDS</title>
       </Helmet>
 
+      {/* 28-Day Monthly Batch Release Schedule */}
+      <div className="max-w-5xl mx-auto px-6 md:px-10 pt-4">
+        <BatchReleaseBanner />
+      </div>
+
       {/* Payment banner */}
-      {(!vettingPaid || !processingPaid) && (
+      {!vettingPaid && (
         <div className="sticky top-0 z-40 bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-6 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
             <div className="flex items-center gap-2 shrink-0">
               <AlertCircle size={13} className="text-amber-600 shrink-0" />
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-800">
-                Payment required
+                Gate 1 Evaluation Fee Required
               </span>
             </div>
             <p className="text-[11px] text-amber-700 flex-1">
-              Both fees must be paid before submitting. Track:{" "}
-              <strong className="uppercase">{authorTrack}</strong>
-              {vettingPaid && " — Vetting paid."}
-              {processingPaid && " — Publication paid."}
+              ₦5,000 Evaluation Fee required to initiate 24-hour Stage 2 Research Integrity Audit. Track:{" "}
+              <strong className="uppercase">{authorTrack}</strong>. Gate 2 (₦25,500 APC) is unlocked only after passing audit.
             </p>
             <button
               type="button"
@@ -1015,7 +1042,7 @@ export const Submit = () => {
 
           <div className="h-px bg-stone-200" />
 
-          {/* ── 05 Publication Fees ── */}
+          {/* ── 05 Two-Tier Payment Gates & Reviewer Referral ── */}
           <section
             id="payment-section"
             className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10"
@@ -1025,11 +1052,10 @@ export const Submit = () => {
                 05
               </p>
               <h3 className="font-headline text-lg font-black text-stone-900">
-                Publication Fees
+                Payment Gates
               </h3>
               <p className="text-xs text-stone-400 mt-2 leading-relaxed">
-                Processed securely via Paystack. Select appropriate billing
-                criteria below.
+                IJSDS operates a transparent Two-Tier Model (Total APC: ₦30,500). Gate 1 is paid now to initiate Stage 2 audit; Gate 2 is paid only upon passing.
               </p>
 
               <div className="mt-5 space-y-2">
@@ -1037,7 +1063,7 @@ export const Submit = () => {
                 <div className="flex bg-stone-100 p-1 rounded border border-stone-200 max-w-[220px]">
                   <button
                     type="button"
-                    disabled={vettingPaid || processingPaid}
+                    disabled={vettingPaid}
                     onClick={() => setAuthorTrack("local")}
                     className={`flex-1 text-center py-2 text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50 ${authorTrack === "local" ? "bg-white text-stone-900 shadow-sm" : "text-stone-400 hover:text-stone-600"}`}
                   >
@@ -1045,7 +1071,7 @@ export const Submit = () => {
                   </button>
                   <button
                     type="button"
-                    disabled={vettingPaid || processingPaid}
+                    disabled={vettingPaid}
                     onClick={() => setAuthorTrack("global")}
                     className={`flex-1 text-center py-2 text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50 ${authorTrack === "global" ? "bg-white text-stone-900 shadow-sm" : "text-stone-400 hover:text-stone-600"}`}
                   >
@@ -1055,27 +1081,67 @@ export const Submit = () => {
               </div>
 
               <div className="mt-6">
-                <p className={labelClass}>Total due</p>
+                <p className={labelClass}>Due Now (Gate 1)</p>
                 <p className="font-headline text-2xl font-black text-stone-900 mt-1">
-                  {authorTrack === "local" ? "₦35,500" : "₦59,000"}
+                  {authorTrack === "local" ? "₦5,000" : "₦15,800"}
+                </p>
+                <p className="text-[10px] text-stone-500 mt-0.5">
+                  + ₦25,500 Gate 2 due upon audit clearance
                 </p>
               </div>
             </div>
 
-            <div className="md:col-span-9 space-y-3">
-              {calculatedFees.map((fee) => (
+            <div className="md:col-span-9 space-y-4">
+              {/* Reviewer Referral Input */}
+              <div className="p-4 bg-primary/5 rounded border border-primary/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                    <Gift className="h-4 w-4 text-primary" /> Reviewer Referral Code (Optional)
+                  </label>
+                  {referralValid === true && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                      ✓ Valid Reviewer Referral
+                    </span>
+                  )}
+                  {referralValid === false && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 px-2 py-0.5 rounded">
+                      Invalid Code
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. IJSDS-REV-A8B9C"
+                    value={referralCode}
+                    onChange={(e) => {
+                      const val = e.target.value.toUpperCase();
+                      setReferralCode(val);
+                      checkReferral(val);
+                    }}
+                    className="flex-1 bg-white border border-stone-300 rounded px-3 py-2 text-xs font-mono tracking-wider focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <p className="text-[11px] text-stone-500">
+                  If referred by an active IJSDS peer reviewer, enter their referral code. The reviewer earns a ₦1,000 incentive upon final Gate 2 settlement (and is ethically excluded from reviewing your manuscript).
+                </p>
+              </div>
+
+              {calculatedFees.map((fee: any) => (
                 <div
-                  key={fee.feeType}
-                  className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 transition-colors ${fee.paid ? "bg-emerald-50" : "bg-stone-100"}`}
+                  key={fee.label}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 transition-colors rounded ${fee.paid ? "bg-emerald-50 border border-emerald-200" : fee.deferred ? "bg-stone-50/70 border border-dashed border-stone-300" : "bg-stone-100 border border-stone-200"}`}
                 >
                   <div className="flex-1 min-w-0 flex items-start gap-3">
                     {fee.paid ? (
                       <CheckCircle2
-                        size={15}
+                        size={16}
                         className="text-emerald-500 mt-0.5 shrink-0"
                       />
+                    ) : fee.deferred ? (
+                      <div className="w-4 h-4 mt-0.5 rounded-full border-2 border-dashed border-stone-400 shrink-0" />
                     ) : (
-                      <div className="w-3.5 h-3.5 mt-0.5 rounded-full border-2 border-stone-300 shrink-0" />
+                      <div className="w-4 h-4 mt-0.5 rounded-full border-2 border-stone-300 shrink-0" />
                     )}
                     <div>
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-500">
@@ -1084,7 +1150,7 @@ export const Submit = () => {
                       <p className="font-headline text-lg font-black text-stone-900">
                         {fee.amount}
                       </p>
-                      <p className="text-xs text-stone-400 mt-0.5">
+                      <p className="text-xs text-stone-500 mt-0.5 leading-relaxed">
                         {fee.desc}
                       </p>
                     </div>
@@ -1092,6 +1158,10 @@ export const Submit = () => {
                   {fee.paid ? (
                     <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-100 px-3 py-2 shrink-0">
                       <CheckCircle2 size={11} /> Paid
+                    </span>
+                  ) : fee.deferred ? (
+                    <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-stone-500 bg-stone-200/80 px-3 py-2 shrink-0">
+                      Billed Post-Audit
                     </span>
                   ) : (
                     <Paystackbtn
@@ -1107,6 +1177,11 @@ export const Submit = () => {
                               value: fee.feeType,
                             },
                             {
+                              display_name: "Gate",
+                              variable_name: "gate",
+                              value: "GATE_1",
+                            },
+                            {
                               display_name: "Submitter",
                               variable_name: "submitter_id",
                               value: user!.id,
@@ -1115,6 +1190,11 @@ export const Submit = () => {
                               display_name: "Billing Track",
                               variable_name: "billing_track",
                               value: authorTrack,
+                            },
+                            {
+                              display_name: "Referral Code",
+                              variable_name: "referral_code",
+                              value: referralCode || "",
                             },
                           ],
                         },
@@ -1125,14 +1205,14 @@ export const Submit = () => {
                   )}
                 </div>
               ))}
-              {vettingPaid && processingPaid && (
-                <div className="flex items-center gap-2.5 px-5 py-3 bg-emerald-50">
+              {vettingPaid && (
+                <div className="flex items-center gap-2.5 px-5 py-3 bg-emerald-50 border border-emerald-200 rounded">
                   <CheckCircle2
-                    size={14}
+                    size={15}
                     className="text-emerald-600 shrink-0"
                   />
                   <p className="text-sm font-bold text-emerald-800">
-                    All fees paid — submission is unlocked.
+                    Gate 1 Evaluation Fee paid — manuscript submission is unlocked.
                   </p>
                 </div>
               )}
@@ -1192,18 +1272,18 @@ export const Submit = () => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading || !vettingPaid || !processingPaid}
+            disabled={loading || !vettingPaid}
             title={
-              !vettingPaid || !processingPaid
-                ? "Pay both fees to unlock"
+              !vettingPaid
+                ? "Pay Gate 1 Evaluation Fee to unlock submission"
                 : undefined
             }
             className="bg-primary hover:bg-[#8f3514] text-white px-8 py-4 font-bold uppercase tracking-[0.2em] text-xs transition-colors flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading
               ? "Submitting…"
-              : !vettingPaid || !processingPaid
-                ? "Pay Fees to Submit"
+              : !vettingPaid
+                ? "Pay Gate 1 to Submit"
                 : "Submit Article"}
             {!loading && <ArrowRight size={15} />}
           </button>

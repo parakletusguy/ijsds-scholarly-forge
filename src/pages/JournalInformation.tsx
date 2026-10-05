@@ -35,8 +35,8 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
     label: 'Publication frequency',
     value: (
       <>
-        <strong className="text-stone-800">Quarterly — four issues per year</strong>, released in March, June,
-        September and December.
+        <strong className="text-stone-800">Monthly — released on the 28th of every month</strong> at 23:59 WAT,
+        operating on a strict 28-day batch publication schedule.
       </>
     ),
   },
@@ -44,8 +44,8 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
     label: 'Time to publication',
     value: (
       <>
-        Approximately <strong className="text-stone-800">8–12 weeks</strong> on average from submission to
-        publication, for manuscripts accepted after review.
+        Predictable <strong className="text-stone-800">28-day monthly batch cycle</strong>. Manuscripts passing
+        Stage 2 integrity screening and peer review before the 27th monthly cutoff are published on the 28th.
       </>
     ),
   },
@@ -78,9 +78,9 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
     label: 'Article processing charges',
     value: (
       <>
-        No submission fee. Charges apply only on acceptance:{' '}
-        <strong className="text-stone-800">₦10,000</strong> manuscript vetting and{' '}
-        <strong className="text-stone-800">₦25,500</strong> publication.{' '}
+        Two-Tier Model:{' '}
+        <strong className="text-stone-800">₦5,000</strong> Gate 1 evaluation fee at submission and{' '}
+        <strong className="text-stone-800">₦25,500</strong> Gate 2 APC upon acceptance (Total: ₦30,500).{' '}
         <Link to="/openAccess" className="text-primary hover:underline">Full fee schedule</Link>.
       </>
     ),

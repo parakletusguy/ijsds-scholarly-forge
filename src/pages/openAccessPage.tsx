@@ -91,37 +91,34 @@ export default function OpenAccessPage() {
 
           <section>
             <h2 className="font-headline text-xl font-bold text-stone-900 tracking-tight mb-3">
-              Article Processing Charges
+              Article Processing Charges (Two-Tier Model)
             </h2>
             <p>
-              To cover the costs of peer review management, copyediting, and digital production, IJSDS charges 
-              a fee upon acceptance of a manuscript. There is no fee to submit or to be considered for publication — 
-              charges apply only when an article has been accepted.
+              To maintain academic independence, rigorous research integrity screening, and open access dissemination, IJSDS operates a transparent Two-Tier Article Processing Charge (APC) model totaling ₦30,500. Gate 1 is paid upon initial submission to cover Stage 2 citation audits and anti-plagiarism screening. Gate 2 is payable strictly after the manuscript clears the integrity stack and receives peer review acceptance.
             </p>
             <div className="mt-5 bg-white border border-stone-200 rounded-sm overflow-hidden overflow-x-auto">
               <table className="w-full text-sm min-w-[280px]">
                 <thead>
                   <tr className="bg-stone-50 border-b border-stone-200">
-                    <th className="text-left px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Fee Type</th>
+                    <th className="text-left px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Fee Tier</th>
+                    <th className="text-left px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Timing</th>
                     <th className="text-right px-5 py-3 font-semibold text-stone-700 tracking-wide text-xs uppercase">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   <tr>
-                    <td className="px-5 py-3.5 text-stone-700">Submission Fee</td>
-                    <td className="px-5 py-3.5 text-right font-medium text-stone-500">None</td>
+                    <td className="px-5 py-3.5 text-stone-700 font-medium">Gate 1: Initial Evaluation Fee</td>
+                    <td className="px-5 py-3.5 text-stone-500 text-xs">At submission (Stage 1 ingestion & Stage 2 integrity screening)</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦5,000</td>
                   </tr>
                   <tr>
-                    <td className="px-5 py-3.5 text-stone-700">Manuscript Vetting Fee</td>
-                    <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦10,000</td>
-                  </tr>
-                  <tr>
-                    <td className="px-5 py-3.5 text-stone-700">Article Publication Fee (APC)</td>
+                    <td className="px-5 py-3.5 text-stone-700 font-medium">Gate 2: Publication Fee (APC)</td>
+                    <td className="px-5 py-3.5 text-stone-500 text-xs">Only after peer review acceptance & prior to 28th batch release</td>
                     <td className="px-5 py-3.5 text-right font-semibold text-stone-900">₦25,500</td>
                   </tr>
                   <tr className="bg-stone-50">
-                    <td className="px-5 py-3.5 text-stone-700 font-semibold">Total</td>
-                    <td className="px-5 py-3.5 text-right font-bold text-stone-900">₦35,500</td>
+                    <td className="px-5 py-3.5 text-stone-700 font-semibold" colSpan={2}>Total Cost</td>
+                    <td className="px-5 py-3.5 text-right font-bold text-stone-900">₦30,500</td>
                   </tr>
                 </tbody>
               </table>

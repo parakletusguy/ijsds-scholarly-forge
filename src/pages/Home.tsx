@@ -6,6 +6,7 @@ import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
 import { getBlogPosts, BlogPost } from '@/lib/blogService';
 import { formatDate } from '@/lib/dateUtils';
+import { BatchReleaseBanner } from '@/components/ijsds2/BatchReleaseBanner';
 import mina from "../images/editors/Mina.jpeg"
 import logo from "/public/Logo_Black_Edited-removebg-preview.png"
 
@@ -74,7 +75,7 @@ export const Home = () => {
             <span className="italic text-primary">Rigorous Research.</span>
           </h1>
           <p className="text-base sm:text-lg md:text-2xl text-stone-500 mb-10 leading-relaxed max-w-3xl mx-auto italic">
-            Published quarterly, IJSDS provides a global platform for original social work and development research.
+            Published monthly on a rigorous 28-day batch release cycle, IJSDS provides a global platform for original social work and development research.
           </p>
           
           <div className="flex flex-col items-center gap-8">
@@ -107,6 +108,11 @@ export const Home = () => {
           </div>
         </div>
       </header>
+
+      {/* 28-Day Monthly Batch Publication Banner */}
+      <div className="container mx-auto px-4 sm:px-8 -mt-6 mb-4 relative z-20">
+        <BatchReleaseBanner />
+      </div>
 
 
       {/* ── Current Issues — Editorial Grid ──────────────────────────────── */}

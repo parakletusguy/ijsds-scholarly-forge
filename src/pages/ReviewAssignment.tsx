@@ -11,6 +11,8 @@ import { toast } from '@/hooks/use-toast';
 import { Users, Mail, BookOpen, ArrowLeft, ShieldCheck, GraduationCap, ChevronRight, UserCheck, Search, Activity } from 'lucide-react';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
+import { matchReviewersForManuscript, type ReviewerMatchCandidate } from '@/lib/ijsds2/reviewerMatching';
+
 interface Reviewer {
   id: string;
   full_name: string;
@@ -34,6 +36,7 @@ export const ReviewAssignment = () => {
   const navigate = useNavigate();
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
+  const [matchedCandidates, setMatchedCandidates] = useState<ReviewerMatchCandidate[]>([]);
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [assigning, setAssigning] = useState(false);
@@ -46,12 +49,14 @@ export const ReviewAssignment = () => {
 
   const fetchData = async () => {
     try {
-      const [submissionData, reviewersData] = await Promise.all([
+      const [submissionData, reviewersData, matchData] = await Promise.all([
         getSubmission(submissionId!),
         getProfiles({ is_reviewer: true }),
+        matchReviewersForManuscript(submissionId!, 5).catch(() => []),
       ]);
       setSubmission(submissionData as unknown as Submission);
       setReviewers(reviewersData);
+      setMatchedCandidates(matchData);
     } catch (error: any) {
       toast({ title: "Couldn't load page", description: 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally { setLoadingData(false); }
@@ -125,6 +130,24 @@ export const ReviewAssignment = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Reviewer selection */}
           <div className="lg:col-span-2 space-y-4">
+            {/* Stage 3 Vector Matching & COPE COI Firewall Banner */}
+            <div className="bg-white border border-stone-200 p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-stone-900">
+                    Stage 3 Reviewer Vector Matching & COPE COI Firewall
+                  </p>
+                  <p className="text-[11px] text-stone-500">
+                    Reviewers ranked by expertise vector similarity against the manuscript abstract. Referring reviewers are strictly excluded.
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase font-mono shrink-0">
+                COPE Active
+              </Badge>
+            </div>
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
               <input
@@ -143,6 +166,10 @@ export const ReviewAssignment = () => {
             ) : (
               filtered.map((reviewer) => {
                 const selected = selectedReviewers.includes(reviewer.id);
+                const match = matchedCandidates.find(
+                  (m) => m.reviewerId === reviewer.id || m.userId === reviewer.id
+                );
+
                 return (
                   <label
                     key={reviewer.id}
@@ -156,7 +183,19 @@ export const ReviewAssignment = () => {
                       className="mt-0.5 rounded-none border-stone-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-stone-800">{reviewer.full_name}</p>
+                      <div className="flex items-center gap-2 flex-wrap justify-between">
+                        <p className="text-sm font-semibold text-stone-800">{reviewer.full_name}</p>
+                        {match && (
+                          <div className="flex items-center gap-1.5">
+                            <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px] font-mono">
+                              🎯 Match: {(match.similarityScore * 100).toFixed(0)}%
+                            </Badge>
+                            <Badge variant="outline" className="text-[10px]">
+                              Load: {match.activeLoad}/3
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
                       <p className="text-xs text-stone-400 flex items-center gap-1.5 mt-0.5">
                         <Mail size={11} className="shrink-0" /> {reviewer.email}
                       </p>

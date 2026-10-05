@@ -1,14 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { BookOpen, CheckSquare, ArrowLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, CheckSquare, ArrowLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
+import { MonthlyBatchReleaseModal } from '@/components/ijsds2/MonthlyBatchReleaseModal';
 
 export const AdminDashboard = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
   const isAdmin = !!profile?.is_admin;
   const isEditor = !!profile?.is_editor;
 
@@ -22,6 +24,13 @@ export const AdminDashboard = () => {
   }, [user, profile, loading, navigate]);
 
   const adminCards = [
+    {
+      title: '28th Monthly Batch Release',
+      description: 'Review manuscripts ready for release, monitor 27th cutoff, and trigger monthly publication batches.',
+      icon: Calendar,
+      onClick: () => setBatchModalOpen(true),
+      roles: ['admin', 'editor'],
+    },
     {
       title: 'Blog',
       description: 'Create, edit, and publish posts on the journal blog.',
@@ -50,7 +59,7 @@ export const AdminDashboard = () => {
         title="Admin"
         subtitle="Dashboard"
         accent="Administration"
-        description="Manage blog posts and review access requests."
+        description="Manage batch release cycles, blog posts, and access requests."
       />
 
       <ContentSection dark>
@@ -68,7 +77,7 @@ export const AdminDashboard = () => {
             return (
               <button
                 key={card.title}
-                onClick={() => navigate(card.url)}
+                onClick={() => card.onClick ? card.onClick() : navigate(card.url!)}
                 className="text-left bg-white border border-stone-200 p-6 hover:border-primary transition-colors group"
               >
                 <div className="w-11 h-11 bg-primary/10 text-primary flex items-center justify-center mb-6">
@@ -83,6 +92,11 @@ export const AdminDashboard = () => {
             );
           })}
         </div>
+
+        <MonthlyBatchReleaseModal
+          open={batchModalOpen}
+          onOpenChange={setBatchModalOpen}
+        />
 
         <p className="mt-10 text-sm text-stone-500 max-w-xl">
           These tools are also available from the sidebar. Keep member roles up to date under Access Requests.

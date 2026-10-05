@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
+import { BatchReleaseBanner } from '@/components/ijsds2/BatchReleaseBanner';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -120,12 +121,17 @@ export const Dashboard = () => {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 animate-fade-in-up">
       {/* Welcome Header */}
-      <header className="mb-16">
+      <header className="mb-8">
         <p className="text-primary font-label text-xs uppercase tracking-[0.3em] mb-4">Account Dashboard</p>
         <h3 className="text-4xl md:text-5xl font-headline text-stone-900 max-w-2xl leading-tight">
           Manage your research and submissions.
         </h3>
       </header>
+
+      {/* 28-Day Monthly Batch Publication Banner */}
+      <div className="mb-12">
+        <BatchReleaseBanner />
+      </div>
 
       {/* Metrics Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16">
@@ -283,32 +289,44 @@ export const Dashboard = () => {
         {/* Registry Continuity & Efficiency */}
         <section className="hidden md:block">
           <div className="bg-stone-100 p-10 h-full border-t border-primary/10">
-            <h4 className="font-headline text-xl mb-8 uppercase tracking-tighter">How It Works</h4>
-            <p className="text-stone-500 max-w-md mx-auto italic font-body text-lg">
-              Every submission goes through the same clear, three-step process.
+            <h4 className="font-headline text-xl mb-4 uppercase tracking-tighter">IJSDS 2.0 Workflow</h4>
+            <p className="text-stone-500 mb-8 italic font-body text-sm leading-relaxed">
+              Every submission moves through our transparent 4-stage publication pipeline.
             </p>
             
-            <div className="space-y-12 relative">
+            <div className="space-y-8 relative">
               <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-stone-200"></div>
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-primary border-4 border-stone-100"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Step 1: Submit</h6>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Stage 1: Gate 1 Ingestion</h6>
                 <p className="text-[10px] text-stone-400 leading-relaxed">
-                  Upload your manuscript and submit it for editorial screening.
+                  Manuscript upload and initial ₦5,000 evaluation fee. 24/7 continuous intake.
+                </p>
+              </div>
+              
+              <div className="relative pl-8">
+                <div className="absolute left-0 top-1 w-4 h-4 bg-stone-400 border-4 border-stone-100"></div>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Stage 2: Integrity Stack</h6>
+                <p className="text-[10px] text-stone-400 leading-relaxed">
+                  24h cooldown audit: Crossref citation check, plagiarism overlap, and AI authorship risk signals.
                 </p>
               </div>
               
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-stone-300 border-4 border-stone-100"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Step 2: Peer Review</h6>
-                <p className="text-[10px] text-stone-400 leading-relaxed">Double-blind review by our expert reviewers.</p>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Stage 3: Review & Gate 2</h6>
+                <p className="text-[10px] text-stone-400 leading-relaxed">
+                  pgvector blind reviewer matching with COPE firewall. Gate 2 APC (₦25,500) only payable upon acceptance.
+                </p>
               </div>
-              
+
               <div className="relative pl-8">
                 <div className="absolute left-0 top-1 w-4 h-4 bg-stone-300 border-4 border-stone-100"></div>
-                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Step 3: Publication</h6>
-                <p className="text-[10px] text-stone-400 leading-relaxed">Your article is published, permanently archived, and citable.</p>
+                <h6 className="text-[10px] font-label font-bold uppercase tracking-[0.2em] mb-1">Stage 4: 28th Batch Release</h6>
+                <p className="text-[10px] text-stone-400 leading-relaxed">
+                  Monthly batch publishing at 23:59 WAT on the 28th. DOI registration and archive syndication.
+                </p>
               </div>
             </div>
 
