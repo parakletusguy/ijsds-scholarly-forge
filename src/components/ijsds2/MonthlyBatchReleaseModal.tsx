@@ -18,12 +18,8 @@ import {
   Send,
   FileCheck,
 } from "lucide-react";
-import {
-  getBatchCycleStatus,
-  executeMonthlyPublicationBatch,
-  type MonthlyBatchReleaseResult,
-} from "@/lib/ijsds2/monthlyBatchEngine";
-import { supabase } from "@/integrations/supabase/client";
+import { getBatchStatus, executeMonthlyBatch } from "@/lib/ijsds2/api";
+import type { BatchStatus, MonthlyBatchReleaseResult } from "@/types/ijsds2";
 import { toast } from "@/hooks/use-toast";
 
 interface MonthlyBatchReleaseModalProps {
@@ -35,9 +31,7 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
   open,
   onOpenChange,
 }) => {
-  const cycle = getBatchCycleStatus();
-  const [readyCount, setReadyCount] = useState<number>(0);
-  const [inProgressCount, setInProgressCount] = useState<number>(0);
+  const [status, setStatus] = useState<BatchStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [executing, setExecuting] = useState(false);
   const [result, setResult] = useState<MonthlyBatchReleaseResult | null>(null);
@@ -52,30 +46,10 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
   const fetchBatchCounts = async () => {
     setLoading(true);
     try {
-      const { count: ready } = await supabase
-        .from("manuscripts" as any)
-        .select("id", { count: "exact", head: true })
-        .eq("current_state", "READY_FOR_RELEASE");
-
-      const { count: progress } = await supabase
-        .from("manuscripts" as any)
-        .select("id", { count: "exact", head: true })
-        .in("current_state", [
-          "IN_AUDIT",
-          "AUDIT_REVISION_REQUESTED",
-          "AUDIT_PASSED_PENDING_APC",
-          "APC_PAID",
-          "REVIEWER_MATCHED",
-          "IN_PEER_REVIEW",
-          "AUTHOR_REVISION_REQUESTED",
-          "ACCEPTED",
-          "IN_PRODUCTION",
-        ]);
-
-      setReadyCount(ready || 0);
-      setInProgressCount(progress || 0);
+      setStatus(await getBatchStatus());
     } catch (err) {
-      console.error("Error fetching batch counts:", err);
+      console.error("Error fetching batch status:", err);
+      toast({ title: "Could not load the publication queue", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -84,11 +58,12 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
   const handleExecute = async () => {
     setExecuting(true);
     try {
-      const res = await executeMonthlyPublicationBatch();
+      // Runs on the server (admin-only, advisory-locked). Never computed in the browser.
+      const res = await executeMonthlyBatch();
       setResult(res);
       toast({
         title: "Publication Batch Executed",
-        description: `Published ${res.publishedCount} manuscripts for Issue #${res.targetMonth}. Rolled over ${res.rolledOverCount} in-progress manuscripts.`,
+        description: `Published ${res.publishedCount} manuscripts for Issue #${res.targetMonth}. Rolled over ${res.rolledOverCount} in-progress manuscripts.${res.skipped.length ? ` ${res.skipped.length} skipped — see the report.` : ""}`,
       });
       fetchBatchCounts();
     } catch (err: any) {
@@ -106,7 +81,10 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  const targetMonthName = monthNames[cycle.currentCycleMonth - 1];
+  const cycle = status;
+  const readyCount = status?.readyCount ?? 0;
+  const inProgressCount = status?.inProgressCount ?? 0;
+  const targetMonthName = cycle ? monthNames[cycle.targetMonth - 1] : "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,7 +100,7 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
             </Badge>
           </div>
           <DialogDescription>
-            Target Issue: {targetMonthName} {cycle.currentCycleYear} Edition
+            Target Issue: {targetMonthName} {cycle?.targetYear} Edition
           </DialogDescription>
         </DialogHeader>
 
@@ -138,8 +116,7 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
                 Monthly Batch Successfully Published
               </h4>
               <p className="text-xs mt-1 leading-relaxed">
-                Volume #{Math.max(1, result.targetYear - 2024)}, Issue #{result.targetMonth} has been minted. 
-                DOIs and JATS XML metadata are prepared for Crossref/DOAJ broadcast.
+                Issue #{result.targetMonth} of {result.targetYear} was released. Papers keep the DOI minted at Stage 6; the batch never creates one.
               </p>
             </div>
 
@@ -162,6 +139,15 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
               </div>
             </div>
 
+            {result.skipped.length > 0 && (
+              <div className="p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-xs space-y-1">
+                <p className="font-bold flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" /> {result.skipped.length} manuscript(s) were not published and stay in READY_FOR_RELEASE</p>
+                <ul className="list-disc list-inside text-muted-foreground">
+                  {result.skipped.map((x) => (<li key={x.manuscriptId}>{x.manuscriptId.slice(0, 8)}… — {x.reason}</li>))}
+                </ul>
+              </div>
+            )}
+
             <div className="flex justify-end pt-3 border-t">
               <Button onClick={() => onOpenChange(false)}>Close</Button>
             </div>
@@ -174,7 +160,7 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
                   Days to 28th Release
                 </span>
                 <p className="text-xl font-bold font-mono text-primary mt-1">
-                  {cycle.daysUntilRelease} Days
+                  {cycle?.daysUntilRelease ?? "—"} Days
                 </p>
               </div>
               <div className="border rounded-lg p-3 bg-muted/30">
@@ -182,7 +168,7 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
                   Cutoff Status (27th 23:59)
                 </span>
                 <p className="text-sm font-semibold mt-1">
-                  {cycle.isCutoffPassed ? (
+                  {cycle?.isCutoffPassed ? (
                     <span className="text-amber-600 font-bold">Cutoff Passed</span>
                   ) : (
                     <span className="text-emerald-600 font-bold">Open for Batch</span>
@@ -211,7 +197,7 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
                   • Currently <strong className="text-foreground">{inProgressCount} in-progress manuscripts</strong> (under review or revision) will seamlessly roll over to the next month's batch without losing state.
                 </li>
                 <li>
-                  • Publishing assigns Volume and Issue numbers, assigns DOIs, and prepares indexer broadcasts.
+                  • Publishing marks each paper PUBLISHED, sets its volume/issue and publication date, emails the author and notifies search engines. Papers without a registered DOI are skipped, never given a placeholder one.
                 </li>
               </ul>
             </div>

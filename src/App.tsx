@@ -59,6 +59,9 @@ const EthicalGuidelines = lazy(() => import('./pages/EthicalGuidelines').then(m 
 const AdminBlogManagement = lazy(() => import('./pages/AdminBlogManagement').then(m => ({ default: m.AdminBlogManagement })));
 const EditBlogPost = lazy(() => import('./pages/EditBlogPost').then(m => ({ default: m.EditBlogPost })));
 const ImportNewsletterBlog = lazy(() => import('./pages/ImportNewsletterBlog').then(m => ({ default: m.ImportNewsletterBlog })));
+const AuditReviewQueue = lazy(() => import('./pages/AuditReviewQueue').then(m => ({ default: m.AuditReviewQueue })));
+const IntegritySettings = lazy(() => import('./pages/IntegritySettings').then(m => ({ default: m.IntegritySettings })));
+const ReferralPayouts = lazy(() => import('./pages/ReferralPayouts').then(m => ({ default: m.ReferralPayouts })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
@@ -163,6 +166,9 @@ const App = () => (
                     <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
                     <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
                     <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
+                    <Route path="/editorial/audits" element={<PageLayout><AuditReviewQueue /></PageLayout>} />
+                    <Route path="/admin/integrity" element={<PageLayout><IntegritySettings /></PageLayout>} />
+                    <Route path="/admin/payouts" element={<PageLayout><ReferralPayouts /></PageLayout>} />
                     <Route path="/admin" element={<PageLayout><AdminDashboard /></PageLayout>} />
                     <Route path="/admin/blog" element={<PageLayout><AdminBlogManagement /></PageLayout>} />
                     <Route path="/admin/blogs" element={<PageLayout><AdminBlogManagement /></PageLayout>} />

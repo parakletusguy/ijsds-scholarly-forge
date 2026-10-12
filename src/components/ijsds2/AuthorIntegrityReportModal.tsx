@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { AuthorAuditReport } from "@/types/ijsds2";
+import { setRecommendationSelected } from "@/lib/ijsds2/api";
+import { toast } from "@/hooks/use-toast";
 
 interface AuthorIntegrityReportModalProps {
   open: boolean;
@@ -36,7 +38,26 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
   onProceedToGate2,
   onUploadRevision,
 }) => {
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
   if (!report) return null;
+
+  const summary =
+    report.decision === "AUDIT_PASSED_PENDING_APC"
+      ? "Your manuscript cleared Stage 2. You can now pay Gate 2 (₦25,500 APC) to advance to peer review."
+      : report.decision === "AUDIT_REVISION_REQUESTED"
+      ? "Stage 2 completed with revisions required. Address the items below and re-upload your manuscript — this does not incur another evaluation fee."
+      : report.decision === "AUDIT_REJECTED"
+      ? "Stage 2 found issues that prevent this manuscript from proceeding to peer review. A new submission requires a new Gate 1 evaluation fee."
+      : "This audit has no final decision yet.";
+
+  const toggleRecommendation = async (id: string, current: boolean) => {
+    try {
+      await setRecommendationSelected(id, !current);
+      setSelected((prev) => ({ ...prev, [id]: !current }));
+    } catch (e: any) {
+      toast({ title: "Couldn't save your choice", description: e?.message, variant: "destructive" });
+    }
+  };
 
   const isPassed = report.decision === "AUDIT_PASSED_PENDING_APC";
   const isRevision = report.decision === "AUDIT_REVISION_REQUESTED";
@@ -54,11 +75,9 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
               </DialogTitle>
               <DialogDescription>
                 Revision #{report.revisionNo} • Evaluated on{" "}
-                {new Date(report.generatedAt).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {report.generatedAt
+                  ? new Date(report.generatedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+                  : "—"}
               </DialogDescription>
             </div>
             {isPassed && (
@@ -92,7 +111,7 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
               : "bg-destructive/10 border-destructive/30 text-destructive dark:text-red-300"
           }`}
         >
-          <p className="font-medium">{report.summary}</p>
+          <p className="font-medium">{summary}</p>
         </div>
 
         {/* Actionable Requirements (if any) */}
@@ -117,11 +136,11 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
                 <BookOpen className="h-4 w-4 text-primary" /> Plagiarism & Similarity
               </h4>
               <Badge variant="outline" className="font-mono text-xs">
-                {(report.plagiarism.score * 100).toFixed(1)}% Overlap (Risk: {report.plagiarism.risk})
+                Similarity risk: {report.plagiarism.risk ?? "n/a"}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Provider: {report.plagiarism.provider} (Bibliography excluded)
+              Provider: {report.plagiarism.provider ?? "n/a"} ({report.plagiarism.exclusions})
             </p>
             {report.plagiarism.matches.length > 0 ? (
               <div className="space-y-2 pt-1">
@@ -147,10 +166,12 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
                 <Cpu className="h-4 w-4 text-primary" /> AI Authorship Risk Signal
               </h4>
               <Badge variant="outline" className="font-mono text-xs">
-                Risk Band: {report.aiAuthorship.riskBand}
+                Risk Band: {report.aiAuthorship.riskBand ?? "n/a"}
+                {typeof report.aiAuthorship.score === "number" ? ` (${(report.aiAuthorship.score * 100).toFixed(0)}%)` : ""}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground leading-normal">
+              {report.aiAuthorship.provider ? `${report.aiAuthorship.provider} ${report.aiAuthorship.modelVersion ?? ""} — ` : ""}
               {report.aiAuthorship.disclaimer}
             </p>
             {report.aiAuthorship.flaggedSegments.length > 0 ? (
@@ -171,6 +192,13 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
           </div>
         </div>
 
+        {report.orphanedMarkers.length > 0 && (
+          <div className="p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-xs">
+            <span className="font-semibold">In-text citations with no bibliography entry:</span>{" "}
+            <span className="font-mono">{report.orphanedMarkers.join(", ")}</span>
+          </div>
+        )}
+
         {/* Citation Validation Ledger */}
         <div className="border rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -184,9 +212,9 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
 
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
             {report.citationLedger.map((c, idx) => (
-              <div key={idx} className="bg-muted/30 p-2.5 rounded border text-xs space-y-1.5">
+              <div key={c.id} className="bg-muted/30 p-2.5 rounded border text-xs space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold">[{c.bibliographyIndex}] {c.normalizedTitle || "Reference"}</span>
+                  <span className="font-semibold">[{c.bibliographyIndex ?? idx + 1}] Reference</span>
                   <Badge
                     variant="outline"
                     className={`text-[10px] shrink-0 ${
@@ -228,11 +256,11 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
               <h4 className="text-sm font-semibold flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" /> Recommended Related Works (Citation Graph)
               </h4>
-              <span className="text-[11px] text-muted-foreground">Author Suggestions Only</span>
+              <span className="text-[11px] text-muted-foreground">{report.disclaimer}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {report.relatedRecommendations.map((rec, idx) => (
-                <div key={idx} className="p-2.5 rounded border bg-card text-xs space-y-1">
+              {report.relatedRecommendations.map((rec) => (
+                <div key={rec.id} className="p-2.5 rounded border bg-card text-xs space-y-1">
                   <div className="flex justify-between items-start gap-2">
                     <p className="font-medium text-foreground">{rec.title}</p>
                     <Badge variant="secondary" className="text-[10px] shrink-0">
@@ -241,16 +269,25 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
                   </div>
                   {rec.year && <p className="text-[11px] text-muted-foreground">Published: {rec.year}</p>}
                   {rec.reason && <p className="text-[11px] italic text-muted-foreground">{rec.reason}</p>}
-                  {rec.doi && (
+                  {(rec.doi || rec.externalWorkId) && (
                     <a
-                      href={`https://doi.org/${rec.doi}`}
+                      href={rec.doi ? `https://doi.org/${rec.doi}` : rec.externalWorkId!}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
                     >
-                      View on Crossref <ExternalLink className="h-2.5 w-2.5" />
+                      {rec.doi ? `DOI: ${rec.doi}` : "View on OpenAlex"} <ExternalLink className="h-2.5 w-2.5" />
                     </a>
                   )}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => toggleRecommendation(rec.id, selected[rec.id] ?? !!rec.selected)}
+                      className="text-[11px] underline text-muted-foreground hover:text-foreground"
+                    >
+                      {(selected[rec.id] ?? !!rec.selected) ? "Marked as useful ✓" : "Mark as useful"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

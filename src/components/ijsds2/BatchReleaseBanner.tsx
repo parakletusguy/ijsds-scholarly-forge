@@ -1,16 +1,24 @@
-import React, { useMemo } from "react";
-import { getBatchCycleStatus } from "@/lib/ijsds2/monthlyBatchEngine";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getBatchCycle } from "@/lib/ijsds2/api";
 import { Calendar, Clock, AlertCircle, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const BatchReleaseBanner: React.FC<{ className?: string }> = ({ className = "" }) => {
-  const cycle = useMemo(() => getBatchCycleStatus(), []);
+  // Single source of truth for the WAT calendar is the server (ijsds2/calendar.js).
+  const { data: cycle } = useQuery({
+    queryKey: ["ijsds2", "cycle"],
+    queryFn: getBatchCycle,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!cycle) return null; // loading or API unavailable: show nothing rather than guess
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  const targetMonthName = monthNames[cycle.currentCycleMonth - 1];
+  const targetMonthName = monthNames[cycle.targetMonth - 1];
 
   return (
     <div
@@ -28,7 +36,7 @@ export const BatchReleaseBanner: React.FC<{ className?: string }> = ({ className
             </Badge>
           </div>
           <h3 className="text-base font-semibold text-foreground">
-            Target Issue: {targetMonthName} {cycle.currentCycleYear} Edition (28th Release)
+            Target Issue: {targetMonthName} {cycle.targetYear} Edition (28th Release)
           </h3>
           <p className="text-xs text-muted-foreground max-w-xl">
             Papers completing peer review, production, and APC clearance before{" "}

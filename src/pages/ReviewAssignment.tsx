@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getSubmission } from '@/lib/submissionService';
 import { getProfiles } from '@/lib/profileService';
-import { createReview } from '@/lib/reviewService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,7 +10,8 @@ import { toast } from '@/hooks/use-toast';
 import { Users, Mail, BookOpen, ArrowLeft, ShieldCheck, GraduationCap, ChevronRight, UserCheck, Search, Activity } from 'lucide-react';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
-import { matchReviewersForManuscript, type ReviewerMatchCandidate } from '@/lib/ijsds2/reviewerMatching';
+import { matchReviewers, assignReviewers as assignReviewersApi } from '@/lib/ijsds2/api';
+import type { ReviewerMatchCandidate } from '@/types/ijsds2';
 
 interface Reviewer {
   id: string;
@@ -52,7 +52,7 @@ export const ReviewAssignment = () => {
       const [submissionData, reviewersData, matchData] = await Promise.all([
         getSubmission(submissionId!),
         getProfiles({ is_reviewer: true }),
-        matchReviewersForManuscript(submissionId!, 5).catch(() => []),
+        matchReviewers(submissionId!, 5).then((r) => r.candidates).catch(() => [] as ReviewerMatchCandidate[]),
       ]);
       setSubmission(submissionData as unknown as Submission);
       setReviewers(reviewersData);
@@ -75,20 +75,13 @@ export const ReviewAssignment = () => {
 
     setAssigning(true);
     try {
-      const defaultDeadline = new Date();
-      defaultDeadline.setDate(defaultDeadline.getDate() + 21);
-      const deadlineDate = defaultDeadline.toISOString().split('T')[0];
-
-      await Promise.all(
-        selectedReviewers.map(reviewerId =>
-          createReview({ submission_id: submissionId!, reviewer_id: reviewerId, deadline_date: deadlineDate })
-        )
-      );
+      // Server re-checks the COPE firewall and workload cap, then creates the invitations.
+      await assignReviewersApi(submissionId!, selectedReviewers);
 
       toast({ title: 'Reviewers assigned', description: `${selectedReviewers.length} reviewer(s) assigned.` });
       navigate('/editorial');
     } catch (error: any) {
-      toast({ title: "Couldn't assign reviewers", description: 'Something went wrong. Please try again.', variant: 'destructive' });
+      toast({ title: "Couldn't assign reviewers", description: error?.message ?? 'Something went wrong. Please try again.', variant: 'destructive' });
     } finally { setAssigning(false); }
   };
 
@@ -188,7 +181,7 @@ export const ReviewAssignment = () => {
                         {match && (
                           <div className="flex items-center gap-1.5">
                             <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px] font-mono">
-                              🎯 Match: {(match.similarityScore * 100).toFixed(0)}%
+                              🎯 Match: {(match.similarity * 100).toFixed(0)}%
                             </Badge>
                             <Badge variant="outline" className="text-[10px]">
                               Load: {match.activeLoad}/3
