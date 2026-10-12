@@ -32,6 +32,27 @@ export const AdminDashboard = () => {
       roles: ['admin', 'editor'],
     },
     {
+      title: 'Integrity Audit Queue',
+      description: 'Resolve Stage 2 audits that need an editor: flagged similarity, AI-risk signals, or provider failures.',
+      icon: CheckSquare,
+      url: '/editorial/audits',
+      roles: ['admin', 'editor'],
+    },
+    {
+      title: 'Integrity Thresholds',
+      description: 'View and tune similarity, AI-risk and citation thresholds, with a full change history.',
+      icon: BookOpen,
+      url: '/admin/integrity',
+      roles: ['admin', 'editor'],
+    },
+    {
+      title: 'Referral Payouts',
+      description: 'Process reviewer referral wallet withdrawal requests.',
+      icon: Calendar,
+      url: '/admin/payouts',
+      roles: ['admin'],
+    },
+    {
       title: 'Blog',
       description: 'Create, edit, and publish posts on the journal blog.',
       icon: BookOpen,

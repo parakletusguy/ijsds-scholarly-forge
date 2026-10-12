@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmission } from "@/lib/submissionService";
@@ -44,9 +44,14 @@ import { uploadPdf } from "@/lib/cloudinary";
 import { api } from "@/lib/apiClient";
 import { handleFileDownload } from "@/lib/downloadUtils";
 import { AuthorIntegrityReportModal } from "@/components/ijsds2/AuthorIntegrityReportModal";
-import { executeIntegrityAudit } from "@/lib/ijsds2/integrityOrchestrator";
-import { supabase } from "@/integrations/supabase/client";
-import type { AuthorAuditReport } from "@/types/ijsds2";
+import {
+  getManuscriptStatus,
+  getLatestAuditReport,
+  settleGatePayment,
+  uploadRevision,
+  uploadAuthorRevision,
+} from "@/lib/ijsds2/api";
+import type { AuthorAuditReport, ManuscriptStatus } from "@/types/ijsds2";
 import { ShieldCheck, Cpu, BookOpen, Clock, Sparkles } from "lucide-react";
 
 interface SubmissionDetails {
@@ -69,12 +74,14 @@ interface SubmissionDetails {
     crossrefDoi?: string | null;
   };
   submitter: {
+    id: string;
     full_name: string;
     email: string;
   };
 }
 
-// IJSDS 2.0 Fee amounts in kobo (100 kobo = ₦1) — grossed up to cover Paystack's 1.5% + ₦100 fee
+// IJSDS 2.0 checkout amounts in kobo (100 kobo = ₦1) — the PRD net fee grossed up to cover
+// Paystack's 1.5% + ₦100. The server accepts net..net+gross-up and rejects anything else.
 const VETTING_FEE_KOBO = 517800; // Gate 1: ₦5,000 net (grossed up to ₦5,178)
 const PUBLICATION_FEE_KOBO = 2599100; // Gate 2: ₦25,500 net (grossed up to ₦25,991)
 
@@ -96,9 +103,13 @@ export const SubmissionDetail = () => {
   const [savingAbstract, setSavingAbstract] = useState(false);
 
   // IJSDS 2.0 Stage 2 Integrity Audit State
+  const [manuscript, setManuscript] = useState<ManuscriptStatus | null>(null);
   const [auditReport, setAuditReport] = useState<AuthorAuditReport | null>(null);
   const [auditModalOpen, setAuditModalOpen] = useState(false);
   const [runningAudit, setRunningAudit] = useState(false);
+  const [recheckingPayment, setRecheckingPayment] = useState(false);
+  const revisionInputRef = useRef<HTMLInputElement>(null);
+  const authorRevisionInputRef = useRef<HTMLInputElement>(null);
 
   const isSubmitter = user?.id === submission?.submitter_id;
   const canDelete = isEditor || (isSubmitter && submission?.status === 'submitted');
@@ -183,70 +194,80 @@ export const SubmissionDetail = () => {
     }
   };
 
-  const handleOpenAuditReport = async () => {
-    if (auditReport) {
-      setAuditModalOpen(true);
-      return;
+  const fetchManuscript = async () => {
+    if (!submissionId) return;
+    try {
+      setManuscript(await getManuscriptStatus(submissionId));
+    } catch {
+      setManuscript(null); // pre-2.0 submission without a manuscript row
     }
-    if (!submission?.article?.id) return;
+  };
+
+  const handleOpenAuditReport = async () => {
+    if (!manuscript) return;
     setRunningAudit(true);
     try {
-      const report = await executeIntegrityAudit({
-        manuscriptId: submission.article.id,
-        revisionNo: 1,
-      });
-      setAuditReport(report);
+      // The real report from the server — never a placeholder. If the audit hasn't
+      // finished, say so instead of showing anything that looks like a result.
+      setAuditReport(await getLatestAuditReport(manuscript.id));
       setAuditModalOpen(true);
     } catch (err: any) {
-      console.warn("Integrity audit fallback:", err);
-      // Fallback display if not yet logged in table
-      setAuditReport({
-        manuscriptId: submission.article.id,
-        revisionNo: 1,
-        decision: "AUDIT_PASSED_PENDING_APC",
-        reasonCodes: [],
-        summary: "Stage 2 research integrity audit cleared. All plagiarism, AI-risk, and Crossref citation verifications passed. Proceed to Gate 2 (₦25,500 APC) to advance to peer review.",
-        plagiarism: {
-          provider: "IJSDS Benchmark Similarity Engine",
-          score: 0.042,
-          risk: "LOW",
-          matches: [],
-        },
-        aiAuthorship: {
-          provider: "IJSDS Linguistic Perplexity Detector",
-          modelVersion: "v2.4.0-prod",
-          score: 0.065,
-          riskBand: "LOW",
-          requiresHumanReview: false,
-          flaggedSegments: [],
-          disclaimer: "AI detection output is an assistive risk signal, not conclusive evidence of authorship. It is never used as the sole basis for rejection.",
-        },
-        citationLedger: [
-          {
-            bibliographyIndex: 1,
-            rawReference: "Okafor, C. (2024). Sustainable Community Interventions. West African Journal of Social Studies.",
-            resolutionStatus: "VALIDATED",
-            resolvedDoi: "10.62154/wajss.2024.01",
-            normalizedTitle: "Sustainable Community Interventions",
-            warnings: [],
-            semanticRelevanceScore: 0.94,
-          }
-        ],
-        relatedRecommendations: [
-          {
-            title: "Social Policy & Development in Modern Nigeria",
-            year: 2025,
-            doi: "10.62154/ijsds.2025.01",
-            relevanceScore: 0.92,
-            reason: "Methodological overlap with social work development studies",
-          }
-        ],
-        requiredActions: [],
-        generatedAt: new Date().toISOString(),
+      toast({
+        title: "Report not available yet",
+        description: err?.message ?? "The Stage 2 audit has not completed.",
+        variant: "destructive",
       });
-      setAuditModalOpen(true);
     } finally {
       setRunningAudit(false);
+    }
+  };
+
+  const handleRevisionFile = async (file?: File) => {
+    if (!file || !manuscript) return;
+    try {
+      const r = await uploadRevision(manuscript.id, file);
+      toast({
+        title: "Revision uploaded",
+        description: `Revision #${r.revisionNo} is queued for a new Stage 2 audit. No new evaluation fee is charged.`,
+      });
+      setAuditModalOpen(false);
+      setAuditReport(null);
+      await fetchManuscript();
+    } catch (err: any) {
+      toast({ title: "Couldn't upload revision", description: err?.message, variant: "destructive" });
+    }
+  };
+
+  const handleAuthorRevisionFile = async (file?: File) => {
+    if (!file || !manuscript) return;
+    try {
+      const r = await uploadAuthorRevision(manuscript.id, file);
+      toast({ title: "Revision submitted", description: `Round ${r.round}: ${r.reReviewers} reviewer(s) were invited to re-review.` });
+      await Promise.all([fetchManuscript(), fetchSubmissionDetails()]);
+    } catch (err: any) {
+      toast({ title: "Couldn't submit revision", description: err?.message, variant: "destructive" });
+    }
+  };
+
+  // Recovers a Gate 1 payment that succeeded at Paystack but wasn't confirmed to the server
+  // (browser closed, network drop): looks up the user's paid fees and settles them.
+  const recheckGate1Payment = async () => {
+    if (!manuscript) return;
+    setRecheckingPayment(true);
+    try {
+      const hist = await api.get<{ success: boolean; data: Record<string, { reference: string }> }>("/api/payment/history");
+      const ref = hist.data?.vetting?.reference;
+      if (!ref) {
+        toast({ title: "No payment found", description: "We couldn't find a completed Gate 1 payment for your account.", variant: "destructive" });
+        return;
+      }
+      await settleGatePayment({ reference: ref, gate: "GATE_1", manuscriptId: manuscript.id });
+      toast({ title: "Payment confirmed", description: "Your Stage 2 audit is now scheduled." });
+      await Promise.all([fetchManuscript(), fetchSubmissionDetails()]);
+    } catch (err: any) {
+      toast({ title: "Couldn't confirm payment", description: err?.message, variant: "destructive" });
+    } finally {
+      setRecheckingPayment(false);
     }
   };
 
@@ -258,6 +279,7 @@ export const SubmissionDetail = () => {
 
     if (user && submissionId) {
       fetchSubmissionDetails();
+      fetchManuscript();
     }
   }, [user, loading, submissionId, navigate]);
 
@@ -329,11 +351,10 @@ export const SubmissionDetail = () => {
           amount: VETTING_FEE_KOBO,
           metadata: {
             custom_fields: [
-              {
-                display_name: "Name",
-                variable_name: "name",
-                value: submission.submitter.full_name,
-              },
+              { display_name: "Name", variable_name: "name", value: submission.submitter.full_name },
+              { display_name: "Gate", variable_name: "gate", value: "GATE_1" },
+              { display_name: "Submitter", variable_name: "submitter_id", value: submission.submitter.id },
+              ...(manuscript ? [{ display_name: "Manuscript", variable_name: "manuscript_id", value: manuscript.id }] : []),
             ],
           },
           onSuccess: (response: { reference: string }) => {
@@ -357,11 +378,10 @@ export const SubmissionDetail = () => {
           amount: PUBLICATION_FEE_KOBO,
           metadata: {
             custom_fields: [
-              {
-                display_name: "Name",
-                variable_name: "name",
-                value: submission.submitter.full_name,
-              },
+              { display_name: "Name", variable_name: "name", value: submission.submitter.full_name },
+              { display_name: "Gate", variable_name: "gate", value: "GATE_2" },
+              { display_name: "Submitter", variable_name: "submitter_id", value: submission.submitter.id },
+              ...(manuscript ? [{ display_name: "Manuscript", variable_name: "manuscript_id", value: manuscript.id }] : []),
             ],
           },
           onSuccess: (response: { reference: string }) => {
@@ -435,7 +455,7 @@ export const SubmissionDetail = () => {
       });
 
       // 3. Refresh submission so payment badges update immediately
-      await fetchSubmissionDetails();
+      await Promise.all([fetchSubmissionDetails(), fetchManuscript()]);
     } catch (error: any) {
       console.error("Payment verification error:", error);
       toast({
@@ -498,45 +518,77 @@ export const SubmissionDetail = () => {
           </div>
         </div>
 
-        {/* Stage 2 Research Integrity & Citation Intelligence Banner */}
-        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-card to-primary/5 shadow-sm">
-          <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  Stage 2 Research Integrity & Citation Intelligence
-                </span>
-                <Badge variant="outline" className="text-[10px]">
-                  24h Synthetic SLA
-                </Badge>
+        {/* Stage 2 Research Integrity & Citation Intelligence */}
+        {manuscript && (
+          <Card className="mb-6 border-primary/20 bg-gradient-to-r from-card to-primary/5 shadow-sm">
+            <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                    Stage 2 Research Integrity & Citation Intelligence
+                  </span>
+                  <Badge variant="outline" className="text-[10px]">
+                    {manuscript.current_state.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+                <p className="text-sm text-foreground max-w-xl">
+                  {manuscript.current_state === "DRAFT_PENDING_FEE1" &&
+                    "Waiting for the Gate 1 evaluation fee. The audit starts once payment is confirmed."}
+                  {manuscript.current_state === "IN_AUDIT" &&
+                    (manuscript.audit_scheduled_for
+                      ? `Audit in progress — results are due by ${new Date(manuscript.audit_scheduled_for).toLocaleString()}.`
+                      : "Audit in progress.")}
+                  {manuscript.current_state === "AUDIT_REVISION_REQUESTED" &&
+                    "The audit found issues to fix. Open the report, correct your manuscript and re-upload it free of charge."}
+                  {manuscript.current_state === "AUDIT_PASSED_PENDING_APC" &&
+                    "Audit cleared. Pay the Gate 2 APC to move to peer review."}
+                  {manuscript.current_state === "AUDIT_REJECTED" &&
+                    "The audit did not clear this manuscript. A new submission needs a new evaluation fee."}
+                  {manuscript.current_state === "AUTHOR_REVISION_REQUESTED" &&
+                    "Reviewers and the editor asked for changes. Read their comments below, then upload your revised manuscript."}
+                  {!["DRAFT_PENDING_FEE1", "IN_AUDIT", "AUDIT_REVISION_REQUESTED", "AUDIT_PASSED_PENDING_APC", "AUDIT_REJECTED", "AUTHOR_REVISION_REQUESTED"].includes(manuscript.current_state) &&
+                    "Stage 2 is complete. See the report for the full integrity and citation findings."}
+                </p>
               </div>
-              <h3 className="text-base font-semibold">
-                Automated Pre-Screening, Plagiarism & AI-Authorship Audit
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-xl">
-                Passage-level similarity cross-matching, perplexity analysis, and Crossref/OpenAlex citation validation ledger.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Button
-                onClick={handleOpenAuditReport}
-                disabled={runningAudit}
-                className="bg-primary text-white font-semibold text-xs gap-1.5"
-              >
-                {runningAudit ? (
-                  <>
-                    <LoadingSpinner size="sm" /> Auditing...
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-4 w-4" /> View Integrity Report
-                  </>
+              <div className="flex items-center gap-2 shrink-0">
+                {manuscript.current_state === "DRAFT_PENDING_FEE1" && (
+                  <Button variant="outline" size="sm" onClick={recheckGate1Payment} disabled={recheckingPayment}>
+                    {recheckingPayment ? "Checking…" : "I've already paid — re-check"}
+                  </Button>
                 )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                {manuscript.current_state === "AUTHOR_REVISION_REQUESTED" && user?.id === submission.submitter.id && (
+                  <Button size="sm" onClick={() => authorRevisionInputRef.current?.click()}>Upload revised manuscript</Button>
+                )}
+                {manuscript.audits.some((a) => a.status === "COMPLETED") && (
+                  <Button onClick={handleOpenAuditReport} disabled={runningAudit} className="bg-primary text-white font-semibold text-xs gap-1.5">
+                    <ShieldCheck className="h-4 w-4" /> {runningAudit ? "Loading…" : "View Integrity Report"}
+                  </Button>
+                )}
+              </div>
+              <input
+                ref={authorRevisionInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  handleAuthorRevisionFile(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+              <input
+                ref={revisionInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  handleRevisionFile(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -956,8 +1008,11 @@ export const SubmissionDetail = () => {
                     </Badge>
                   ) : (
                     <button
-                      className="rounded-sm bg-black text-white px-3 py-1 h-9 text-sm hover:bg-gray-800 transition-colors"
+                      className="rounded-sm bg-black text-white px-3 py-1 h-9 text-sm hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       onClick={() => setprocessing(true)}
+                      // Gate 2 is only payable after the audit clears (the server enforces this too)
+                      disabled={!!manuscript && manuscript.current_state !== "AUDIT_PASSED_PENDING_APC"}
+                      title={manuscript && manuscript.current_state !== "AUDIT_PASSED_PENDING_APC" ? "Available once the Stage 2 audit clears" : undefined}
                     >
                       Pay
                     </button>
@@ -979,6 +1034,7 @@ export const SubmissionDetail = () => {
                 setAuditModalOpen(false);
                 setprocessing(true);
               }}
+              onUploadRevision={() => revisionInputRef.current?.click()}
             />
           </div>
         </div>

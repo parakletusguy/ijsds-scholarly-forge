@@ -23,10 +23,11 @@ import { FileUpload } from "@/components/file-management/FileUpload";
 import Paystackbtn from "@/components/paystack/paystackFunction";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BatchReleaseBanner } from "@/components/ijsds2/BatchReleaseBanner";
-import { validateReferralCode, IJSDS2_FINANCIALS } from "@/lib/ijsds2/paymentService";
+import { validateReferralCode, settleGatePayment } from "@/lib/ijsds2/api";
 
 // IJSDS 2.0 Two-Tier Payment Model (PRD v2.4.0-PROD)
-// Gate 1: ₦5,000 net evaluation fee grossed up to cover Paystack (1.5% + ₦100)
+// Gate 1: ₦5,000 net evaluation fee grossed up to cover Paystack (1.5% + ₦100).
+// The server accepts net..net+gross-up (local) or the exact legacy Global price.
 const GATE1_FEE_LOCAL = 517800; // ₦5,178 (517,800 kobo)
 const GATE1_FEE_GLOBAL = 1580000; // ~$10.50 USD value in kobo
 const GATE2_FEE_LOCAL = 2599100; // ₦25,991 (2,599,100 kobo) collected post-audit
@@ -424,25 +425,28 @@ export const Submit = () => {
         ...(referralCode ? { referral_code: referralCode } : {}),
       } as any);
 
-      // Verify Gate 1 Evaluation Fee against the live API
-      const articleId = result?.article?.id;
-      if (articleId && vettingReference) {
-        await api
-          .post("/api/payment/verify-payment", {
-            reference: vettingReference,
-            articleId,
-            type: "vetting",
-          })
-          .catch((err) =>
-            console.error("[payment] Gate 1 verify failed:", err),
-          );
+      // Server-side verification of the Gate 1 payment (amount/payer checked against Paystack).
+      const manuscriptId = (result as any)?.manuscript?.id as string | undefined;
+      let gate1Confirmed = true;
+      if (manuscriptId && vettingReference) {
+        try {
+          await settleGatePayment({ reference: vettingReference, gate: "GATE_1", manuscriptId });
+        } catch (err) {
+          gate1Confirmed = false;
+          console.error("[payment] Gate 1 verify failed:", err);
+        }
       }
 
       clearDraft();
-      toast({
-        title: "Submission Complete",
-        description: "Manuscript submitted for evaluation.",
-      });
+      toast(
+        gate1Confirmed
+          ? { title: "Submission Complete", description: "Manuscript submitted. The Stage 2 integrity audit will report within 24 hours." }
+          : {
+              title: "Submitted — payment not yet confirmed",
+              description: "We couldn't confirm your Gate 1 payment. Open the manuscript and choose \"I've already paid — re-check\".",
+              variant: "destructive",
+            },
+      );
       navigate("/dashboard");
     } catch (error) {
       toast({
@@ -1179,7 +1183,7 @@ export const Submit = () => {
                             {
                               display_name: "Gate",
                               variable_name: "gate",
-                              value: "GATE_1",
+                              value: fee.feeType === "vetting" ? "GATE_1" : "GATE_2",
                             },
                             {
                               display_name: "Submitter",

@@ -14,8 +14,9 @@ import {
 import { PaperDownload } from '@/components/papers/PaperDownload';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
+import { getMyReviewerProfile } from '@/lib/ijsds2/api';
+import { updateReview } from '@/lib/reviewService';
 import { ReviewerReferralCard } from '@/components/ijsds2/ReviewerReferralCard';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ReviewWithSubmission {
   id: string;
@@ -33,7 +34,6 @@ interface ReviewWithSubmission {
       abstract: string;
       subject_area: string;
       status?: string;
-      corresponding_author_email: string;
       manuscript_file_url: string;
       vetting_fee: boolean;
       processing_fee: boolean;
@@ -95,23 +95,13 @@ export const ReviewerDashboard = () => {
       );
       setReviews(active);
 
-      if (user) {
-        try {
-          const { data: revProfile } = await supabase
-            .from('reviewer_profiles' as any)
-            .select('referral_code, wallet_balance_naira')
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (revProfile) {
-            setReferralCode((revProfile as any).referral_code);
-            setWalletBalance(Number((revProfile as any).wallet_balance_naira || 0));
-          } else {
-            setReferralCode(`IJSDS-REV-${user.id.slice(0, 5).toUpperCase()}`);
-          }
-        } catch {
-          setReferralCode(`IJSDS-REV-${user.id.slice(0, 5).toUpperCase()}`);
-        }
+      // Real referral code + wallet from the server; no code is shown if it can't be loaded.
+      try {
+        const rp = await getMyReviewerProfile();
+        setReferralCode(rp.referral_code);
+        setWalletBalance(rp.wallet_balance_naira);
+      } catch (e) {
+        console.warn("Referral profile unavailable:", e);
       }
     } catch {
       toast({ title: "Couldn't load reviews", description: 'Something went wrong. Please try again.', variant: 'destructive' });
@@ -126,7 +116,17 @@ export const ReviewerDashboard = () => {
     </div>
   );
 
-  const pendingReviews = reviews.filter(r => !r.submitted_at);
+  const respond = async (id: string, invitation_status: 'accepted' | 'declined') => {
+    try {
+      await updateReview(id, { invitation_status } as any);
+      toast({ title: invitation_status === 'accepted' ? 'Invitation accepted' : 'Invitation declined' });
+      fetchReviews();
+    } catch (e: any) {
+      toast({ title: "Couldn't update invitation", description: e?.message, variant: 'destructive' });
+    }
+  };
+
+  const pendingReviews = reviews.filter(r => !r.submitted_at && r.invitation_status !== 'declined');
   const completedReviews = reviews.filter(r => r.submitted_at);
 
   const filter = (list: ReviewWithSubmission[]) =>
@@ -202,7 +202,18 @@ export const ReviewerDashboard = () => {
 
             <div className="flex flex-wrap gap-2 pt-2 border-t border-stone-100">
               <PaperDownload articleId={review.submission?.article_id} manuscriptFileUrl={art.manuscript_file_url} title={art.title} />
-              {!completed ? (
+              {!completed && review.invitation_status === 'pending' ? (
+                <>
+                  <Button onClick={() => respond(review.id, 'accepted')}
+                    className="h-8 text-[10px] font-bold uppercase tracking-widest bg-primary text-white hover:bg-stone-900 rounded-none">
+                    Accept invitation
+                  </Button>
+                  <Button variant="outline" onClick={() => respond(review.id, 'declined')}
+                    className="h-8 text-[10px] rounded-none border-stone-200 hover:border-destructive hover:text-destructive">
+                    Decline
+                  </Button>
+                </>
+              ) : !completed ? (
                 <>
                   <Button onClick={() => navigate(`/review/${review.id}`)}
                     className="h-8 text-[10px] font-bold uppercase tracking-widest bg-primary text-white hover:bg-stone-900 rounded-none gap-1.5">
