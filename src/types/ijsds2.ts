@@ -77,7 +77,9 @@ export interface AuthorAuditReport {
     riskBand: string | null;
     provider: string | null;
     modelVersion: string | null;
-    score?: number | null; // only when the journal chooses to expose raw scores (or for staff)
+    mode?: 'declaration' | 'detector' | null; // 'declaration' = no detector; an AI-use disclosure is required instead
+    hasDisclosure?: boolean | null;
+    score?: number | null; // only when a detector ran and the journal exposes raw scores (or for staff)
     flaggedSegments: Array<{ segment_index: number; text_snippet: string; confidence: number; label: string }>;
     disclaimer: string;
   };
