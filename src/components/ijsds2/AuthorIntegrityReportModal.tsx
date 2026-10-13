@@ -160,6 +160,27 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
           </div>
 
           {/* AI-Authorship Section */}
+          {report.aiAuthorship.mode === "declaration" ? (
+            <div className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold flex items-center gap-1.5">
+                  <Cpu className="h-4 w-4 text-primary" /> AI-Use Disclosure
+                </h4>
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${report.aiAuthorship.hasDisclosure ? "border-emerald-500 text-emerald-700 dark:text-emerald-300" : "border-amber-500 text-amber-700 dark:text-amber-300"}`}
+                >
+                  {report.aiAuthorship.hasDisclosure ? "Statement found" : "Statement missing"}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground leading-normal">{report.aiAuthorship.disclaimer}</p>
+              {!report.aiAuthorship.hasDisclosure && (
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  Add a short statement saying whether generative AI tools were used in preparing the manuscript and how, or that none were used.
+                </p>
+              )}
+            </div>
+          ) : (
           <div className="border rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold flex items-center gap-1.5">
@@ -190,6 +211,7 @@ export const AuthorIntegrityReportModal: React.FC<AuthorIntegrityReportModalProp
               <p className="text-xs text-muted-foreground italic">No formulaic or repetitive machine cadence flagged.</p>
             )}
           </div>
+          )}
         </div>
 
         {report.orphanedMarkers.length > 0 && (
