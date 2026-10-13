@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getProcessedArticles, getPublishedArticles, updateArticleStatus } from '@/lib/publicationService';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle, FileUp, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { BatchReleaseBanner } from '@/components/ijsds2/BatchReleaseBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
@@ -44,6 +44,7 @@ interface Article {
 
 export const Publication = () => {
   const { user, profile, loading: authLoading } = useAuth();
+  const isAdminUser = !!profile?.is_admin;
   const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,89 +127,6 @@ export const Publication = () => {
     const doi = `10.1234/journal.${new Date().getFullYear()}.${randomId}`;
   };
 
-  const handleBulkPublish = async () => {
-    if (!bulkVolume || !bulkIssue) {
-      toast({
-        title: "Error",
-        description: "Please enter both volume and issue numbers",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const matchingArticles = processed.filter(
-      article => 
-        article.volume?.toString() === bulkVolume && 
-        article.issue?.toString() === bulkIssue
-    );
-
-    if (matchingArticles.length === 0) {
-      toast({
-        title: "No Articles Found",
-        description: `No processed articles found for Volume ${bulkVolume}, Issue ${bulkIssue}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setUpdating(true);
-    try {
-      // Loop through and update each article individually since the backend doesn't support bulk-publish
-      const results = await Promise.allSettled(
-        matchingArticles.map(article => updateArticleStatus(article.id, 'published'))
-      );
-
-      const failedCount = results.filter(r => r.status === 'rejected').length;
-      if (failedCount === matchingArticles.length) {
-        throw new Error("All articles failed to publish");
-      }
-
-      // Create notifications for all published article authors
-      try {
-        const { notifyUserArticlePublished } = await import('@/lib/emailService');
-        
-        for (const article of matchingArticles) {
-          // Get the user ID and profile from the corresponding author email
-          const { data: authorProfile } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .eq('email', article.corresponding_author_email)
-            .single();
-
-          if (authorProfile) {
-            await notifyUserArticlePublished(
-              authorProfile.id,
-              authorProfile.full_name || 'Author',
-              article.title
-            );
-          }
-        }
-      } catch (notificationError) {
-        console.error('Error sending publication notifications:', notificationError);
-        // Don't fail publication if notifications fail
-      }
-
-      toast({
-        title: "Success",
-        description: failedCount > 0 
-          ? `Published ${matchingArticles.length - failedCount} articles. (${failedCount} failed)` 
-          : `Published all ${matchingArticles.length} articles from Volume ${bulkVolume}, Issue ${bulkIssue}`,
-      });
-
-      fetchAcceptedArticles();
-      setBulkVolume('');
-      setBulkIssue('');
-    } catch (error) {
-      console.error('Error bulk publishing articles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to publish articles",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdating(false);
-    }
-  };
 
   if (loading || !isAdmin) {
     return (
@@ -256,56 +174,22 @@ export const Publication = () => {
            
 
               <TabsContent value='processed' className='flex flex-col items-center'>
-                {/* Bulk Publishing Controls */}
-                <Card className="w-full mb-6">
+                {/* IJSDS 2.0: publication happens only in the monthly batch on the 28th */}
+                <Card className="w-full mb-6 border-primary/20">
                   <CardHeader>
-                    <CardTitle className="text-lg">Bulk Publish by Volume & Issue</CardTitle>
+                    <CardTitle className="text-lg">Publication happens on the 28th</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
-                      <div className="flex-1">
-                        <Label htmlFor="volume">Volume Number</Label>
-                        <Input
-                          id="volume"
-                          type="number"
-                          placeholder="e.g., 15"
-                          value={bulkVolume}
-                          onChange={(e) => setBulkVolume(e.target.value)}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <Label htmlFor="issue">Issue Number</Label>
-                        <Input
-                          id="issue"
-                          type="number"
-                          placeholder="e.g., 3"
-                          value={bulkIssue}
-                          onChange={(e) => setBulkIssue(e.target.value)}
-                        />
-                      </div>
-                      <Button 
-                        onClick={handleBulkPublish}
-                        disabled={updating || !bulkVolume || !bulkIssue}
-                        className="px-6"
-                      >
-                        {updating ? (
-                          <>Publishing...</>
-                        ) : (
-                          <>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Publish Issue
-                          </>
-                        )}
+                  <CardContent className="space-y-3 text-sm text-muted-foreground">
+                    <BatchReleaseBanner />
+                    <p>
+                      Articles are no longer published one by one. Once an article is approved for processing and its Crossref DOI is
+                      registered, it joins the next monthly batch automatically and is released at 00:00 WAT on the 28th.
+                      Papers still waiting for a DOI appear below with their volume and issue.
+                    </p>
+                    {isAdminUser && (
+                      <Button variant="outline" onClick={() => navigate('/admin')}>
+                        Open the batch release console
                       </Button>
-                    </div>
-                    {bulkVolume && bulkIssue && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {processed.filter(
-                          article => 
-                            article.volume?.toString() === bulkVolume && 
-                            article.issue?.toString() === bulkIssue
-                        ).length} articles will be published for Volume {bulkVolume}, Issue {bulkIssue}
-                      </p>
                     )}
                   </CardContent>
                 </Card>
