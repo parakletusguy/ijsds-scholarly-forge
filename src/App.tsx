@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -30,7 +30,6 @@ const PeerReview = lazy(() => import('./pages/PeerReview').then(m => ({ default:
 const SubmissionDetail = lazy(() => import('./pages/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })));
 const SubmissionReviews = lazy(() => import('./pages/SubmissionReviews').then(m => ({ default: m.SubmissionReviews })));
 const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
-const RevisionSubmissionPortal = lazy(() => import('./components/revisions/RevisionSubmissionPortal').then(m => ({ default: m.RevisionSubmissionPortal })));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const ManageRequests = lazy(() => import('./pages/approveRequest').then(m => ({ default: m.ManageRequests })));
 const Landing = lazy(() => import('./pages/landingPage').then(m => ({ default: m.Landing })));
@@ -62,6 +61,12 @@ const ImportNewsletterBlog = lazy(() => import('./pages/ImportNewsletterBlog').t
 const AuditReviewQueue = lazy(() => import('./pages/AuditReviewQueue').then(m => ({ default: m.AuditReviewQueue })));
 const IntegritySettings = lazy(() => import('./pages/IntegritySettings').then(m => ({ default: m.IntegritySettings })));
 const ReferralPayouts = lazy(() => import('./pages/ReferralPayouts').then(m => ({ default: m.ReferralPayouts })));
+// The old revision portal wrote to Supabase directly. Revisions (audit and peer review) are now
+// uploaded from the submission page, where the backend enforces the state machine.
+const RevisionRedirect = () => {
+  const { submissionId } = useParams();
+  return <Navigate to={`/submission/${submissionId}/details`} replace />;
+};
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 import { HelmetProvider } from 'react-helmet-async';
 import { Button } from "./components/ui/button";
@@ -162,7 +167,7 @@ const App = () => (
                     <Route path="/reports" element={<PageLayout><Reports /></PageLayout>} />
                     <Route path="/submission/:submissionId/details" element={<PageLayout><SubmissionDetail /></PageLayout>} />
                     <Route path="/submission/:submissionId/reviews" element={<PageLayout><SubmissionReviews /></PageLayout>} />
-                    <Route path="/submission/:submissionId/revision" element={<PageLayout><RevisionSubmissionPortal /></PageLayout>} />
+                    <Route path="/submission/:submissionId/revision" element={<RevisionRedirect />} />
                     <Route path="/requests" element={<PageLayout><ManageRequests /></PageLayout>} />
                     <Route path="/blog/admin" element={<PageLayout><BlogAdmin /></PageLayout>} />
                     <Route path="/partners/admin" element={<PageLayout><PartnersAdmin /></PageLayout>} />
