@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Users, Target, Brain, Info, ShieldCheck, AlertCircle, Mail, GraduationCap } from 'lucide-react';
+import { Users, Target, Brain, Info, ShieldCheck, AlertCircle, Mail, GraduationCap, CheckCircle2, Circle } from 'lucide-react';
+import { GATE_1_NAME, GATE_2_NAME, releaseProgress, stateLabel } from '@/lib/ijsds2/labels';
 import { matchReviewers, assignReviewers, getManuscriptStatus } from '@/lib/ijsds2/api';
 import type { ManuscriptState, ReviewerMatchCandidate } from '@/types/ijsds2';
 
@@ -90,12 +91,35 @@ export const AutomatedReviewerMatchingInterface = ({ submissionId, onAssigned }:
       </div>
 
       {state && !canAssign && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-          <p>
-            Reviewers can only be assigned after the integrity audit is cleared and Gate 2 is paid. This paper is currently{' '}
-            <strong>{state.replace(/_/g, ' ').toLowerCase()}</strong>, so you can preview matches but not assign yet.
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900 space-y-3">
+          <p className="flex items-center gap-2 font-semibold">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            Reviewers can’t be assigned yet — you can preview the matches below.
           </p>
+          <p>
+            Current status: <strong>{stateLabel(state)}</strong>
+          </p>
+          {(() => {
+            const p = releaseProgress(state);
+            const steps = [
+              { done: p.gate1Paid, text: GATE_1_NAME, note: 'paid by the author when submitting' },
+              { done: p.auditCleared, text: 'Integrity audit cleared', note: p.rejected ? 'this paper was rejected at the audit' : 'runs automatically about 24 hours after Gate 1' },
+              { done: p.gate2Paid, text: GATE_2_NAME, note: 'payable by the author only after the audit is cleared' },
+            ];
+            return (
+              <ol className="space-y-1.5">
+                {steps.map((st) => (
+                  <li key={st.text} className="flex items-start gap-2">
+                    {st.done ? <CheckCircle2 className="h-4 w-4 mt-px shrink-0 text-emerald-600" /> : <Circle className="h-4 w-4 mt-px shrink-0 text-amber-600" />}
+                    <span>
+                      <strong className={st.done ? 'text-emerald-800' : ''}>{st.text}</strong>
+                      <span className="text-amber-800/80"> — {st.done ? 'done' : st.note}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            );
+          })()}
         </div>
       )}
 
