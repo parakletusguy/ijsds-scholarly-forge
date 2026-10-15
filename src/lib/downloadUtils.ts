@@ -8,7 +8,12 @@ export const handleFileDownload = async (fileUrl: string, title?: string, articl
     let resolvedUrl = fileUrl;
     if (articleId) {
       try {
-        const res = await fetch(`${API_URL}/api/files/${articleId}/latest`);
+        // Unpublished manuscripts are only served to staff and the paper's own author/reviewers,
+        // so send the login token when there is one.
+        const token = localStorage.getItem('ijsds_token');
+        const res = await fetch(`${API_URL}/api/files/${articleId}/latest`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         const json = await res.json();
         if (json.success && json.data?.file_url) resolvedUrl = json.data.file_url;
       } catch { /* fall through to fileUrl */ }
