@@ -171,13 +171,13 @@ export const Production = () => {
                     <Users className="h-4 w-4 shrink-0" />
                     <span>Authors</span>
                   </TabsTrigger>
-                  <TabsTrigger value="doi" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
-                    <Link className="h-4 w-4 shrink-0" />
-                    <span>DOI</span>
-                  </TabsTrigger>
                   <TabsTrigger value="issues" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                     <BookOpen className="h-4 w-4 shrink-0" />
-                    <span>Issues</span>
+                    <span>1. Vol &amp; Issue</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="doi" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+                    <Link className="h-4 w-4 shrink-0" />
+                    <span>2. DOI</span>
                   </TabsTrigger>
                   <TabsTrigger value="doaj" className="flex items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
                     <Globe className="h-4 w-4 shrink-0" />

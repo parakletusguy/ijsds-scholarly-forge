@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getBatchCycle } from '@/lib/ijsds2/api';
 import { approveForProcessing, updateArticle } from '@/lib/productionService';
 import type { Article } from '@/lib/articleService';
 import { useToast } from '@/hooks/use-toast';
@@ -31,13 +32,28 @@ export const IssueCompilation = ({ article, onUpdate }: IssueCompilationProps) =
   const [loading, setLoading] = useState(false);
   const [processload,setProcessLoad] = useState(false)
   const [issueInfo, setIssueInfo] = useState<IssueInfo>({
-    volume: article.volume || 1,
-    issue: article.issue || 1,
+    volume: article.volume || 0,
+    issue: article.issue || 0,
     year: new Date().getFullYear(),
-    title: 'Special Issue on Advanced Research',
+    title: '',
     description: '',
     publishDate: new Date().toISOString().split('T')[0]
   });
+
+  // Unassigned papers default to the upcoming monthly release: Volume = year − 2024, Issue = month,
+  // published on the 28th. (The DOI is built from volume/issue and can't change after registration.)
+  useEffect(() => {
+    if (article.volume && article.issue) return;
+    getBatchCycle()
+      .then((c) => setIssueInfo((prev) => ({
+        ...prev,
+        volume: prev.volume || Math.max(1, c.targetYear - 2024),
+        issue: prev.issue || c.targetMonth,
+        year: c.targetYear,
+        publishDate: `${c.targetYear}-${String(c.targetMonth).padStart(2, '0')}-28`,
+      })))
+      .catch(() => {});
+  }, [article.id]);
   // Page numbers stay empty until the editor enters them. Defaulting to a
   // placeholder range gets saved to the DB and published as citation metadata.
   const [issueArticles, setIssueArticles] = useState<Array<{
