@@ -18,8 +18,9 @@ export interface CrossRefJobStatus {
 
 interface JobResponse {
   success: boolean;
-  jobId: string;
   message?: string;
+  // jobId is null when the queue was unavailable and the deposit ran directly.
+  data: { jobId: string | null; queued?: boolean };
 }
 
 interface StatusResponse {

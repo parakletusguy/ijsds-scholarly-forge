@@ -15,7 +15,7 @@ export interface FileVersion {
 
 interface ListResponse { success: true; data: FileVersion[] }
 interface UploadResponse { success: true; data: FileVersion }
-interface ConvertResponse { success: true; data: { html: string } }
+interface ConvertResponse { success: true; data: string } // backend returns the HTML string as data
 
 export const uploadFile = async (
   file: File,
@@ -44,7 +44,7 @@ export const deleteFile = async (id: string): Promise<void> => {
 
 export const convertDocxToHtml = async (url: string): Promise<string> => {
   const res = await api.post<ConvertResponse>('/api/files/convert', { url });
-  return res.data.html;
+  return res.data;
 };
 
 /** Build a full URL for file downloads served from the backend */

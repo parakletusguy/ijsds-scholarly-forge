@@ -193,15 +193,23 @@ export const ReviewerDetail = () => {
                     <p className="text-[11px] text-stone-400 mt-0.5">Submitted on</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <User size={15} className="text-stone-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-stone-800 truncate">{submission.submitter.full_name}</p>
-                    <p className="text-[11px] text-stone-400 mt-0.5 flex items-center gap-1 truncate">
-                      <Mail size={11} className="shrink-0" /> {submission.submitter.email}
-                    </p>
+                {/* Double-blind review: the server withholds the author's identity from reviewers. */}
+                {submission.submitter ? (
+                  <div className="flex items-start gap-3">
+                    <User size={15} className="text-stone-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-stone-800 truncate">{submission.submitter.full_name}</p>
+                      <p className="text-[11px] text-stone-400 mt-0.5 flex items-center gap-1 truncate">
+                        <Mail size={11} className="shrink-0" /> {submission.submitter.email}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-start gap-3">
+                    <User size={15} className="text-stone-400 mt-0.5 shrink-0" />
+                    <p className="text-sm text-stone-500">Author identity hidden (double-blind review)</p>
+                  </div>
+                )}
               </div>
             </div>
 

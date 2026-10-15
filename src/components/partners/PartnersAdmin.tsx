@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit2, Trash2, ExternalLink, Save, X, Users, ArrowUp, ArrowDown, Building2, ShieldCheck, Globe, ListOrdered } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { isAdminUser } from '@/lib/roleUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +35,7 @@ interface PartnerFormData {
 }
 
 export const PartnersAdmin = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,16 +68,10 @@ export const PartnersAdmin = () => {
     }
     
     try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      
-      if (profile && profile.is_admin) {
-        setUserRole(profile);
+      // Admin status comes from the signed-in profile (the old Supabase lookup always failed,
+      // which bounced every admin away from this page).
+      if (isAdminUser(profile ?? user)) {
+        setUserRole({ is_admin: true });
       } else {
         toast({
           title: 'Access Denied',

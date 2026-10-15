@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isEditorUser } from '@/lib/roleUtils';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ const OUTCOMES = [
 export const AuditReviewQueue = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const isStaff = !!(profile?.is_editor || profile?.is_admin);
+  const isStaff = isEditorUser(profile);
   const [items, setItems] = useState<ReviewQueueItem[]>([]);
   const [busy, setBusy] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);

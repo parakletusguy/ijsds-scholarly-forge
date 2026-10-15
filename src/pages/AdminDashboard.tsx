@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { isAdminUser, isEditorUser } from '@/lib/roleUtils';
 import { Button } from '@/components/ui/button';
 import { BookOpen, CheckSquare, ArrowLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,8 +12,8 @@ export const AdminDashboard = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [batchModalOpen, setBatchModalOpen] = useState(false);
-  const isAdmin = !!profile?.is_admin;
-  const isEditor = !!profile?.is_editor;
+  const isAdmin = isAdminUser(profile);
+  const isEditor = isEditorUser(profile);
 
   useEffect(() => {
     if (loading) return;
@@ -117,6 +118,7 @@ export const AdminDashboard = () => {
         <MonthlyBatchReleaseModal
           open={batchModalOpen}
           onOpenChange={setBatchModalOpen}
+          canExecute={isAdmin}
         />
 
         <p className="mt-10 text-sm text-stone-500 max-w-xl">

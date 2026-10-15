@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAdminUser, isEditorUser } from '@/lib/roleUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { getProcessedArticles, getPublishedArticles, updateArticleStatus } from '@/lib/publicationService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,7 +45,7 @@ interface Article {
 
 export const Publication = () => {
   const { user, profile, loading: authLoading } = useAuth();
-  const isAdminUser = !!profile?.is_admin;
+  const isAdminRole = isAdminUser(profile);
   const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +61,7 @@ export const Publication = () => {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate('/auth'); return; }
-    if (profile?.is_editor || profile?.is_admin) {
+    if (isEditorUser(profile)) {
       setIsAdmin(true);
     } else if (profile) {
       toast({ title: "Access denied", description: "You need editor access to view this page.", variant: "destructive" });
@@ -186,7 +187,7 @@ export const Publication = () => {
                       registered, it joins the next monthly batch automatically and is released at 00:00 WAT on the 28th.
                       Papers still waiting for a DOI appear below with their volume and issue.
                     </p>
-                    {isAdminUser && (
+                    {isAdminRole && (
                       <Button variant="outline" onClick={() => navigate('/admin')}>
                         Open the batch release console
                       </Button>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAdminUser } from '@/lib/roleUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { getProfiles, updateProfile } from '@/lib/profileService';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,7 @@ export const ManageRequests = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [loadingData, setLoadingData] = useState(true);
-  const IsAdmin = !!profile?.is_admin;
+  const IsAdmin = isAdminUser(profile);
   const [editorRequests, seteditorRequests] = useState<any[]>([]);
   const [reviewerRequests, setreviewerRequests] = useState<any[]>([]);
   const [adminRequests, setadminRequests] = useState<any[]>([]);
@@ -54,17 +55,11 @@ export const ManageRequests = () => {
       const target = editorRequests.find((p:any) => p.id === id);
       if (type == 'approve') {
         await updateProfile(id, { is_editor: true, request_editor: false });
-        try {
-          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'editor', decision: 'accepted' });
-        } catch (e) { console.warn('Notification failed', e); }
+        // The requester is notified (in-app + email) by the backend.
         toast({ title: 'Approved', description: `${target?.full_name} is now an editor.` });
       } else {
         await updateProfile(id, { request_editor: false });
-        try {
-          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'editor', decision: 'rejected' });
-        } catch (e) { console.warn('Notification failed', e); }
+        // The requester is notified (in-app + email) by the backend.
         toast({ title: 'Declined', description: `Editor request for ${target?.full_name} has been declined.` });
       }
       fetchRequests();
@@ -76,17 +71,11 @@ export const ManageRequests = () => {
       const target = reviewerRequests.find((p:any) => p.id === id);
       if (type == 'approve') {
         await updateProfile(id, { is_reviewer: true, request_reviewer: false });
-        try {
-          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'reviewer', decision: 'accepted' });
-        } catch (e) { console.warn('Notification failed', e); }
+        // The requester is notified (in-app + email) by the backend.
         toast({ title: 'Approved', description: `${target?.full_name} is now a reviewer.` });
       } else {
         await updateProfile(id, { request_reviewer: false });
-        try {
-          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'reviewer', decision: 'rejected' });
-        } catch (e) { console.warn('Notification failed', e); }
+        // The requester is notified (in-app + email) by the backend.
         toast({ title: 'Declined', description: `Reviewer request for ${target?.full_name} has been declined.` });
       }
       fetchRequests();
@@ -97,18 +86,12 @@ export const ManageRequests = () => {
     try {
       const target = adminRequests.find((p:any) => p.id === id);
       if (type == 'approve') {
-        await updateProfile(id, { is_admin: true, request_admin: false, role: 'admin' });
-        try {
-          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'admin', decision: 'accepted' });
-        } catch (e) { console.warn('Notification failed', e); }
+        await updateProfile(id, { is_admin: true, request_admin: false, assign_role: 'admin' });
+        // The requester is notified (in-app + email) by the backend.
         toast({ title: 'Approved', description: `${target?.full_name} is now an admin.` });
       } else {
         await updateProfile(id, { request_admin: false });
-        try {
-          const { notifyRequesterOfRoleDecision } = await import('@/lib/roleNotificationService');
-          await notifyRequesterOfRoleDecision({ userId: id, email: target?.email || '', name: target?.full_name || '', role: 'admin', decision: 'rejected' });
-        } catch (e) { console.warn('Notification failed', e); }
+        // The requester is notified (in-app + email) by the backend.
         toast({ title: 'Declined', description: `Admin request for ${target?.full_name} has been declined.` });
       }
       fetchRequests();

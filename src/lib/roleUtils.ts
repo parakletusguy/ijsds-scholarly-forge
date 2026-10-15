@@ -24,3 +24,12 @@ export const getActingRoleFromProfile = (
 
   return p.role || "author";
 };
+
+const truthy = (v: unknown) => v === true || v === "true" || v === 1;
+
+/** Same rules as the backend's authorize()/isStaffUser: the role string OR the flag counts. */
+export const isAdminUser = (p: Profile | null | undefined) => !!p && (truthy(p.is_admin) || p.role === "admin");
+export const isEditorUser = (p: Profile | null | undefined) =>
+  !!p && (isAdminUser(p) || truthy(p.is_editor) || p.role === "editor");
+export const isReviewerUser = (p: Profile | null | undefined) =>
+  !!p && (isEditorUser(p) || truthy(p.is_reviewer) || p.role === "reviewer");

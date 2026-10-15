@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { isEditorUser } from '@/lib/roleUtils';
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmissions, type Submission } from "@/lib/submissionService";
 import { createEditorialDecision } from "@/lib/editorialService";
@@ -53,7 +54,7 @@ export const Editorial = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const isEditor = !!(profile?.is_editor || profile?.is_admin);
+  const isEditor = isEditorUser(profile);
 
   // Must be before any early return to comply with Rules of Hooks
   const allSubjects = useMemo(() => {

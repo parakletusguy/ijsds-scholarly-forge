@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Globe, ExternalLink } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { isAdminUser } from '@/lib/roleUtils';
 import { useAuth } from '@/hooks/useAuth';
 import * as partnersService from '@/lib/partnersService';
 
@@ -18,7 +18,7 @@ interface Partner {
 
 export const Partners = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -28,12 +28,8 @@ export const Partners = () => {
     if (user) fetchUserRole();
   }, [user]);
 
-  const fetchUserRole = async () => {
-    try {
-      const { data } = await supabase.from('profiles').select('is_admin').eq('id', user!.id).single();
-      if (data) setIsAdmin(data.is_admin);
-    } catch {}
-  };
+  // Admin status comes from the signed-in profile (the old Supabase lookup always failed).
+  const fetchUserRole = async () => setIsAdmin(isAdminUser(profile ?? user));
 
   const fetchPartners = async () => {
     try {

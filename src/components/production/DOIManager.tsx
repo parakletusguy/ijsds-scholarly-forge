@@ -66,7 +66,8 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
     try {
       const res = await crossrefRegister(article.id);
       toast({ title: "DOI Registration Queued", description: "Depositing metadata to CrossRef — tracking progress below." });
-      startPolling(res.jobId);
+      if (res.data?.jobId) startPolling(res.data.jobId);
+      else onUpdate(); // ran directly (no queue job to poll)
     } catch (err) {
       toast({ title: "Registration Failed", description: (err as Error).message, variant: "destructive" });
     } finally {
@@ -80,7 +81,8 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
     try {
       const res = await crossrefRedeposit(article.id);
       toast({ title: "Redeposit Queued", description: "Updated metadata is being sent to CrossRef." });
-      startPolling(res.jobId);
+      if (res.data?.jobId) startPolling(res.data.jobId);
+      else onUpdate();
     } catch (err) {
       toast({ title: "Redeposit Failed", description: (err as Error).message, variant: "destructive" });
     } finally {

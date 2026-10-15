@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { isEditorUser } from '@/lib/roleUtils';
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSubmission } from "@/lib/submissionService";
@@ -39,8 +40,6 @@ import { EditorFileManager } from "@/components/editor/EditorFileManager";
 import { ArticleAuthorsEditor } from "@/components/production/ArticleAuthorsEditor";
 import type { Article } from "@/lib/articleService";
 import ReceiptDown from "@/components/receiptGeneration/receiptDownload";
-import { SendRecieptMail } from "@/lib/emailService";
-import { uploadPdf } from "@/lib/cloudinary";
 import { api } from "@/lib/apiClient";
 import { handleFileDownload } from "@/lib/downloadUtils";
 import { AuthorIntegrityReportModal } from "@/components/ijsds2/AuthorIntegrityReportModal";
@@ -95,7 +94,7 @@ export const SubmissionDetail = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [vet, setvet] = useState(false);
   const [processing, setprocessing] = useState(false);
-  const isEditor = !!(profile?.is_editor || profile?.is_admin);
+  const isEditor = isEditorUser(profile);
   const [crossrefLoading, setCrossrefLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editingAuthors, setEditingAuthors] = useState(false);
@@ -420,7 +419,9 @@ export const SubmissionDetail = () => {
       if (!success) throw new Error("Server error during payment verification");
       if (!data.status) throw new Error("Payment could not be verified");
 
-      // 2. Generate and email a PDF receipt (separate from backend confirmation email)
+      // 2. Give the author a PDF receipt to keep. (It used to be emailed from the browser, which
+      //    always failed: only staff may call the send endpoint. The backend's own confirmation
+      //    email covers the notification.)
       const feeLabels: Record<string, { amount: string; label: string }> = {
         vetting: { amount: "5,000", label: "Gate 1 evaluation fee" },
         processing: { amount: "25,500", label: "Gate 2 publication fee (APC)" },
@@ -435,24 +436,20 @@ export const SubmissionDetail = () => {
           type: typeLabel,
           reference: transactionReference,
         });
-        const receiptUrl = await uploadPdf(blob);
-
-        if (user) {
-          await SendRecieptMail(
-            user.id,
-            submission!.submitter.full_name,
-            submission!.article.title,
-            receiptUrl,
-            typeLabel,
-          );
-        }
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `IJSDS-receipt-${transactionReference}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
       } catch (receiptErr) {
-        console.warn("Receipt generation/email warning:", receiptErr);
+        console.warn("Receipt generation warning:", receiptErr);
       }
 
       toast({
         title: "Payment Successful",
-        description: `Your ${typeLabel} of ₦${amountLabel} has been verified. A receipt has been sent to your email.`,
+        description: `Your ${typeLabel} of ₦${amountLabel} has been verified. A confirmation email is on its way and your receipt has been downloaded.`,
       });
 
       // 3. Refresh submission so payment badges update immediately

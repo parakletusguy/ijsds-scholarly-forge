@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/file-management/FileUpload';
 import { api } from '@/lib/apiClient';
-import { updateArticle } from '@/lib/articleService';
 import { toast } from '@/hooks/use-toast';
 import { Upload, FileText, Calendar, RefreshCw, Shield, Download } from 'lucide-react';
 import { handleFileDownload } from '@/lib/downloadUtils';
@@ -55,7 +54,7 @@ export const EditorFileManager = ({ articleId, submissionId }: EditorFileManager
 
     setUploading(true);
     try {
-      await updateArticle(articleId, { manuscript_file_url: fileUrl });
+      // The server makes a new main version the article's manuscript as part of the upload.
       await fetchFiles();
       setFileDescription('');
       toast({

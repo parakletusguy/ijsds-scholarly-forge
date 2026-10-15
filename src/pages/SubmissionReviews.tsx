@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isEditorUser } from '@/lib/roleUtils';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getSubmission } from '@/lib/submissionService';
@@ -47,7 +48,7 @@ export const SubmissionReviews = () => {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const isEditor = !!(profile?.is_editor || profile?.is_admin);
+  const isEditor = isEditorUser(profile);
 
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }

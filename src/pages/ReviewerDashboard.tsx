@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isReviewerUser } from '@/lib/roleUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { getReviews } from '@/lib/reviewService';
 import { Button } from '@/components/ui/button';
@@ -75,7 +76,7 @@ export const ReviewerDashboard = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<number>(0);
-  const isReviewer = !!profile?.is_reviewer;
+  const isReviewer = isReviewerUser(profile);
 
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }
@@ -88,7 +89,8 @@ export const ReviewerDashboard = () => {
 
   const fetchReviews = async () => {
     try {
-      const reviewList = await getReviews();
+      // Only my own assignments (staff who are also reviewers would otherwise get every review).
+      const reviewList = await getReviews({ reviewer_id: user!.id });
       // Published articles drop off the reviewer's dashboard (also enforced server-side)
       const active = (reviewList as unknown as ReviewWithSubmission[]).filter(
         (r) => r.submission?.article?.status !== 'published'

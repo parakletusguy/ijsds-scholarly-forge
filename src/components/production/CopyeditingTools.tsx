@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { uploadFile, convertDocxToHtml } from '@/lib/fileService';
+import { handleFileDownload } from '@/lib/downloadUtils';
 import { useToast } from '@/hooks/use-toast';
 import { updateArticle } from '@/lib/productionService';
 import type { Article } from '@/lib/articleService';
@@ -44,31 +45,6 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     try {
       await updateArticle(article.id, { status: newStatus as any });
 
-      // Send notification if article is being marked as processed
-      if (newStatus === 'processed') {
-        try {
-          // Get article and submission details for notification
-          const { data: submission } = await supabase
-            .from('submissions')
-            .select(`
-              submitter_id,
-              profiles!inner(full_name)
-            `)
-            .eq('article_id', article.id)
-            .single();
-
-          if (submission) {
-          if (submission) {
-            // Updated import or fallback if the service is not yet available
-            // await notifyUserArticleProcessed(...)
-          }
-          }
-        } catch (notificationError) {
-          console.error('Error sending processed notification:', notificationError);
-          // Don't fail the status update if notification fails
-        }
-      }
-
       toast({
         title: "Status Updated",
         description: `Article status changed to ${newStatus.replace('_', ' ')}`,
@@ -94,17 +70,14 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
     try {
 
       // In a real implementation, you'd save to a copyediting_notes table
-       const docFile = await DownloadDocx(content,fileName)
-       const {data,error} = await supabase.storage
-       .from('journal-website-db1')
-      .upload(docFile.fileName,docFile.converted, {
-        upsert:true
-      });
-      if(error) throw error
-
+       // Save the edited document as a new version of the article's manuscript (backend storage).
+       const docFile = await DownloadDocx(content, fileName || `${article.id}_copyedited.docx`)
+       const name = docFile.fileName.endsWith('.docx') ? docFile.fileName : `${docFile.fileName}.docx`
+       await uploadFile(new globalThis.File([docFile.converted], name, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }), article.id, { file_description: 'Copyedited version' })
+       onUpdate()
       toast({
         title: "Notes Saved",
-        description: "Edited file has been savedhave been saved",
+        description: "The edited document was saved as a new manuscript version.",
       });
       setEditingNotes('');
     } catch (error) {
@@ -130,24 +103,15 @@ export const CopyeditingTools = ({ article, onUpdate }: CopyeditingToolsProps) =
   };
 
   const viewArticle = async (url) => {
-
-    if(content == ''){  
-      const fileNameUrl = url.split("/").pop(); 
-      console.log(fileName); 
-      const getHtml = await fetch('https://ijsdsbackend-agewf0h8g5hfawax.switzerlandnorth-01.azurewebsites.net/supabase/getFile', {
-      method: 'POST',
-      headers: {"Content-Type" : "application/json"},
-      body:JSON.stringify({
-        url:url
-      })
-    })
-    const htmlValue = await getHtml.json()
-    setfileName(fileNameUrl)
-    setContent(htmlValue.data)
-  }else{
-    setContent(content)
-  }
-
+    if (content === '') {
+      try {
+        setfileName(String(url).split('/').pop()?.split('?')[0] || 'manuscript.docx')
+        setContent(await convertDocxToHtml(url))
+      } catch (error) {
+        toast({ title: "Couldn't open the document", description: error instanceof Error ? error.message : 'Only .docx files can be opened in the editor.', variant: "destructive" })
+        return
+      }
+    }
     setEditor(true)
   }
 
@@ -175,19 +139,7 @@ const Check = async (html) => {
     }
 
     try {
-      // Get the public URL from Supabase storage
-      const { data } = supabase.storage
-        .from('journal-website-db1')
-        .getPublicUrl(article.manuscript_file_url);
-
-      // Create a temporary link to download the file
-      const link = document.createElement('a');
-      link.href = data.publicUrl;
-      link.download = `${article.title.replace(/[^a-z0-9]/gi, '_')}_original.docx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
+      await handleFileDownload(article.manuscript_file_url, article.title, article.id);
       toast({
         title: "Download Started",
         description: "Document download has started",
@@ -214,27 +166,8 @@ const Check = async (html) => {
 
     setUploading(true);
     try {
-      // Upload the file to replace the original
-      const fileExt = uploadedFile.name.split('.').pop();
-      const fileName = `${article.id}_edited.${fileExt}`;
-      
-      const { data, error } = await supabase.storage
-        .from('journal-website-db1')
-        .upload(fileName, uploadedFile, {
-          cacheControl: '3600',
-          upsert: true // This will replace the existing file
-        });
-
-      if (error) throw error;
-
-      // Update the article with the new file URL
-      const { error: updateError } = await supabase
-        .from('articles')
-        .update({ manuscript_file_url: fileName })
-        .eq('id', article.id);
-
-      if (updateError) throw updateError;
-
+      // Upload as a new main version; the server makes it the article's manuscript.
+      await uploadFile(uploadedFile, article.id, { file_description: 'Copyedited replacement' });
       toast({
         title: "Upload Successful",
         description: "Document has been updated successfully",

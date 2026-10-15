@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { signIn, signUp, resetPassword } from '@/lib/auth';
-import { sendWelcomeEmail, sendAuthorWelcomeEmail } from '@/lib/emailService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
@@ -13,6 +12,7 @@ export const Auth = () => {
   const redirectUrl = searchParams.get('redirect') || (reason === 'submit' ? '/submit' : '/');
   const initialMode = searchParams.get('mode') === 'signup' || reason === 'submit' ? 'signup' : 'signin';
   const isConfirmed = searchParams.get('confirmed') === 'true';
+  const authError = searchParams.get('error');
   
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot-password'>(initialMode);
   const [email, setEmail] = useState('');
@@ -58,10 +58,7 @@ export const Auth = () => {
           toast({ title: 'Signup Failed', description: error.message, variant: 'destructive' });
         } else {
           refreshAuth(data.profile);
-          try {
-            if (role === 'author') await sendAuthorWelcomeEmail(data.profile.id, fullName, email);
-            else await sendWelcomeEmail(data.profile.id, fullName, email);
-          } catch (err) { console.error('Email error:', err); }
+          // The welcome email is sent by the backend at registration.
           toast({ title: 'Success', description: 'Account created. Welcome to IJSDS.' });
           navigate(redirectUrl);
         }
@@ -84,11 +81,11 @@ export const Auth = () => {
 
   const handleOrcidLogin = () => {
     setLoading(true);
-    const client_id = "APP-GKE87FTH6QV1ZK9D"
-    const apiBase = import.meta.env.VITE_API_URL || "https://ijsdsbackend-429660256945.europe-southwest1.run.app";
+    // The backend starts the ORCID flow so it can set a one-time state (CSRF protection) and use
+    // the exact redirect URI it will later present when exchanging the code.
+    const apiBase = import.meta.env.VITE_API_URL || "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net";
     const normalizedBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
-    const redirect = encodeURIComponent(`${normalizedBase}/auth/orcid`);
-    window.location.href = `https://orcid.org/oauth/authorize?client_id=${client_id}&response_type=code&scope=/authenticate&redirect_uri=${redirect}`;
+    window.location.href = `${normalizedBase}/auth/orcid/start`;
   };
 
   const inputClass = "w-full bg-stone-100 border-0 px-4 py-4 text-stone-900 placeholder:text-stone-400 focus:ring-0 focus:bg-stone-200 transition-colors text-sm font-body outline-none";
@@ -141,6 +138,13 @@ export const Auth = () => {
                 <p className="text-xs text-stone-600 leading-relaxed">
                   Please sign up for an author account or log in to submit your manuscript and track it through peer review.
                 </p>
+              </div>
+            )}
+
+            {authError && (
+              <div role="alert" className="mb-8 p-4 bg-red-50 border border-red-200">
+                <p className="text-xs font-bold uppercase tracking-widest text-red-700 mb-1">Sign-in problem</p>
+                <p className="text-xs text-red-800 leading-relaxed">{authError}</p>
               </div>
             )}
 

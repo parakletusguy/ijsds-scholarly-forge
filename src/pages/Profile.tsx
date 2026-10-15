@@ -162,17 +162,7 @@ export const Profile = () => {
             : { request_reviewer: true };
       const updated = await updateProfile(user.id, updates);
       setProfile(updated);
-      try {
-        const { notifyAdminsOfRoleRequest } = await import("@/lib/roleNotificationService");
-        await notifyAdminsOfRoleRequest({
-          requesterId: user.id,
-          requesterName: profile?.full_name ?? "",
-          requesterEmail: profile?.email ?? "",
-          role: type,
-        });
-      } catch {
-        /* notification failure is non-critical */
-      }
+      // Admins are notified by the backend when the request is saved.
       toast({
         title: "Request sent",
         description: `An admin will review your ${type} request.`,

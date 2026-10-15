@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { AuthorFileManager } from '@/components/author/AuthorFileManager';
@@ -47,19 +46,13 @@ export const SubmissionFileManager = ({
         </CardContent>
       </Card>
 
-      {/* File Management for Authors */}
-      {/* {isAuthor && (
-        <AuthorFileManager 
+      {/* File management: only the submitting author may upload new versions (the server enforces this too). */}
+      {isAuthor && (
+        <AuthorFileManager
           articleId={articleId}
           submissionId={submissionId}
         />
-      )} */}
-
-
-        <AuthorFileManager 
-          articleId={articleId}
-          submissionId={submissionId}
-        />
+      )}
 
       {/* Submission Info for Non-Authors */}
       {/* {!isAuthor && (

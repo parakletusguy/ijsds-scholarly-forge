@@ -53,18 +53,9 @@ export const api = {
     ),
 
   post: <T>(path: string, body?: unknown): Promise<T> => {
-    const actingRole = getActingRole();
-    console.log("[ApiClient] POST actingRole:", actingRole);
-    let finalBody = body;
-    if (
-      actingRole &&
-      typeof body === "object" &&
-      body !== null &&
-      !Array.isArray(body)
-    ) {
-      finalBody = { ...(body as object), role: actingRole };
-      console.log("[ApiClient] POST injected role:", actingRole);
-    }
+    // Never add the caller's role to request bodies: the server derives permissions from the
+    // token, and an injected "role" field once turned every approved/declined user into an admin.
+    const finalBody = body;
     return fetch(`${API_URL}${path}`, {
       method: "POST",
       headers: buildHeaders(),
@@ -73,18 +64,9 @@ export const api = {
   },
 
   patch: <T>(path: string, body?: unknown): Promise<T> => {
-    const actingRole = getActingRole();
-    console.log("[ApiClient] PATCH actingRole:", actingRole);
-    let finalBody = body;
-    if (
-      actingRole &&
-      typeof body === "object" &&
-      body !== null &&
-      !Array.isArray(body)
-    ) {
-      finalBody = { ...(body as object), role: actingRole };
-      console.log("[ApiClient] PATCH injected role:", actingRole);
-    }
+    // Never add the caller's role to request bodies: the server derives permissions from the
+    // token, and an injected "role" field once turned every approved/declined user into an admin.
+    const finalBody = body;
     return fetch(`${API_URL}${path}`, {
       method: "PATCH",
       headers: buildHeaders(),

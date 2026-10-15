@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
+import { isEditorUser } from '@/lib/roleUtils';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -8,9 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { CopyeditingTools } from '@/components/production/CopyeditingTools';
-import { ProofreadingSystem } from '@/components/production/ProofreadingSystem';
-import { TypesettingIntegration } from '@/components/production/TypesettingIntegration';
-import { PDFGeneration } from '@/components/production/PDFGeneration';
 import { IssueCompilation } from '@/components/production/IssueCompilation';
 import { DOIManager } from '@/components/production/DOIManager';
 import { DOAJExportManager } from '@/components/production/DOAJExportManager';
@@ -31,7 +28,7 @@ export const Production = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const isEditor = !!(profile?.is_editor || profile?.is_admin);
+  const isEditor = isEditorUser(profile);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/auth'); return; }

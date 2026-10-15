@@ -26,6 +26,8 @@ export const getProfile = async (id: string): Promise<Profile> => {
 };
 
 export const updateProfile = async (id: string, updates: Partial<{
+  /** Admin only: changes the user's role column (a stray `role` field is ignored by the server). */
+  assign_role: 'author' | 'reviewer' | 'editor' | 'admin';
   full_name: string;
   affiliation: string;
   bio: string;

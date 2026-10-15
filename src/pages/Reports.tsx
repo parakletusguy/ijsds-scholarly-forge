@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { isEditorUser } from '@/lib/roleUtils';
 import { ComprehensiveReports } from '@/components/reporting/ComprehensiveReports';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,7 +11,7 @@ import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 export const Reports = () => {
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
-  const isEditor = !!(profile?.is_editor || profile?.is_admin);
+  const isEditor = isEditorUser(profile);
 
   useEffect(() => {
     if (!loading && !user) { navigate('/auth'); return; }

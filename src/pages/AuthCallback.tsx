@@ -12,8 +12,12 @@ export const AuthCallback = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    
+    // The backend now returns the token in the URL fragment (#token=...) so it never reaches
+    // server logs; keep accepting ?token= for older links.
+    const hashToken = new URLSearchParams(window.location.hash.slice(1)).get('token');
+    const token = hashToken || searchParams.get('token');
+    if (hashToken) window.history.replaceState(null, '', window.location.pathname);
+
     if (token) {
       setToken(token);
       

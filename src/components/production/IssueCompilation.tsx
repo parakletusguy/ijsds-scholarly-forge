@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { approveForProcessing, updateArticle } from '@/lib/productionService';
 import type { Article } from '@/lib/articleService';
 import { useToast } from '@/hooks/use-toast';

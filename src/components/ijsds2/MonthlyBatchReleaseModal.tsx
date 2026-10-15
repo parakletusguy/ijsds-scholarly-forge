@@ -25,11 +25,14 @@ import { toast } from "@/hooks/use-toast";
 interface MonthlyBatchReleaseModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Only admins may trigger a release (the server enforces this); editors can view the queue. */
+  canExecute?: boolean;
 }
 
 export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> = ({
   open,
   onOpenChange,
+  canExecute = false,
 }) => {
   const [status, setStatus] = useState<BatchStatus | null>(null);
   const [loading, setLoading] = useState(false);
@@ -208,7 +211,8 @@ export const MonthlyBatchReleaseModal: React.FC<MonthlyBatchReleaseModalProps> =
               </Button>
               <Button
                 onClick={handleExecute}
-                disabled={executing || readyCount === 0}
+                disabled={executing || readyCount === 0 || !canExecute}
+                title={canExecute ? undefined : "Only an administrator can trigger the monthly release"}
                 className="bg-primary text-white font-semibold gap-1.5"
               >
                 {executing ? (

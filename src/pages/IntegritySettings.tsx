@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isAdminUser, isEditorUser } from '@/lib/roleUtils';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ const Num = ({ label, value, onChange, step = 0.01 }: { label: string; value: nu
 export const IntegritySettings = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = !!profile?.is_admin;
+  const isAdmin = isAdminUser(profile);
   const [cfg, setCfg] = useState<IntegrityConfig | null>(null);
   const [history, setHistory] = useState<History>([]);
   const [reason, setReason] = useState('');
@@ -35,7 +36,7 @@ export const IntegritySettings = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (!user || !(isAdmin || profile?.is_editor)) { navigate('/dashboard'); return; }
+    if (!user || !isEditorUser(profile)) { navigate('/dashboard'); return; }
     load().catch((e) => toast({ title: "Couldn't load settings", description: e?.message, variant: 'destructive' }));
   }, [user, profile, loading]);
 

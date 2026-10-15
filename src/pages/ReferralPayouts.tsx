@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isAdminUser } from '@/lib/roleUtils';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ export const ReferralPayouts = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (!user || !profile?.is_admin) { navigate('/dashboard'); return; }
+    if (!user || !isAdminUser(profile)) { navigate('/dashboard'); return; }
     load();
   }, [user, profile, loading, filter]);
 
