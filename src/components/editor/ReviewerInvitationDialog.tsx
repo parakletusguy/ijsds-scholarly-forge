@@ -102,8 +102,9 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
     } catch (error) {
       console.error('Error sending review invitation:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to send review invitation.',
+        title: "Couldn't send invitation",
+        // Surface the server's reason (e.g. COPE conflict, or the paper isn't past Gate 2 yet)
+        description: error instanceof Error ? error.message : 'Failed to send review invitation.',
         variant: 'destructive',
       });
     } finally {
@@ -120,12 +121,12 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
         </Button>
       </DialogTrigger>
 
-    <DialogContent className="max-w-2xl">
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <Tabs defaultValue="assignReviewer" className="space-y-6">
               <DialogHeader>
           <TabsList>
                       <TabsTrigger value="assignReviewer">Assign Reviewer </TabsTrigger>
-                      <TabsTrigger value="workflow">Under Review</TabsTrigger>
+                      <TabsTrigger value="workflow">Suggested Reviewers</TabsTrigger>
             </TabsList>
         </DialogHeader>
           <TabsContent value='assignReviewer'>
@@ -198,14 +199,10 @@ export const ReviewerInvitationDialog = ({ submissionId, submissionTitle, onInvi
     </TabsContent>
 
   <TabsContent value='workflow'>
-              <AutomatedReviewerMatchingInterface 
-                                  articleData={{
-                                      title: submission.article?.title || submissionTitle,
-                                      abstract: submission.article?.abstract || '',
-                                    keywords: [],
-                                    subject_area: ''
-                                  }}
-                                />
+              <AutomatedReviewerMatchingInterface
+                submissionId={submissionId}
+                onAssigned={() => { setOpen(false); onInvite(); }}
+              />
             </TabsContent>
 
 

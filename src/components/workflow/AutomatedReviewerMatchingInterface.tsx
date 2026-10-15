@@ -1,409 +1,197 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { supabase } from '@/integrations/supabase/client';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { 
-  Users, 
-  Target, 
-  Brain, 
-  Settings, 
-  Star, 
-  Clock,
-  BookOpen,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
+import { Users, Target, Brain, Info, ShieldCheck, AlertCircle, Mail, GraduationCap } from 'lucide-react';
+import { matchReviewers, assignReviewers, getManuscriptStatus } from '@/lib/ijsds2/api';
+import type { ManuscriptState, ReviewerMatchCandidate } from '@/types/ijsds2';
 
-interface MatchingCriteria {
-  subjectAreaWeight: number;
-  keywordSimilarity: number;
-  reviewerWorkload: number;
-  responseTimeHistory: number;
-  conflictAvoidance: boolean;
-  minimumExperience: number;
-  maxReviewsPerReviewer: number;
+const MAX_LOAD = 3;
+const ASSIGNABLE: ManuscriptState[] = ['APC_PAID', 'REVIEWER_MATCHED', 'IN_PEER_REVIEW', 'AUTHOR_REVISION_REQUESTED'];
+
+interface Props {
+  submissionId: string;
+  /** Called after reviewers were assigned so the parent can refresh. */
+  onAssigned?: () => void;
 }
 
-interface ReviewerMatch {
-  id: string;
-  name: string;
-  email: string;
-  affiliation: string;
-  matchScore: number;
-  currentWorkload: number;
-  avgResponseTime: number;
-  expertise: string[];
-  status: 'available' | 'busy' | 'unavailable';
-  conflictRisk: 'none' | 'low' | 'medium' | 'high';
-}
+type Method = 'vector' | 'keyword';
 
-interface AutomatedReviewerMatchingInterfaceProps {
-  submissionId?: string;
-  articleData?: {
-    title: string;
-    abstract: string;
-    keywords: string[];
-    subject_area: string;
-  };
-}
-
-export const AutomatedReviewerMatchingInterface = ({ 
-  submissionId, 
-  articleData 
-}: AutomatedReviewerMatchingInterfaceProps) => {
+/**
+ * Stage 3 reviewer matching. Everything shown here comes from the server: similarity, current
+ * workload and expertise are real, and the COPE exclusions (referring reviewer, the author,
+ * reviewers at the workload cap, already-invited, unavailable) are applied by the backend
+ * both when listing and again when assigning.
+ */
+export const AutomatedReviewerMatchingInterface = ({ submissionId, onAssigned }: Props) => {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [matches, setMatches] = useState<ReviewerMatch[]>([]);
-  const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
-  const [criteria, setCriteria] = useState<MatchingCriteria>({
-    subjectAreaWeight: 40,
-    keywordSimilarity: 30,
-    reviewerWorkload: 15,
-    responseTimeHistory: 15,
-    conflictAvoidance: true,
-    minimumExperience: 2,
-    maxReviewsPerReviewer: 3
-  });
+  const [loading, setLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
+  const [matches, setMatches] = useState<ReviewerMatchCandidate[]>([]);
+  const [method, setMethod] = useState<Method | null>(null);
+  const [state, setState] = useState<ManuscriptState | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [m, s] = await Promise.all([
+        matchReviewers(submissionId, 10),
+        getManuscriptStatus(submissionId).catch(() => null),
+      ]);
+      setMatches(m.candidates);
+      setMethod(m.method);
+      setState(s?.current_state ?? null);
+      setSelected([]);
+    } catch (e: any) {
+      setError(e?.message ?? 'Could not load reviewer matches.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (articleData) {
-      findMatchingReviewers();
-    }
-  }, [articleData, criteria]);
+    if (submissionId) load();
+  }, [submissionId]);
 
-  const findMatchingReviewers = async () => {
-    if (!articleData) return;
-    
-    setLoading(true);
+  const canAssign = state === null || ASSIGNABLE.includes(state);
+
+  const toggle = (userId: string) =>
+    setSelected((prev) => (prev.includes(userId) ? prev.filter((x) => x !== userId) : [...prev, userId]));
+
+  const assign = async () => {
+    setAssigning(true);
     try {
-      // Fetch potential reviewers
-      const { data: reviewers } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          email,
-          affiliation,
-          is_reviewer
-        `)
-        .eq('is_reviewer', true);
-
-      if (!reviewers) return;
-
-      // Simulate matching algorithm with scoring
-      const scoredMatches: ReviewerMatch[] = reviewers.map(reviewer => {
-        const matchScore = calculateMatchScore(reviewer, articleData, criteria);
-        const currentWorkload = Math.floor(Math.random() * 5); // Mock data
-        const avgResponseTime = Math.floor(Math.random() * 20) + 5; // Mock data
-        const expertise = generateMockExpertise(); // Mock data
-        const status = ['available', 'busy', 'unavailable'][Math.floor(Math.random() * 3)] as 'available' | 'busy' | 'unavailable';
-        const conflictRisk = ['none', 'low', 'medium', 'high'][Math.floor(Math.random() * 4)] as 'none' | 'low' | 'medium' | 'high';
-
-        return {
-          id: reviewer.id,
-          name: reviewer.full_name || 'Unknown',
-          email: reviewer.email || '',
-          affiliation: reviewer.affiliation || '',
-          matchScore,
-          currentWorkload,
-          avgResponseTime,
-          expertise,
-          status,
-          conflictRisk
-        };
-      });
-
-      // Sort by match score and filter
-      const filteredMatches = scoredMatches
-        .filter(match => 
-          match.status === 'available' && 
-          match.currentWorkload < criteria.maxReviewsPerReviewer &&
-          match.conflictRisk !== 'high'
-        )
-        .sort((a, b) => b.matchScore - a.matchScore)
-        .slice(0, 15);
-
-      setMatches(filteredMatches);
-    } catch (error) {
-      console.error('Error finding matching reviewers:', error);
-      toast({
-        title: "Error",
-        description: "Failed to find matching reviewers",
-        variant: "destructive",
-      });
+      await assignReviewers(submissionId, selected);
+      toast({ title: 'Reviewers assigned', description: `${selected.length} reviewer(s) invited by email.` });
+      onAssigned?.();
+      await load();
+    } catch (e: any) {
+      toast({ title: "Couldn't assign reviewers", description: e?.message ?? 'Please try again.', variant: 'destructive' });
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculateMatchScore = (reviewer: any, article: any, criteria: MatchingCriteria): number => {
-    // Simplified scoring algorithm
-    let score = 0;
-    
-    // Subject area matching (mock calculation)
-    const subjectScore = Math.random() * 100;
-    score += (subjectScore * criteria.subjectAreaWeight) / 100;
-    
-    // Keyword similarity (mock calculation)
-    const keywordScore = Math.random() * 100;
-    score += (keywordScore * criteria.keywordSimilarity) / 100;
-    
-    // Workload consideration (mock calculation)
-    const workloadScore = Math.random() * 100;
-    score += (workloadScore * criteria.reviewerWorkload) / 100;
-    
-    // Response time history (mock calculation)
-    const responseScore = Math.random() * 100;
-    score += (responseScore * criteria.responseTimeHistory) / 100;
-    
-    return Math.round(score);
-  };
-
-  const generateMockExpertise = (): string[] => {
-    const allExpertise = [
-      'Machine Learning', 'Data Science', 'Artificial Intelligence', 
-      'Computer Vision', 'Natural Language Processing', 'Robotics',
-      'Software Engineering', 'Database Systems', 'Cloud Computing',
-      'Cybersecurity', 'Human-Computer Interaction', 'Bioinformatics'
-    ];
-    const count = Math.floor(Math.random() * 4) + 1;
-    return allExpertise.sort(() => 0.5 - Math.random()).slice(0, count);
-  };
-
-  const handleReviewerSelection = (reviewerId: string) => {
-    setSelectedReviewers(prev => 
-      prev.includes(reviewerId)
-        ? prev.filter(id => id !== reviewerId)
-        : [...prev, reviewerId]
-    );
-  };
-
-  const assignSelectedReviewers = async () => {
-    if (!submissionId || selectedReviewers.length === 0) return;
-
-    setLoading(true);
-    try {
-      // Create review assignments
-      const assignments = selectedReviewers.map(reviewerId => ({
-        submission_id: submissionId,
-        reviewer_id: reviewerId,
-        invitation_status: 'pending',
-        review_round: 1,
-        deadline_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString()
-      }));
-
-      const { error } = await supabase
-        .from('reviews')
-        .insert(assignments);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `${selectedReviewers.length} reviewers assigned successfully`,
-      });
-
-      setSelectedReviewers([]);
-    } catch (error) {
-      console.error('Error assigning reviewers:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign reviewers",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'available': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'busy': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'unavailable': return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default: return null;
-    }
-  };
-
-  const getConflictColor = (risk: string) => {
-    switch (risk) {
-      case 'none': return 'text-green-600';
-      case 'low': return 'text-blue-600';
-      case 'medium': return 'text-yellow-600';
-      case 'high': return 'text-red-600';
-      default: return 'text-gray-600';
+      setAssigning(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Matching Criteria Configuration */}
+    <div className="space-y-4">
+      <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
+        <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+        <p>
+          Reviewers are ranked from their stated expertise against this paper. These are excluded automatically: the
+          referring reviewer, the author, anyone already invited, anyone unavailable, and anyone with {MAX_LOAD} active
+          reviews.
+        </p>
+      </div>
+
+      {state && !canAssign && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <p>
+            Reviewers can only be assigned after the integrity audit is cleared and Gate 2 is paid. This paper is currently{' '}
+            <strong>{state.replace(/_/g, ' ').toLowerCase()}</strong>, so you can preview matches but not assign yet.
+          </p>
+        </div>
+      )}
+
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Matching Criteria Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label>Subject Area Weight: {criteria.subjectAreaWeight}%</Label>
-                <Slider
-                  value={[criteria.subjectAreaWeight]}
-                  onValueChange={([value]) => setCriteria(prev => ({ ...prev, subjectAreaWeight: value }))}
-                  max={100}
-                  step={5}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div>
-                <Label>Keyword Similarity: {criteria.keywordSimilarity}%</Label>
-                <Slider
-                  value={[criteria.keywordSimilarity]}
-                  onValueChange={([value]) => setCriteria(prev => ({ ...prev, keywordSimilarity: value }))}
-                  max={100}
-                  step={5}
-                  className="mt-2"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label>Reviewer Workload: {criteria.reviewerWorkload}%</Label>
-                <Slider
-                  value={[criteria.reviewerWorkload]}
-                  onValueChange={([value]) => setCriteria(prev => ({ ...prev, reviewerWorkload: value }))}
-                  max={100}
-                  step={5}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div>
-                <Label>Response Time History: {criteria.responseTimeHistory}%</Label>
-                <Slider
-                  value={[criteria.responseTimeHistory]}
-                  onValueChange={([value]) => setCriteria(prev => ({ ...prev, responseTimeHistory: value }))}
-                  max={100}
-                  step={5}
-                  className="mt-2"
-                />
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          
-        </CardContent>
-      </Card>
-
-      {/* Matching Results */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex flex-wrap items-center gap-2 text-base">
             <Brain className="h-5 w-5" />
-            AI-Powered Reviewer Matches
-            {selectedReviewers.length > 0 && (
-              <Badge variant="secondary">
-                {selectedReviewers.length} selected
+            Suggested reviewers
+            {method && (
+              <Badge variant="outline" className="text-[10px] font-normal">
+                {method === 'vector' ? 'Ranked by semantic similarity' : 'Ranked by keyword match'}
               </Badge>
             )}
+            {selected.length > 0 && <Badge variant="secondary">{selected.length} selected</Badge>}
           </CardTitle>
+          {method === 'keyword' && (
+            <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+              <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              Match % is the share of a reviewer's listed expertise keywords that appear in the paper. Reviewers who have
+              not listed any expertise cannot be ranked; invite them from the other tab if needed.
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           {loading ? (
-            <LoadingSpinner text="Finding matching reviewers..." />
+            <LoadingSpinner text="Finding reviewers..." />
+          ) : error ? (
+            <div className="py-6 text-center space-y-3">
+              <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+              <p className="text-sm text-muted-foreground">{error}</p>
+              <Button variant="outline" size="sm" onClick={load}>Try again</Button>
+            </div>
+          ) : matches.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <h3 className="text-sm font-semibold mb-1">No eligible reviewers matched</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                Either no reviewer's listed expertise matches this paper, or everyone who does is excluded or at capacity.
+                Ask reviewers to add expertise keywords in their dashboard, or invite someone from the other tab.
+              </p>
+            </div>
           ) : (
-            <div className="space-y-4">
-              {matches.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Matches Found</h3>
-                  <p className="text-muted-foreground">
-                    Try adjusting the matching criteria or ensure article data is provided
-                  </p>
-                </div>
-              ) : (
-                matches.map((match) => (
-                  <div
-                    key={match.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedReviewers.includes(match.id) 
-                        ? 'border-primary bg-muted/50' 
-                        : 'border-border hover:bg-muted/25'
-                    }`}
-                    onClick={() => handleReviewerSelection(match.id)}
+            <div className="space-y-3">
+              {matches.map((c) => {
+                const isSelected = selected.includes(c.userId);
+                const atCap = c.activeLoad >= MAX_LOAD;
+                return (
+                  <label
+                    key={c.userId}
+                    className={`flex items-start gap-3 rounded-lg border p-4 transition-colors ${
+                      atCap ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    } ${isSelected ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/30'}`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h4 className="font-semibold">{match.name}</h4>
-                          <Badge variant="outline" className="flex items-center gap-1">
-                            <Star className="h-3 w-3" />
-                            {match.matchScore}% match
-                          </Badge>
-                          {getStatusIcon(match.status)}
+                    <Checkbox
+                      checked={isSelected}
+                      disabled={atCap || !canAssign}
+                      onCheckedChange={() => toggle(c.userId)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="font-semibold text-sm">{c.fullName ?? 'Unnamed reviewer'}</h4>
+                        <Badge variant="outline" className="font-mono text-[11px]">
+                          {(c.similarity * 100).toFixed(0)}% match
+                        </Badge>
+                        <Badge variant={c.activeLoad === 0 ? 'secondary' : 'outline'} className="text-[11px]">
+                          {c.activeLoad}/{MAX_LOAD} active reviews
+                        </Badge>
+                      </div>
+                      {(c.affiliation || c.email) && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                          {c.affiliation && (
+                            <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{c.affiliation}</span>
+                          )}
+                          {c.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{c.email}</span>}
                         </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {match.affiliation}
-                        </p>
-                        
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {match.expertise.map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-xs">
-                              {skill}
-                            </Badge>
+                      )}
+                      {c.expertiseKeywords.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {c.expertiseKeywords.map((k) => (
+                            <Badge key={k} variant="secondary" className="text-[10px] font-normal">{k}</Badge>
                           ))}
                         </div>
-                        
-                        <div className="grid grid-cols-3 gap-4 text-xs">
-                          <div>
-                            <span className="text-muted-foreground">Workload:</span>
-                            <span className="ml-1 font-medium">{match.currentWorkload} reviews</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Avg Response:</span>
-                            <span className="ml-1 font-medium">{match.avgResponseTime} days</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Conflict Risk:</span>
-                            <span className={`ml-1 font-medium ${getConflictColor(match.conflictRisk)}`}>
-                              {match.conflictRisk}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))
-              )}
-              
-              {selectedReviewers.length > 0 && (
-                <div className="flex gap-3 pt-4 border-t">
-                  <Button onClick={assignSelectedReviewers} disabled={loading}>
+                  </label>
+                );
+              })}
+
+              {selected.length > 0 && (
+                <div className="flex gap-3 pt-3 border-t">
+                  <Button onClick={assign} disabled={assigning || !canAssign}>
                     <Target className="h-4 w-4 mr-2" />
-                    Assign {selectedReviewers.length} Reviewer(s)
+                    {assigning ? 'Assigning…' : `Assign ${selected.length} reviewer${selected.length === 1 ? '' : 's'}`}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setSelectedReviewers([])}
-                  >
-                    Clear Selection
-                  </Button>
+                  <Button variant="outline" onClick={() => setSelected([])} disabled={assigning}>Clear selection</Button>
                 </div>
               )}
             </div>
