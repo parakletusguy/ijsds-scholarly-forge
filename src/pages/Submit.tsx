@@ -348,18 +348,18 @@ export const Submit = () => {
       return;
     }
 
-    if (!vettingPaid) {
-      toast({
-        title: "Gate 1 Payment Required",
-        description:
-          "Please pay the Gate 1 Evaluation Fee (₦5,000) before submitting.",
-        variant: "destructive",
-      });
-      document
-        .getElementById("payment-section")
-        ?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
+    // if (!vettingPaid) {
+    //   toast({
+    //     title: "Gate 1 Payment Required",
+    //     description:
+    //       "Please pay the Gate 1 Evaluation Fee (₦5,000) before submitting.",
+    //     variant: "destructive",
+    //   });
+    //   document
+    //     .getElementById("payment-section")
+    //     ?.scrollIntoView({ behavior: "smooth" });
+    //   return;
+    // }
 
     if (!ethicsAgree) {
       toast({
@@ -1276,7 +1276,7 @@ export const Submit = () => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading || !vettingPaid}
+            // disabled={loading || !vettingPaid}
             title={
               !vettingPaid
                 ? "Pay Gate 1 Evaluation Fee to unlock submission"
@@ -1286,8 +1286,8 @@ export const Submit = () => {
           >
             {loading
               ? "Submitting…"
-              : !vettingPaid
-                ? "Pay Gate 1 to Submit"
+              // : !vettingPaid
+              //   ? "Pay Gate 1 to Submit"
                 : "Submit Article"}
             {!loading && <ArrowRight size={15} />}
           </button>

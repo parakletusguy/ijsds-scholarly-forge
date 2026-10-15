@@ -52,6 +52,7 @@ import {
   uploadAuthorRevision,
 } from "@/lib/ijsds2/api";
 import type { AuthorAuditReport, ManuscriptStatus } from "@/types/ijsds2";
+import { stateLabel } from "@/lib/ijsds2/labels";
 import { ShieldCheck, Cpu, BookOpen, Clock, Sparkles } from "lucide-react";
 
 interface SubmissionDetails {
@@ -529,7 +530,7 @@ export const SubmissionDetail = () => {
                     Stage 2 Research Integrity & Citation Intelligence
                   </span>
                   <Badge variant="outline" className="text-[10px]">
-                    {manuscript.current_state.replace(/_/g, " ")}
+                    {stateLabel(manuscript.current_state)}
                   </Badge>
                 </div>
                 <p className="text-sm text-foreground max-w-xl">
