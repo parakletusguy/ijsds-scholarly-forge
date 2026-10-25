@@ -50,6 +50,8 @@ export interface ManuscriptStatus {
   target_publication_month: number | null;
   published_at: string | null;
   doi: string | null;
+  /** False while the fee/audit gates are switched off on the server. */
+  payment_gates_enforced?: boolean;
   audits: Array<{
     id: string;
     revision_no: number;

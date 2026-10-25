@@ -34,6 +34,7 @@ export const AutomatedReviewerMatchingInterface = ({ submissionId, onAssigned }:
   const [matches, setMatches] = useState<ReviewerMatchCandidate[]>([]);
   const [method, setMethod] = useState<Method | null>(null);
   const [state, setState] = useState<ManuscriptState | null>(null);
+  const [gatesEnforced, setGatesEnforced] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
 
@@ -48,6 +49,7 @@ export const AutomatedReviewerMatchingInterface = ({ submissionId, onAssigned }:
       setMatches(m.candidates);
       setMethod(m.method);
       setState(s?.current_state ?? null);
+      setGatesEnforced(s?.payment_gates_enforced !== false);
       setSelected([]);
     } catch (e: any) {
       setError(e?.message ?? 'Could not load reviewer matches.');
@@ -60,7 +62,7 @@ export const AutomatedReviewerMatchingInterface = ({ submissionId, onAssigned }:
     if (submissionId) load();
   }, [submissionId]);
 
-  const canAssign = state === null || ASSIGNABLE.includes(state);
+  const canAssign = !gatesEnforced || state === null || ASSIGNABLE.includes(state);
 
   const toggle = (userId: string) =>
     setSelected((prev) => (prev.includes(userId) ? prev.filter((x) => x !== userId) : [...prev, userId]));
