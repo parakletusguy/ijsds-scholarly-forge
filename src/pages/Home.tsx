@@ -76,8 +76,6 @@ export const Home = () => {
     navigate(q ? `/articles?q=${encodeURIComponent(q)}` : '/articles');
   };
 
-  const [featured, ...rest] = articles;
-
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 selection:bg-orange-100 selection:text-primary">
 
@@ -178,43 +176,22 @@ export const Home = () => {
               </Link>
             </div>
           ) : (
-            <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-              {featured && (
-                <article className="lg:col-span-7 border-t-2 border-stone-900 pt-6">
-                  {featured.subject_area && (
-                    <p className="text-xs font-semibold tracking-wide uppercase text-primary mb-4">{featured.subject_area}</p>
-                  )}
-                  <h3 className="font-headline text-3xl md:text-4xl leading-tight mb-5">
-                    <Link to={`/article/${buildArticleSlug(featured)}`} className="hover:text-primary transition-colors">
-                      {featured.title}
+            <ol className="grid md:grid-cols-2 gap-x-16 border-t border-stone-300">
+              {articles.map((a) => (
+                <li key={a.id} className="py-6 border-b border-stone-200">
+                  <h3 className="font-headline text-xl leading-snug mb-2">
+                    <Link to={`/article/${buildArticleSlug(a)}`} className="hover:text-primary transition-colors">
+                      {a.title}
                     </Link>
                   </h3>
-                  <p className="text-stone-600 leading-relaxed line-clamp-4 mb-6 max-w-[65ch]">{featured.abstract}</p>
-                  <p className="text-sm font-medium text-stone-800">{formatAuthors(featured.authors)}</p>
-                  <p className="text-sm text-stone-500 mt-1">{citationLine(featured)}</p>
-                  <p className="text-sm mt-1"><Doi doi={featured.crossrefDoi} /></p>
-                </article>
-              )}
-
-              {rest.length > 0 && (
-                <ol className="lg:col-span-5 border-t border-stone-300">
-                  {rest.map((a) => (
-                    <li key={a.id} className="py-5 border-b border-stone-200">
-                      <h3 className="font-headline text-lg md:text-xl leading-snug mb-2">
-                        <Link to={`/article/${buildArticleSlug(a)}`} className="hover:text-primary transition-colors">
-                          {a.title}
-                        </Link>
-                      </h3>
-                      <p className="text-sm text-stone-600">{formatAuthors(a.authors)}</p>
-                      <p className="text-xs text-stone-500 mt-1 flex flex-wrap gap-x-3">
-                        {citationLine(a) && <span>{citationLine(a)}</span>}
-                        <Doi doi={a.crossrefDoi} />
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
+                  <p className="text-sm text-stone-600">{formatAuthors(a.authors)}</p>
+                  <p className="text-xs text-stone-500 mt-1 flex flex-wrap gap-x-3">
+                    {citationLine(a) && <span>{citationLine(a)}</span>}
+                    <Doi doi={a.crossrefDoi} />
+                  </p>
+                </li>
+              ))}
+            </ol>
           )}
         </div>
       </section>
