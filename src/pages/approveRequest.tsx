@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ProfileCard } from '@/components/admins/approveRequest';
+import { ReviewerApplicationCard } from '@/components/admins/ReviewerApplicationCard';
+import { getReviewerApplications, type ReviewerApplication } from '@/lib/reviewerApplicationService';
 import { ShieldCheck, ArrowLeft, Users, ShieldAlert, Award } from 'lucide-react';
 
 export const ManageRequests = () => {
@@ -18,6 +20,7 @@ export const ManageRequests = () => {
   const IsAdmin = isAdminUser(profile);
   const [editorRequests, seteditorRequests] = useState<any[]>([]);
   const [reviewerRequests, setreviewerRequests] = useState<any[]>([]);
+  const [applications, setApplications] = useState<ReviewerApplication[]>([]);
   const [adminRequests, setadminRequests] = useState<any[]>([]);
 
   useEffect(() => {
@@ -31,14 +34,17 @@ export const ManageRequests = () => {
 
   const fetchRequests = async () => {
     try {
-      const data = await getProfiles();
+      const [data, apps] = await Promise.all([getProfiles(), getReviewerApplications('PENDING').catch(() => [] as ReviewerApplication[])]);
+      setApplications(apps);
+      const withApplication = new Set(apps.map((a) => a.applicant?.id));
       const edi: any[] = [];
       const rev: any[] = [];
       const adm: any[] = [];
       data.forEach((p: any) => {
         if (p.request_admin) adm.push(p);
         else if (p.request_editor) edi.push(p);
-        else if (p.request_reviewer) rev.push(p);
+        // Older one-click requests (no application on file) still appear, below the applications.
+        else if (p.request_reviewer && !withApplication.has(p.id)) rev.push(p);
       });
       seteditorRequests(edi);
       setreviewerRequests(rev);
@@ -137,7 +143,7 @@ export const ManageRequests = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{reviewerRequests.length}</div>
+              <div className="text-2xl font-bold">{reviewerRequests.length + applications.length}</div>
             </CardContent>
           </Card>
           
@@ -161,7 +167,7 @@ export const ManageRequests = () => {
                   className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
                 >
                   Reviewer requests
-                  <Badge variant="secondary" className="ml-2">{reviewerRequests.length}</Badge>
+                  <Badge variant="secondary" className="ml-2">{reviewerRequests.length + applications.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="editors" 
@@ -182,7 +188,13 @@ export const ManageRequests = () => {
             
             <CardContent className="pt-6">
               <TabsContent value="reviewers" className="space-y-4 m-0">
-                {reviewerRequests.length === 0 ? (
+                {applications.map((app) => (
+                  <ReviewerApplicationCard key={app.id} application={app} onDecided={fetchRequests} />
+                ))}
+                {reviewerRequests.length > 0 && applications.length > 0 && (
+                  <p className="text-xs text-muted-foreground pt-2">Older requests made before the application form (no details on file):</p>
+                )}
+                {reviewerRequests.length === 0 && applications.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground">No reviewer requests.</div>
                 ) : (
                   reviewerRequests.map(profile => (

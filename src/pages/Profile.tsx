@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { getProfile, updateProfile } from "@/lib/profileService";
+import { ReviewerApplicationDialog } from "@/components/reviewer/ReviewerApplicationDialog";
+import { getMyReviewerApplications, type ReviewerApplication } from "@/lib/reviewerApplicationService";
 import { Profile as ProfileData } from "@/types/profile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -148,17 +150,28 @@ export const Profile = () => {
     setEditing(false);
   };
 
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [lastApplication, setLastApplication] = useState<ReviewerApplication | null>(null);
+  useEffect(() => {
+    if (user) getMyReviewerApplications().then((a) => setLastApplication(a[0] ?? null)).catch(() => {});
+  }, [user]);
+
   const requestRole = async (type: "reviewer" | "editor" | "admin") => {
     if (!user) return;
+    // Reviewers apply through a verification form instead of a one-click request.
+    if (type === "reviewer") {
+      setApplyOpen(true);
+      return;
+    }
     const setBusy =
-      type === "reviewer" ? setRequestingR : type === "editor" ? setRequestingE : setRequestingA;
+      type === "editor" ? setRequestingE : setRequestingA;
     setBusy(true);
     try {
       const updates =
         type === "admin"
           ? { request_admin: true }
           : type === "editor"
-            ? { request_editor: true, request_reviewer: true }
+            ? { request_editor: true }
             : { request_reviewer: true };
       const updated = await updateProfile(user.id, updates);
       setProfile(updated);
@@ -529,13 +542,21 @@ export const Profile = () => {
                         ) : null}
                       </div>
                       <p className="text-xs text-stone-500 leading-relaxed">{r.blurb}</p>
+                      {r.key === "reviewer" && r.pending && (
+                        <p className="mt-2 text-[11px] text-amber-700">Your application is under review. We'll email you when there's a decision.</p>
+                      )}
+                      {r.key === "reviewer" && !r.active && !r.pending && lastApplication?.status === "DECLINED" && (
+                        <p className="mt-2 text-[11px] text-stone-500">
+                          Your last application was declined{lastApplication.decision_reason ? `: ${lastApplication.decision_reason}` : "."}
+                        </p>
+                      )}
                       {!r.active && !r.pending && (
                         <button
                           disabled={r.busy}
                           onClick={() => requestRole(r.key)}
                           className={`mt-3 w-full h-9 border text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 ${r.btn}`}
                         >
-                          {r.busy ? "Sending…" : "Request access"}
+                          {r.busy ? "Sending…" : r.key === "reviewer" ? "Apply" : "Request access"}
                         </button>
                       )}
                     </div>
@@ -569,6 +590,16 @@ export const Profile = () => {
           </div>
         </div>
       </ContentSection>
+      <ReviewerApplicationDialog
+        open={applyOpen}
+        onOpenChange={setApplyOpen}
+        defaults={{ full_name: profile.full_name, orcid_id: profile.orcid_id }}
+        onSubmitted={async () => {
+          if (!user) return;
+          setProfile(await getProfile(user.id));
+          getMyReviewerApplications().then((a) => setLastApplication(a[0] ?? null)).catch(() => {});
+        }}
+      />
     </div>
   );
 };
