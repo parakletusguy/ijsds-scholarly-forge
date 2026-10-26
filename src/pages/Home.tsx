@@ -1,507 +1,316 @@
-import { useState, useEffect } from 'react';
-import { BookOpen, Users, Globe, ArrowRight, User, TrendingUp, MapPin, Clock, CheckCircle, ExternalLink } from 'lucide-react';
+import { useState, useEffect, type FormEvent } from 'react';
+import { ArrowRight, Search } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getArticles, Article } from '@/lib/articleService';
 import { buildArticleSlug } from '@/lib/articleSlug';
 import { useAuth } from '@/hooks/useAuth';
 import { getBlogPosts, BlogPost } from '@/lib/blogService';
 import { formatDate } from '@/lib/dateUtils';
-import { BatchReleaseBanner } from '@/components/ijsds2/BatchReleaseBanner';
-import mina from "../images/editors/Mina.jpeg"
-import logo from "/public/Logo_Black_Edited-removebg-preview.png"
+import mina from "../images/editors/Mina.jpeg";
 
-const STOCK_IMAGES = [
-  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=900",
-  "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?auto=format&fit=crop&q=80&w=900",
-  "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=900",
-  "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=900",
-  "https://images.unsplash.com/photo-1512820666249-f14f70a277d3?auto=format&fit=crop&q=80&w=900",
-  "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=900",
+// Facts a reader can check. No marketing numbers: credibility comes from verifiable detail.
+const JOURNAL_FACTS: { label: string; value: string; href?: string }[] = [
+  { label: 'ISSN (print)', value: '3115-6940', href: 'https://portal.issn.org/resource/ISSN/3115-6940' },
+  { label: 'eISSN (online)', value: '3115-6932', href: 'https://portal.issn.org/resource/ISSN/3115-6932' },
+  { label: 'Peer review', value: 'Double-blind' },
+  { label: 'Access', value: 'Open access, CC BY 4.0' },
+  { label: 'Identifiers', value: 'Crossref DOI for every article' },
+  { label: 'Discovery', value: 'Google Scholar, OAI-PMH' },
 ];
+
+const formatAuthors = (authors: any) => {
+  if (!Array.isArray(authors) || authors.length === 0) return 'IJSDS Editorial';
+  const names = authors.map((a: any) => a?.name).filter(Boolean);
+  if (names.length === 0) return 'IJSDS Editorial';
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names[0]} et al.`;
+};
+
+const citationLine = (a: Article) => {
+  const parts: string[] = [];
+  if (a.volume) parts.push(`Vol. ${a.volume}`);
+  if (a.issue) parts.push(`Issue ${a.issue}`);
+  if (a.publication_date) parts.push(new Date(a.publication_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }));
+  return parts.join(' · ');
+};
+
+const Doi = ({ doi }: { doi?: string | null }) =>
+  doi ? (
+    <a
+      href={`https://doi.org/${doi}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-stone-500 hover:text-primary underline decoration-stone-300 underline-offset-2 break-all"
+    >
+      doi.org/{doi}
+    </a>
+  ) : null;
 
 export const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [recentArticles, setRecentArticles] = useState<Article[]>([]);
-  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const stats = { reach: 94, scholars: 12000, citations: 450, nations: 82 };
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
-    fetchData();
+    Promise.all([getArticles({ status: 'published' }), getBlogPosts()])
+      .then(([a, p]) => {
+        setArticles(a.slice(0, 6));
+        setPosts(p.slice(0, 3));
+      })
+      .catch((error) => {
+        console.error('Error fetching home data:', error);
+        setLoadFailed(true);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const [articles, posts] = await Promise.all([
-        getArticles({ status: 'published' }),
-        getBlogPosts(),
-      ]);
-      setRecentArticles(articles.slice(0, 6));
-      setRecentPosts(posts.slice(0, 3));
-    } catch (error) {
-      console.error('Error fetching home data:', error);
-    } finally {
-      setLoading(false);
-    }
+  const submitPath = user ? '/submit' : '/auth?reason=submit';
+  const onSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    navigate(q ? `/articles?q=${encodeURIComponent(q)}` : '/articles');
   };
 
-  const formatAuthors = (authors: any) => {
-    if (!authors || !Array.isArray(authors) || authors.length === 0) return 'IJSDS Editorial';
-    if (authors.length === 1) return authors[0].name;
-    if (authors.length === 2) return `${authors[0].name} & ${authors[1].name}`;
-    return `${authors[0].name} et al.`;
-  };
-
-  const estimateReadTime = (abstract: string) =>
-    abstract ? `${Math.max(5, Math.ceil(abstract.split(' ').length / 200) * 5)} Min Read` : '8 Min Read';
-
-  const [featured, ...rest] = recentArticles;
+  const [featured, ...rest] = articles;
 
   return (
-    <div className="min-h-screen bg-stone-50 selection:bg-orange-100 selection:text-primary">
+    <div className="min-h-screen bg-stone-50 text-stone-900 selection:bg-orange-100 selection:text-primary">
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <header className="relative flex items-center overflow-hidden bg-stone-50 pt-12 pb-16 md:pt-16 md:pb-20">
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '32px 32px', opacity: 0.08 }}
-        />
-        <div className="container mx-auto px-8 relative z-10 text-center max-w-5xl">
-          <span className="text-primary tracking-[0.4em] font-bold text-[10px] mb-8 inline-block uppercase">
-            Established 2025 · Open Access · Peer Reviewed
-          </span>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-light leading-[1.1] tracking-tight text-stone-900 mb-6 md:mb-10">
-            Amplifying African Voices through{' '}
-            <span className="italic text-primary">Rigorous Research.</span>
-          </h1>
-          <p className="text-base sm:text-lg md:text-2xl text-stone-500 mb-10 leading-relaxed max-w-3xl mx-auto italic">
-            Published monthly on a rigorous 28-day batch release cycle, IJSDS provides a global platform for original social work and development research.
-          </p>
-          
-          <div className="flex flex-col items-center gap-8">
-            <div className="relative w-full max-w-2xl group">
-              <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                <BookOpen size={20} className="text-primary/40 group-focus-within:text-primary transition-colors" />
+      {/* ── Masthead ─────────────────────────────────────────────────────── */}
+      <header className="border-b border-stone-200">
+        <div className="container mx-auto px-4 sm:px-8 py-14 md:py-20 grid gap-12 lg:grid-cols-12 lg:gap-16 items-start">
+          <div className="lg:col-span-8">
+            <h1 className="font-headline font-light tracking-tight leading-[1.05] text-[clamp(2.4rem,6vw,5rem)] mb-6">
+              Amplifying African voices through <span className="italic text-primary">rigorous research.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-stone-600 leading-relaxed max-w-[60ch] mb-10">
+              The International Journal of Social Work and Development Studies publishes original research on
+              social work, social policy and development, free for anyone to read.
+            </p>
+
+            <form onSubmit={onSearch} role="search" className="flex max-w-2xl mb-6">
+              <label htmlFor="home-search" className="sr-only">Search published articles</label>
+              <div className="relative flex-1">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                <input
+                  id="home-search"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search articles"
+                  className="w-full h-14 bg-white border border-stone-300 border-r-0 pl-11 pr-4 text-base focus:outline-none focus:border-primary"
+                />
               </div>
-              <input 
-                type="text"
-                placeholder="Search the archive..."
-                className="w-full bg-white border border-stone-200 py-5 pl-14 pr-8 text-base md:text-lg font-headline italic tracking-tight focus:border-primary focus:ring-0 transition-all"
-                onKeyPress={(e) => e.key === 'Enter' && navigate(`/articles?q=${(e.target as HTMLInputElement).value}`)}
-              />
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto">
-              <button
-                onClick={() => navigate('/articles')}
-                className="bg-primary text-white px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-none w-full sm:w-auto"
-              >
-                Browse All Research
+              <button type="submit" className="h-14 px-6 bg-stone-900 text-white text-sm font-semibold hover:bg-primary transition-colors">
+                Search
               </button>
-              <button
-                onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}
-                className="border-2 border-stone-300 text-stone-900 px-8 md:px-12 py-4 md:py-5 font-bold text-xs md:text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all w-full sm:w-auto"
-              >
-                Submit Manuscript
-              </button>
+            </form>
+
+            <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold">
+              <Link to={submitPath} className="text-primary inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+                Submit a manuscript <ArrowRight size={15} />
+              </Link>
+              <Link to="/archive" className="text-stone-700 hover:text-primary hover:underline underline-offset-4">
+                Browse issues
+              </Link>
+              <Link to="/author-guide" className="text-stone-700 hover:text-primary hover:underline underline-offset-4">
+                Author guidelines
+              </Link>
             </div>
           </div>
+
+          <aside className="lg:col-span-4 lg:pt-14" aria-labelledby="facts-heading">
+            <h2 id="facts-heading" className="font-headline text-xl mb-4">The journal</h2>
+            <dl className="border-t border-stone-300 text-sm">
+              {JOURNAL_FACTS.map((f) => (
+                <div key={f.label} className="flex justify-between gap-6 py-3 border-b border-stone-200">
+                  <dt className="text-stone-500">{f.label}</dt>
+                  <dd className="text-right font-medium text-stone-800">
+                    {f.href ? (
+                      <a href={f.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary underline decoration-stone-300 underline-offset-2">
+                        {f.value}
+                      </a>
+                    ) : f.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <Link to="/indexing" className="mt-4 inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-primary">
+              How IJSDS is indexed <ArrowRight size={14} />
+            </Link>
+          </aside>
         </div>
       </header>
 
-      {/* 28-Day Monthly Batch Publication Banner */}
-      <div className="container mx-auto px-4 sm:px-8 -mt-6 mb-4 relative z-20">
-        <BatchReleaseBanner />
-      </div>
-
-
-      {/* ── Current Issues — Editorial Grid ──────────────────────────────── */}
-      <section className="py-32 bg-stone-50">
+      {/* ── Latest research ──────────────────────────────────────────────── */}
+      <section className="py-20 md:py-28" aria-labelledby="latest-heading">
         <div className="container mx-auto px-4 sm:px-8">
-          <div className="flex justify-between items-end mb-16">
-            <div>
-              <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
-                Recent Publications
-              </span>
-              <h2 className="font-headline text-3xl md:text-5xl text-stone-900">Latest Issues</h2>
-            </div>
-            <Link
-              to="/archive"
-              className="group flex items-center gap-2 text-primary font-bold text-sm border-b border-primary/30 pb-1 hover:border-primary transition-colors"
-            >
-              View Full Archive
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-wrap justify-between items-baseline gap-4 mb-12">
+            <h2 id="latest-heading" className="font-headline text-3xl md:text-5xl">Latest research</h2>
+            <Link to="/articles" className="text-sm font-semibold text-primary inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+              All articles <ArrowRight size={15} />
             </Link>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-              <div className="lg:col-span-8 aspect-video bg-stone-100 animate-pulse" />
-              <div className="lg:col-span-4 space-y-4">
-                <div className="h-6 bg-stone-100 animate-pulse w-2/3" />
-                <div className="h-32 bg-stone-100 animate-pulse" />
-              </div>
+            <div className="space-y-6" aria-busy="true" aria-label="Loading articles">
+              <div className="h-40 bg-stone-100 animate-pulse" />
+              <div className="h-20 bg-stone-100 animate-pulse" />
+              <div className="h-20 bg-stone-100 animate-pulse" />
             </div>
-          ) : recentArticles.length === 0 ? (
-            <div className="py-20 text-center border-2 border-dashed border-primary/10">
-              <p className="text-stone-300 font-headline text-3xl italic">
-                "No articles published yet. Be the first to contribute."
-              </p>
-              <button
-                onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}
-                className="mt-8 bg-primary text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-primary/90 transition-all"
-              >
-                Submit Research
-              </button>
+          ) : loadFailed ? (
+            <div className="py-16 border-y border-stone-200 text-center">
+              <p className="font-headline text-2xl text-stone-500 mb-6">We couldn't load the latest articles.</p>
+              <Link to="/articles" className="text-sm font-semibold text-primary hover:underline underline-offset-4">
+                Go to the article list
+              </Link>
+            </div>
+          ) : articles.length === 0 ? (
+            <div className="py-16 border-y border-stone-200 text-center">
+              <p className="font-headline text-2xl text-stone-500 mb-6">No articles have been published yet.</p>
+              <Link to={submitPath} className="inline-block bg-primary text-white px-7 py-3 text-sm font-semibold hover:bg-primary/90">
+                Submit your research
+              </Link>
             </div>
           ) : (
-            <>
-              {/* Featured row */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-16 gap-y-12 mb-16">
-                {/* Large featured article */}
-                {featured && (
-                  <div
-                    className="lg:col-span-8 group cursor-pointer border-l-4 sm:border-l-8 border-primary pl-4 sm:pl-8 py-4 bg-primary/5 hover:bg-primary/80 transition-all"
-                    onClick={() => navigate(`/article/${buildArticleSlug(featured)}`)}
-                  >
-                    <div className="flex gap-4 mb-4">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                        {featured.subject_area || 'Research Article'}
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                        {estimateReadTime(featured.abstract || '')}
-                      </span>
-                    </div>
-                    <h3 className="font-headline text-2xl sm:text-4xl mb-4 leading-tight group-hover:text-primary transition-colors">
+            <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+              {featured && (
+                <article className="lg:col-span-7 border-t-2 border-stone-900 pt-6">
+                  {featured.subject_area && (
+                    <p className="text-xs font-semibold tracking-wide uppercase text-primary mb-4">{featured.subject_area}</p>
+                  )}
+                  <h3 className="font-headline text-3xl md:text-4xl leading-tight mb-5">
+                    <Link to={`/article/${buildArticleSlug(featured)}`} className="hover:text-primary transition-colors">
                       {featured.title}
-                    </h3>
-                    <p className="text-stone-500 mb-6 line-clamp-3 leading-relaxed">
-                      {featured.abstract}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                        <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center">
-                          <User size={14} className="text-stone-400" />
-                        </div>
-                        <span className="text-sm font-medium">{formatAuthors(featured.authors)}</span>
-                        {(featured.volume || featured.issue) && (
-                          <span className="text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 ml-2">
-                             V{featured.volume}:I{featured.issue}
-                          </span>
-                        )}
-                        {featured.publication_date && (
-                          <span className="text-sm text-stone-400 whitespace-nowrap">
-                            · {new Date(featured.publication_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
-                          </span>
-                        )}
-                      </div>
-                      {featured.crossrefDoi && (
-                        <a
-                          href={`https://doi.org/${featured.crossrefDoi}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/70 transition-colors uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-none"
-                        >
-                          <ExternalLink size={12} />
-                          CrossRef DOI: {featured.crossrefDoi}
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Side text-only card */}
-                {rest[0] && (
-                  <div
-                    className="lg:col-span-4 flex flex-col justify-end cursor-pointer group h-full"
-                    onClick={() => navigate(`/article/${buildArticleSlug(rest[0])}`)}
-                  >
-                    <div className="p-6 md:p-8 border-l-2 border-primary/20 bg-white hover:border-primary transition-colors h-full flex flex-col justify-center">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 block">
-                        {rest[0].subject_area || 'Field Report'}
-                      </span>
-                      <h3 className="font-headline text-xl md:text-2xl leading-snug mb-4 md:mb-6 group-hover:text-primary transition-colors">
-                        {rest[0].title}
-                      </h3>
-                      <p className="text-sm text-stone-500 mb-6 line-clamp-4 leading-relaxed">
-                        {rest[0].abstract}
-                      </p>
-                      <div className="flex items-center justify-between mt-auto">
-                        <span className="text-primary font-bold text-xs uppercase tracking-widest underline underline-offset-4 group-hover:no-underline transition-all">
-                          Read Abstract →
-                        </span>
-                        {rest[0].crossrefDoi && (
-                          <a
-                            href={`https://doi.org/${rest[0].crossrefDoi}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 text-[9px] font-bold text-green-700 hover:text-green-900 transition-colors uppercase tracking-widest"
-                          >
-                            <ExternalLink size={10} />
-                            CrossRef DOI
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bottom grid (Responsive: 1 col on mobile/XS, 2 on SM/MD, 3 on LG) */}
-              {rest.length > 1 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-12 gap-y-12 md:gap-y-16 border-t border-stone-100 pt-16">
-                  {rest.slice(1, 4).map((article) => (
-                    <div
-                      key={article.id}
-                      className="group cursor-pointer"
-                      onClick={() => navigate(`/article/${buildArticleSlug(article)}`)}
-                    >
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-primary block mb-3">
-                        {article.subject_area || 'Research Article'}
-                      </span>
-                      <h3 className="font-headline text-lg md:text-xl lg:text-2xl leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-stone-500 line-clamp-2 leading-relaxed mb-4">
-                        {article.abstract}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs text-stone-400">
-                          <User size={12} />
-                          <span className="truncate">{formatAuthors(article.authors)}</span>
-                          {(article.volume || article.issue) && (
-                            <span className="text-[9px] font-bold text-primary">
-                              V{article.volume}
-                            </span>
-                          )}
-                        </div>
-                        {article.crossrefDoi && (
-                          <a
-                            href={`https://doi.org/${article.crossrefDoi}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[9px] font-bold text-green-700 hover:text-green-900 transition-colors uppercase tracking-widest flex items-center gap-1"
-                          >
-                            <ExternalLink size={10} />
-                            CrossRef DOI
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    </Link>
+                  </h3>
+                  <p className="text-stone-600 leading-relaxed line-clamp-4 mb-6 max-w-[65ch]">{featured.abstract}</p>
+                  <p className="text-sm font-medium text-stone-800">{formatAuthors(featured.authors)}</p>
+                  <p className="text-sm text-stone-500 mt-1">{citationLine(featured)}</p>
+                  <p className="text-sm mt-1"><Doi doi={featured.crossrefDoi} /></p>
+                </article>
               )}
-            </>
+
+              {rest.length > 0 && (
+                <ol className="lg:col-span-5 border-t border-stone-300">
+                  {rest.map((a) => (
+                    <li key={a.id} className="py-5 border-b border-stone-200">
+                      <h3 className="font-headline text-lg md:text-xl leading-snug mb-2">
+                        <Link to={`/article/${buildArticleSlug(a)}`} className="hover:text-primary transition-colors">
+                          {a.title}
+                        </Link>
+                      </h3>
+                      <p className="text-sm text-stone-600">{formatAuthors(a.authors)}</p>
+                      <p className="text-xs text-stone-500 mt-1 flex flex-wrap gap-x-3">
+                        {citationLine(a) && <span>{citationLine(a)}</span>}
+                        <Doi doi={a.crossrefDoi} />
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
           )}
         </div>
       </section>
 
-      {/* ── Recent Blog Posts ────────────────────────────────────────────── */}
-      {recentPosts.length > 0 && (
-        <section className="py-24 bg-white border-t border-stone-100">
-          <div className="container mx-auto px-4 sm:px-8">
-            <div className="flex justify-between items-end mb-12">
-              <div>
-                <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-3 block">
-                  From the Blog
-                </span>
-                <h2 className="font-headline text-3xl md:text-4xl text-stone-900">Latest News &amp; Updates</h2>
-              </div>
-              <button
-                onClick={() => navigate('/blog')}
-                className="group flex items-center gap-2 text-primary font-bold text-sm border-b border-primary/30 pb-1 hover:border-primary transition-colors"
-              >
-                All Posts
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
+      {/* ── From the Editor-in-Chief ─────────────────────────────────────── */}
+      <section className="py-20 md:py-28 bg-stone-100 border-y border-stone-200" aria-labelledby="editor-heading">
+        <div className="container mx-auto px-4 sm:px-8 grid gap-10 md:grid-cols-12 md:gap-16 items-center">
+          <div className="md:col-span-4">
+            <img src={mina} alt="Prof. Mina Magaret Ogbanga, Editor-in-Chief of IJSDS" className="w-full max-w-xs md:max-w-none aspect-[4/5] object-cover" />
+          </div>
+          <figure className="md:col-span-8">
+            <h2 id="editor-heading" className="text-xs font-semibold tracking-[0.18em] uppercase text-primary mb-6">From the Editor-in-Chief</h2>
+            <blockquote className="font-headline font-light text-2xl md:text-4xl leading-snug mb-8 max-w-[34ch]">
+              “Research is not just an academic exercise; it is how we shape the future. Through our journal, we give
+              African scholars the platform they deserve to lead global conversations.”
+            </blockquote>
+            <figcaption>
+              <p className="font-headline text-lg">Prof. Mina Magaret Ogbanga</p>
+              <p className="text-sm text-stone-500">Editor-in-Chief</p>
+              <Link to="/editorial-board" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline underline-offset-4">
+                Meet the editorial board <ArrowRight size={14} />
+              </Link>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              {recentPosts.map(post => (
-                <div
-                  key={post.id}
-                  onClick={() => navigate(`/blog/${post.slug}`)}
-                  className="group cursor-pointer border border-stone-100 bg-stone-50 hover:border-primary/30 transition-all overflow-hidden"
-                >
-                  {post.featured_image_url ? (
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={post.featured_image_url}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-primary/5 flex items-center justify-center">
-                      <BookOpen size={28} className="text-primary/20" />
-                    </div>
-                  )}
-                  <div className="p-5 space-y-2">
-                    {post.category && (
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{post.category}</span>
+      {/* ── For authors ──────────────────────────────────────────────────── */}
+      <section className="py-20 md:py-24 bg-primary text-white" aria-labelledby="authors-heading">
+        <div className="container mx-auto px-4 sm:px-8 grid gap-12 md:grid-cols-12 md:gap-16">
+          <div className="md:col-span-6">
+            <h2 id="authors-heading" className="font-headline font-light text-4xl md:text-5xl leading-tight mb-6">
+              Publish with IJSDS
+            </h2>
+            <p className="text-white/80 leading-relaxed max-w-[50ch] mb-8">
+              We welcome original research articles, case studies and reviews in social work and development studies
+              from researchers everywhere.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link to={submitPath} className="bg-white text-primary px-7 py-3.5 text-sm font-semibold hover:bg-stone-100 transition-colors">
+                Submit a manuscript
+              </Link>
+              <Link to="/author-guide" className="border border-white/60 px-7 py-3.5 text-sm font-semibold hover:bg-white/10 transition-colors">
+                Read the author guidelines
+              </Link>
+            </div>
+          </div>
+          <dl className="md:col-span-6 grid gap-6 sm:grid-cols-2 content-start">
+            {[
+              ['Double-blind peer review', 'Independent experts evaluate every manuscript without knowing who wrote it.'],
+              ['Free to read', 'Every article is open access under CC BY 4.0. Authors keep their copyright.'],
+              ['A DOI for every article', 'Each paper gets a permanent Crossref DOI, so it can always be found and cited.'],
+              ['Discoverable', 'Article pages carry full citation metadata for Google Scholar and OAI-PMH harvesters.'],
+            ].map(([t, d]) => (
+              <div key={t} className="border-t border-white/30 pt-4">
+                <dt className="font-semibold mb-1.5">{t}</dt>
+                <dd className="text-sm text-white/75 leading-relaxed">{d}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* ── News ─────────────────────────────────────────────────────────── */}
+      {posts.length > 0 && (
+        <section className="py-20 md:py-24" aria-labelledby="news-heading">
+          <div className="container mx-auto px-4 sm:px-8">
+            <div className="flex flex-wrap justify-between items-baseline gap-4 mb-10">
+              <h2 id="news-heading" className="font-headline text-3xl md:text-4xl">News from the journal</h2>
+              <Link to="/blog" className="text-sm font-semibold text-primary inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+                All news <ArrowRight size={15} />
+              </Link>
+            </div>
+            <div className="grid gap-10 sm:grid-cols-3">
+              {posts.map((post) => (
+                <article key={post.id}>
+                  <Link to={`/blog/${post.slug}`} className="block aspect-[16/10] overflow-hidden bg-stone-100 mb-4" tabIndex={-1} aria-hidden="true">
+                    {post.featured_image_url ? (
+                      <img src={post.featured_image_url} alt="" loading="lazy" className="w-full h-full object-cover object-top" />
+                    ) : (
+                      <span className="w-full h-full flex items-center justify-center font-headline text-3xl text-stone-300">IJSDS</span>
                     )}
-                    <h3 className="font-headline text-base font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                    {post.excerpt && (
-                      <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">{post.excerpt}</p>
-                    )}
-                    <p className="text-[10px] text-stone-400 pt-1">{formatDate(post.published_at, 'short')}</p>
-                  </div>
-                </div>
+                  </Link>
+                  <p className="text-xs text-stone-500 mb-2">
+                    {formatDate(post.published_at, 'short')}{post.category ? ` · ${post.category}` : ''}
+                  </p>
+                  <h3 className="font-headline text-xl leading-snug">
+                    <Link to={`/blog/${post.slug}`} className="hover:text-primary transition-colors">{post.title}</Link>
+                  </h3>
+                  {post.excerpt && <p className="text-sm text-stone-600 line-clamp-2 leading-relaxed mt-2">{post.excerpt}</p>}
+                </article>
               ))}
             </div>
           </div>
         </section>
       )}
-
-      {/* ── Editorial Spotlight ──────────────────────────────────────────── */}
-      <section className="py-32 bg-stone-200 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(#8f3514 0.5px, transparent 0.5px)', backgroundSize: '24px 24px', opacity: 0.05 }}
-        />
-        <div className="container mx-auto px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-10 items-center gap-20">
-            <div className="lg:col-span-4 order-2 lg:order-1">
-              <div className="aspect-[3/4] bg-stone-100 overflow-hidden relative group">
-                <img
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                  alt="Editor in Chief"
-                  src={mina}
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-6 order-1 lg:order-2">
-              <div className="bg-stone-50 p-12 relative overflow-hidden group/card">
-                <img 
-                  src={logo} 
-                  alt="IJSDS Logo" 
-                  className="absolute -top-4 -right-4 w-32 opacity-[0.03] group-hover/card:opacity-[0.07] transition-opacity duration-1000 -rotate-12 pointer-events-none" 
-                />
-                <span className="text-primary font-headline text-7xl leading-none italic font-black block mb-6">"</span>
-                <blockquote className="font-headline text-2xl md:text-3xl lg:text-4xl leading-snug text-stone-900 mb-8 md:mb-10 font-light">
-                  Research is not just an academic exercise — it is how we shape the future. Through our journal, we give African scholars the platform they deserve to lead global conversations.
-                </blockquote>
-                <div className="flex items-center justify-between border-l-4 border-primary pl-6">
-                  <div>
-                    <p className="text-lg font-bold font-headline">Prof. Mina Magaret Ogbanga</p>
-                    <p className="text-stone-400 uppercase tracking-[0.3em] text-[9px] font-bold mt-1">
-                      Editor-in-Chief, IJSDS
-                    </p>
-                  </div>
-                  <img src={logo} alt="Official Stamp" className="h-10 opacity-20 hidden sm:block grayscale" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Submission CTA ───────────────────────────────────────────────── */}
-      <section className="py-24 bg-primary text-white">
-        <div className="container mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="font-headline text-4xl md:text-5xl mb-6 font-light leading-tight">
-                Ready to share your <span className="italic">research with the world?</span>
-              </h2>
-              <p className="text-white/70 leading-relaxed max-w-md">
-                IJSDS welcomes original research articles, case studies, and reviews on social work and development studies from researchers worldwide.
-              </p>
-            </div>
-            <div className="flex flex-col gap-6">
-              {[
-                'Double-blind peer review within 28 days',
-                'Free to read — no subscription required',
-                'Permanent DOI link assigned to every article',
-                'Listed across 140+ academic databases',
-              ].map((point) => (
-                <div key={point} className="flex items-start gap-4">
-                  <CheckCircle size={18} className="text-white/60 mt-0.5 shrink-0" />
-                  <span className="text-white/80 text-sm leading-relaxed">{point}</span>
-                </div>
-              ))}
-              <button
-                onClick={() => navigate(user ? '/submit' : '/auth?reason=submit')}
-                className="mt-4 bg-white text-primary px-10 py-4 font-bold text-sm uppercase tracking-widest hover:bg-white/90 transition-all w-full md:w-auto self-start"
-              >
-                Submit Your Research
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Impact Stats ─────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white border-t border-primary/5">
-        <div className="container mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left">
-            {[
-              { icon: Globe, value: `${stats.reach}%`, label: 'International Reach' },
-              { icon: Users, value: `${stats.scholars.toLocaleString()}+`, label: 'Readers Worldwide' },
-              { icon: TrendingUp, value: `${stats.citations}+`, label: 'Citations' },
-              { icon: MapPin, value: `${stats.nations}`, label: 'Countries Reached' },
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="group">
-                <div className="text-3xl sm:text-4xl md:text-5xl font-headline text-primary mb-3 flex items-center justify-center md:justify-start gap-2 sm:gap-3">
-                  <Icon size={24} className="opacity-20 group-hover:opacity-60 transition-opacity shrink-0" />
-                  <span className="truncate">{value}</span>
-                </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why Choose IJSDS ─────────────────────────────────────────────── */}
-      <section className="py-32 bg-stone-50">
-        <div className="container mx-auto px-4 sm:px-8">
-          <div className="mb-20 max-w-2xl">
-            <span className="font-label text-primary uppercase tracking-[0.25em] text-[10px] font-bold mb-4 block">
-              Why Publish With Us
-            </span>
-            <h2 className="font-headline text-4xl md:text-5xl text-stone-900 mb-6">Why Choose IJSDS?</h2>
-            <p className="text-stone-500 leading-relaxed">
-              We are committed to supporting researchers in publishing impactful, high-quality work that makes a difference in social work and development.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-            {[
-              {
-                icon: Globe,
-                stat: '94%',
-                title: 'Global Reach',
-                body: 'Our published articles are read and cited across 140+ countries and have informed policy decisions worldwide.',
-              },
-              {
-                icon: Clock,
-                stat: '28 Days',
-                title: 'Fast Peer Review',
-                body: 'We aim to complete the peer review process within 28 days so your research reaches readers quickly.',
-              },
-              {
-                icon: BookOpen,
-                stat: 'Open Access',
-                title: 'Free for Everyone',
-                body: 'Every article we publish is freely available to anyone — no subscription or payment required to read.',
-              },
-            ].map(({ icon: Icon, stat, title, body }) => (
-              <div key={title} className="space-y-5 group">
-                <div className="w-12 h-12 border-2 border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all">
-                  <Icon size={20} className="text-primary group-hover:text-white transition-colors" />
-                </div>
-                <div className="text-5xl font-headline text-primary">{stat}</div>
-                <h3 className="font-bold text-lg tracking-tight">{title}</h3>
-                <p className="text-stone-500 text-sm leading-relaxed">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
