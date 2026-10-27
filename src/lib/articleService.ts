@@ -27,6 +27,10 @@ export interface Article {
   corresponding_author_email?: string;
   doi?: string | null;
   crossrefDoi?: string | null;
+  /** Latest Crossref deposit: PENDING (awaiting Crossref), REGISTERED or FAILED. */
+  crossref_status?: 'PENDING' | 'REGISTERED' | 'FAILED' | null;
+  crossref_message?: string | null;
+  crossref_registered_at?: string | null;
   status: string;
   volume?: number | null;
   issue?: number | null;

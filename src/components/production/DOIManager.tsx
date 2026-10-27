@@ -103,7 +103,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
   };
 
   const copyDoi = () => {
-    if (article.doi) navigator.clipboard.writeText(article.doi);
+    if (doi) navigator.clipboard.writeText(doi);
     toast({ title: "Copied" });
   };
 
@@ -111,6 +111,8 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
     jobStatus && (jobStatus.state === "waiting" || jobStatus.state === "delayed" || jobStatus.state === "active");
 
   const hasIssueAssignment = !!article.volume && !!article.issue;
+  // The journal's DOIs are Crossref DOIs (article.doi is the older Zenodo field).
+  const doi = article.crossrefDoi ?? null;
 
   return (
     <div className="space-y-0 divide-y divide-stone-100">
@@ -118,17 +120,17 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
       {/* DOI Status */}
       <div className="py-6 space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Current DOI</p>
-        {article.doi ? (
+        {doi ? (
           <div className="flex items-center gap-3">
             <CheckCircle size={15} className="text-emerald-600 shrink-0" />
             <code className="text-sm text-stone-800 font-mono bg-stone-100 px-2 py-1 select-all">
-              {article.doi}
+              {doi}
             </code>
             <button onClick={copyDoi} className="text-stone-400 hover:text-primary transition-colors">
               <Copy size={13} />
             </button>
             <a
-              href={`https://doi.org/${article.doi}`}
+              href={`https://doi.org/${doi}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-stone-400 hover:text-primary transition-colors"
@@ -145,6 +147,26 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
           </div>
         )}
       </div>
+
+      {doi && (
+        <div className="py-4">
+          {article.crossref_status === 'FAILED' ? (
+            <p className="text-xs text-red-700 bg-red-50 border border-red-100 px-3 py-2">
+              <strong>Crossref rejected the last deposit.</strong> {article.crossref_message ?? ''} Correct the metadata, then use Redeposit.
+            </p>
+          ) : article.crossref_registered_at ? (
+            <p className="text-xs text-emerald-700 flex items-center gap-1.5">
+              <CheckCircle size={13} /> Confirmed by Crossref
+              {article.crossref_status === 'PENDING' ? ' (an update is awaiting confirmation)' : ''}
+            </p>
+          ) : (
+            <p className="text-xs text-amber-700 flex items-center gap-1.5">
+              <Clock size={13} /> Deposited, awaiting confirmation from Crossref (checked every 10 minutes).
+              {article.crossref_message ? ` ${article.crossref_message}` : ''}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Job status tracker */}
       {jobStatus && (
@@ -174,7 +196,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
 
         <div className="flex flex-wrap gap-3">
           {/* Register (only if no DOI yet, and only once Volume/Issue exist) */}
-          {!article.doi && (
+          {!doi && (
             <button
               onClick={handleRegister}
               disabled={registering || !!isPolling || !hasIssueAssignment}
@@ -189,7 +211,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
           )}
 
           {/* Redeposit (only if DOI exists) */}
-          {article.doi && (
+          {doi && (
             <button
               onClick={handleRedeposit}
               disabled={redepositing || !!isPolling}
@@ -214,7 +236,7 @@ export const DOIManager = ({ article, onUpdate }: DOIManagerProps) => {
         </div>
 
         <p className="text-[10px] text-stone-400 leading-relaxed">
-          {article.doi
+          {doi
             ? "Use Redeposit to correct metadata (title, authors, volume) after the DOI is already assigned."
             : hasIssueAssignment
               ? "Registration is triggered automatically when processing is approved in the Issues tab. Use this only if that job did not run or needs to be re-triggered."
