@@ -56,6 +56,10 @@ export const getBatchStatus = () => unwrap(api.get<Envelope<BatchStatus>>(`${BAS
 export const executeMonthlyBatch = () =>
   unwrap(api.post<Envelope<MonthlyBatchReleaseResult>>(`${BASE}/batch/execute`, {}));
 
+/** Editor override: publish one article now instead of waiting for the next 28th. */
+export const releaseArticleNow = (articleId: string, reason: string) =>
+  unwrap(api.post<Envelope<{ published: boolean; manuscriptId: string; articleId: string }>>(`${BASE}/articles/${articleId}/release-now`, { reason }));
+
 export const getMyReviewerProfile = () => unwrap(api.get<Envelope<ReviewerReferralProfile>>(`${BASE}/reviewer/me`));
 
 export const uploadAuthorRevision = (manuscriptId: string, file: File, note?: string) => {

@@ -15,6 +15,7 @@ import { ArrowLeft, Calendar, FileText, Globe, Save, Upload, AlertTriangle, File
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { BatchReleaseBanner } from '@/components/ijsds2/BatchReleaseBanner';
+import { ReleaseNowDialog } from '@/components/ijsds2/ReleaseNowDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
@@ -183,9 +184,9 @@ export const Publication = () => {
                   <CardContent className="space-y-3 text-sm text-muted-foreground">
                     <BatchReleaseBanner />
                     <p>
-                      Articles are no longer published one by one. Once an article is approved for processing and its Crossref DOI is
-                      registered, it joins the next monthly batch automatically and is released at 00:00 WAT on the 28th.
-                      Papers still waiting for a DOI appear below with their volume and issue.
+                      Once an article is approved for processing and Crossref confirms its DOI, it joins the next monthly batch
+                      automatically and is released at 00:00 WAT on the 28th. For exceptions, such as a paper that just missed a
+                      release, use Publish now on the article below.
                     </p>
                     {isAdminRole && (
                       <Button variant="outline" onClick={() => navigate('/admin')}>
@@ -227,9 +228,14 @@ export const Publication = () => {
                           Submitted: {format(new Date(article.submission_date), 'MMM dd, yyyy')}
                         </p>
                         {article.crossrefDoi && (
-                          <p className="text-xs text-green-700 font-medium mt-1">
-                            CrossRef DOI: {article.crossrefDoi}
-                          </p>
+                          <div className="flex items-end justify-between gap-3 mt-1">
+                            <p className="text-xs text-green-700 font-medium">
+                              CrossRef DOI: {article.crossrefDoi}
+                            </p>
+                            {article.status !== 'published' && (
+                              <ReleaseNowDialog articleId={article.id} title={article.title} onReleased={fetchAcceptedArticles} />
+                            )}
+                          </div>
                         )}
                       </div>
                     ))
