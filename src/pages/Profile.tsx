@@ -152,8 +152,13 @@ export const Profile = () => {
 
   const [applyOpen, setApplyOpen] = useState(false);
   const [lastApplication, setLastApplication] = useState<ReviewerApplication | null>(null);
+  const [applicationsLoaded, setApplicationsLoaded] = useState(false);
   useEffect(() => {
-    if (user) getMyReviewerApplications().then((a) => setLastApplication(a[0] ?? null)).catch(() => {});
+    if (user)
+      getMyReviewerApplications()
+        .then((a) => setLastApplication(a[0] ?? null))
+        .catch(() => {})
+        .finally(() => setApplicationsLoaded(true));
   }, [user]);
 
   const requestRole = async (type: "reviewer" | "editor" | "admin") => {
@@ -542,9 +547,22 @@ export const Profile = () => {
                         ) : null}
                       </div>
                       <p className="text-xs text-stone-500 leading-relaxed">{r.blurb}</p>
-                      {r.key === "reviewer" && r.pending && (
+                      {r.key === "reviewer" && r.pending && applicationsLoaded && lastApplication?.status !== "PENDING" ? (
+                        // A one-click request from before the application form: no details on file yet.
+                        <>
+                          <p className="mt-2 text-[11px] text-amber-700">
+                            Your earlier request needs your verification details (institutional email, ORCID, ResearchGate and Google Scholar) before it can be reviewed.
+                          </p>
+                          <button
+                            onClick={() => setApplyOpen(true)}
+                            className={`mt-3 w-full h-9 border text-[10px] font-bold uppercase tracking-widest transition-colors ${r.btn}`}
+                          >
+                            Complete your application
+                          </button>
+                        </>
+                      ) : r.key === "reviewer" && r.pending ? (
                         <p className="mt-2 text-[11px] text-amber-700">Your application is under review. We'll email you when there's a decision.</p>
-                      )}
+                      ) : null}
                       {r.key === "reviewer" && !r.active && !r.pending && lastApplication?.status === "DECLINED" && (
                         <p className="mt-2 text-[11px] text-stone-500">
                           Your last application was declined{lastApplication.decision_reason ? `: ${lastApplication.decision_reason}` : "."}
