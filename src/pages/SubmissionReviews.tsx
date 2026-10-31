@@ -6,7 +6,7 @@ import { getSubmission } from '@/lib/submissionService';
 import { getReviews } from '@/lib/reviewService';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, CheckCircle2, Clock, AlertCircle, FileText, Info, User, Calendar, MessageSquare } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, AlertCircle, FileText, Info, User, Calendar, MessageSquare, Paperclip } from 'lucide-react';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
 
 interface Review {
@@ -17,6 +17,7 @@ interface Review {
   recommendation: string | null;
   comments_to_author: string | null;
   comments_to_editor: string | null;
+  review_file_url?: string | null;
   deadline_date: string | null;
   reviewer?: {
     full_name: string;
@@ -155,6 +156,23 @@ export const SubmissionReviews = () => {
                         <span className="inline-block mt-1.5 bg-stone-900 text-white px-3 py-1 text-[11px] font-bold uppercase tracking-widest">
                           {review.recommendation.replace('_', ' ')}
                         </span>
+                      </div>
+                    )}
+
+                    {review.submitted_at && review.comments_to_author && (
+                      <div className="mt-4 pt-4 border-t border-stone-100">
+                        <p className={`${label} flex items-center gap-1.5`}><MessageSquare size={12} /> Comments to author</p>
+                        <p className="text-sm text-stone-600 leading-relaxed mt-2 whitespace-pre-wrap">{review.comments_to_author}</p>
+                      </div>
+                    )}
+
+                    {review.review_file_url && (
+                      <div className="mt-4 pt-4 border-t border-stone-100">
+                        <p className={label}>Review document</p>
+                        <a href={review.review_file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline underline-offset-2 mt-2">
+                          <Paperclip size={14} /> Open the reviewer's document
+                        </a>
+                        {!review.submitted_at && <p className="text-xs text-stone-400 mt-1">Draft: this review has not been submitted yet.</p>}
                       </div>
                     )}
 

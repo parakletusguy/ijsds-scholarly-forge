@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { getReview, updateReview } from '@/lib/reviewService';
+import { getReview, updateReview, uploadReviewFile, removeReviewFile } from '@/lib/reviewService';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, ShieldCheck, BookOpen, GraduationCap, Info, CheckCircle2, AlertCircle, Send, Activity, User } from 'lucide-react';
+import { ArrowLeft, Save, ShieldCheck, BookOpen, GraduationCap, Info, CheckCircle2, AlertCircle, Send, Activity, User, Paperclip, X, Loader2 } from 'lucide-react';
 import { ReviewerFileManager } from '@/components/reviewer/ReviewerFileManager';
 import { PaymentStatusBadge } from '@/components/payment/PaymentStatusBadge';
 import { PageHeader, ContentSection } from '@/components/layout/PageElements';
@@ -19,6 +19,7 @@ interface ReviewData {
   recommendation: string | null;
   comments_to_author: string | null;
   comments_to_editor: string | null;
+  review_file_url?: string | null;
   submission: {
     article: {
       id: string;
@@ -39,6 +40,8 @@ export const ReviewForm = () => {
   const navigate = useNavigate();
   const [review, setReview] = useState<ReviewData | null>(null);
   const [recommendation, setRecommendation] = useState('');
+  const [reviewFileUrl, setReviewFileUrl] = useState<string | null>(null);
+  const [fileBusy, setFileBusy] = useState(false);
   const [commentsToAuthor, setCommentsToAuthor] = useState('');
   const [commentsToEditor, setCommentsToEditor] = useState('');
   const [loadingData, setLoadingData] = useState(true);
@@ -55,6 +58,7 @@ export const ReviewForm = () => {
       const data = await getReview(reviewId!);
       setReview(data as any);
       setRecommendation(data.recommendation || '');
+      setReviewFileUrl(data.review_file_url || null);
       setCommentsToAuthor(data.comments_to_author || '');
       setCommentsToEditor(data.comments_to_editor || '');
     } catch {
@@ -82,6 +86,32 @@ export const ReviewForm = () => {
     } catch {
       toast({ title: 'Error', description: 'Failed to save review.', variant: 'destructive' });
     } finally { setSaving(false); setSubmitting(false); }
+  };
+
+  const attachFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Please upload a file under 10 MB.', variant: 'destructive' });
+      return;
+    }
+    setFileBusy(true);
+    try {
+      const res = await uploadReviewFile(reviewId!, file);
+      setReviewFileUrl(res.review_file_url);
+      toast({ title: 'Document attached', description: file.name });
+    } catch (err) {
+      toast({ title: "Couldn't upload the document", description: (err as Error).message, variant: 'destructive' });
+    } finally { setFileBusy(false); }
+  };
+
+  const detachFile = async () => {
+    setFileBusy(true);
+    try {
+      await removeReviewFile(reviewId!);
+      setReviewFileUrl(null);
+    } catch (err) {
+      toast({ title: "Couldn't remove the document", description: (err as Error).message, variant: 'destructive' });
+    } finally { setFileBusy(false); }
   };
 
   const handleSubmit = () => {
@@ -191,6 +221,40 @@ export const ReviewForm = () => {
                   rows={5}
                   className={inputClasses}
                 />
+              </div>
+
+              {/* Reviewer's document */}
+              <div className="mt-8">
+                <p className={`${label} mb-1.5`}>Review document</p>
+                <p className="text-xs text-stone-400 mb-3">
+                  Optional: an annotated manuscript or a full report (PDF or Word, up to 10 MB). Seen by editors only. Please remove your name from the file.
+                </p>
+                {reviewFileUrl ? (
+                  <div className="flex items-center gap-3">
+                    <a href={reviewFileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline underline-offset-2">
+                      <Paperclip size={14} /> View attached document
+                    </a>
+                    {!isSubmitted && (
+                      <button type="button" onClick={detachFile} disabled={fileBusy} className="inline-flex items-center gap-1 text-xs text-stone-500 hover:text-red-700 disabled:opacity-50">
+                        <X size={12} /> Remove
+                      </button>
+                    )}
+                  </div>
+                ) : isSubmitted ? (
+                  <p className="text-sm text-stone-500">No document attached.</p>
+                ) : (
+                  <label className={`inline-flex items-center gap-2 border border-stone-200 px-4 h-11 text-[10px] font-bold uppercase tracking-widest text-stone-700 hover:border-primary cursor-pointer ${fileBusy ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {fileBusy ? <Loader2 size={13} className="animate-spin" /> : <Paperclip size={13} />}
+                    {fileBusy ? 'Uploading…' : 'Attach document'}
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="sr-only"
+                      disabled={fileBusy}
+                      onChange={(e) => { attachFile(e.target.files?.[0]); e.target.value = ''; }}
+                    />
+                  </label>
+                )}
               </div>
 
               {!isSubmitted ? (

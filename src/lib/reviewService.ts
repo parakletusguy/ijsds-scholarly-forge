@@ -62,6 +62,17 @@ export const createReview = async (body: {
   return res.data;
 };
 
+export const uploadReviewFile = async (id: string, file: File): Promise<{ id: string; review_file_url: string }> => {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await api.upload<{ success: true; data: { id: string; review_file_url: string } }>(`/api/reviews/${id}/file`, form);
+  return res.data;
+};
+
+export const removeReviewFile = async (id: string): Promise<void> => {
+  await api.delete(`/api/reviews/${id}/file`);
+};
+
 export const updateReview = async (
   id: string,
   updates: Partial<{

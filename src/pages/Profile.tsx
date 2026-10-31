@@ -60,9 +60,6 @@ export const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [requestingR, setRequestingR] = useState(false);
-  const [requestingE, setRequestingE] = useState(false);
-  const [requestingA, setRequestingA] = useState(false);
   const [editing, setEditing] = useState(false);
 
   const [form, setForm] = useState({
@@ -161,41 +158,6 @@ export const Profile = () => {
         .finally(() => setApplicationsLoaded(true));
   }, [user]);
 
-  const requestRole = async (type: "reviewer" | "editor" | "admin") => {
-    if (!user) return;
-    // Reviewers apply through a verification form instead of a one-click request.
-    if (type === "reviewer") {
-      setApplyOpen(true);
-      return;
-    }
-    const setBusy =
-      type === "editor" ? setRequestingE : setRequestingA;
-    setBusy(true);
-    try {
-      const updates =
-        type === "admin"
-          ? { request_admin: true }
-          : type === "editor"
-            ? { request_editor: true }
-            : { request_reviewer: true };
-      const updated = await updateProfile(user.id, updates);
-      setProfile(updated);
-      // Admins are notified by the backend when the request is saved.
-      toast({
-        title: "Request sent",
-        description: `An admin will review your ${type} request.`,
-      });
-    } catch {
-      toast({
-        title: "Couldn't send request",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setBusy(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center">
@@ -222,7 +184,6 @@ export const Profile = () => {
       blurb: "Evaluate manuscripts submitted to the journal.",
       active: profile.is_reviewer,
       pending: profile.request_reviewer,
-      busy: requestingR,
       btn: "border-amber-200 text-amber-700 hover:bg-amber-50",
     },
     {
@@ -232,7 +193,6 @@ export const Profile = () => {
       blurb: "Manage submissions, assign reviewers, and make decisions.",
       active: profile.is_editor,
       pending: profile.request_editor,
-      busy: requestingE,
       btn: "border-primary/20 text-primary hover:bg-primary/5",
     },
     {
@@ -242,7 +202,6 @@ export const Profile = () => {
       blurb: "Full access, including member management and settings.",
       active: profile.is_admin,
       pending: profile.request_admin,
-      busy: requestingA,
       btn: "border-red-200 text-red-700 hover:bg-red-50",
     },
   ];
@@ -529,7 +488,11 @@ export const Profile = () => {
                 </h2>
 
                 <div className="space-y-3">
-                  {roles.map((r) => (
+                  {roles
+                    // Editor and admin access is assigned, not requested: those show only once held
+                    // (or while an older request is still waiting for a decision).
+                    .filter((r) => r.key === "reviewer" || r.active || r.pending)
+                    .map((r) => (
                     <div key={r.key} className="border border-stone-200 p-4">
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 min-w-0">
@@ -568,13 +531,12 @@ export const Profile = () => {
                           Your last application was declined{lastApplication.decision_reason ? `: ${lastApplication.decision_reason}` : "."}
                         </p>
                       )}
-                      {!r.active && !r.pending && (
+                      {r.key === "reviewer" && !r.active && !r.pending && (
                         <button
-                          disabled={r.busy}
-                          onClick={() => requestRole(r.key)}
-                          className={`mt-3 w-full h-9 border text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 ${r.btn}`}
+                          onClick={() => setApplyOpen(true)}
+                          className={`mt-3 w-full h-9 border text-[10px] font-bold uppercase tracking-widest transition-colors ${r.btn}`}
                         >
-                          {r.busy ? "Sending…" : r.key === "reviewer" ? "Apply" : "Request access"}
+                          Apply
                         </button>
                       )}
                     </div>
