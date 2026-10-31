@@ -21,6 +21,8 @@ export const ManageRequests = () => {
   const [editorRequests, seteditorRequests] = useState<any[]>([]);
   const [reviewerRequests, setreviewerRequests] = useState<any[]>([]);
   const [applications, setApplications] = useState<ReviewerApplication[]>([]);
+  const [pastApplications, setPastApplications] = useState<ReviewerApplication[]>([]);
+  const [applicationsError, setApplicationsError] = useState<string | null>(null);
   const [adminRequests, setadminRequests] = useState<any[]>([]);
 
   useEffect(() => {
@@ -34,8 +36,18 @@ export const ManageRequests = () => {
 
   const fetchRequests = async () => {
     try {
-      const [data, apps] = await Promise.all([getProfiles(), getReviewerApplications('PENDING').catch(() => [] as ReviewerApplication[])]);
+      setApplicationsError(null);
+      const [data, allApps] = await Promise.all([
+        getProfiles(),
+        getReviewerApplications('ALL').catch((e) => {
+          // Without this, every applicant would look as if they had sent no details.
+          setApplicationsError(e instanceof Error ? e.message : 'Please try again.');
+          return [] as ReviewerApplication[];
+        }),
+      ]);
+      const apps = allApps.filter((a) => a.status === 'PENDING');
       setApplications(apps);
+      setPastApplications(allApps.filter((a) => a.status !== 'PENDING').reverse());
       const withApplication = new Set(apps.map((a) => a.applicant?.id));
       const edi: any[] = [];
       const rev: any[] = [];
@@ -191,8 +203,16 @@ export const ManageRequests = () => {
                 {applications.map((app) => (
                   <ReviewerApplicationCard key={app.id} application={app} onDecided={fetchRequests} />
                 ))}
-                {reviewerRequests.length > 0 && applications.length > 0 && (
-                  <p className="text-xs text-muted-foreground pt-2">Older requests made before the application form (no details on file):</p>
+                {applicationsError && (
+                  <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-100 px-4 py-3">
+                    Couldn't load the application details ({applicationsError}). Don't decide on the requests below until this page loads properly.
+                  </p>
+                )}
+                {reviewerRequests.length > 0 && !applicationsError && (
+                  <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 px-4 py-3">
+                    These people asked before the application form existed, so they have not sent an ORCID, institutional email or profile links.
+                    They need to choose "Complete your application" on their profile; their details will then appear here.
+                  </p>
                 )}
                 {reviewerRequests.length === 0 && applications.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground">No reviewer requests.</div>
@@ -205,6 +225,16 @@ export const ManageRequests = () => {
                       onReject={() => handleApproveReviewer(profile.id,'reject')}
                     />
                   ))
+                )}
+                {pastApplications.length > 0 && (
+                  <details className="pt-4">
+                    <summary className="cursor-pointer text-sm font-medium text-stone-700">Past applications ({pastApplications.length})</summary>
+                    <div className="space-y-4 mt-4">
+                      {pastApplications.map((app) => (
+                        <ReviewerApplicationCard key={app.id} application={app} onDecided={fetchRequests} />
+                      ))}
+                    </div>
+                  </details>
                 )}
               </TabsContent>
 

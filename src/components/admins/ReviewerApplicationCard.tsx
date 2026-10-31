@@ -48,12 +48,19 @@ export const ReviewerApplicationCard = ({ application: a, onDecided }: { applica
         <dt className="text-stone-500">ResearchGate</dt><dd>{link(a.researchgate_url, a.researchgate_url)}</dd>
         <dt className="text-stone-500">Google Scholar</dt><dd>{link(a.google_scholar_url, 'Open profile')}</dd>
       </dl>
+      {a.status !== 'PENDING' && (
+        <p className="text-sm text-stone-600">
+          <strong>{a.status === 'APPROVED' ? 'Approved' : 'Declined'}</strong>
+          {a.decided_at ? ` on ${new Date(a.decided_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+          {a.decision_reason ? `: ${a.decision_reason}` : ''}
+        </p>
+      )}
       {declining && (
         <div className="space-y-2">
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (optional, included in the email to the applicant)" />
         </div>
       )}
-      <div className="flex flex-wrap gap-2">
+      {a.status === 'PENDING' && <div className="flex flex-wrap gap-2">
         {!declining ? (
           <>
             <Button disabled={busy} onClick={() => decide(true)} className="bg-primary hover:bg-[#7a2d11] text-white rounded-none h-10 px-5 text-[10px] font-bold uppercase tracking-widest gap-1.5">
@@ -71,7 +78,7 @@ export const ReviewerApplicationCard = ({ application: a, onDecided }: { applica
             <Button disabled={busy} variant="ghost" onClick={() => setDeclining(false)} className="rounded-none h-10 px-5 text-[10px] font-bold uppercase tracking-widest">Cancel</Button>
           </>
         )}
-      </div>
+      </div>}
     </div>
   );
 };
