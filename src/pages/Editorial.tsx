@@ -24,7 +24,6 @@ import {
   Users,
   Clock,
   CheckCircle2,
-  ArrowLeft,
   RefreshCw,
   ShieldAlert,
   Activity,
@@ -347,10 +346,6 @@ export const Editorial = () => {
 
       <ContentSection>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <Button onClick={() => navigate(-1)} variant="outline"
-            className="rounded-none font-headline font-black uppercase text-[10px] tracking-widest gap-2 h-10 border-primary/20 hover:border-primary">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Button>
           <div className="flex items-center gap-3 bg-white/50 px-4 py-2 border border-border/20">
             <ShieldAlert size={14} className="text-secondary" />
             <span className="font-headline font-bold text-[9px] uppercase tracking-widest text-foreground/40">
@@ -378,8 +373,8 @@ export const Editorial = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={v => { setActiveTab(v); setExpandedId(null); }} className="space-y-6">
-          <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
-          <TabsList className="bg-white border border-border/20 p-1.5 rounded-none h-auto flex min-w-max shadow-sm w-full">
+          <div className="-mx-1 px-1 md:overflow-x-auto no-scrollbar">
+          <TabsList className="bg-white border border-border/20 p-1.5 rounded-none h-auto grid grid-cols-2 md:flex md:min-w-max shadow-sm w-full">
             {[
               { val: "pending", label: "Pending", count: pendingSubmissions.length },
               { val: "review", label: "In Review", count: underReviewSubmissions.length },
@@ -387,7 +382,7 @@ export const Editorial = () => {
               { val: "completed", label: "Completed", count: completedSubmissions.length },
             ].map(tab => (
               <TabsTrigger key={tab.val} value={tab.val}
-                className="rounded-none py-2.5 px-4 sm:px-6 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-2 flex-1">
+                className="rounded-none min-w-0 py-2.5 px-2 sm:px-6 data-[state=active]:bg-primary data-[state=active]:text-white font-medium text-xs uppercase tracking-wider transition-all gap-2 md:flex-1">
                 {tab.label}
                 <Badge className="bg-primary/15 text-primary hover:bg-primary/15 border-none rounded-none text-[8px] font-bold px-1.5 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                   {tab.count}

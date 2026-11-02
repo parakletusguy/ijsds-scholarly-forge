@@ -173,27 +173,27 @@ export const ManageRequests = () => {
         <Card>
           <Tabs defaultValue="reviewers" className="w-full">
             <CardHeader className="p-0 border-b">
-              <TabsList className="w-full h-auto bg-transparent rounded-none border-b-0 p-0 flex">
+              <TabsList className="w-full h-auto bg-transparent rounded-none border-b-0 p-0 grid grid-cols-3 md:flex">
                 <TabsTrigger 
                   value="reviewers" 
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
+                  className="min-w-0 flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 md:py-4 px-1.5 text-xs leading-tight"
                 >
                   Reviewer requests
-                  <Badge variant="secondary" className="ml-2">{reviewerRequests.length + applications.length}</Badge>
+                  <Badge variant="secondary" className="ml-1">{reviewerRequests.length + applications.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="editors" 
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
+                  className="min-w-0 flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 md:py-4 px-1.5 text-xs leading-tight"
                 >
                   Editor requests
-                  <Badge variant="secondary" className="ml-2">{editorRequests.length}</Badge>
+                  <Badge variant="secondary" className="ml-1">{editorRequests.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="admins" 
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-4"
+                  className="min-w-0 flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 md:py-4 px-1.5 text-xs leading-tight"
                 >
                   Admin requests
-                  <Badge variant="secondary" className="ml-2">{adminRequests.length}</Badge>
+                  <Badge variant="secondary" className="ml-1">{adminRequests.length}</Badge>
                 </TabsTrigger>
               </TabsList>
             </CardHeader>

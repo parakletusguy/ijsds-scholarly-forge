@@ -95,7 +95,7 @@ export const Header = () => {
         className={`bg-white/90 backdrop-blur-md transition-all duration-700 w-full ${isScrolled ? "py-0.5 shadow-sm" : "py-1"}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center w-full">
-          <div className="flex items-center gap-3 sm:gap-4 xl:gap-8 min-w-0">
+          <div className="flex flex-1 items-center gap-3 sm:gap-4 xl:gap-4 2xl:gap-8 min-w-0">
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-2 group shrink-0"
@@ -103,16 +103,16 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="IJSDS Logo"
-                className="w-36 sm:w-44 xl:w-52 h-auto object-contain -my-2 sm:-my-3 lg:-my-5 -ml-1 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
+                className="w-36 sm:w-44 xl:w-44 2xl:w-52 h-auto object-contain -my-2 sm:-my-3 lg:-my-5 -ml-1 group-hover:scale-[1.02] transition-transform duration-500 shrink-0"
               />
             </button>
 
-            <div className="hidden xl:flex gap-3 2xl:gap-5 items-center">
+            <div className="hidden xl:flex flex-1 min-w-0 justify-end gap-1 2xl:gap-5 items-center overflow-hidden">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-[10px] xl:text-[11px] font-medium uppercase tracking-[0.1em] 2xl:tracking-[0.18em] transition-all duration-300 whitespace-nowrap ${
+                  className={`text-[9px] xl:text-[10px] 2xl:text-[11px] font-medium uppercase tracking-[0.05em] 2xl:tracking-[0.18em] transition-all duration-300 whitespace-nowrap ${
                     isActive(link.path)
                       ? "text-primary border-b border-primary/40 pb-0.5 font-bold"
                       : "text-stone-400 hover:text-primary"
@@ -124,7 +124,7 @@ export const Header = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-4 shrink-0">
 
             {loading ? (
               <div className="h-10 w-24 bg-stone-100 animate-pulse rounded" />
@@ -180,13 +180,13 @@ export const Header = () => {
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => navigate("/auth")}
-                  className="text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-primary transition-colors px-2 sm:px-3 py-1.5 whitespace-nowrap"
+                  className="text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-primary transition-colors px-1 sm:px-3 py-1.5 whitespace-nowrap"
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => navigate("/auth?reason=submit")}
-                  className="hidden sm:block bg-primary text-white px-3 sm:px-4 xl:px-6 py-2 xl:py-2.5 text-[10px] font-bold uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/10 border border-transparent whitespace-nowrap"
+                  className="hidden sm:block bg-primary text-white px-3 sm:px-4 xl:px-4 2xl:px-6 py-2 xl:py-2.5 text-[10px] font-bold uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/10 border border-transparent whitespace-nowrap"
                 >
                   Submit Manuscript
                 </button>
