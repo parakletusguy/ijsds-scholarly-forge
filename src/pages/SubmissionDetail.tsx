@@ -41,6 +41,7 @@ import { ArticleAuthorsEditor } from "@/components/production/ArticleAuthorsEdit
 import type { Article } from "@/lib/articleService";
 import ReceiptDown from "@/components/receiptGeneration/receiptDownload";
 import { api } from "@/lib/apiClient";
+import { ArticleSectionEditor } from "@/components/production/ArticleSectionEditor";
 import { handleFileDownload } from "@/lib/downloadUtils";
 import { AuthorIntegrityReportModal } from "@/components/ijsds2/AuthorIntegrityReportModal";
 import {
@@ -602,7 +603,11 @@ export const SubmissionDetail = () => {
                   <h3 className="text-2xl font-semibold mb-2">
                     {submission.article.title}
                   </h3>
-                  {submission.article.subject_area && (
+                  {isEditor ? (
+                    <div className="mb-4">
+                      <ArticleSectionEditor compact article={submission.article} onUpdate={fetchSubmissionDetails} />
+                    </div>
+                  ) : submission.article.subject_area && (
                     <Badge variant="secondary" className="mb-4">
                       {submission.article.subject_area}
                     </Badge>
