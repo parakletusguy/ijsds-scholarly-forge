@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/file-management/FileUpload";
 import Paystackbtn from "@/components/paystack/paystackFunction";
+import { PAPER_SECTIONS } from "@/lib/paperSections";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BatchReleaseBanner } from "@/components/ijsds2/BatchReleaseBanner";
 import { validateReferralCode, settleGatePayment } from "@/lib/ijsds2/api";
@@ -679,11 +680,7 @@ export const Submit = () => {
                     value={subjectArea}
                     onChange={(e) => setSubjectArea(e.target.value)}
                   >
-                    <option>Sustainable Architecture</option>
-                    <option>Digital Heritage</option>
-                    <option>Urban Ecology</option>
-                    <option>Social Development</option>
-                    <option>Community Welfare</option>
+                    {PAPER_SECTIONS.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1.5">

@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { EditorFileManager } from '@/components/editor/EditorFileManager';
 import { ArticleAuthorsEditor } from '@/components/production/ArticleAuthorsEditor';
 import { DOIManager } from '@/components/production/DOIManager';
+import { ArticleSectionEditor } from '@/components/production/ArticleSectionEditor';
 import { DOAJExportManager } from '@/components/production/DOAJExportManager';
 import { downloadDoajXml } from '@/lib/doajService';
 
@@ -290,12 +291,13 @@ export const Publication = () => {
                               <DialogHeader>
                                 <DialogTitle>Manage Article</DialogTitle>
                                 <DialogDescription>
-                                  Update files, authors, DOI, or export metadata to DOAJ
+                                  Update files, section, authors, DOI, or export metadata to DOAJ
                                 </DialogDescription>
                               </DialogHeader>
-                              <Tabs defaultValue={article.submission_id ? 'files' : 'authors'} className="w-full">
-                                <TabsList className={`grid w-full ${article.submission_id ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                              <Tabs defaultValue={article.submission_id ? 'files' : 'section'} className="w-full">
+                                <TabsList className={`grid w-full ${article.submission_id ? 'grid-cols-5' : 'grid-cols-4'}`}>
                                   {article.submission_id && <TabsTrigger value="files">Files</TabsTrigger>}
+                                  <TabsTrigger value="section">Section</TabsTrigger>
                                   <TabsTrigger value="authors">Authors</TabsTrigger>
                                   <TabsTrigger value="doi">
                                     DOI
@@ -316,6 +318,9 @@ export const Publication = () => {
                                     />
                                   </TabsContent>
                                 )}
+                                <TabsContent value="section">
+                                  <ArticleSectionEditor article={article} onUpdate={fetchAcceptedArticles} />
+                                </TabsContent>
                                 <TabsContent value="authors">
                                   <ArticleAuthorsEditor
                                     article={article as any}
