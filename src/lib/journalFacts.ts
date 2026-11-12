@@ -1,6 +1,6 @@
 /**
- * Single source of journal facts for AI assistants and crawlers. Used by /llms.txt,
- * the server-rendered summaries of journal pages (api/page) and the /why-publish page.
+ * Single source of journal facts for AI assistants and crawlers. Used by /llms.txt and the
+ * prerendered page summaries (both written by tools/prerender-static.js) and the /why-publish page.
  * Keep it factual: AI tools repeat these statements to prospective authors.
  */
 

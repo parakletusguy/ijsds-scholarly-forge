@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { build } from 'esbuild';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,15 @@ if (!fs.existsSync(templatePath)) {
 }
 
 const baseHtml = fs.readFileSync(templatePath, 'utf8');
+
+// Journal facts and page summaries live in TypeScript (src/lib); bundle them for Node.
+await build({
+  entryPoints: [path.resolve(__dirname, '../src/lib/journalPages.ts'), path.resolve(__dirname, '../src/lib/journalFacts.ts')],
+  bundle: true, platform: 'node', format: 'esm', outdir: path.join(__dirname, '.journal-build'), logLevel: 'warning',
+});
+const { PAGE_CONTENT, renderPage, renderHomeShell } = await import(pathToFileURL(path.join(__dirname, '.journal-build', 'journalPages.js')).href);
+const { buildLlmsTxt } = await import(pathToFileURL(path.join(__dirname, '.journal-build', 'journalFacts.js')).href);
+const summaries = Object.fromEntries(Object.values(PAGE_CONTENT).map((p) => [p.path, p]));
 
 const staticRoutes = [
   {
@@ -44,6 +54,11 @@ const staticRoutes = [
     path: '/submission-guidelines',
     title: 'Submission Guidelines - IJSDS',
     description: 'Manuscript preparation, formatting instructions, and submission criteria for authors submitting to IJSDS.',
+  },
+  {
+    path: '/why-publish',
+    title: 'Publishing with IJSDS: questions and answers',
+    description: 'Scope, cost, peer review time, indexing and how to submit to IJSDS.',
   },
   {
     path: '/peer-review',
@@ -146,6 +161,9 @@ staticRoutes.forEach(({ path: routePath, title, description }) => {
     `<meta property="og:description" content="${description}">`
   );
 
+  // Journal pages also get a readable summary and JSON-LD for crawlers that don't run JS.
+  if (summaries[routePath]) routeHtml = renderPage(baseHtml, summaries[routePath]);
+
   // Create folder in dist: e.g. dist/about/index.html
   const targetDir = path.join(distDir, routePath.replace(/^\//, ''));
   if (!fs.existsSync(targetDir)) {
@@ -155,4 +173,10 @@ staticRoutes.forEach(({ path: routePath, title, description }) => {
   fs.writeFileSync(path.join(targetDir, 'index.html'), routeHtml, 'utf8');
 });
 
-console.log('Successfully prerendered all static route HTML files!');
+// The home page and app shell, then the plain-text fact sheets for AI assistants.
+fs.writeFileSync(templatePath, renderHomeShell(baseHtml), 'utf8');
+fs.writeFileSync(path.join(distDir, 'llms.txt'), buildLlmsTxt(false), 'utf8');
+fs.writeFileSync(path.join(distDir, 'llms-full.txt'), buildLlmsTxt(true), 'utf8');
+fs.rmSync(path.join(__dirname, '.journal-build'), { recursive: true, force: true });
+
+console.log('Successfully prerendered all static route HTML files, llms.txt and llms-full.txt!');

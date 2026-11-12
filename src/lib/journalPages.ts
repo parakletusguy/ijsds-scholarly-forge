@@ -1,12 +1,13 @@
-// Server-renders a readable summary into journal pages (home, about, guidelines, fees...).
-//
-// AI crawlers (GPTBot, ClaudeBot, PerplexityBot) and many search bots don't run JavaScript,
-// so they saw only the empty SPA shell on these pages. Like api/article, this serves the same
-// shell to everyone with a page-specific <title>, description, canonical, JSON-LD and a plain
-// HTML summary inside #root, which React replaces on load. Facts come from journalFacts.ts.
+/**
+ * Readable summaries of the journal pages, written into the prerendered HTML at build time
+ * (tools/prerender-static.js). AI crawlers (GPTBot, ClaudeBot, PerplexityBot) and many search
+ * bots don't run JavaScript, so without this they saw only the empty SPA shell. Everyone gets
+ * the same HTML: a page-specific <title>, description, canonical, JSON-LD and a plain summary
+ * inside #root, which React replaces on load.
+ */
 import {
   ARTICLE_TYPES, FAQ, FEES, INDEXING, JOURNAL, PAGES, REVIEW, SCOPE, SITE_URL,
-} from '../../src/lib/journalFacts.js';
+} from './journalFacts';
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -53,7 +54,7 @@ const faqPage = {
   mainEntity: FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 };
 
-type Page = { path: string; title: string; description: string; body: () => string; jsonLd?: object };
+export type Page = { path: string; title: string; description: string; body: () => string; jsonLd?: object };
 
 const intro = () => `<p>${esc(JOURNAL.summary)}</p>`;
 
@@ -149,22 +150,16 @@ export const renderPage = (shell: string, page: Page) => {
   return withNav.test(html) ? html.replace(withNav, summary) : html.replace(/<div id=["']root["']>/i, (m) => `${m}\n      <article class="ssr-summary">${page.body()}</article>`);
 };
 
-export default async function handler(req: any, res: any) {
-  const name = String(req.query?.name ?? 'home');
-  const page = PAGE_CONTENT[name];
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  try {
-    const shell = await (await fetch(`https://${host}/index.html`)).text();
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    if (!page) {
-      res.setHeader('Cache-Control', 'no-store');
-      return res.status(200).send(shell);
-    }
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-    return res.status(200).send(renderPage(shell, page));
-  } catch (error) {
-    console.error('[api/page] failed to render', name, error);
-    res.setHeader('Location', `${SITE_URL}/`);
-    return res.status(302).end();
-  }
-}
+
+/**
+ * dist/index.html is also the shell for every app route (and the service worker's fallback),
+ * so the home summary goes in <noscript>: crawlers without JavaScript read it, people never see it.
+ */
+export const renderHomeShell = (shell: string) => {
+  const home = PAGE_CONTENT.home;
+  return shell
+    .replace(/<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${esc(home.description)}">`)
+    .replace(/<meta\s+property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${esc(home.description)}">`)
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i, `<script type="application/ld+json">${JSON.stringify(periodical).replace(/</g, '\\u003c')}</script>`)
+    .replace(/<div id=["']root["']>\s*<nav[\s\S]*?<\/nav>\s*<\/div>/i, `<div id="root">\n      <noscript><article class="ssr-summary">${home.body()}</article></noscript>\n    </div>`);
+};

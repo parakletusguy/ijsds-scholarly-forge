@@ -347,6 +347,8 @@ export default async function handler(req: any, res: any) {
       html = html.replace(/<title>.*?<\/title>/i, '');
       // Drop default homepage canonical from index.html
       html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, '');
+      // Drop the home page's crawler summary (see src/lib/journalPages.ts) so it isn't read as part of the article
+      html = html.replace(/<noscript><article class="ssr-summary">[\s\S]*?<\/noscript>/i, '');
       // Inject accurate SSR meta tags
       html = html.replace('</head>', `    ${buildMetaTags(article)}\n  </head>`);
       // Visible title/authors/abstract for non-JS crawlers (replaced by React on load)
