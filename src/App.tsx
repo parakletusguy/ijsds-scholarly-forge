@@ -27,6 +27,7 @@ const EditorialBoard = lazy(() => import('./pages/EditorialBoard'));
 const JournalInformation = lazy(() => import('./pages/JournalInformation'));
 const SubmissionGuidelines = lazy(() => import('./pages/SubmissionGuidelines').then(m => ({ default: m.SubmissionGuidelines })));
 const PeerReview = lazy(() => import('./pages/PeerReview').then(m => ({ default: m.PeerReview })));
+const WhyPublish = lazy(() => import('./pages/WhyPublish').then(m => ({ default: m.WhyPublish })));
 const SubmissionDetail = lazy(() => import('./pages/SubmissionDetail').then(m => ({ default: m.SubmissionDetail })));
 const SubmissionReviews = lazy(() => import('./pages/SubmissionReviews').then(m => ({ default: m.SubmissionReviews })));
 const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
@@ -189,6 +190,7 @@ const App = () => (
                     <Route path="/journal-information" element={<PublicLayout><JournalInformation /></PublicLayout>} />
                     <Route path="/submission-guidelines" element={<PublicLayout><SubmissionGuidelines /></PublicLayout>} />
                     <Route path="/peer-review" element={<PublicLayout><PeerReview /></PublicLayout>} />
+                    <Route path="/why-publish" element={<PublicLayout><WhyPublish /></PublicLayout>} />
 
                     <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
                   </Routes>

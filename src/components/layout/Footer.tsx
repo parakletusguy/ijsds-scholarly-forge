@@ -65,6 +65,7 @@ export const Footer = () => {
             <h4 className={headingClass}>For Authors</h4>
             <ul className="space-y-3 font-body text-sm">
               <li><Link className={linkClass} to={user ? "/submit" : "/auth?reason=submit"}>Submit Manuscript</Link></li>
+              <li><Link className={linkClass} to="/why-publish">Why Publish with IJSDS</Link></li>
               <li><Link className={linkClass} to="/submission-guidelines">Submission Guidelines</Link></li>
               <li><Link className={linkClass} to="/author-guide">Author Guide</Link></li>
               <li><Link className={linkClass} to="/orcidGuide">ORCID Guide</Link></li>

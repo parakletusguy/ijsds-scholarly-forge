@@ -5,6 +5,14 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/llms.txt",
+      "destination": "/api/llms"
+    },
+    {
+      "source": "/llms-full.txt",
+      "destination": "/api/llms?full=1"
+    },
+    {
       "source": "/feed/latest-articles.xml",
       "destination": "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net/feed/latest-articles.xml"
     },

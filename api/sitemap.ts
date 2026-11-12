@@ -30,6 +30,7 @@ export default async function handler(req: any, res: any) {
       { path: '/papers', priority: '1.0', changefreq: 'daily' },
       { path: '/articles', priority: '0.9', changefreq: 'daily' },
       { path: '/archive', priority: '0.8', changefreq: 'weekly' },
+      { path: '/why-publish', priority: '0.9', changefreq: 'monthly' },
       { path: '/about', priority: '0.8', changefreq: 'monthly' },
       { path: '/editorial-board', priority: '0.8', changefreq: 'monthly' },
       { path: '/journal-information', priority: '0.8', changefreq: 'monthly' },

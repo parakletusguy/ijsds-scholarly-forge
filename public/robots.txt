@@ -4,6 +4,20 @@ Allow: /papers/
 Allow: /api/pdf/
 Allow: /article/
 
+# AI assistants and AI search: welcome. A plain-text summary is at /llms.txt
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bingbot
+Allow: /
+
 User-agent: Googlebot
 Allow: /
 Allow: /papers/
