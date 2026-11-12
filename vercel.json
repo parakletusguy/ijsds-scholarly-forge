@@ -37,6 +37,14 @@
       "destination": "https://ijsds-database-ftb5hpfrfecegtbz.switzerlandnorth-01.azurewebsites.net/papers/:id"
     },
     {
+      "source": "/",
+      "destination": "/api/page/home"
+    },
+    {
+      "source": "/:name(why-publish|about|journal-information|submission-guidelines|peer-review|openAccess|indexing|contact)",
+      "destination": "/api/page/:name"
+    },
+    {
       "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }
